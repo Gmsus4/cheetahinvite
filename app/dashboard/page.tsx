@@ -35,6 +35,7 @@ async function DashboardData() {
         id: true,
         name: true,
         eventType: true,
+        imageUrl: true,
         status: true,
         eventDate: true,
         expiresAt: true,

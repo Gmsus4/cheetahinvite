@@ -332,9 +332,12 @@ body,p,a,button,input,textarea,select,li,small,nav,label{font-family:var(--font-
 .public-invitation-page{min-height:100vh;background:#fbf8f2}.dashboard-share-actions{display:flex;align-items:center;gap:6px}.dashboard-event-open,.dashboard-event-share{min-height:31px;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 9px;border:1px solid #dce1e8;border-radius:3px;background:#fff;color:#596575;font:600 9px Arial,sans-serif;cursor:pointer}.dashboard-event-open svg,.dashboard-event-share svg{width:12px;height:12px}.dashboard-event-share{border-color:#f2c4ae;color:#c94708}.dashboard-event-share:hover,.dashboard-event-open:hover{background:#fff2eb}
 .editor-publish{grid-column:1/-1;min-height:44px;display:flex;gap:9px;margin-top:3px;border:0;border-radius:3px;font-family:var(--font-inter),Arial,sans-serif;font-size:10px;cursor:pointer}.editor-publish svg{width:15px;height:15px}
 .dashboard-event-card{grid-template-columns:49px minmax(120px,1fr) auto 82px auto auto}
+.dashboard-event-art{width:52px;height:58px;overflow:hidden;border-radius:4px;background:#f4eee8}
+.dashboard-event-art.has-image{background:#f4eee8}
+.dashboard-event-art img{width:100%;height:100%;display:block;object-fit:cover}
 @media(max-width:1000px){.dashboard-event-card{grid-template-columns:45px minmax(100px,1fr) auto auto auto}.dashboard-event-updated{display:none}}
-@media(max-width:680px){.dashboard-event-card{grid-template-columns:39px minmax(0,1fr) auto;align-items:center}.dashboard-event-edit{grid-column:2;grid-row:2;justify-self:start}.dashboard-share-actions{grid-column:2/4;grid-row:3;justify-self:start}.dashboard-status{grid-column:3;grid-row:1}}
-@media(max-width:390px){.dashboard-event-card{grid-template-columns:34px minmax(0,1fr) auto}.dashboard-event-edit{grid-column:2;grid-row:2}.dashboard-share-actions{grid-column:2/4;grid-row:3}}
+@media(max-width:680px){.dashboard-event-card{grid-template-columns:48px minmax(0,1fr) auto;align-items:center}.dashboard-event-art{width:46px;height:52px}.dashboard-event-edit{grid-column:2;grid-row:2;justify-self:start}.dashboard-share-actions{grid-column:2/4;grid-row:3;justify-self:start}.dashboard-status{grid-column:3;grid-row:1}}
+@media(max-width:390px){.dashboard-event-card{grid-template-columns:42px minmax(0,1fr) auto}.dashboard-event-art{width:40px;height:46px}.dashboard-event-edit{grid-column:2;grid-row:2}.dashboard-share-actions{grid-column:2/4;grid-row:3}}
 
 /* Invitation header: clear event label and details action */
 .invite-website .invite-website-nav{height:70px;gap:14px;padding:0 8%;border-bottom:1px solid #e9e3d8;background:#fbf8f2;color:#7a7468;font-size:8px;letter-spacing:.16em}

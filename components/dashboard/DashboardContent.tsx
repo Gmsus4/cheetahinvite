@@ -21,6 +21,7 @@ type DashboardEvent = {
   id: string;
   name: string;
   eventType: string;
+  imageUrl: string | null;
   status: EventStatus;
   eventDate: Date | null;
   expiresAt: Date | null;
@@ -168,7 +169,9 @@ export function DashboardContent({ userName, userEmail, events, view = "summary"
               <div className="dashboard-event-list">
                 {(view === "summary" ? events.slice(0, 3) : events).map((event) => (
                   <article className="dashboard-event-card" key={event.id}>
-                    <span className="dashboard-event-art"><FiGift aria-hidden="true" /></span>
+                    <span className={`dashboard-event-art${event.imageUrl ? " has-image" : ""}`}>
+                      {event.imageUrl ? <img src={event.imageUrl} alt={`Portada de ${event.name}`} loading="lazy" /> : <FiGift aria-hidden="true" />}
+                    </span>
                     <div className="dashboard-event-info">
                       <span className="dashboard-event-type">{eventLabels[event.eventType] ?? event.eventType}</span>
                       <h3>{event.name}</h3>
