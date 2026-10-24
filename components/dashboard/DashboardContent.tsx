@@ -4,6 +4,7 @@ import {
   FiCalendar,
   FiCheckCircle,
   FiClock,
+  FiEdit2,
   FiFileText,
   FiGift,
   FiHeart,
@@ -184,8 +185,10 @@ export function DashboardContent({ userName, userEmail, events, view = "summary"
                       <small>Actualizado</small>
                       <span>{formatDate(event.updatedAt)}</span>
                     </div>
-                    <Link className="dashboard-event-edit" href={`/dashboard/eventos/${event.id}`}>Editar</Link>
-                    {event.status === "PUBLISHED" && event.slug && <CopyInvitationLink slug={event.slug} />}
+                    <div className="dashboard-event-actions">
+                      <Link className="dashboard-event-edit" href={`/dashboard/eventos/${event.id}`} aria-label="Editar invitación" title="Editar invitación"><FiEdit2 aria-hidden="true" /><span>Editar</span></Link>
+                      {event.status === "PUBLISHED" && event.slug && <CopyInvitationLink slug={event.slug} />}
+                    </div>
                   </article>
                 ))}
               </div>

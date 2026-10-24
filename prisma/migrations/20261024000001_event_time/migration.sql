@@ -1,0 +1,1 @@
+ALTER TABLE "Event" ADD COLUMN "eventTime" VARCHAR(5);

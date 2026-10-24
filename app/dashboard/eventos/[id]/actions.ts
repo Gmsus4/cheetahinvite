@@ -52,6 +52,7 @@ async function persistEvent(eventId: string, formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const eventType = String(formData.get("eventType") ?? "");
   const dateValue = String(formData.get("eventDate") ?? "");
+  const eventTime = String(formData.get("eventTime") ?? "");
   const hostNames = String(formData.get("hostNames") ?? "").trim();
   const venue = String(formData.get("venue") ?? "").trim();
   const address = String(formData.get("address") ?? "").trim();
@@ -80,6 +81,7 @@ async function persistEvent(eventId: string, formData: FormData) {
     hostNames.length > 120 || venue.length > 160 || address.length > 240 ||
     message.length > 1200 || !/^#[0-9a-fA-F]{6}$/.test(accent) ||
     (eventDate && Number.isNaN(eventDate.getTime())) ||
+    (eventTime && (!/^([01]\d|2[0-3]):[0-5]\d$/.test(eventTime) || !eventDate)) ||
     !Array.isArray(sections) || sections.length > 12 || imageReferences.size > ACCOUNT_LIMITS.imagesPerInvitation ||
     sections.some((section) => !isValidSection(section))
   ) redirect(`/dashboard/eventos/${eventId}?error=datos`);
@@ -95,7 +97,7 @@ async function persistEvent(eventId: string, formData: FormData) {
 
   const result = await prisma.event.updateMany({
     where: { id: eventId, ownerId: session.user.id },
-    data: { name, eventType, eventDate, hostNames, venue, address, message, imageUrl: imageUrl || null, accent, sections },
+    data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, accent, sections },
   });
 
   if (!result.count) redirect("/dashboard?error=evento");

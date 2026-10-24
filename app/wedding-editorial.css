@@ -1,0 +1,65 @@
+/* Wedding composition shared by the public invitation and full preview. */
+.invite-wedding-editorial{--wedding-paper:#f8f5ef;--wedding-ink:#202630;background:var(--wedding-paper);color:var(--wedding-ink)}
+.invite-wedding-editorial .invite-hero-content h1,.invite-wedding-editorial .invite-welcome h2,.invite-wedding-editorial .invite-content-copy h2,.invite-wedding-editorial .invite-location-main-copy h2,.invite-wedding-editorial .invite-countdown-panel h2,.invite-wedding-editorial .invite-website-footer strong{font-family:Georgia,'Times New Roman',serif;font-weight:400;letter-spacing:-.035em}
+.invite-wedding-editorial .invite-website-hero{min-height:520px;height: min(76vh,740px);background-position:center}
+.invite-wedding-editorial .invite-website-hero::before,.invite-wedding-editorial .invite-website-hero::after,.invite-wedding-editorial .invite-hero-glow,.invite-wedding-editorial .invite-hero-rule,.invite-wedding-editorial .invite-hero-intro,.invite-wedding-editorial .invite-hero-side-note{display:none}
+.invite-wedding-editorial .invite-hero-content{width:66%;padding:70px 7%}
+.invite-wedding-editorial .invite-hero-kicker{margin-bottom:22px;color:#e9ded0;font-size:12px;letter-spacing:.24em}
+.invite-wedding-editorial .invite-hero-content h1{max-width:650px;font-size:clamp(54px,7.8vw,112px);line-height:.98;text-wrap:balance}
+.invite-wedding-editorial .invite-hero-event-name{margin-top:20px}
+.invite-wedding-editorial .invite-hero-date{margin-top:18px;font-size:14px}
+.invite-wedding-editorial .invite-hero-button{min-height:44px;margin-top:28px;padding:0 26px;letter-spacing:.14em;text-transform:uppercase}
+.invite-wedding-editorial .invite-welcome{padding:55px 24px 60px}
+.invite-wedding-editorial .invite-welcome>.invite-section-kicker,.invite-wedding-editorial .invite-welcome>strong{display:none}
+.invite-wedding-editorial .invite-ornament{margin:0 0 16px;color:#dbb3ae;font-size:26px}
+.invite-wedding-editorial .invite-welcome h2{font-size:clamp(32px,3.6vw,46px)}
+.invite-wedding-editorial .invite-welcome>p{max-width:480px;margin:18px auto 0;font-family:inherit;font-size:14px;line-height:1.75}
+.invite-wedding-editorial .invite-main-location{min-height:360px;grid-template-columns:1.12fr 1fr;background:#eee8dd}
+.invite-wedding-editorial .invite-location-photo{min-height:360px}
+.invite-wedding-editorial .invite-location-main-copy{padding:48px 12%}
+.invite-wedding-editorial .invite-location-main-copy h2{font-size:clamp(30px,3.4vw,44px)}
+.invite-wedding-editorial .invite-extra-sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:0 3% 40px;background:var(--wedding-paper)}
+.invite-wedding-editorial .invite-content-block{width:100%;max-width:none;min-height:240px;margin:0;grid-column:1/-1;background:#f0eae0}
+.invite-wedding-editorial .invite-content-copy{padding:44px 11%}
+.invite-wedding-editorial .invite-content-copy h2{font-size:clamp(28px,3vw,38px)}
+.invite-wedding-editorial .invite-content-icon{display:none}
+.invite-wedding-editorial .invite-content-copy .invite-section-kicker{color:var(--invite-accent);font-size:9px;letter-spacing:.18em}
+.invite-wedding-editorial .invite-content-body{font-family:inherit;font-size:13px;line-height:1.8}
+.invite-wedding-editorial .invite-content-block:not(.has-section-image) .invite-content-copy{grid-column:1/-1}
+.invite-wedding-editorial .invite-content-story{margin:0 -3.2%;width:106.4%}
+.invite-wedding-editorial .invite-content-ceremony,.invite-wedding-editorial .invite-content-reception,.invite-wedding-editorial .invite-content-dress_code,.invite-wedding-editorial .invite-content-rsvp{grid-column:auto}
+.invite-wedding-editorial .invite-content-ceremony .invite-content-copy,.invite-wedding-editorial .invite-content-reception .invite-content-copy{padding:30px 12%}
+.invite-wedding-editorial .invite-content-image{min-height:290px}
+.invite-wedding-editorial .invite-content-rsvp{background:#1e2632}
+.invite-wedding-editorial .invite-content-rsvp .invite-content-copy .invite-section-kicker{color:#e5c7b5}
+.invite-wedding-editorial .invite-content-program{background:var(--wedding-paper)}
+.invite-wedding-editorial .invite-content-program .invite-content-copy{max-width:720px;margin:auto;padding:60px 24px;align-items:center;text-align:center}
+.invite-wedding-editorial .invite-content-program .invite-content-copy h2,.invite-wedding-editorial .invite-content-program .invite-section-kicker{text-align:center}
+.invite-wedding-editorial .invite-program-list{max-width:480px}
+.invite-wedding-editorial .invite-program-copy{text-align:left}
+.invite-wedding-editorial .invite-program-copy p{font-family:inherit;font-size:13px}
+.invite-wedding-editorial .invite-content-gallery{background:var(--wedding-paper);color:var(--wedding-ink)}
+.invite-wedding-editorial .invite-content-gallery .invite-content-copy{grid-column:1/-1;grid-row:1;align-items:center;padding:28px 24px;text-align:center}
+.invite-wedding-editorial .invite-content-gallery h2{color:var(--wedding-ink)}
+.invite-wedding-editorial .invite-content-gallery .invite-content-body{color:#73766d}
+.invite-wedding-editorial .invite-content-gallery .invite-gallery-feature{grid-column:1/-1;grid-row:2;height:480px}
+.invite-wedding-editorial .invite-countdown-panel{background:linear-gradient(120deg,#ead1c7,#eee1d4);padding:55px 24px}
+.invite-wedding-editorial .invite-website-footer{padding:32px 20px;background:#1e2632}
+.invite-wedding-editorial .invite-website-footer strong{font-size:28px}
+@media(max-width:760px){
+ .invite-wedding-editorial .invite-website-hero{min-height:540px;height:80svh;background-position:60% center}
+ .invite-wedding-editorial .invite-hero-content{width:100%;padding:60px 8%}
+ .invite-wedding-editorial .invite-hero-content h1{max-width:450px;font-size:clamp(50px,12vw,76px)}
+ .invite-wedding-editorial .invite-main-location{grid-template-columns:1fr}
+ .invite-wedding-editorial .invite-location-photo{min-height:270px}
+ .invite-wedding-editorial .invite-location-main-copy{padding:36px 8%}
+ .invite-wedding-editorial .invite-extra-sections{grid-template-columns:1fr;gap:14px;padding:0 14px 30px}
+ .invite-wedding-editorial .invite-content-block{grid-column:1;grid-template-columns:1fr}
+ .invite-wedding-editorial .invite-content-story{margin:0;width:100%}
+ .invite-wedding-editorial .invite-content-block .invite-content-image{grid-column:1;grid-row:1;min-height:260px}
+ .invite-wedding-editorial .invite-content-block .invite-content-copy{grid-column:1;grid-row:2;padding:32px 26px}
+ .invite-wedding-editorial .invite-content-block:not(.has-section-image) .invite-content-copy{grid-row:1}
+ .invite-wedding-editorial .invite-content-program .invite-content-copy{width:100%;padding:44px 20px}
+ .invite-wedding-editorial .invite-content-gallery .invite-content-copy{grid-row:1}
+ .invite-wedding-editorial .invite-content-gallery .invite-gallery-feature{grid-row:2;height:300px;min-height:300px}
+}

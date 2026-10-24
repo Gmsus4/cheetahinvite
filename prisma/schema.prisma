@@ -44,6 +44,7 @@ model Event {
   slug         String?     @unique
   status       EventStatus @default(DRAFT)
   eventDate    DateTime?
+  eventTime    String?     @db.VarChar(5)
   expiresAt    DateTime?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt

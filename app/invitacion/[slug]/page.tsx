@@ -36,6 +36,8 @@ async function InvitationData({ params }: InvitationPageProps) {
       name={event.name}
       hostNames={event.hostNames ?? ""}
       date={date}
+      eventDateKey={event.eventDate?.toISOString().slice(0, 10) ?? ""}
+      eventTime={event.eventTime ?? ""}
       venue={event.venue ?? ""}
       address={event.address ?? ""}
       message={event.message ?? ""}

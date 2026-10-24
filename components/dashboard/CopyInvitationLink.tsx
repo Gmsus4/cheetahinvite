@@ -19,8 +19,8 @@ export function CopyInvitationLink({ slug }: { slug: string }) {
     }
   }
 
-  return <div className="dashboard-share-actions">
-    <Link className="dashboard-event-open" href={path} target="_blank" rel="noreferrer"><FiExternalLink aria-hidden="true" /> Ver</Link>
-    <button className="dashboard-event-share" type="button" onClick={copyLink}><span aria-hidden="true">{copied ? <FiCheck /> : <FiCopy />}</span>{copied ? "Copiado" : "Compartir"}</button>
-  </div>;
+  return <>
+    <Link className="dashboard-event-open" href={path} target="_blank" rel="noreferrer" aria-label="Ver invitación" title="Ver invitación"><FiExternalLink aria-hidden="true" /><span>Ver</span></Link>
+    <button className="dashboard-event-share" type="button" onClick={copyLink} aria-label={copied ? "Enlace copiado" : "Compartir invitación"} title={copied ? "Enlace copiado" : "Compartir invitación"}><span aria-hidden="true">{copied ? <FiCheck /> : <FiCopy />}</span><span>{copied ? "Copiado" : "Compartir"}</span></button>
+  </>;
 }

@@ -9,7 +9,7 @@ import { BrandEmblem } from "@/components/BrandEmblem";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 
 type EventData = {
-  id: string; name: string; eventType: string; eventDate: Date | null; hostNames: string | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED"; slug: string | null;
+  id: string; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED"; slug: string | null;
   venue: string | null; address: string | null; message: string | null; imageUrl: string | null; imageUploads: number; accent: string; sections: unknown;
 };
 
@@ -42,6 +42,7 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
   const [name, setName] = useState(event.name);
   const [eventType, setEventType] = useState(event.eventType);
   const [eventDate, setEventDate] = useState(dateInputValue(event.eventDate));
+  const [eventTime, setEventTime] = useState(event.eventTime ?? "");
   const [hostNames, setHostNames] = useState(event.hostNames ?? "");
   const [venue, setVenue] = useState(event.venue ?? "");
   const [address, setAddress] = useState(event.address ?? "");
@@ -92,7 +93,8 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
               <div className="editor-field"><label htmlFor="event-name">¿Cómo se llama tu evento? <span>(obligatorio)</span></label><input id="event-name" name="name" required minLength={2} maxLength={100} value={name} onChange={e => setName(e.target.value)} placeholder="Ej. Nuestra boda" /></div>
               <div className="editor-field"><label htmlFor="event-type">Tipo de celebración</label><select id="event-type" name="eventType" value={eventType} onChange={e => setEventType(e.target.value)}><option value="wedding">Boda</option><option value="birthday">Cumpleaños</option><option value="graduation">Graduación</option><option value="baby_shower">Baby shower</option><option value="anniversary">Aniversario</option><option value="other">Otro evento</option></select></div>
               <div className="editor-field"><label htmlFor="host-names">¿A quién celebramos? <span>(opcional)</span></label><input id="host-names" name="hostNames" placeholder="Ej. Mariana y Andrés" maxLength={120} value={hostNames} onChange={e => setHostNames(e.target.value)} /></div>
-              <div className="editor-field"><label htmlFor="event-date">Fecha <span>(opcional)</span></label><div className="editor-input-icon"><FiCalendar /><input id="event-date" name="eventDate" type="date" value={eventDate} onChange={e => setEventDate(e.target.value)} /></div></div>
+              <div className="editor-field"><label htmlFor="event-date">Fecha <span>(opcional)</span></label><div className="editor-input-icon"><FiCalendar /><input id="event-date" name="eventDate" type="date" value={eventDate} onChange={e => { setEventDate(e.target.value); if (!e.target.value) setEventTime(""); }} /></div></div>
+              <div className="editor-field"><label htmlFor="event-time">Hora <span>(opcional)</span></label><div className="editor-input-icon"><FiClock /><input id="event-time" name="eventTime" type="time" value={eventTime} onChange={e => setEventTime(e.target.value)} disabled={!eventDate} /></div><small className="editor-field-help">El contador se mostrará cuando agregues fecha y hora.</small></div>
               <div className="editor-field"><label htmlFor="venue">Lugar <span>(opcional)</span></label><input id="venue" name="venue" placeholder="Ej. Jardín Los Olivos" maxLength={160} value={venue} onChange={e => setVenue(e.target.value)} /></div>
               <div className="editor-field"><label htmlFor="address">Dirección <span>(opcional)</span></label><input id="address" name="address" placeholder="Calle, ciudad" maxLength={240} value={address} onChange={e => setAddress(e.target.value)} /></div>
               <div className="editor-field editor-group-wide"><label htmlFor="message">Mensaje para tus invitados <span>(opcional)</span></label><textarea id="message" name="message" rows={3} maxLength={1200} placeholder="Nos encantará compartir este día contigo…" value={message} onChange={e => setMessage(e.target.value)} /></div>
@@ -124,7 +126,7 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
                     {(section.type === "ceremony" || section.type === "reception" || section.type === "gallery") && <div className="editor-field"><label htmlFor={`${base}-detail`}>{section.type === "gallery" ? "Texto de apoyo" : "Fecha u horario"}</label><input id={`${base}-detail`} maxLength={240} value={section.detail} onChange={(e) => updateSection(section.id, { detail: e.target.value })} placeholder={section.type === "gallery" ? "Momentos que queremos recordar" : "Ej. 5:00 p. m."} /></div>}
                     {(section.type === "ceremony" || section.type === "reception" || section.type === "gifts") && <div className="editor-field"><label htmlFor={`${base}-link`}>{section.type === "gifts" ? "Enlace a mesa de regalos" : "Enlace a mapa"}</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://…" /></div>}
                     {section.type === "gallery" && <div className="editor-field"><label>Fotos de la galería</label><CloudinaryImageUpload eventId={event.id} images={section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : []} multiple imageUploads={imageUploads} onUpload={() => setImageUploads((count) => count + 1)} onChange={(images) => updateSection(section.id, { imageUrls: images, imageUrl: images[0] ?? "" })} /></div>}
-                    {(section.type === "ceremony" || section.type === "reception") && <div className="editor-field"><label>Imagen de esta sección</label><CloudinaryImageUpload eventId={event.id} images={section.imageUrl ? [section.imageUrl] : []} multiple={false} imageUploads={imageUploads} onUpload={() => setImageUploads((count) => count + 1)} onChange={(images) => updateSection(section.id, { imageUrl: images[0] ?? "" })} /></div>}
+                    {(section.type === "ceremony" || section.type === "reception" || section.type === "story" || section.type === "custom") && <div className="editor-field"><label>Imagen de esta sección</label><CloudinaryImageUpload eventId={event.id} images={section.imageUrl ? [section.imageUrl] : []} multiple={false} imageUploads={imageUploads} onUpload={() => setImageUploads((count) => count + 1)} onChange={(images) => updateSection(section.id, { imageUrl: images[0] ?? "" })} /></div>}
                     {section.type === "rsvp" && <div className="editor-field"><label htmlFor={`${base}-link`}>Enlace de confirmación o WhatsApp</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://wa.me/…" /></div>}
                     {section.type === "music" && <div className="editor-field"><label htmlFor={`${base}-link`}>Enlace de canción o playlist</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://…" /></div>}
                     {section.type === "custom" && <><div className="editor-field"><label htmlFor={`${base}-detail`}>Dato adicional <span>(opcional)</span></label><input id={`${base}-detail`} maxLength={240} value={section.detail} onChange={(e) => updateSection(section.id, { detail: e.target.value })} placeholder="Ej. Salón principal" /></div><div className="editor-field"><label htmlFor={`${base}-link`}>Enlace <span>(opcional)</span></label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://…" /></div></>}
@@ -139,7 +141,7 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
         </form>
       </section>
       <aside className="editor-preview-panel"><div className="editor-preview-title"><div><span>VISTA PREVIA</span><small>Se actualiza al editar</small></div><span className="preview-draft-chip">{event.status === "PUBLISHED" ? <><FiCheck /> PUBLICADA</> : <><FiLock /> PRIVADA</>}</span></div>
-        <InvitationCanvas eventType={eventType} name={name} hostNames={hostNames} date={prettyDate} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} sections={sections} />
+        <InvitationCanvas eventType={eventType} name={name} hostNames={hostNames} date={prettyDate} eventDateKey={eventDate} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} sections={sections} />
         <button className="editor-open-preview" type="submit" form="event-editor-form" formAction={saveAndPreview}><FiEye /> Guardar y ver invitación completa</button>
         <p className="editor-preview-note">{event.status === "PUBLISHED" ? <><FiCheck /> Guardaremos tus cambios y podrás ver la versión actualizada de tu enlace público.</> : <><FiLock /> Guardaremos tus cambios y abriremos la vista privada. No tiene un enlace público.</>}</p>
       </aside>
@@ -289,12 +291,12 @@ function parseProgramEntry(line: string, index: number) {
   return { id: `${index}-${cleaned}`, time: "", description: cleaned };
 }
 
-export function InvitationCanvas({ eventType, name, hostNames, date, venue, address, message, imageUrl, accent, sections, full = false }: {
-  eventType: string; name: string; hostNames: string; date: string; venue: string; address: string; message: string; imageUrl: string; accent: string; sections: InviteSection[]; full?: boolean;
+export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, accent, sections, full = false }: {
+  eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; accent: string; sections: InviteSection[]; full?: boolean;
 }) {
-  if (full) return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} sections={sections} />;
+  if (full) return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} sections={sections} />;
   const visibleSections = sections.filter((section) => section.enabled && (section.content || section.detail || section.link || section.imageUrl || section.imageUrls?.length));
-  return <article className={`invitation-preview${full ? " invitation-preview-full" : ""}`} style={{ "--preview-accent": accent } as React.CSSProperties}>
+  return <article className={`invitation-preview${full ? " invitation-preview-full" : ""}`} style={{ "--preview-accent": accent, "--invite-accent": accent } as React.CSSProperties}>
     <div className="invitation-preview-cover" style={imageUrl ? { backgroundImage: `linear-gradient(180deg, #0b13201a, #0b132099), url("${imageUrl.replaceAll('"', '')}")` } : undefined}>
       {!imageUrl && <span className="preview-cover-mark">✦</span>}
       <span className="preview-type">{eventLabels[eventType] ?? "Una celebración"}</span>
@@ -308,27 +310,61 @@ export function InvitationCanvas({ eventType, name, hostNames, date, venue, addr
       {section.imageUrl && <div className="preview-section-image" style={{ backgroundImage: `url("${section.imageUrl.replaceAll('"', '')}")` }} />}
       <span className="preview-section-mark">{sectionIcon(section.type)}</span><h3>{section.title || "Tu sección"}</h3>{section.detail && <p className="preview-section-detail">{section.detail}</p>}{section.content && <p>{section.content}</p>}{section.link && <span className="preview-section-link">{section.type === "rsvp" ? "Confirmar asistencia" : section.type === "gifts" ? "Ver mesa de regalos" : section.type === "music" ? "Escuchar música" : "Ver ubicación"}</span>}
     </div>)}
+    <div className="editor-countdown-preview"><span>CUENTA REGRESIVA</span>{eventDateKey && eventTime ? <CountdownTimer date={eventDateKey} time={eventTime} /> : <p>Elige la fecha y hora para activar el contador.</p>}</div>
     <footer className="invitation-preview-signoff"><span>CON CARIÑO</span><strong>{hostNames || name || "Nos encantará verte"}</strong><i>✦</i></footer>
   </article>;
 }
 
-function InvitationWebsite({ eventType, name, hostNames, date, venue, address, message, imageUrl, accent, sections }: {
-  eventType: string; name: string; hostNames: string; date: string; venue: string; address: string; message: string; imageUrl: string; accent: string; sections: InviteSection[];
+function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eventTime, venue, address, message, imageUrl, accent, sections }: {
+  eventType: string; name: string; hostNames: string; date: string; eventDateKey: string; eventTime: string; venue: string; address: string; message: string; imageUrl: string; accent: string; sections: InviteSection[];
 }) {
   const visibleSections = sections.filter((section) => section.enabled && (section.content || section.detail || section.link || section.imageUrl || section.imageUrls?.length));
   const title = hostNames || name || "Una celebración especial";
-  return <article className="invite-website" style={{ "--invite-accent": accent } as React.CSSProperties}>
+  const dateAndTime = eventTime ? `${date} · ${formatEventTime(eventTime)}` : date;
+  return <article className={`invite-website${eventType === "wedding" ? " invite-wedding-editorial" : ""}`} style={{ "--invite-accent": accent } as React.CSSProperties}>
     <section className={`invite-website-hero${imageUrl ? " has-cover-image" : ""}`} style={imageUrl ? { backgroundImage: `linear-gradient(90deg,#10100fd9 0%,#10100f66 58%,#10100f12 100%),url("${imageUrl.replaceAll('"', '')}")` } : undefined}>
       <div className="invite-hero-glow" aria-hidden="true" />
-      <div className="invite-hero-content"><span className="invite-hero-kicker">UNA FECHA · UN RECUERDO · UNA CELEBRACIÓN</span><span className="invite-hero-rule" /><p className="invite-hero-intro">Con mucha ilusión te invitamos a celebrar</p><h1>{title}</h1><p className="invite-hero-event-name">{name || eventLabels[eventType] || "Un día muy especial"}</p><div className="invite-hero-date"><FiCalendar /> {date}</div><a className="invite-hero-button" href="#invite-details">Descubre la invitación <FiArrowDown /></a></div>
+      <div className="invite-hero-content"><span className="invite-hero-kicker">{eventType === "wedding" ? "NOS CASAMOS" : "UNA FECHA · UN RECUERDO · UNA CELEBRACIÓN"}</span><span className="invite-hero-rule" /><p className="invite-hero-intro">Con mucha ilusión te invitamos a celebrar</p><h1>{title}</h1><p className="invite-hero-event-name">{name || eventLabels[eventType] || "Un día muy especial"}</p><div className="invite-hero-date"><FiCalendar /> {dateAndTime}</div><a className="invite-hero-button" href="#invite-details">Acompáñanos <FiArrowDown /></a></div>
       <div className="invite-hero-side-note"><span>ESTÁS INVITADO</span><i>✦</i><span>CON CARIÑO</span></div>
     </section>
-    <section className="invite-welcome" id="invite-details"><span className="invite-section-kicker">NOS ENCANTARÍA COMPARTIRLO CONTIGO</span><span className="invite-ornament">✦</span><h2>Un momento para celebrar</h2><p>{message || "Hay días que se vuelven inolvidables cuando los compartimos con las personas que queremos. Nos encantará contar contigo."}</p><strong>{title}</strong></section>
+    <section className="invite-welcome" id="invite-details"><span className="invite-section-kicker">NOS ENCANTARÍA COMPARTIRLO CONTIGO</span><span className="invite-ornament">✦</span><h2>{eventType === "wedding" ? "Bienvenidos" : "Un momento para celebrar"}</h2><p>{message || "Hay días que se vuelven inolvidables cuando los compartimos con las personas que queremos. Nos encantará contar contigo."}</p><strong>{title}</strong></section>
     {(venue || address) && <section className="invite-main-location"><div className="invite-location-photo" style={imageUrl ? { backgroundImage: `url("${imageUrl.replaceAll('"', '')}")` } : undefined}><span className="invite-photo-caption">EL LUGAR DE NUESTRO ENCUENTRO</span></div><div className="invite-location-main-copy"><span className="invite-section-kicker">GUARDA LA FECHA</span><h2>{venue || "El lugar de la celebración"}</h2><p className="invite-location-address">{address || "Pronto compartiremos la ubicación"}</p><span className="invite-static-link"><FiMapPin /> Ver ubicación al publicar</span></div></section>}
     {visibleSections.length > 0 && <section className="invite-extra-sections">{visibleSections.map((section, index) => <InviteWebsiteSection key={section.id} section={section} index={index} />)}</section>}
-    <section className="invite-countdown-panel"><span className="invite-section-kicker">RESERVA LA FECHA</span><h2>{date}</h2><p>Nos encantará celebrar contigo</p><span className="invite-countdown-decoration">✦</span></section>
+    <section className="invite-countdown-panel"><span className="invite-section-kicker">RESERVA LA FECHA</span><h2>{dateAndTime}</h2>{eventDateKey && eventTime ? <CountdownTimer date={eventDateKey} time={eventTime} /> : <p>Nos encantará celebrar contigo</p>}<span className="invite-countdown-decoration">✦</span></section>
     <footer className="invite-website-footer"><span className="invite-footer-ornament">✦</span><p>Gracias por ser parte de este momento</p><strong>{title}</strong><small>HECHO CON CARIÑO PARA CELEBRAR</small></footer>
   </article>;
+}
+
+function formatEventTime(time: string) {
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return time;
+  return new Intl.DateTimeFormat("es-MX", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "UTC" }).format(new Date(`1970-01-01T${time}:00Z`));
+}
+
+function CountdownTimer({ date, time }: { date: string; time: string }) {
+  const [now, setNow] = useState<number | null>(null);
+  const target = Date.parse(`${date}T${time}:00-06:00`);
+
+  useEffect(() => {
+    const update = () => setNow(Date.now());
+    update();
+    const interval = window.setInterval(update, 1000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  if (!Number.isFinite(target)) return null;
+  if (now !== null && now >= target) return <p className="invite-countdown-started">¡Llegó el gran día! Que empiece la celebración.</p>;
+
+  const totalSeconds = now === null ? 0 : Math.floor((target - now) / 1000);
+  const values = [
+    { value: now === null ? "--" : String(Math.floor(totalSeconds / 86400)), label: "días" },
+    { value: now === null ? "--" : String(Math.floor((totalSeconds % 86400) / 3600)).padStart(2, "0"), label: "horas" },
+    { value: now === null ? "--" : String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0"), label: "minutos" },
+    { value: now === null ? "--" : String(totalSeconds % 60).padStart(2, "0"), label: "segundos" },
+  ];
+
+  return <div className="invite-countdown-clock" aria-label="Cuenta regresiva para el evento">
+    {values.map((item) => <div className="invite-countdown-unit" key={item.label}><strong>{item.value}</strong><span>{item.label}</span></div>)}
+  </div>;
 }
 
 function InviteWebsiteSection({ section, index = 0 }: { section: InviteSection; index?: number }) {
@@ -336,9 +372,9 @@ function InviteWebsiteSection({ section, index = 0 }: { section: InviteSection; 
   const isRsvp = section.type === "rsvp";
   const isGift = section.type === "gifts";
   const galleryImages = section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : [];
-  return <section className={`invite-content-block invite-content-${section.type}${index % 2 ? " invite-content-offset" : ""}`}>
+  return <section className={`invite-content-block invite-content-${section.type}${index % 2 ? " invite-content-offset" : ""}${section.imageUrl || galleryImages.length ? " has-section-image" : ""}`}>
     {isGallery && galleryImages.length > 0 ? <div className="invite-content-image invite-gallery-feature"><GalleryCarousel images={galleryImages} title={section.title} /></div> : section.imageUrl && <div className="invite-content-image" style={{ backgroundImage: `url("${section.imageUrl.replaceAll('"', '')}")` }} role="img" aria-label={section.title} />}
-      <div className="invite-content-copy"><span className="invite-content-icon">{sectionIcon(section.type)}</span><span className="invite-section-kicker">{section.type === "ceremony" ? "CEREMONIA" : section.type === "reception" ? "RECEPCIÓN" : section.type === "program" ? "HORARIOS Y ACTIVIDADES" : section.type === "parents" ? "CON LA BENDICIÓN DE" : section.type === "dress_code" ? "CÓDIGO DE VESTIMENTA" : section.type === "rsvp" ? "CONFIRMACIÓN" : section.type === "gifts" ? "MESA DE REGALOS" : section.type === "gallery" ? "NUESTROS MOMENTOS" : section.type === "music" ? "NUESTRA CANCIÓN" : "UN DETALLE ESPECIAL"}</span><h2>{section.title}</h2>{section.detail && <p className="invite-content-detail">{section.detail}</p>}{section.type === "program" && <ol className="invite-program-list">{section.content.split("\n").map(parseProgramEntry).filter((entry) => entry.description).map((entry, index) => <li key={entry.id}><span className={entry.time ? "invite-program-time" : "invite-program-index"}>{entry.time || String(index + 1).padStart(2, "0")}</span><div className="invite-program-copy"><i aria-hidden="true" /><p>{entry.description}</p></div></li>)}</ol>}{section.type === "parents" && <ul className="invite-parents-list">{section.content.split("\n").map((line) => line.trim()).filter(Boolean).map((line) => <li key={line}>{line}</li>)}</ul>}{section.content && section.type !== "program" && section.type !== "parents" && <p className="invite-content-body">{section.content}</p>}
+      <div className="invite-content-copy"><span className="invite-content-icon">{sectionIcon(section.type)}</span><span className="invite-section-kicker">{section.type === "story" ? "NUESTRA HISTORIA" : section.type === "ceremony" ? "CEREMONIA" : section.type === "reception" ? "RECEPCIÓN" : section.type === "program" ? "HORARIOS Y ACTIVIDADES" : section.type === "parents" ? "CON LA BENDICIÓN DE" : section.type === "dress_code" ? "CÓDIGO DE VESTIMENTA" : section.type === "rsvp" ? "CONFIRMACIÓN" : section.type === "gifts" ? "MESA DE REGALOS" : section.type === "gallery" ? "NUESTROS MOMENTOS" : section.type === "music" ? "NUESTRA CANCIÓN" : "UN DETALLE ESPECIAL"}</span><h2>{section.title}</h2>{section.detail && <p className="invite-content-detail">{section.detail}</p>}{section.type === "program" && <ol className="invite-program-list">{section.content.split("\n").map(parseProgramEntry).filter((entry) => entry.description).map((entry, index) => <li key={entry.id}><span className={entry.time ? "invite-program-time" : "invite-program-index"}>{entry.time || String(index + 1).padStart(2, "0")}</span><div className="invite-program-copy"><i aria-hidden="true" /><p>{entry.description}</p></div></li>)}</ol>}{section.type === "parents" && <ul className="invite-parents-list">{section.content.split("\n").map((line) => line.trim()).filter(Boolean).map((line) => <li key={line}>{line}</li>)}</ul>}{section.content && section.type !== "program" && section.type !== "parents" && <p className="invite-content-body">{section.content}</p>}
       {(section.link || isRsvp || isGift) && <span className="invite-static-link">{isRsvp ? "Confirmar asistencia al publicar" : isGift ? "Consultar mesa de regalos al publicar" : isGallery ? "Ver galería" : section.type === "music" ? "Escuchar al publicar" : "Abrir mapa al publicar"} <FiArrowDown /></span>}
     </div>
   </section>;
