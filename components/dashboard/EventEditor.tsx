@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { FiArrowDown, FiArrowLeft, FiArrowUp, FiCalendar, FiCheck, FiChevronLeft, FiChevronRight, FiClock, FiEye, FiGift, FiHeart, FiImage, FiLock, FiMapPin, FiMusic, FiPlus, FiSave, FiTag, FiTrash2, FiUsers, FiX } from "react-icons/fi";
 import { publishEvent, saveEventForPreview, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
+import { BrandEmblem } from "@/components/BrandEmblem";
 
 type EventData = {
   id: string; name: string; eventType: string; eventDate: Date | null; hostNames: string | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED"; slug: string | null;
@@ -70,7 +71,7 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
 
   return <main className="editor-page">
     <header className="editor-header">
-      <Link className="brand editor-brand" href="/dashboard"><Image src="/cheetah-mascot.png" alt="" width={34} height={38} /><span className="brand-name">Cheetah<span>Invite</span></span></Link>
+      <Link className="brand editor-brand" href="/dashboard"><BrandEmblem size={36} /><span className="brand-name">Cheetah<span>Invite</span></span></Link>
       <Link className="editor-back" href="/dashboard"><FiArrowLeft /> Volver a mis eventos</Link>
     </header>
     <div className="editor-layout">

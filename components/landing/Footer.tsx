@@ -1,16 +1,10 @@
-import Image from "next/image";
+import { BrandEmblem } from "@/components/BrandEmblem";
 
 export function Footer() {
   return (
     <footer className="site-footer">
       <a className="brand" href="#inicio">
-        <Image
-          className="brand-mascot"
-          src="/cheetah-mascot.png"
-          alt=""
-          width={32}
-          height={35}
-        />
+        <BrandEmblem size={32} />
         <span className="brand-name">
           Cheetah<span>Invite</span>
         </span>

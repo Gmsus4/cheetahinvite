@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { FiArrowLeft } from "react-icons/fi";
+import { BrandEmblem } from "@/components/BrandEmblem";
 import { RegisterForm } from "@/components/login/RegisterForm";
 
 export const metadata: Metadata = {
@@ -13,7 +13,7 @@ export default function RegisterPage() {
     <main className="login-page">
       <header className="login-topbar">
         <a className="brand" href="/" aria-label="Cheetah Invite, inicio">
-          <Image className="brand-mascot" src="/cheetah-mascot.png" alt="" width={40} height={44} priority />
+          <BrandEmblem size={40} priority />
           <span className="brand-name">Cheetah<span>Invite</span></span>
         </a>
         <a className="login-back" href="/"><FiArrowLeft aria-hidden="true" /> Volver al inicio</a>

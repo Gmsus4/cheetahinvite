@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FiArrowLeft, FiArrowUpRight, FiCalendar, FiGift } from "react-icons/fi";
 import { auth } from "@/auth";
+import { BrandEmblem } from "@/components/BrandEmblem";
 import { createEvent } from "./actions";
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default async function CreateEventPage({
     <main className="create-event-page">
       <header className="create-event-header">
         <Link className="brand" href="/" aria-label="Cheetah Invite, inicio">
-          <Image src="/cheetah-mascot.png" alt="" width={38} height={42} priority />
+          <BrandEmblem size={38} priority />
           <span className="brand-name">Cheetah<span>Invite</span></span>
         </Link>
         <Link className="create-back-link" href="/dashboard"><FiArrowLeft aria-hidden="true" /> Volver a mi panel</Link>

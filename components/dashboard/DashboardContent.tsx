@@ -11,6 +11,7 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import { DashboardSignOut } from "@/components/dashboard/DashboardSignOut";
+import { BrandEmblem } from "@/components/BrandEmblem";
 import { DashboardSectionNav } from "@/components/dashboard/DashboardSectionNav";
 import { CopyInvitationLink } from "@/components/dashboard/CopyInvitationLink";
 
@@ -87,7 +88,7 @@ export function DashboardContent({ userName, userEmail, events, view = "summary"
     <div className="dashboard-page">
       <aside className="dashboard-sidebar">
         <Link className="brand dashboard-brand" href="/dashboard" aria-label="Cheetah Invite, panel">
-          <span className="dashboard-brand-mark">c</span>
+          <BrandEmblem size={32} className="dashboard-brand-mark" />
           <span className="brand-name">Cheetah<span>Invite</span></span>
         </Link>
 
@@ -111,7 +112,7 @@ export function DashboardContent({ userName, userEmail, events, view = "summary"
       <main className="dashboard-main">
         <header className="dashboard-mobile-header">
           <Link className="brand dashboard-brand" href="/dashboard" aria-label="Cheetah Invite, panel">
-            <span className="dashboard-brand-mark">c</span>
+            <BrandEmblem size={32} className="dashboard-brand-mark" />
             <span className="brand-name">Cheetah<span>Invite</span></span>
           </Link>
         </header>

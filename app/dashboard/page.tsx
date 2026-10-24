@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import { BrandEmblem } from "@/components/BrandEmblem";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 
@@ -59,7 +60,7 @@ async function DashboardData() {
 function DashboardLoading() {
   return (
     <main className="dashboard-loading" aria-label="Cargando tu panel">
-      <span className="dashboard-loading-mark">c</span>
+      <BrandEmblem size={43} className="dashboard-loading-mark" />
       <p>Preparando tu espacio para celebrar…</p>
     </main>
   );
