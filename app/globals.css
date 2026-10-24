@@ -336,3 +336,17 @@ body,p,a,button,input,textarea,select,li,small,nav,label{font-family:var(--font-
 @media(max-width:1000px){.dashboard-event-card{grid-template-columns:45px minmax(100px,1fr) auto auto auto}.dashboard-event-updated{display:none}}
 @media(max-width:680px){.dashboard-event-card{grid-template-columns:39px minmax(0,1fr) auto;align-items:center}.dashboard-event-edit{grid-column:2;grid-row:2;justify-self:start}.dashboard-share-actions{grid-column:2/4;grid-row:3;justify-self:start}.dashboard-status{grid-column:3;grid-row:1}}
 @media(max-width:390px){.dashboard-event-card{grid-template-columns:34px minmax(0,1fr) auto}.dashboard-event-edit{grid-column:2;grid-row:2}.dashboard-share-actions{grid-column:2/4;grid-row:3}}
+
+/* Invitation header: clear event label and details action */
+.invite-website .invite-website-nav{height:70px;gap:14px;padding:0 8%;border-bottom:1px solid #e9e3d8;background:#fbf8f2;color:#7a7468;font-size:8px;letter-spacing:.16em}
+.invite-website .invite-nav-label{color:#8a8173;font-size:8px;font-weight:700;letter-spacing:.18em;white-space:nowrap}
+.invite-website .invite-nav-divider{width:1px;height:18px;background:#d9d1c4}
+.invite-website .invite-nav-event{color:#30372e;font-size:9px;letter-spacing:.1em}
+.invite-website .invite-website-nav>a{width:auto;height:36px;display:inline-flex;align-items:center;justify-content:center;gap:10px;margin-left:auto;padding:0 14px;border:1px solid color-mix(in srgb,var(--invite-accent) 48%,#d9d7ce);border-radius:2px;color:var(--invite-accent);font-size:8px;font-weight:700;letter-spacing:.08em;transition:background .2s,color .2s}
+.invite-website .invite-website-nav>a:hover{background:var(--invite-accent);color:#fff}
+.invite-website .invite-website-nav>a svg{width:13px;height:13px;transition:transform .2s}
+.invite-website .invite-website-nav>a:hover svg{transform:translateY(2px)}
+@media(max-width:760px){.invite-website .invite-website-nav{height:58px;gap:9px;padding:0 6%}.invite-website .invite-nav-label{font-size:7px;letter-spacing:.12em}.invite-website .invite-nav-divider{height:15px}.invite-website .invite-nav-event{font-size:8px;letter-spacing:.06em}.invite-website .invite-website-nav>a{height:32px;gap:7px;padding:0 10px;font-size:7px}}
+.dashboard-nav-item{width:100%;border:0;background:transparent;font-family:inherit;text-align:left;cursor:pointer}
+#resumen,#mis-eventos{scroll-margin-top:24px}
+.dashboard-event-count-link{display:inline-flex;align-items:center;gap:4px;cursor:pointer}.dashboard-event-count-link svg{width:11px;height:11px}

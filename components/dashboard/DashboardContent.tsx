@@ -11,6 +11,7 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import { DashboardSignOut } from "@/components/dashboard/DashboardSignOut";
+import { DashboardSectionNav } from "@/components/dashboard/DashboardSectionNav";
 import { CopyInvitationLink } from "@/components/dashboard/CopyInvitationLink";
 
 type EventStatus = "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED";
@@ -30,6 +31,7 @@ type DashboardContentProps = {
   userName: string;
   userEmail: string;
   events: DashboardEvent[];
+  view?: "summary" | "events";
 };
 
 const statusLabels: Record<EventStatus, string> = {
@@ -67,7 +69,7 @@ function getInitials(name: string) {
     .join("");
 }
 
-export function DashboardContent({ userName, userEmail, events }: DashboardContentProps) {
+export function DashboardContent({ userName, userEmail, events, view = "summary" }: DashboardContentProps) {
   const firstName = userName.trim().split(/\s+/)[0] || "bienvenido";
   const activeEvents = events.filter((event) => event.status === "PUBLISHED").length;
   const drafts = events.filter((event) => event.status === "DRAFT").length;
@@ -90,18 +92,7 @@ export function DashboardContent({ userName, userEmail, events }: DashboardConte
         </Link>
 
         <p className="dashboard-nav-label">ESPACIO DE TRABAJO</p>
-        <nav className="dashboard-nav" aria-label="Panel de usuario">
-          <a className="dashboard-nav-item active" href="#resumen">
-            <FiFileText aria-hidden="true" /> Resumen
-          </a>
-          <a className="dashboard-nav-item" href="#mis-eventos">
-            <FiCalendar aria-hidden="true" /> Mis eventos
-            <span className="dashboard-nav-count">{events.length}</span>
-          </a>
-          <Link className="dashboard-nav-item" href="/#plantillas">
-            <FiGift aria-hidden="true" /> Plantillas
-          </Link>
-        </nav>
+        <DashboardSectionNav eventCount={events.length} activeView={view} />
 
         <div className="dashboard-sidebar-bottom">
           <div className="dashboard-help-card">
@@ -117,7 +108,7 @@ export function DashboardContent({ userName, userEmail, events }: DashboardConte
         </div>
       </aside>
 
-      <main className="dashboard-main" id="resumen">
+      <main className="dashboard-main">
         <header className="dashboard-mobile-header">
           <Link className="brand dashboard-brand" href="/dashboard" aria-label="Cheetah Invite, panel">
             <span className="dashboard-brand-mark">c</span>
@@ -128,9 +119,9 @@ export function DashboardContent({ userName, userEmail, events }: DashboardConte
         <div className="dashboard-content">
           <div className="dashboard-welcome-row">
             <div>
-              <p className="dashboard-eyebrow">TU ESPACIO PERSONAL</p>
-              <h1>¡Hola, {firstName}!</h1>
-              <p className="dashboard-subtitle">Aquí puedes organizar las invitaciones de tus momentos especiales.</p>
+              <p className="dashboard-eyebrow">{view === "summary" ? "TU ESPACIO PERSONAL" : "GESTIÓN DE INVITACIONES"}</p>
+              <h1>{view === "summary" ? `¡Hola, ${firstName}!` : "Mis eventos"}</h1>
+              <p className="dashboard-subtitle">{view === "summary" ? "Aquí puedes organizar las invitaciones de tus momentos especiales." : "Consulta el estado de tus invitaciones y continúa editándolas o compartiéndolas."}</p>
             </div>
             <div className="dashboard-welcome-actions">
               <DashboardSignOut className="dashboard-signout dashboard-signout-prominent" />
@@ -140,7 +131,7 @@ export function DashboardContent({ userName, userEmail, events }: DashboardConte
             </div>
           </div>
 
-          <section className="dashboard-stats" aria-label="Resumen de eventos">
+          {view === "summary" && <section className="dashboard-stats" aria-label="Resumen de eventos">
             <article className="dashboard-stat-card">
               <span className="dashboard-stat-icon stat-icon-orange"><FiCalendar aria-hidden="true" /></span>
               <span className="dashboard-stat-copy"><small>Total de eventos</small><strong>{events.length}</strong></span>
@@ -161,20 +152,20 @@ export function DashboardContent({ userName, userEmail, events }: DashboardConte
               <span className="dashboard-stat-copy"><small>Por vencer</small><strong>{expiring}</strong></span>
               <span className="dashboard-stat-caption">en 30 días</span>
             </article>
-          </section>
+          </section>}
 
-          <section className="dashboard-events-section" id="mis-eventos">
+          <section className="dashboard-events-section">
             <div className="dashboard-section-heading">
               <div>
-                <p className="dashboard-eyebrow">TUS CELEBRACIONES</p>
-                <h2>Mis eventos</h2>
+                <p className="dashboard-eyebrow">{view === "summary" ? "ACTIVIDAD RECIENTE" : "TUS CELEBRACIONES"}</p>
+                <h2>{view === "summary" ? "Eventos recientes" : "Todos mis eventos"}</h2>
               </div>
-              <span className="dashboard-event-count">{events.length} {events.length === 1 ? "evento" : "eventos"}</span>
+              {view === "summary" ? <Link className="dashboard-event-count dashboard-event-count-link" href="/dashboard/eventos">Ver todos <FiArrowUpRight aria-hidden="true" /></Link> : <span className="dashboard-event-count">{events.length} {events.length === 1 ? "evento" : "eventos"}</span>}
             </div>
 
             {events.length ? (
               <div className="dashboard-event-list">
-                {events.map((event) => (
+                {(view === "summary" ? events.slice(0, 3) : events).map((event) => (
                   <article className="dashboard-event-card" key={event.id}>
                     <span className="dashboard-event-art"><FiGift aria-hidden="true" /></span>
                     <div className="dashboard-event-info">

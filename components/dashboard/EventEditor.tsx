@@ -311,7 +311,6 @@ function InvitationWebsite({ eventType, name, hostNames, date, venue, address, m
   const visibleSections = sections.filter((section) => section.enabled && (section.content || section.detail || section.link || section.imageUrl || section.imageUrls?.length));
   const title = hostNames || name || "Una celebración especial";
   return <article className="invite-website" style={{ "--invite-accent": accent } as React.CSSProperties}>
-    <nav className="invite-website-nav"><span className="invite-nav-monogram">{title.trim().charAt(0).toUpperCase()}</span><span>{eventLabels[eventType] ?? "Invitación especial"}</span><a href="#invite-details" aria-label="Ir a los detalles"><FiArrowDown /></a></nav>
     <section className={`invite-website-hero${imageUrl ? " has-cover-image" : ""}`} style={imageUrl ? { backgroundImage: `linear-gradient(90deg,#10100fd9 0%,#10100f66 58%,#10100f12 100%),url("${imageUrl.replaceAll('"', '')}")` } : undefined}>
       <div className="invite-hero-glow" aria-hidden="true" />
       <div className="invite-hero-content"><span className="invite-hero-kicker">UNA FECHA · UN RECUERDO · UNA CELEBRACIÓN</span><span className="invite-hero-rule" /><p className="invite-hero-intro">Con mucha ilusión te invitamos a celebrar</p><h1>{title}</h1><p className="invite-hero-event-name">{name || eventLabels[eventType] || "Un día muy especial"}</p><div className="invite-hero-date"><FiCalendar /> {date}</div><a className="invite-hero-button" href="#invite-details">Descubre la invitación <FiArrowDown /></a></div>

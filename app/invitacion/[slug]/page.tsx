@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { InvitationCanvas, type InviteSection } from "@/components/dashboard/EventEditor";
@@ -6,21 +7,18 @@ import { prisma } from "@/prisma";
 
 type InvitationPageProps = PageProps<"/invitacion/[slug]">;
 
-export async function generateMetadata({ params }: InvitationPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  await connection();
-  const event = await prisma.event.findFirst({
-    where: { slug, status: "PUBLISHED", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
-    select: { name: true, message: true },
-  });
-  if (!event) return { title: "Invitación no disponible | Cheetah Invite" };
-  return {
-    title: `${event.name} | Cheetah Invite`,
-    description: event.message || `Te invitamos a celebrar: ${event.name}.`,
-  };
+export const metadata: Metadata = {
+  title: "Invitación digital | Cheetah Invite",
+  description: "Estás invitado a celebrar un momento especial.",
+};
+
+export default function PublicInvitationPage({ params }: InvitationPageProps) {
+  return <Suspense fallback={<div className="editor-loading">Preparando tu invitación…</div>}>
+    <InvitationData params={params} />
+  </Suspense>;
 }
 
-export default async function PublicInvitationPage({ params }: InvitationPageProps) {
+async function InvitationData({ params }: InvitationPageProps) {
   const { slug } = await params;
   await connection();
   const event = await prisma.event.findFirst({
