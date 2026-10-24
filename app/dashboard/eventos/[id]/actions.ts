@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { ACCOUNT_LIMITS } from "@/lib/limits";
 
 export async function updateEvent(eventId: string, formData: FormData) {
   await persistEvent(eventId, formData);
@@ -65,13 +66,21 @@ async function persistEvent(eventId: string, formData: FormData) {
   }
   const eventTypes = ["wedding", "birthday", "graduation", "baby_shower", "anniversary", "other"];
   const eventDate = dateValue ? new Date(`${dateValue}T12:00:00.000Z`) : null;
+  const imageReferences = new Set<string>([imageUrl]);
+  if (Array.isArray(sections)) {
+    for (const section of sections) {
+      if (!isValidSection(section)) continue;
+      if (section.imageUrl) imageReferences.add(section.imageUrl);
+      for (const url of section.imageUrls ?? []) if (url) imageReferences.add(url);
+    }
+  }
 
   if (
     name.length < 2 || name.length > 100 || !eventTypes.includes(eventType) ||
     hostNames.length > 120 || venue.length > 160 || address.length > 240 ||
     message.length > 1200 || !/^#[0-9a-fA-F]{6}$/.test(accent) ||
     (eventDate && Number.isNaN(eventDate.getTime())) ||
-    !Array.isArray(sections) || sections.length > 12 ||
+    !Array.isArray(sections) || sections.length > 12 || imageReferences.size > ACCOUNT_LIMITS.imagesPerInvitation ||
     sections.some((section) => !isValidSection(section))
   ) redirect(`/dashboard/eventos/${eventId}?error=datos`);
 

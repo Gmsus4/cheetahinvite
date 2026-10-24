@@ -6,10 +6,11 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { FiArrowDown, FiArrowLeft, FiArrowUp, FiCalendar, FiCheck, FiChevronLeft, FiChevronRight, FiClock, FiEye, FiGift, FiHeart, FiImage, FiLock, FiMapPin, FiMusic, FiPlus, FiSave, FiTag, FiTrash2, FiUsers, FiX } from "react-icons/fi";
 import { publishEvent, saveEventForPreview, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 import { BrandEmblem } from "@/components/BrandEmblem";
+import { ACCOUNT_LIMITS } from "@/lib/limits";
 
 type EventData = {
   id: string; name: string; eventType: string; eventDate: Date | null; hostNames: string | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED"; slug: string | null;
-  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; accent: string; sections: unknown;
+  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; imageUploads: number; accent: string; sections: unknown;
 };
 
 export type SectionType = "story" | "ceremony" | "reception" | "program" | "parents" | "dress_code" | "gifts" | "rsvp" | "gallery" | "music" | "custom";
@@ -24,7 +25,7 @@ const sectionOptions: { type: SectionType; title: string; description: string }[
   { type: "dress_code", title: "Código de vestimenta", description: "Vestimenta y recomendaciones." },
   { type: "gifts", title: "Regalos", description: "Mesa de regalos o notas para tus invitados." },
   { type: "rsvp", title: "Confirmación", description: "Indica cómo confirmar asistencia." },
-  { type: "gallery", title: "Galería", description: "Sube hasta 12 fotos para mostrar en un carrusel." },
+  { type: "gallery", title: "Galería", description: "Muestra fotos de tu celebración en un carrusel." },
   { type: "music", title: "Música", description: "Comparte una canción o playlist." },
   { type: "custom", title: "Sección personalizada", description: "Crea un bloque con tu propio contenido." },
 ];
@@ -46,6 +47,7 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
   const [address, setAddress] = useState(event.address ?? "");
   const [message, setMessage] = useState(event.message ?? "");
   const [imageUrl, setImageUrl] = useState(event.imageUrl ?? "");
+  const [imageUploads, setImageUploads] = useState(event.imageUploads);
   const [accent, setAccent] = useState(event.accent || "#E9560A");
   const [sections, setSections] = useState<InviteSection[]>(() => {
     if (Array.isArray(event.sections)) return event.sections as InviteSection[];
@@ -76,22 +78,37 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
     </header>
     <div className="editor-layout">
       <section className="editor-form-panel">
-        <div className="editor-heading"><p className="dashboard-eyebrow">PERSONALIZA TU CELEBRACIÓN</p><h1>Edita tu invitación</h1><p>Diseña cada detalle y revisa cómo se verá para tus invitados.</p><div className="editor-draft-reminder"><FiLock /> Privada mientras sea borrador</div></div>
+        <div className="editor-heading"><p className="dashboard-eyebrow">TU INVITACIÓN</p><h1>Completa los detalles</h1><p>Empieza con la información principal. Después puedes agregar fotos y detalles opcionales.</p><div className="editor-draft-reminder">{event.status === "PUBLISHED" ? <><FiCheck /> Invitación publicada</> : <><FiLock /> Tus cambios son privados hasta que publiques</>}</div></div>
+        <nav className="editor-step-nav" aria-label="Secciones del editor">
+          <a href="#event-details"><span>1</span> Datos</a><a href="#event-cover"><span>2</span> Portada</a><a href="#event-extras"><span>3</span> Detalles opcionales</a>
+        </nav>
         {(saved || published || state) && <p className="editor-success" role="status"><FiCheck /> {published ? "Tu invitación ya está publicada y lista para compartir." : "Cambios guardados correctamente."}</p>}
         {error && <p className="editor-error" role="alert">{error === "imagen" ? "Usa una URL válida que comience con http:// o https://." : "Revisa los campos e inténtalo de nuevo."}</p>}
         <form id="event-editor-form" action={formAction} className="editor-form">
           <input type="hidden" name="sections" value={JSON.stringify(sections)} />
-          <div className="editor-field"><label htmlFor="event-name">Nombre del evento</label><input id="event-name" name="name" required minLength={2} maxLength={100} value={name} onChange={e => setName(e.target.value)} /></div>
-          <div className="editor-field"><label htmlFor="event-type">Tipo de evento</label><select id="event-type" name="eventType" value={eventType} onChange={e => setEventType(e.target.value)}><option value="wedding">Boda</option><option value="birthday">Cumpleaños</option><option value="graduation">Graduación</option><option value="baby_shower">Baby shower</option><option value="anniversary">Aniversario</option><option value="other">Otro evento</option></select></div>
-          <div className="editor-field"><label htmlFor="event-date">Fecha y hora</label><div className="editor-input-icon"><FiCalendar /><input id="event-date" name="eventDate" type="date" value={eventDate} onChange={e => setEventDate(e.target.value)} /></div></div>
-          <div className="editor-field"><label htmlFor="host-names">Anfitriones o festejados</label><input id="host-names" name="hostNames" placeholder="Ej. Mariana y Andrés" maxLength={120} value={hostNames} onChange={e => setHostNames(e.target.value)} /></div>
-          <div className="editor-field"><label htmlFor="venue">Lugar</label><input id="venue" name="venue" placeholder="Ej. Jardín Los Olivos" maxLength={160} value={venue} onChange={e => setVenue(e.target.value)} /></div>
-          <div className="editor-field"><label htmlFor="address">Dirección</label><input id="address" name="address" placeholder="Calle, ciudad" maxLength={240} value={address} onChange={e => setAddress(e.target.value)} /></div>
-          <div className="editor-field"><label htmlFor="message">Mensaje para tus invitados</label><textarea id="message" name="message" rows={4} maxLength={1200} placeholder="Nos encantará compartir este día contigo…" value={message} onChange={e => setMessage(e.target.value)} /></div>
-          <div className="editor-field"><label>Imagen de portada</label><input type="hidden" name="imageUrl" value={imageUrl} /><CloudinaryImageUpload eventId={event.id} images={imageUrl ? [imageUrl] : []} multiple={false} onChange={(images) => setImageUrl(images[0] ?? "")} /></div>
-          <div className="editor-field editor-color-field"><label htmlFor="accent">Color de acento</label><div><input id="accent" name="accent" type="color" value={accent} onChange={e => setAccent(e.target.value)} /><span>{accent.toUpperCase()}</span></div></div>
-          <div className="editor-sections-field">
-            <div className="editor-sections-heading"><div><h2>Secciones de tu invitación</h2><p>Elige qué mostrar y organiza el orden de la página.</p></div><span>{sections.filter((section) => section.enabled).length} visibles</span></div>
+          <section className="editor-group" id="event-details">
+            <div className="editor-group-heading"><span className="editor-group-number">1</span><div><h2>Datos de la celebración</h2><p>Esta información aparecerá en tu invitación.</p></div></div>
+            <div className="editor-group-fields">
+              <div className="editor-field"><label htmlFor="event-name">¿Cómo se llama tu evento? <span>(obligatorio)</span></label><input id="event-name" name="name" required minLength={2} maxLength={100} value={name} onChange={e => setName(e.target.value)} placeholder="Ej. Nuestra boda" /></div>
+              <div className="editor-field"><label htmlFor="event-type">Tipo de celebración</label><select id="event-type" name="eventType" value={eventType} onChange={e => setEventType(e.target.value)}><option value="wedding">Boda</option><option value="birthday">Cumpleaños</option><option value="graduation">Graduación</option><option value="baby_shower">Baby shower</option><option value="anniversary">Aniversario</option><option value="other">Otro evento</option></select></div>
+              <div className="editor-field"><label htmlFor="host-names">¿A quién celebramos? <span>(opcional)</span></label><input id="host-names" name="hostNames" placeholder="Ej. Mariana y Andrés" maxLength={120} value={hostNames} onChange={e => setHostNames(e.target.value)} /></div>
+              <div className="editor-field"><label htmlFor="event-date">Fecha <span>(opcional)</span></label><div className="editor-input-icon"><FiCalendar /><input id="event-date" name="eventDate" type="date" value={eventDate} onChange={e => setEventDate(e.target.value)} /></div></div>
+              <div className="editor-field"><label htmlFor="venue">Lugar <span>(opcional)</span></label><input id="venue" name="venue" placeholder="Ej. Jardín Los Olivos" maxLength={160} value={venue} onChange={e => setVenue(e.target.value)} /></div>
+              <div className="editor-field"><label htmlFor="address">Dirección <span>(opcional)</span></label><input id="address" name="address" placeholder="Calle, ciudad" maxLength={240} value={address} onChange={e => setAddress(e.target.value)} /></div>
+              <div className="editor-field editor-group-wide"><label htmlFor="message">Mensaje para tus invitados <span>(opcional)</span></label><textarea id="message" name="message" rows={3} maxLength={1200} placeholder="Nos encantará compartir este día contigo…" value={message} onChange={e => setMessage(e.target.value)} /></div>
+            </div>
+          </section>
+          <section className="editor-group" id="event-cover">
+            <div className="editor-group-heading"><span className="editor-group-number">2</span><div><h2>Personaliza la portada</h2><p>Agrega una foto y elige un color. Puedes hacerlo ahora o después.</p></div></div>
+            <div className="editor-group-fields editor-cover-fields">
+              <div className="editor-field"><label>Foto de portada <span>(opcional)</span></label><input type="hidden" name="imageUrl" value={imageUrl} /><CloudinaryImageUpload eventId={event.id} images={imageUrl ? [imageUrl] : []} multiple={false} imageUploads={imageUploads} onUpload={() => setImageUploads((count) => count + 1)} onChange={(images) => setImageUrl(images[0] ?? "")} /></div>
+              <p className="editor-field-help editor-image-quota">{imageUploads} de {ACCOUNT_LIMITS.imagesPerInvitation} imágenes subidas. Las imágenes reemplazadas también cuentan.</p>
+              <div className="editor-field editor-color-field"><label htmlFor="accent">Color principal</label><div><input id="accent" name="accent" type="color" value={accent} onChange={e => setAccent(e.target.value)} /><span>{accent.toUpperCase()}</span></div><small className="editor-field-help">Se usará en algunos detalles de diseño.</small></div>
+            </div>
+          </section>
+          <section className="editor-sections-field" id="event-extras">
+            <div className="editor-group-heading"><span className="editor-group-number">3</span><div><h2>Detalles adicionales</h2><p>Agrega horarios, confirmación de asistencia, regalos y más. Todo esto es opcional.</p></div></div>
+            <div className="editor-sections-heading"><span>{sections.filter((section) => section.enabled).length} secciones activas</span></div>
             <div className="editor-section-list">
               {sections.map((section, index) => {
                 const option = sectionOptions.find((item) => item.type === section.type)!;
@@ -101,24 +118,24 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
                     <label className="editor-section-toggle"><input type="checkbox" checked={section.enabled} onChange={(e) => updateSection(section.id, { enabled: e.target.checked })} /><span className="editor-section-icon">{sectionIcon(section.type)}</span><span className="editor-section-toggle-copy"><strong>{section.title || option.title}</strong><small>{option.description}</small></span></label>
                     <div className="editor-section-actions"><button type="button" aria-label="Mover sección arriba" disabled={index === 0} onClick={() => moveSection(index, -1)}><FiArrowUp /></button><button type="button" aria-label="Mover sección abajo" disabled={index === sections.length - 1} onClick={() => moveSection(index, 1)}><FiArrowDown /></button><button type="button" aria-label="Eliminar sección" onClick={() => setSections((current) => current.filter((item) => item.id !== section.id))}><FiTrash2 /></button></div>
                   </div>
-                  <div className="editor-section-fields">
+                  <details className="editor-section-details"><summary>Editar esta sección</summary><div className="editor-section-fields">
                     <div className="editor-field"><label htmlFor={`${base}-title`}>Título</label><input id={`${base}-title`} value={section.title} maxLength={100} onChange={(e) => updateSection(section.id, { title: e.target.value })} /></div>
                     <div className="editor-field"><label htmlFor={`${base}-content`}>{section.type === "dress_code" ? "Indicaciones" : section.type === "rsvp" ? "Instrucciones" : section.type === "gifts" ? "Mensaje" : section.type === "program" ? "Horario y actividad (un momento por renglón)" : section.type === "parents" ? "Nombres (una pareja o persona por renglón)" : "Descripción"}</label><textarea id={`${base}-content`} rows={section.type === "program" || section.type === "parents" ? 5 : 3} maxLength={2000} value={section.content} onChange={(e) => updateSection(section.id, { content: e.target.value })} placeholder={section.type === "program" ? "5:30 p. m. — Recepción de invitados\n6:00 p. m. — Ceremonia\n7:00 p. m. — Cóctel" : section.type === "parents" ? "Ej. Joaquín Reyes y Patricia Fuentes\nRodrigo Navarro y Lucía Cortés" : "Escribe aquí la información para tus invitados…"} /></div>
                     {(section.type === "ceremony" || section.type === "reception" || section.type === "gallery") && <div className="editor-field"><label htmlFor={`${base}-detail`}>{section.type === "gallery" ? "Texto de apoyo" : "Fecha u horario"}</label><input id={`${base}-detail`} maxLength={240} value={section.detail} onChange={(e) => updateSection(section.id, { detail: e.target.value })} placeholder={section.type === "gallery" ? "Momentos que queremos recordar" : "Ej. 5:00 p. m."} /></div>}
                     {(section.type === "ceremony" || section.type === "reception" || section.type === "gifts") && <div className="editor-field"><label htmlFor={`${base}-link`}>{section.type === "gifts" ? "Enlace a mesa de regalos" : "Enlace a mapa"}</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://…" /></div>}
-                    {section.type === "gallery" && <div className="editor-field"><label>Fotos de la galería</label><CloudinaryImageUpload eventId={event.id} images={section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : []} multiple onChange={(images) => updateSection(section.id, { imageUrls: images, imageUrl: images[0] ?? "" })} /></div>}
-                    {(section.type === "ceremony" || section.type === "reception") && <div className="editor-field"><label>Imagen de esta sección</label><CloudinaryImageUpload eventId={event.id} images={section.imageUrl ? [section.imageUrl] : []} multiple={false} onChange={(images) => updateSection(section.id, { imageUrl: images[0] ?? "" })} /></div>}
+                    {section.type === "gallery" && <div className="editor-field"><label>Fotos de la galería</label><CloudinaryImageUpload eventId={event.id} images={section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : []} multiple imageUploads={imageUploads} onUpload={() => setImageUploads((count) => count + 1)} onChange={(images) => updateSection(section.id, { imageUrls: images, imageUrl: images[0] ?? "" })} /></div>}
+                    {(section.type === "ceremony" || section.type === "reception") && <div className="editor-field"><label>Imagen de esta sección</label><CloudinaryImageUpload eventId={event.id} images={section.imageUrl ? [section.imageUrl] : []} multiple={false} imageUploads={imageUploads} onUpload={() => setImageUploads((count) => count + 1)} onChange={(images) => updateSection(section.id, { imageUrl: images[0] ?? "" })} /></div>}
                     {section.type === "rsvp" && <div className="editor-field"><label htmlFor={`${base}-link`}>Enlace de confirmación o WhatsApp</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://wa.me/…" /></div>}
                     {section.type === "music" && <div className="editor-field"><label htmlFor={`${base}-link`}>Enlace de canción o playlist</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://…" /></div>}
                     {section.type === "custom" && <><div className="editor-field"><label htmlFor={`${base}-detail`}>Dato adicional <span>(opcional)</span></label><input id={`${base}-detail`} maxLength={240} value={section.detail} onChange={(e) => updateSection(section.id, { detail: e.target.value })} placeholder="Ej. Salón principal" /></div><div className="editor-field"><label htmlFor={`${base}-link`}>Enlace <span>(opcional)</span></label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://…" /></div></>}
-                  </div>
+                  </div></details>
                 </fieldset>;
               })}
             </div>
-            <div className="editor-add-section"><label htmlFor="add-section">Agregar una sección</label><select id="add-section" value="" onChange={(e) => { const type = e.target.value as SectionType; if (type && sections.length < 12) setSections((current) => [...current, makeSection(type, crypto.randomUUID())]); e.currentTarget.value = ""; }}><option value="">Selecciona un bloque…</option>{sectionOptions.map((option) => <option key={option.type} value={option.type}>{option.title}</option>)}</select><small>Puedes agregar hasta 12 secciones y cambiar su orden.</small></div>
-          </div>
-          <button className="button editor-save" type="submit" disabled={pending}><FiSave /> {pending ? "Guardando…" : "Guardar borrador"}</button>
-          <button className="button editor-publish" type="submit" formAction={publish}><FiEye /> {event.status === "PUBLISHED" ? "Guardar cambios y publicar" : "Publicar invitación"}</button>
+            <div className="editor-add-section"><label htmlFor="add-section">Agregar otro detalle</label><select id="add-section" value="" onChange={(e) => { const type = e.target.value as SectionType; if (type && sections.length < 12) setSections((current) => [...current, makeSection(type, crypto.randomUUID())]); e.currentTarget.value = ""; }}><option value="">Elige qué quieres agregar…</option>{sectionOptions.map((option) => <option key={option.type} value={option.type}>{option.title}</option>)}</select><small>Elige una opción para agregarla a tu invitación. Puedes incluir hasta 12.</small></div>
+          </section>
+          <div className="editor-form-actions"><button className="button editor-save" type="submit" disabled={pending}><FiSave /> {pending ? "Guardando…" : "Guardar cambios"}</button><p>Guarda tu avance cuando quieras. Podrás seguir editando después.</p>
+          <button className="button editor-publish" type="submit" formAction={publish}><FiEye /> {event.status === "PUBLISHED" ? "Guardar y actualizar invitación" : "Publicar mi invitación"}</button></div>
         </form>
       </section>
       <aside className="editor-preview-panel"><div className="editor-preview-title"><div><span>VISTA PREVIA</span><small>Se actualiza al editar</small></div><span className="preview-draft-chip">{event.status === "PUBLISHED" ? <><FiCheck /> PUBLICADA</> : <><FiLock /> PRIVADA</>}</span></div>
@@ -130,21 +147,27 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
   </main>;
 }
 
-function CloudinaryImageUpload({ eventId, images, multiple, onChange }: {
+function CloudinaryImageUpload({ eventId, images, multiple, imageUploads, onUpload, onChange }: {
   eventId: string;
   images: string[];
   multiple: boolean;
+  imageUploads: number;
+  onUpload: () => void;
   onChange: (images: string[]) => void;
 }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const maxImages = multiple ? 12 : 1;
+  const maxImages = multiple ? Math.max(0, ACCOUNT_LIMITS.imagesPerInvitation - imageUploads) : 1;
 
   async function uploadFiles(files: File[]) {
     setError("");
-    const remaining = multiple ? maxImages - images.length : 1;
+    if (imageUploads >= ACCOUNT_LIMITS.imagesPerInvitation) {
+      setError(`Ya usaste las ${ACCOUNT_LIMITS.imagesPerInvitation} imágenes disponibles para esta invitación.`);
+      return;
+    }
+    const remaining = multiple ? Math.min(maxImages, ACCOUNT_LIMITS.imagesPerInvitation - images.length) : 1;
     if (remaining <= 0) {
-      setError(multiple ? "La galería ya tiene el máximo de 12 fotos." : "Quita la imagen actual antes de subir otra.");
+      setError(imageUploads >= ACCOUNT_LIMITS.imagesPerInvitation ? `Ya se usaron las ${ACCOUNT_LIMITS.imagesPerInvitation} subidas permitidas para esta invitación.` : multiple ? "La galería ya tiene el máximo de fotos." : "Quita la imagen actual antes de subir otra.");
       return;
     }
     const selected = files.slice(0, remaining);
@@ -157,33 +180,16 @@ function CloudinaryImageUpload({ eventId, images, multiple, onChange }: {
         if (!file.type.startsWith("image/") || !["image/jpeg", "image/png", "image/webp", "image/avif"].includes(file.type)) {
           throw new Error("Usa imágenes JPG, PNG, WebP o AVIF.");
         }
-        if (file.size > 10 * 1024 * 1024) throw new Error("Cada imagen debe pesar 10 MB o menos.");
-
-        const signingResponse = await fetch("/api/cloudinary/signature", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ eventId }),
-        });
-        const signing = await signingResponse.json() as {
-          cloudName?: string; apiKey?: string; timestamp?: number; folder?: string; publicId?: string; uploadPreset?: string; signature?: string; error?: string;
-        };
-        if (!signingResponse.ok || !signing.cloudName || !signing.apiKey || !signing.timestamp || !signing.folder || !signing.publicId || !signing.uploadPreset || !signing.signature) {
-          throw new Error(signing.error || "No pudimos preparar la subida.");
-        }
-
-        const form = new FormData();
-        form.set("file", file);
-        form.set("api_key", signing.apiKey);
-        form.set("timestamp", String(signing.timestamp));
-        form.set("folder", signing.folder);
-        form.set("public_id", signing.publicId);
-        form.set("upload_preset", signing.uploadPreset);
-        form.set("signature", signing.signature);
-        const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(signing.cloudName)}/image/upload`, { method: "POST", body: form });
-        const uploaded = await uploadResponse.json() as { secure_url?: string; error?: { message?: string } };
-        if (!uploadResponse.ok || !uploaded.secure_url) throw new Error(uploaded.error?.message || "Cloudinary no pudo subir esta imagen.");
-        nextImages.push(uploaded.secure_url.replace("/image/upload/", "/image/upload/f_auto,q_auto/"));
-        onChange(nextImages.slice(0, maxImages));
+        if (file.size > ACCOUNT_LIMITS.imageSizeBytes) throw new Error(`Cada imagen debe pesar ${ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB o menos.`);
+        const uploadForm = new FormData();
+        uploadForm.set("file", file);
+        uploadForm.set("eventId", eventId);
+        const uploadResponse = await fetch("/api/cloudinary/upload", { method: "POST", body: uploadForm });
+        const uploaded = await uploadResponse.json() as { secureUrl?: string; error?: string };
+        if (!uploadResponse.ok || !uploaded.secureUrl) throw new Error(uploaded.error || "No pudimos subir esta imagen.");
+        nextImages.push(uploaded.secureUrl);
+        onChange(nextImages.slice(0, ACCOUNT_LIMITS.imagesPerInvitation));
+        onUpload();
       }
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : "No pudimos subir la imagen.");
@@ -201,7 +207,7 @@ function CloudinaryImageUpload({ eventId, images, multiple, onChange }: {
         if (files.length) void uploadFiles(files);
       }} />
     </label>
-    <small className="image-upload-help">JPG, PNG, WebP o AVIF · máximo 10 MB{multiple ? ` por foto · ${images.length}/12 fotos` : ""}</small>
+    <small className="image-upload-help">JPG, PNG, WebP o AVIF · máximo {ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB por imagen · {Math.max(0, ACCOUNT_LIMITS.imagesPerInvitation - imageUploads)} subidas disponibles</small>
     {error && <p className="image-upload-error" role="alert">{error}</p>}
     {images.length > 0 && <div className="image-upload-previews">{images.map((url, index) => <div className="image-upload-preview" key={`${url}-${index}`}>
       <Image src={url} alt={`Imagen ${index + 1}`} width={160} height={160} unoptimized />

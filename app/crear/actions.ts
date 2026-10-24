@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
+import { ACCOUNT_LIMITS } from "@/lib/limits";
 
 const eventTypes = new Set([
   "wedding",
@@ -28,14 +29,17 @@ export async function createEvent(formData: FormData) {
   const eventDate = dateValue ? new Date(`${dateValue}T12:00:00.000Z`) : null;
   if (eventDate && Number.isNaN(eventDate.getTime())) redirect("/crear?error=fecha");
 
-  await prisma.event.create({
-    data: {
-      ownerId: session.user.id,
-      name,
-      eventType,
-      eventDate,
-    },
+  const created = await prisma.$transaction(async (tx) => {
+    const slot = await tx.user.updateMany({
+      where: { id: session.user.id, invitationCount: { lt: ACCOUNT_LIMITS.invitations } },
+      data: { invitationCount: { increment: 1 } },
+    });
+    if (!slot.count) return false;
+
+    await tx.event.create({ data: { ownerId: session.user.id, name, eventType, eventDate } });
+    return true;
   });
+  if (!created) redirect("/crear?error=limite");
 
   redirect("/dashboard");
 }

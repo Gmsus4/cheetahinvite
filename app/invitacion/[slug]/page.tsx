@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { InvitationCanvas, type InviteSection } from "@/components/dashboard/EventEditor";
 import { prisma } from "@/prisma";
 
-type InvitationPageProps = PageProps<"/invitacion/[slug]">;
+type InvitationPageProps = Pick<PageProps<"/invitacion/[slug]">, "params">;
 
 export const metadata: Metadata = {
   title: "Invitación digital | Cheetah Invite",

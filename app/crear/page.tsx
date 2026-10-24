@@ -5,6 +5,8 @@ import { FiArrowLeft, FiArrowUpRight, FiCalendar, FiGift } from "react-icons/fi"
 import { auth } from "@/auth";
 import { BrandEmblem } from "@/components/BrandEmblem";
 import { createEvent } from "./actions";
+import { prisma } from "@/prisma";
+import { ACCOUNT_LIMITS } from "@/lib/limits";
 
 export const metadata: Metadata = {
   title: "Nueva invitación | Cheetah Invite",
@@ -20,6 +22,8 @@ export default async function CreateEventPage({
   const params = await searchParams;
   const initialType = typeof params.tipo === "string" ? params.tipo : "";
   const hasError = typeof params.error === "string";
+  const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { invitationCount: true } });
+  const invitationLimitReached = (user?.invitationCount ?? 0) >= ACCOUNT_LIMITS.invitations;
 
   return (
     <main className="create-event-page">
@@ -36,6 +40,9 @@ export default async function CreateEventPage({
         <p className="dashboard-eyebrow">UN NUEVO MOMENTO PARA CELEBRAR</p>
         <h1>Empecemos con lo esencial</h1>
         <p className="create-event-intro">Guarda estos datos como borrador. Podrás completar y personalizar tu invitación después.</p>
+
+        {invitationLimitReached ? <div className="create-event-limit" role="status"><strong>Ya usaste tus {ACCOUNT_LIMITS.invitations} invitaciones disponibles.</strong><p>Por ahora, cada cuenta puede crear hasta {ACCOUNT_LIMITS.invitations} invitaciones.</p><Link className="button" href="/dashboard">Volver a mi panel</Link></div> : <>
+        <p className="create-event-quota">Invitación {(user?.invitationCount ?? 0) + 1} de {ACCOUNT_LIMITS.invitations}</p>
 
         <form action={createEvent} className="create-event-form">
           <label htmlFor="event-name">Nombre del evento</label>
@@ -55,9 +62,10 @@ export default async function CreateEventPage({
           <label htmlFor="event-date">Fecha del evento <span>(opcional)</span></label>
           <div className="create-event-date-input"><FiCalendar aria-hidden="true" /><input id="event-date" name="eventDate" type="date" /></div>
 
-          {hasError && <p className="create-event-error" role="alert">Revisa los datos e inténtalo de nuevo.</p>}
+          {hasError && <p className="create-event-error" role="alert">{params.error === "limite" ? `Ya alcanzaste el máximo de ${ACCOUNT_LIMITS.invitations} invitaciones.` : "Revisa los datos e inténtalo de nuevo."}</p>}
           <button className="button create-event-submit" type="submit">Guardar borrador <FiArrowUpRight aria-hidden="true" /></button>
         </form>
+        </>}
         <p className="create-event-footnote">Todavía no se publica ni se cobra nada.</p>
       </section>
     </main>

@@ -8,15 +8,16 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  passwordHash  String?
-  accounts      Account[]
-  sessions      Session[]
-  events        Event[]
+  id              String    @id @default(cuid())
+  name            String?
+  email           String?   @unique
+  emailVerified   DateTime?
+  image           String?
+  passwordHash    String?
+  invitationCount Int       @default(0)
+  accounts        Account[]
+  sessions        Session[]
+  events          Event[]
 }
 
 enum EventStatus {
@@ -28,24 +29,25 @@ enum EventStatus {
 }
 
 model Event {
-  id        String      @id @default(cuid())
-  ownerId   String
-  name      String
-  eventType String
-  hostNames String?
-  venue     String?
-  address   String?
-  message   String?     @db.Text
-  imageUrl  String?     @db.Text
-  accent    String      @default("#E9560A")
-  sections  Json        @default("[]")
-  slug      String?     @unique
-  status    EventStatus @default(DRAFT)
-  eventDate DateTime?
-  expiresAt DateTime?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  owner     User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  id           String      @id @default(cuid())
+  ownerId      String
+  name         String
+  eventType    String
+  hostNames    String?
+  venue        String?
+  address      String?
+  message      String?     @db.Text
+  imageUrl     String?     @db.Text
+  imageUploads Int         @default(0)
+  accent       String      @default("#E9560A")
+  sections     Json        @default("[]")
+  slug         String?     @unique
+  status       EventStatus @default(DRAFT)
+  eventDate    DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  owner        User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@index([ownerId, status])
 }
