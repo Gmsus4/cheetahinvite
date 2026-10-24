@@ -1,16 +1,21 @@
 "use client";
 
 import Image from "next/image";
+import { CustomInvitationLinkField } from "./CustomInvitationLinkField";
+import { invitationPath, normalizeInvitationSlug } from "@/lib/invitation-url";
+import { InvitationLivePreview } from "./InvitationLivePreview";
 import Link from "next/link";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 import { FiArrowDown, FiArrowLeft, FiArrowUp, FiCalendar, FiCheck, FiChevronLeft, FiChevronRight, FiClock, FiEye, FiGift, FiHeart, FiImage, FiLock, FiMapPin, FiMusic, FiPlus, FiSave, FiTag, FiTrash2, FiUsers, FiX } from "react-icons/fi";
-import { publishEvent, saveEventForPreview, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
+import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 import { BrandEmblem } from "@/components/BrandEmblem";
+import { invitationPriceLabel, isInvitationPublished } from "@/lib/invitation-payment";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
+import { getInvitationFont, invitationFonts, recommendedInvitationFonts, type FontRole } from "@/lib/invitation-fonts";
 
 type EventData = {
-  id: string; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED"; slug: string | null;
-  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; imageUploads: number; accent: string; sections: unknown;
+  id: string; ownerId: string; customSlug: string | null; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; paidAt: Date | null; expiresAt: Date | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED"; slug: string | null;
+  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; imageUploads: number; accent: string; typography: string; bodyTypography: string; sections: unknown;
 };
 
 export type SectionType = "story" | "ceremony" | "reception" | "program" | "parents" | "dress_code" | "gifts" | "rsvp" | "gallery" | "music" | "custom";
@@ -40,6 +45,7 @@ const dateInputValue = (date: Date | null) => date ? new Date(date).toISOString(
 
 export function EventEditor({ event, saved, error, published }: { event: EventData; saved: boolean; error: string; published: boolean }) {
   const [name, setName] = useState(event.name);
+  const [customSlug, setCustomSlug] = useState(event.customSlug ?? "");
   const [eventType, setEventType] = useState(event.eventType);
   const [eventDate, setEventDate] = useState(dateInputValue(event.eventDate));
   const [eventTime, setEventTime] = useState(event.eventTime ?? "");
@@ -50,18 +56,28 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
   const [imageUrl, setImageUrl] = useState(event.imageUrl ?? "");
   const [imageUploads, setImageUploads] = useState(event.imageUploads);
   const [accent, setAccent] = useState(event.accent || "#E9560A");
+  const [typography, setTypography] = useState(event.typography || "default");
+  const [bodyTypography, setBodyTypography] = useState(event.bodyTypography || "inter");
   const [sections, setSections] = useState<InviteSection[]>(() => {
     if (Array.isArray(event.sections)) return event.sections as InviteSection[];
     return ["story", "ceremony", "reception", "dress_code", "gifts", "rsvp"].map((type) => makeSection(type as SectionType));
   });
+  const isPublished = isInvitationPublished(event);
   const save = updateEvent.bind(null, event.id);
-  const saveAndPreview = saveEventForPreview.bind(null, event.id);
+  const [previewExpanded, setPreviewExpanded] = useState(false);
+  const closePreview = useCallback(() => setPreviewExpanded(false), []);
   const publish = publishEvent.bind(null, event.id);
+  const snapshot = JSON.stringify([name, eventType, eventDate, eventTime, hostNames, venue, address, message, imageUrl, accent, typography, bodyTypography, sections, customSlug]);
+  const initialSnapshot = JSON.stringify([event.name, event.eventType, dateInputValue(event.eventDate), event.eventTime ?? "", event.hostNames ?? "", event.venue ?? "", event.address ?? "", event.message ?? "", event.imageUrl ?? "", event.accent || "#E9560A", event.typography || "default", event.bodyTypography || "inter", Array.isArray(event.sections) ? event.sections : ["story", "ceremony", "reception", "dress_code", "gifts", "rsvp"].map((type) => makeSection(type as SectionType)), event.customSlug ?? ""]);
+  const [, publishAction, publishing] = useActionState(async (_: string, formData: FormData) => { await publish(formData); return ""; }, "");
   const [state, formAction, pending] = useActionState(async (_: string, formData: FormData) => {
+    const submittedSnapshot = snapshot;
     await save(formData);
-    return "";
+    return submittedSnapshot;
   }, "");
 
+  const dirty = snapshot !== (state || initialSnapshot);
+  const busy = pending || publishing;
   const prettyDate = eventDate ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${eventDate}T12:00:00Z`)) : "La fecha";
   const updateSection = (id: string, changes: Partial<InviteSection>) => setSections((current) => current.map((section) => section.id === id ? { ...section, ...changes } : section));
   const moveSection = (index: number, direction: -1 | 1) => setSections((current) => {
@@ -79,18 +95,19 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
     </header>
     <div className="editor-layout">
       <section className="editor-form-panel">
-        <div className="editor-heading"><p className="dashboard-eyebrow">TU INVITACIÓN</p><h1>Completa los detalles</h1><p>Empieza con la información principal. Después puedes agregar fotos y detalles opcionales.</p><div className="editor-draft-reminder">{event.status === "PUBLISHED" ? <><FiCheck /> Invitación publicada</> : <><FiLock /> Tus cambios son privados hasta que publiques</>}</div></div>
+        <div className="editor-heading"><p className="dashboard-eyebrow">TU INVITACIÓN</p><h1>Completa los detalles</h1><p>Empieza con la información principal. Después puedes agregar fotos y detalles opcionales.</p><div className="editor-draft-reminder">{isPublished ? <><FiCheck /> Invitación publicada</> : <><FiLock /> Tu invitación es privada hasta confirmar el pago</>}</div></div>
         <nav className="editor-step-nav" aria-label="Secciones del editor">
           <a href="#event-details"><span>1</span> Datos</a><a href="#event-cover"><span>2</span> Portada</a><a href="#event-extras"><span>3</span> Detalles opcionales</a>
         </nav>
-        {(saved || published || state) && <p className="editor-success" role="status"><FiCheck /> {published ? "Tu invitación ya está publicada y lista para compartir." : "Cambios guardados correctamente."}</p>}
-        {error && <p className="editor-error" role="alert">{error === "imagen" ? "Usa una URL válida que comience con http:// o https://." : "Revisa los campos e inténtalo de nuevo."}</p>}
+        {!dirty && (saved || (published && isPublished) || state) && <p className="editor-success" role="status"><FiCheck /> {published && isPublished ? "Tu invitación ya está publicada y lista para compartir." : "Cambios guardados correctamente."}</p>}
+        {error && <p className="editor-error" role="alert">{error === "enlace-ocupado" ? "Ya tienes otra invitación con ese enlace. Elige otro nombre." : error === "enlace" ? "El enlace debe tener entre 2 y 80 caracteres, con letras, números y guiones." : error === "imagen" ? "Usa una URL válida que comience con http:// o https://." : "Revisa los campos e inténtalo de nuevo."}</p>}
         <form id="event-editor-form" action={formAction} className="editor-form">
           <input type="hidden" name="sections" value={JSON.stringify(sections)} />
           <section className="editor-group" id="event-details">
             <div className="editor-group-heading"><span className="editor-group-number">1</span><div><h2>Datos de la celebración</h2><p>Esta información aparecerá en tu invitación.</p></div></div>
             <div className="editor-group-fields">
               <div className="editor-field"><label htmlFor="event-name">¿Cómo se llama tu evento? <span>(obligatorio)</span></label><input id="event-name" name="name" required minLength={2} maxLength={100} value={name} onChange={e => setName(e.target.value)} placeholder="Ej. Nuestra boda" /></div>
+              <CustomInvitationLinkField eventId={event.id} ownerId={event.ownerId} value={customSlug} savedValue={event.customSlug} suggestion={normalizeInvitationSlug(hostNames || name).slice(0, 80).replace(/-$/, "")} onChange={setCustomSlug} />
               <div className="editor-field"><label htmlFor="event-type">Tipo de celebración</label><select id="event-type" name="eventType" value={eventType} onChange={e => setEventType(e.target.value)}><option value="wedding">Boda</option><option value="birthday">Cumpleaños</option><option value="graduation">Graduación</option><option value="baby_shower">Baby shower</option><option value="anniversary">Aniversario</option><option value="other">Otro evento</option></select></div>
               <div className="editor-field"><label htmlFor="host-names">¿A quién celebramos? <span>(opcional)</span></label><input id="host-names" name="hostNames" placeholder="Ej. Mariana y Andrés" maxLength={120} value={hostNames} onChange={e => setHostNames(e.target.value)} /></div>
               <div className="editor-field"><label htmlFor="event-date">Fecha <span>(opcional)</span></label><div className="editor-input-icon"><FiCalendar /><input id="event-date" name="eventDate" type="date" value={eventDate} onChange={e => { setEventDate(e.target.value); if (!e.target.value) setEventTime(""); }} /></div></div>
@@ -106,6 +123,9 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
               <div className="editor-field"><label>Foto de portada <span>(opcional)</span></label><input type="hidden" name="imageUrl" value={imageUrl} /><CloudinaryImageUpload eventId={event.id} images={imageUrl ? [imageUrl] : []} multiple={false} imageUploads={imageUploads} onUpload={() => setImageUploads((count) => count + 1)} onChange={(images) => setImageUrl(images[0] ?? "")} /></div>
               <p className="editor-field-help editor-image-quota">{imageUploads} de {ACCOUNT_LIMITS.imagesPerInvitation} imágenes subidas. Las imágenes reemplazadas también cuentan.</p>
               <div className="editor-field editor-color-field"><label htmlFor="accent">Color principal</label><div><input id="accent" name="accent" type="color" value={accent} onChange={e => setAccent(e.target.value)} /><span>{accent.toUpperCase()}</span></div><small className="editor-field-help">Se usará en algunos detalles de diseño.</small></div>
+              <InvitationFontSelect role="heading" eventType={eventType} value={typography} onChange={setTypography} />
+              <InvitationFontSelect role="body" eventType={eventType} value={bodyTypography} onChange={setBodyTypography} />
+              <div className="editor-font-sample editor-group-wide" style={{ fontFamily: getInvitationFont(typography).family }}>{hostNames || name || "Tu celebración"}<span style={{ fontFamily: getInvitationFont(bodyTypography).family }}>Nos encantará compartir este día contigo. Una celebración para recordar.</span></div>
             </div>
           </section>
           <section className="editor-sections-field" id="event-extras">
@@ -136,17 +156,39 @@ export function EventEditor({ event, saved, error, published }: { event: EventDa
             </div>
             <div className="editor-add-section"><label htmlFor="add-section">Agregar otro detalle</label><select id="add-section" value="" onChange={(e) => { const type = e.target.value as SectionType; if (type && sections.length < 12) setSections((current) => [...current, makeSection(type, crypto.randomUUID())]); e.currentTarget.value = ""; }}><option value="">Elige qué quieres agregar…</option>{sectionOptions.map((option) => <option key={option.type} value={option.type}>{option.title}</option>)}</select><small>Elige una opción para agregarla a tu invitación. Puedes incluir hasta 12.</small></div>
           </section>
-          <div className="editor-form-actions"><button className="button editor-save" type="submit" disabled={pending}><FiSave /> {pending ? "Guardando…" : "Guardar cambios"}</button><p>Guarda tu avance cuando quieras. Podrás seguir editando después.</p>
-          <button className="button editor-publish" type="submit" formAction={publish}><FiEye /> {event.status === "PUBLISHED" ? "Guardar y actualizar invitación" : "Publicar mi invitación"}</button></div>
+          <div className="editor-form-actions">
+            <p className={`editor-save-status${dirty ? " is-dirty" : ""}`} role="status" aria-live="polite">{busy ? "Guardando…" : dirty ? "Cambios sin guardar" : state || saved || published ? "Cambios guardados" : "Todo está al día"}</p>
+            <button className={`button editor-save${isPublished ? " is-primary" : ""}`} type="submit" disabled={busy || !dirty}><FiSave /> {pending ? "Guardando…" : isPublished ? "Guardar cambios" : "Guardar borrador"}</button>
+            {!isPublished && <button className="button editor-publish" type="submit" formAction={publishAction} disabled={busy}><FiEye /> {publishing ? "Guardando…" : event.paidAt ? "Revisar publicación" : `Pagar y publicar · ${invitationPriceLabel} MXN`}</button>}
+            <p>{isPublished ? "Al guardar, los cambios se verán en tu enlace público." : "Puedes editar y previsualizar gratis. El enlace se habilita después de confirmar el pago."}</p>
+          </div>
         </form>
       </section>
-      <aside className="editor-preview-panel"><div className="editor-preview-title"><div><span>VISTA PREVIA</span><small>Se actualiza al editar</small></div><span className="preview-draft-chip">{event.status === "PUBLISHED" ? <><FiCheck /> PUBLICADA</> : <><FiLock /> PRIVADA</>}</span></div>
-        <InvitationCanvas eventType={eventType} name={name} hostNames={hostNames} date={prettyDate} eventDateKey={eventDate} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} sections={sections} />
-        <button className="editor-open-preview" type="submit" form="event-editor-form" formAction={saveAndPreview}><FiEye /> Guardar y ver invitación completa</button>
-        <p className="editor-preview-note">{event.status === "PUBLISHED" ? <><FiCheck /> Guardaremos tus cambios y podrás ver la versión actualizada de tu enlace público.</> : <><FiLock /> Guardaremos tus cambios y abriremos la vista privada. No tiene un enlace público.</>}</p>
+      <aside className="editor-preview-panel"><div className="editor-preview-title"><div><span>VISTA PREVIA</span><small>Se actualiza al editar</small></div><span className="preview-draft-chip">{isPublished ? <><FiCheck /> PUBLICADA</> : <><FiLock /> PRIVADA</>}</span></div>
+        {!event.paidAt && <div className="editor-payment-notice"><FiLock /><div><strong>Pendiente de pago</strong><p>{invitationPriceLabel} MXN por evento · 12 meses activa. Tu enlace permanece privado hasta confirmar el pago.</p><Link href={`/dashboard/eventos/${event.id}/pago`}>Ver detalles del pago</Link></div></div>}
+        <InvitationLivePreview expanded={previewExpanded} onClose={closePreview}><InvitationCanvas eventType={eventType} name={name} hostNames={hostNames} date={prettyDate} eventDateKey={eventDate} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} sections={sections} full /></InvitationLivePreview>
+        <button className="editor-open-preview" type="button" onClick={() => setPreviewExpanded(true)}><FiEye /> Ver invitación completa</button>
+        <p className="editor-preview-note">La vista previa incluye tus cambios actuales. Abrirla no guarda ni publica.</p>
+        {isPublished && event.slug && <>
+          <Link className="editor-public-invitation" href={invitationPath(event)!} target="_blank" rel="noopener noreferrer"><FiEye /> Abrir invitación pública ↗</Link>
+          {dirty && <p className="editor-preview-note">El enlace público muestra la última versión guardada. Guarda tus cambios para actualizarla.</p>}
+        </>}
       </aside>
     </div>
   </main>;
+}
+
+function InvitationFontSelect({ role, eventType, value, onChange }: { role: FontRole; eventType: string; value: string; onChange: (value: string) => void }) {
+  const recommended = recommendedInvitationFonts(eventType, role);
+  const id = role === "heading" ? "typography" : "bodyTypography";
+  return <div className="editor-field editor-typography-field">
+    <label htmlFor={id}>{role === "heading" ? "Tipografía de los títulos" : "Tipografía de los textos"}</label>
+    <select id={id} name={id} value={value} onChange={(event) => onChange(event.target.value)} style={{ fontFamily: getInvitationFont(value).family }}>
+      <optgroup label="Recomendadas para este evento">{recommended.map((fontId) => { const font = getInvitationFont(fontId); return <option key={font.id} value={font.id} style={{ fontFamily: font.family }}>{font.label}</option>; })}</optgroup>
+      <optgroup label="Más tipografías">{invitationFonts.filter((font) => !recommended.includes(font.id)).map((font) => <option key={font.id} value={font.id} style={{ fontFamily: font.family }}>{font.label}</option>)}</optgroup>
+    </select>
+    <small className="editor-field-help">{role === "heading" ? "Para nombres y títulos de la invitación." : "Para descripciones, horarios, indicaciones y demás textos."} Todas las fuentes están disponibles; las recomendaciones cambian según el evento.</small>
+  </div>;
 }
 
 function CloudinaryImageUpload({ eventId, images, multiple, imageUploads, onUpload, onChange }: {
@@ -228,18 +270,19 @@ function GalleryCarousel({ images, title }: { images: string[]; title: string })
 
   useEffect(() => {
     if (!lightboxOpen) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const ownerDocument = closeButtonRef.current?.ownerDocument ?? document;
+    const previousOverflow = ownerDocument.body.style.overflow;
+    ownerDocument.body.style.overflow = "hidden";
     closeButtonRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setLightboxOpen(false);
       if (event.key === "ArrowLeft" && images.length > 1) setActiveIndex((current) => (current - 1 + images.length) % images.length);
       if (event.key === "ArrowRight" && images.length > 1) setActiveIndex((current) => (current + 1) % images.length);
     };
-    window.addEventListener("keydown", onKeyDown);
+    ownerDocument.addEventListener("keydown", onKeyDown);
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = previousOverflow;
+      ownerDocument.removeEventListener("keydown", onKeyDown);
+      ownerDocument.body.style.overflow = previousOverflow;
       openButtonRef.current?.focus();
     };
   }, [lightboxOpen, images.length]);
@@ -291,37 +334,22 @@ function parseProgramEntry(line: string, index: number) {
   return { id: `${index}-${cleaned}`, time: "", description: cleaned };
 }
 
-export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, accent, sections, full = false }: {
-  eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; accent: string; sections: InviteSection[]; full?: boolean;
+export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, accent, typography = "default", bodyTypography = "inter", sections }: {
+  eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; accent: string; typography?: string; bodyTypography?: string; sections: InviteSection[]; full?: boolean;
 }) {
-  if (full) return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} sections={sections} />;
-  const visibleSections = sections.filter((section) => section.enabled && (section.content || section.detail || section.link || section.imageUrl || section.imageUrls?.length));
-  return <article className={`invitation-preview${full ? " invitation-preview-full" : ""}`} style={{ "--preview-accent": accent, "--invite-accent": accent } as React.CSSProperties}>
-    <div className="invitation-preview-cover" style={imageUrl ? { backgroundImage: `linear-gradient(180deg, #0b13201a, #0b132099), url("${imageUrl.replaceAll('"', '')}")` } : undefined}>
-      {!imageUrl && <span className="preview-cover-mark">✦</span>}
-      <span className="preview-type">{eventLabels[eventType] ?? "Una celebración"}</span>
-      <div className="preview-cover-title"><span>TE INVITAMOS A CELEBRAR</span><h2>{hostNames || name || "Tus nombres aquí"}</h2><p>{date}</p></div>
-    </div>
-    <div className="invitation-preview-copy"><span className="preview-overline">UN DÍA PARA RECORDAR</span><h2>{hostNames || "Tus nombres aquí"}</h2><p className="preview-name">{name || "Una celebración especial"}</p><span className="preview-divider" />
-      <p className="preview-date"><FiCalendar /> {date}</p>{venue && <p className="preview-place"><FiMapPin /> {venue}</p>}{address && <p className="preview-address">{address}</p>}
-      {message && <blockquote>{message}</blockquote>}
-    </div>
-    {visibleSections.map((section) => <div className={`invitation-preview-section preview-section-${section.type}`} key={section.id}>
-      {section.imageUrl && <div className="preview-section-image" style={{ backgroundImage: `url("${section.imageUrl.replaceAll('"', '')}")` }} />}
-      <span className="preview-section-mark">{sectionIcon(section.type)}</span><h3>{section.title || "Tu sección"}</h3>{section.detail && <p className="preview-section-detail">{section.detail}</p>}{section.content && <p>{section.content}</p>}{section.link && <span className="preview-section-link">{section.type === "rsvp" ? "Confirmar asistencia" : section.type === "gifts" ? "Ver mesa de regalos" : section.type === "music" ? "Escuchar música" : "Ver ubicación"}</span>}
-    </div>)}
-    <div className="editor-countdown-preview"><span>CUENTA REGRESIVA</span>{eventDateKey && eventTime ? <CountdownTimer date={eventDateKey} time={eventTime} /> : <p>Elige la fecha y hora para activar el contador.</p>}</div>
-    <footer className="invitation-preview-signoff"><span>CON CARIÑO</span><strong>{hostNames || name || "Nos encantará verte"}</strong><i>✦</i></footer>
-  </article>;
+  return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} sections={sections} />;
 }
 
-function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eventTime, venue, address, message, imageUrl, accent, sections }: {
-  eventType: string; name: string; hostNames: string; date: string; eventDateKey: string; eventTime: string; venue: string; address: string; message: string; imageUrl: string; accent: string; sections: InviteSection[];
+function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eventTime, venue, address, message, imageUrl, accent, typography = "default", bodyTypography = "inter", sections }: {
+  eventType: string; name: string; hostNames: string; date: string; eventDateKey: string; eventTime: string; venue: string; address: string; message: string; imageUrl: string; accent: string; typography?: string; bodyTypography?: string; sections: InviteSection[];
 }) {
   const visibleSections = sections.filter((section) => section.enabled && (section.content || section.detail || section.link || section.imageUrl || section.imageUrls?.length));
+  const dressCode = visibleSections.find((section) => section.type === "dress_code");
+  const confirmation = visibleSections.find((section) => section.type === "rsvp");
+  const pairedSections = dressCode && confirmation ? visibleSections.filter((section) => section.id === dressCode.id || section.id === confirmation.id) : [];
   const title = hostNames || name || "Una celebración especial";
   const dateAndTime = eventTime ? `${date} · ${formatEventTime(eventTime)}` : date;
-  return <article className={`invite-website${eventType === "wedding" ? " invite-wedding-editorial" : ""}`} style={{ "--invite-accent": accent } as React.CSSProperties}>
+  return <article className={`invite-website${eventType === "wedding" ? " invite-wedding-editorial" : ""}`} data-typography={typography} data-body-typography={bodyTypography} style={{ "--invite-accent": accent, "--invite-heading-font": getInvitationFont(typography).family, "--invite-body-font": getInvitationFont(bodyTypography).family } as React.CSSProperties}>
     <section className={`invite-website-hero${imageUrl ? " has-cover-image" : ""}`} style={imageUrl ? { backgroundImage: `linear-gradient(90deg,#10100fd9 0%,#10100f66 58%,#10100f12 100%),url("${imageUrl.replaceAll('"', '')}")` } : undefined}>
       <div className="invite-hero-glow" aria-hidden="true" />
       <div className="invite-hero-content"><span className="invite-hero-kicker">{eventType === "wedding" ? "NOS CASAMOS" : "UNA FECHA · UN RECUERDO · UNA CELEBRACIÓN"}</span><span className="invite-hero-rule" /><p className="invite-hero-intro">Con mucha ilusión te invitamos a celebrar</p><h1>{title}</h1><p className="invite-hero-event-name">{name || eventLabels[eventType] || "Un día muy especial"}</p><div className="invite-hero-date"><FiCalendar /> {dateAndTime}</div><a className="invite-hero-button" href="#invite-details">Acompáñanos <FiArrowDown /></a></div>
@@ -329,7 +357,13 @@ function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eve
     </section>
     <section className="invite-welcome" id="invite-details"><span className="invite-section-kicker">NOS ENCANTARÍA COMPARTIRLO CONTIGO</span><span className="invite-ornament">✦</span><h2>{eventType === "wedding" ? "Bienvenidos" : "Un momento para celebrar"}</h2><p>{message || "Hay días que se vuelven inolvidables cuando los compartimos con las personas que queremos. Nos encantará contar contigo."}</p><strong>{title}</strong></section>
     {(venue || address) && <section className="invite-main-location"><div className="invite-location-photo" style={imageUrl ? { backgroundImage: `url("${imageUrl.replaceAll('"', '')}")` } : undefined}><span className="invite-photo-caption">EL LUGAR DE NUESTRO ENCUENTRO</span></div><div className="invite-location-main-copy"><span className="invite-section-kicker">GUARDA LA FECHA</span><h2>{venue || "El lugar de la celebración"}</h2><p className="invite-location-address">{address || "Pronto compartiremos la ubicación"}</p><span className="invite-static-link"><FiMapPin /> Ver ubicación al publicar</span></div></section>}
-    {visibleSections.length > 0 && <section className="invite-extra-sections">{visibleSections.map((section, index) => <InviteWebsiteSection key={section.id} section={section} index={index} />)}</section>}
+    {visibleSections.length > 0 && <section className="invite-extra-sections">{visibleSections.map((section, index) => {
+      if (pairedSections.some((paired) => paired.id === section.id)) {
+        if (section.id !== pairedSections[0].id) return null;
+        return <div className="invite-practical-details" key={section.id}>{pairedSections.map((paired) => <InviteWebsiteSection key={paired.id} section={paired} index={visibleSections.indexOf(paired)} />)}</div>;
+      }
+      return <InviteWebsiteSection key={section.id} section={section} index={index} />;
+    })}</section>}
     <section className="invite-countdown-panel"><span className="invite-section-kicker">RESERVA LA FECHA</span><h2>{dateAndTime}</h2>{eventDateKey && eventTime ? <CountdownTimer date={eventDateKey} time={eventTime} /> : <p>Nos encantará celebrar contigo</p>}<span className="invite-countdown-decoration">✦</span></section>
     <footer className="invite-website-footer"><span className="invite-footer-ornament">✦</span><p>Gracias por ser parte de este momento</p><strong>{title}</strong><small>HECHO CON CARIÑO PARA CELEBRAR</small></footer>
   </article>;

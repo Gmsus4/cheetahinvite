@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { invitationPath } from "@/lib/invitation-url";
 import { InvitationCanvas, type InviteSection } from "@/components/dashboard/EventEditor";
 import { prisma } from "@/prisma";
 
@@ -22,9 +23,10 @@ async function InvitationData({ params }: InvitationPageProps) {
   const { slug } = await params;
   await connection();
   const event = await prisma.event.findFirst({
-    where: { slug, status: "PUBLISHED", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
+    where: { slug, status: "PUBLISHED", paidAt: { not: null }, expiresAt: { gt: new Date() } },
   });
   if (!event) notFound();
+  if (event.customSlug) redirect(invitationPath(event)!);
 
   const date = event.eventDate
     ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(event.eventDate)
@@ -43,6 +45,8 @@ async function InvitationData({ params }: InvitationPageProps) {
       message={event.message ?? ""}
       imageUrl={event.imageUrl ?? ""}
       accent={event.accent}
+      typography={event.typography}
+      bodyTypography={event.bodyTypography}
       sections={sections}
       full
     />

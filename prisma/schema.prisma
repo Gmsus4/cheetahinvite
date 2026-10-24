@@ -40,17 +40,24 @@ model Event {
   imageUrl     String?     @db.Text
   imageUploads Int         @default(0)
   accent       String      @default("#E9560A")
+  typography   String      @default("default")
+  bodyTypography String    @default("inter")
   sections     Json        @default("[]")
   slug         String?     @unique
+  customSlug   String?     @db.VarChar(80)
   status       EventStatus @default(DRAFT)
   eventDate    DateTime?
   eventTime    String?     @db.VarChar(5)
   expiresAt    DateTime?
+  paidAt       DateTime?
+  stripeCheckoutSessionId String? @unique
+  stripePaymentIntentId String? @unique
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   owner        User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@index([ownerId, status])
+  @@unique([ownerId, customSlug])
 }
 
 model Account {

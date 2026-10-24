@@ -22,6 +22,9 @@ export default function DashboardPage() {
 
 async function DashboardData() {
   await connection();
+  // This clock is read on the server after opting into request-time rendering.
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
   const session = await auth();
   const user = session?.user;
 
@@ -39,7 +42,10 @@ async function DashboardData() {
         status: true,
         eventDate: true,
         expiresAt: true,
+        paidAt: true,
         slug: true,
+        ownerId: true,
+        customSlug: true,
         updatedAt: true,
       },
     }),
@@ -51,6 +57,7 @@ async function DashboardData() {
 
   return (
     <DashboardContent
+      now={now}
       userName={account?.name || user.name || "Usuario"}
       userEmail={account?.email || user.email || ""}
       events={events}

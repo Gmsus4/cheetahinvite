@@ -4,9 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { FiCheck, FiCopy, FiExternalLink } from "react-icons/fi";
 
-export function CopyInvitationLink({ slug }: { slug: string }) {
+export function CopyInvitationLink({ path }: { path: string }) {
   const [copied, setCopied] = useState(false);
-  const path = `/invitacion/${slug}`;
 
   async function copyLink() {
     const url = `${window.location.origin}${path}`;

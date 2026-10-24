@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./invitation-fonts.css";
+import "./wedding-editorial.css";
+import "./event-workspace.css";
+import "./dashboard-workspace.css";
+import "./invitation-sections.css";
 
 export const metadata: Metadata = {
   title: "Cheetah Invite — Invitaciones digitales para celebrar",

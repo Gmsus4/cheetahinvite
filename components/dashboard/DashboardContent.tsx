@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { invitationPath } from "@/lib/invitation-url";
+import { isInvitationPublished } from "@/lib/invitation-payment";
 import {
   FiArrowUpRight,
   FiCalendar,
@@ -15,6 +17,7 @@ import { DashboardSignOut } from "@/components/dashboard/DashboardSignOut";
 import { BrandEmblem } from "@/components/BrandEmblem";
 import { DashboardSectionNav } from "@/components/dashboard/DashboardSectionNav";
 import { CopyInvitationLink } from "@/components/dashboard/CopyInvitationLink";
+import { DeleteInvitationButton } from "@/components/dashboard/DeleteInvitationButton";
 
 type EventStatus = "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED";
 
@@ -26,11 +29,15 @@ type DashboardEvent = {
   status: EventStatus;
   eventDate: Date | null;
   expiresAt: Date | null;
+  paidAt: Date | null;
   slug: string | null;
+  ownerId: string;
+  customSlug: string | null;
   updatedAt: Date;
 };
 
 type DashboardContentProps = {
+  now: number;
   userName: string;
   userEmail: string;
   events: DashboardEvent[];
@@ -72,11 +79,10 @@ function getInitials(name: string) {
     .join("");
 }
 
-export function DashboardContent({ userName, userEmail, events, view = "summary" }: DashboardContentProps) {
+export function DashboardContent({ userName, userEmail, events, now, view = "summary" }: DashboardContentProps) {
   const firstName = userName.trim().split(/\s+/)[0] || "bienvenido";
-  const activeEvents = events.filter((event) => event.status === "PUBLISHED").length;
+  const activeEvents = events.filter((event) => isInvitationPublished(event, new Date(now))).length;
   const drafts = events.filter((event) => event.status === "DRAFT").length;
-  const now = Date.now();
   const soon = now + 30 * 24 * 60 * 60 * 1000;
   const expiring = events.filter(
     (event) =>
@@ -187,7 +193,8 @@ export function DashboardContent({ userName, userEmail, events, view = "summary"
                     </div>
                     <div className="dashboard-event-actions">
                       <Link className="dashboard-event-edit" href={`/dashboard/eventos/${event.id}`} aria-label="Editar invitación" title="Editar invitación"><FiEdit2 aria-hidden="true" /><span>Editar</span></Link>
-                      {event.status === "PUBLISHED" && event.slug && <CopyInvitationLink slug={event.slug} />}
+                      {isInvitationPublished(event, new Date(now)) && event.slug && <CopyInvitationLink path={invitationPath(event)!} />}
+                      <DeleteInvitationButton eventId={event.id} eventName={event.name} />
                     </div>
                   </article>
                 ))}

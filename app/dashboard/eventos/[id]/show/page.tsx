@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { invitationPath } from "@/lib/invitation-url";
 import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { FiArrowLeft, FiEdit2, FiLock } from "react-icons/fi";
+import { isInvitationPublished } from "@/lib/invitation-payment";
 import { auth } from "@/auth";
 import { InvitationCanvas, type InviteSection } from "@/components/dashboard/EventEditor";
 import { prisma } from "@/prisma";
@@ -31,7 +33,7 @@ async function ShowInvitationData({ params }: ShowPageProps) {
     ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(event.eventDate)
     : "La fecha";
   const sections = Array.isArray(event.sections) ? event.sections as InviteSection[] : [];
-  const isPublished = event.status === "PUBLISHED" && (!event.expiresAt || event.expiresAt > new Date()) && Boolean(event.slug);
+  const isPublished = isInvitationPublished(event);
 
   return <main className="show-preview-page">
     <header className="show-preview-toolbar">
@@ -53,10 +55,12 @@ async function ShowInvitationData({ params }: ShowPageProps) {
         message={event.message ?? ""}
         imageUrl={event.imageUrl ?? ""}
         accent={event.accent}
+        typography={event.typography}
+        bodyTypography={event.bodyTypography}
         sections={sections}
         full
       />
     </div>
-    <footer className="show-preview-footer">{isPublished && event.slug ? <><Link href={`/invitacion/${event.slug}`} target="_blank">Abrir invitación pública</Link><span>·</span><span>Comparte el enlace desde tu panel.</span></> : <><FiLock /> Esta página es privada y no tiene enlace para compartir. Publícala desde el editor cuando esté lista.</>}</footer>
+    <footer className="show-preview-footer">{isPublished && event.slug ? <><Link href={invitationPath(event)!} target="_blank">Abrir invitación pública</Link><span>·</span><span>Comparte el enlace desde tu panel.</span></> : <><FiLock /> Esta página es privada y no tiene enlace para compartir. Publícala desde el editor cuando esté lista.</>}</footer>
   </main>;
 }

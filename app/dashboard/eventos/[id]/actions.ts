@@ -5,15 +5,53 @@ import { prisma } from "@/prisma";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
+import { isInvitationFont } from "@/lib/invitation-fonts";
+import { isValidInvitationSlug, normalizeInvitationSlug } from "@/lib/invitation-url";
+
+export async function deleteEvent(eventId: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Tu sesión expiró. Inicia sesión para eliminar la invitación." };
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const deleted = await tx.event.deleteMany({ where: { id: eventId, ownerId: session.user.id } });
+      if (deleted.count) {
+        await tx.user.updateMany({
+          where: { id: session.user.id, invitationCount: { gt: 0 } },
+          data: { invitationCount: { decrement: 1 } },
+        });
+      }
+    });
+  } catch {
+    return { error: "No se pudo eliminar la invitación. Inténtalo de nuevo." };
+  }
+
+  revalidatePath("/dashboard", "layout");
+  revalidatePath("/crear");
+  revalidatePath("/invitacion/[slug]", "page");
+  revalidatePath("/invitacion/[slug]/[customSlug]", "page");
+  return { error: null };
+}
 
 export async function updateEvent(eventId: string, formData: FormData) {
   await persistEvent(eventId, formData);
-  redirect(`/dashboard/eventos/${eventId}?saved=1`);
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/eventos/${eventId}`);
+  revalidatePath(`/dashboard/eventos/${eventId}/show`);
+  revalidatePath("/invitacion/[slug]", "page");
+  revalidatePath("/invitacion/[slug]/[customSlug]", "page");
+  revalidatePath("/dashboard/eventos");
 }
 
-export async function saveEventForPreview(eventId: string, formData: FormData) {
-  await persistEvent(eventId, formData);
-  redirect(`/dashboard/eventos/${eventId}/show`);
+export async function checkInvitationSlug(eventId: string, value: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { available: false };
+  const customSlug = normalizeInvitationSlug(value);
+  if (!isValidInvitationSlug(customSlug)) return { available: false };
+  const owned = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { id: true } });
+  if (!owned) return { available: false };
+  const existing = await prisma.event.findFirst({ where: { ownerId: session.user.id, customSlug, id: { not: eventId } }, select: { id: true } });
+  return { available: !existing };
 }
 
 export async function publishEvent(eventId: string, formData: FormData) {
@@ -23,26 +61,18 @@ export async function publishEvent(eventId: string, formData: FormData) {
 
   const event = await prisma.event.findFirst({
     where: { id: eventId, ownerId: session.user.id },
-    select: { id: true, name: true, slug: true },
+    select: { id: true, paidAt: true },
   });
   if (!event) redirect("/dashboard?error=evento");
 
-  const baseSlug = `${slugify(event.name).slice(0, 48) || "evento"}-${event.id}`;
-  const slug = event.slug || baseSlug;
-  const expiresAt = new Date();
-  expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-  await prisma.event.update({
-    where: { id: event.id },
-    data: { slug, status: "PUBLISHED", expiresAt },
-  });
-
-  revalidatePath("/dashboard");
-  revalidatePath(`/invitacion/${slug}`);
-  redirect(`/dashboard/eventos/${eventId}?published=1`);
-}
-
-function slugify(value: string) {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48);
+  if (!event.paidAt) {
+    await prisma.event.updateMany({ where: { id: event.id, ownerId: session.user.id, paidAt: null }, data: { status: "PENDING_PAYMENT" } });
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/eventos");
+    redirect(`/dashboard/eventos/${eventId}/pago`);
+  }
+  // Publication and its validity are granted only by the verified Stripe webhook.
+  redirect(`/dashboard/eventos/${eventId}/pago`);
 }
 
 async function persistEvent(eventId: string, formData: FormData) {
@@ -50,6 +80,9 @@ async function persistEvent(eventId: string, formData: FormData) {
   if (!session?.user?.id) redirect("/login?callbackUrl=%2Fdashboard");
 
   const name = String(formData.get("name") ?? "").trim();
+  const hasCustomSlug = formData.has("customSlug");
+  const customSlug = normalizeInvitationSlug(String(formData.get("customSlug") ?? ""));
+  if (hasCustomSlug && customSlug && !isValidInvitationSlug(customSlug)) redirect(`/dashboard/eventos/${eventId}?error=enlace`);
   const eventType = String(formData.get("eventType") ?? "");
   const dateValue = String(formData.get("eventDate") ?? "");
   const eventTime = String(formData.get("eventTime") ?? "");
@@ -59,6 +92,8 @@ async function persistEvent(eventId: string, formData: FormData) {
   const message = String(formData.get("message") ?? "").trim();
   const imageUrl = String(formData.get("imageUrl") ?? "").trim();
   const accent = String(formData.get("accent") ?? "#E9560A");
+  const typography = String(formData.get("typography") ?? "default");
+  const bodyTypography = String(formData.get("bodyTypography") ?? "inter");
   let sections: unknown;
   try {
     sections = JSON.parse(String(formData.get("sections") ?? "[]"));
@@ -79,7 +114,7 @@ async function persistEvent(eventId: string, formData: FormData) {
   if (
     name.length < 2 || name.length > 100 || !eventTypes.includes(eventType) ||
     hostNames.length > 120 || venue.length > 160 || address.length > 240 ||
-    message.length > 1200 || !/^#[0-9a-fA-F]{6}$/.test(accent) ||
+    message.length > 1200 || !/^#[0-9a-fA-F]{6}$/.test(accent) || !isInvitationFont(typography) || !isInvitationFont(bodyTypography) ||
     (eventDate && Number.isNaN(eventDate.getTime())) ||
     (eventTime && (!/^([01]\d|2[0-3]):[0-5]\d$/.test(eventTime) || !eventDate)) ||
     !Array.isArray(sections) || sections.length > 12 || imageReferences.size > ACCOUNT_LIMITS.imagesPerInvitation ||
@@ -95,10 +130,20 @@ async function persistEvent(eventId: string, formData: FormData) {
     }
   }
 
-  const result = await prisma.event.updateMany({
+  if (hasCustomSlug && customSlug) {
+    const duplicate = await prisma.event.findFirst({ where: { ownerId: session.user.id, customSlug, id: { not: eventId } }, select: { id: true } });
+    if (duplicate) redirect(`/dashboard/eventos/${eventId}?error=enlace-ocupado`);
+  }
+  let result;
+  try {
+    result = await prisma.event.updateMany({
     where: { id: eventId, ownerId: session.user.id },
-    data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, accent, sections },
+    data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, accent, typography, bodyTypography, sections, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
   });
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2002") redirect(`/dashboard/eventos/${eventId}?error=enlace-ocupado`);
+    throw error;
+  }
 
   if (!result.count) redirect("/dashboard?error=evento");
 }

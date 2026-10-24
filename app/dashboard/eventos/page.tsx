@@ -19,6 +19,9 @@ export default function DashboardEventsPage() {
 
 async function DashboardEventsData() {
   await connection();
+  // This clock is read on the server after opting into request-time rendering.
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
   const session = await auth();
   const user = session?.user;
   if (!user?.id) redirect("/login?callbackUrl=%2Fdashboard%2Feventos");
@@ -35,7 +38,10 @@ async function DashboardEventsData() {
         status: true,
         eventDate: true,
         expiresAt: true,
+        paidAt: true,
         slug: true,
+        ownerId: true,
+        customSlug: true,
         updatedAt: true,
       },
     }),
@@ -43,6 +49,7 @@ async function DashboardEventsData() {
   ]);
 
   return <DashboardContent
+    now={now}
     userName={account?.name || user.name || "Usuario"}
     userEmail={account?.email || user.email || ""}
     events={events}
