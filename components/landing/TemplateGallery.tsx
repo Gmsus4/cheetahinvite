@@ -4,6 +4,7 @@ const templates = [
   {
     name: "Jardín eterno",
     type: "Boda",
+    eventType: "wedding",
     tone: "garden",
     mark: FiHeart,
     detail: "Sofía & Mateo",
@@ -11,6 +12,7 @@ const templates = [
   {
     name: "Un día de estrellas",
     type: "Cumpleaños",
+    eventType: "birthday",
     tone: "stars",
     mark: FiGift,
     detail: "Emma cumple 5",
@@ -18,6 +20,7 @@ const templates = [
   {
     name: "El gran comienzo",
     type: "Graduación",
+    eventType: "graduation",
     tone: "grad",
     mark: FiAward,
     detail: "Lo logramos",
@@ -54,7 +57,7 @@ export function TemplateGallery() {
               <div className="template-date">UNA FECHA · UN RECUERDO</div>
               <a
                 className="template-arrow"
-                href="/crear"
+                href={`/crear?tipo=${template.eventType}`}
                 aria-label={`Elegir plantilla ${template.name}`}
               >
                 <FiArrowUpRight aria-hidden="true" />

@@ -9,6 +9,21 @@ import { TrustStrip } from "@/components/landing/TrustStrip";
 
 export default function Home() {
   return (
+    <Suspense fallback={<LandingContent />}>
+      <AuthenticatedHome />
+    </Suspense>
+  );
+}
+
+async function AuthenticatedHome() {
+  const session = await auth();
+  if (session?.user?.id) redirect("/dashboard");
+
+  return <LandingContent />;
+}
+
+function LandingContent() {
+  return (
     <main>
       <Navbar />
       <Hero />
@@ -21,3 +36,6 @@ export default function Home() {
     </main>
   );
 }
+import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";

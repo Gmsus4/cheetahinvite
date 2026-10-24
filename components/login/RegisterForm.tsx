@@ -46,14 +46,14 @@ export function RegisterForm() {
         email: data.get("email"),
         password,
         redirect: false,
-        redirectTo: "/",
+        redirectTo: "/dashboard",
       });
 
       if (login?.error) {
         router.push("/login?registered=1");
         return;
       }
-      window.location.assign(login?.url ?? "/");
+      window.location.assign(login?.url ?? "/dashboard");
     } catch {
       setMessage("No pudimos conectar con el servicio. Intenta de nuevo.");
       setIsSubmitting(false);

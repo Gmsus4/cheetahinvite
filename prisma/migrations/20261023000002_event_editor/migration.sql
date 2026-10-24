@@ -1,0 +1,7 @@
+ALTER TABLE "Event"
+ADD COLUMN "hostNames" TEXT,
+ADD COLUMN "venue" TEXT,
+ADD COLUMN "address" TEXT,
+ADD COLUMN "message" TEXT,
+ADD COLUMN "imageUrl" TEXT,
+ADD COLUMN "accent" TEXT NOT NULL DEFAULT '#E9560A';

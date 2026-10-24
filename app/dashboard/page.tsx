@@ -1,0 +1,66 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { connection } from "next/server";
+import { Suspense } from "react";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import { auth } from "@/auth";
+import { prisma } from "@/prisma";
+
+export const metadata: Metadata = {
+  title: "Mi panel | Cheetah Invite",
+  description: "Administra tus invitaciones digitales y eventos.",
+};
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardData />
+    </Suspense>
+  );
+}
+
+async function DashboardData() {
+  await connection();
+  const session = await auth();
+  const user = session?.user;
+
+  if (!user?.id) redirect("/login?callbackUrl=%2Fdashboard");
+
+  const [events, account] = await Promise.all([
+    prisma.event.findMany({
+      where: { ownerId: user.id },
+      orderBy: { updatedAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        eventType: true,
+        status: true,
+        eventDate: true,
+        expiresAt: true,
+        slug: true,
+        updatedAt: true,
+      },
+    }),
+    prisma.user.findUnique({
+      where: { id: user.id },
+      select: { name: true, email: true },
+    }),
+  ]);
+
+  return (
+    <DashboardContent
+      userName={account?.name || user.name || "Usuario"}
+      userEmail={account?.email || user.email || ""}
+      events={events}
+    />
+  );
+}
+
+function DashboardLoading() {
+  return (
+    <main className="dashboard-loading" aria-label="Cargando tu panel">
+      <span className="dashboard-loading-mark">c</span>
+      <p>Preparando tu espacio para celebrar…</p>
+    </main>
+  );
+}

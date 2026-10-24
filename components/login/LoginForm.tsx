@@ -19,7 +19,7 @@ export function LoginForm() {
         email: formData.get("email"),
         password: formData.get("password"),
         redirect: false,
-        redirectTo: "/",
+        redirectTo: "/dashboard",
       });
 
       if (result?.error) {

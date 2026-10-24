@@ -16,6 +16,38 @@ model User {
   passwordHash  String?
   accounts      Account[]
   sessions      Session[]
+  events        Event[]
+}
+
+enum EventStatus {
+  DRAFT
+  PENDING_PAYMENT
+  PUBLISHED
+  EXPIRED
+  ARCHIVED
+}
+
+model Event {
+  id        String      @id @default(cuid())
+  ownerId   String
+  name      String
+  eventType String
+  hostNames String?
+  venue     String?
+  address   String?
+  message   String?     @db.Text
+  imageUrl  String?     @db.Text
+  accent    String      @default("#E9560A")
+  sections  Json        @default("[]")
+  slug      String?     @unique
+  status    EventStatus @default(DRAFT)
+  eventDate DateTime?
+  expiresAt DateTime?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  owner     User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, status])
 }
 
 model Account {

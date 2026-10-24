@@ -9,7 +9,7 @@ export function GoogleSignInButton() {
 
   async function handleGoogleSignIn() {
     setIsLoading(true);
-    await signIn("google", { redirectTo: "/" });
+    await signIn("google", { redirectTo: "/dashboard" });
   }
 
   return (
