@@ -117,3 +117,64 @@
  .invite-website[data-template="wedding-plantilla3"] .invite-content-music::before{mask-image:radial-gradient(ellipse 80px 100px at top left,#000 15%,transparent 85%),radial-gradient(ellipse 80px 100px at bottom right,#000 15%,transparent 85%)}
  .invite-website[data-template="wedding-plantilla3"] .invite-content-program::before{mask-image:radial-gradient(ellipse 80px 100px at top right,#000 15%,transparent 85%),radial-gradient(ellipse 80px 100px at bottom left,#000 15%,transparent 85%)}
 }
+
+/* A floral tribute instead of boxed rows for the parents. */
+.invite-website .invite-extra-sections .invite-parents-tribute {
+  display: block;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--invite-paper, #fbf8f2);
+}
+.invite-website .invite-extra-sections .invite-parents-tribute .invite-content-copy {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1040px);
+  padding: clamp(64px, 7vw, 108px) clamp(28px, 6vw, 96px);
+  align-items: center;
+  text-align: center;
+}
+.invite-parents-ornament { position: relative; width: 140px; height: 100px; margin: 0 auto 24px; mix-blend-mode: multiply; }
+.invite-parents-ornament img { object-fit: contain; }
+.invite-website .invite-extra-sections .invite-parents-tribute h2 { margin: 14px 0 0; }
+.invite-website .invite-extra-sections .invite-parents-tribute .invite-parents-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  gap: 44px 60px;
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.invite-website .invite-extra-sections .invite-parents-tribute .invite-parents-list li {
+  display: flex;
+  flex: 1 1 260px;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  max-width: 380px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font-family: var(--invite-heading-font, Georgia, serif);
+  font-size: clamp(23px, 2.6vw, 32px);
+  line-height: 1.5;
+}
+.invite-parents-rule { width: 48px; height: 1px; margin-bottom: 22px; background: var(--invite-accent); opacity: .45; }
+.invite-parent-name { display: block; width: 100%; overflow-wrap: anywhere; }
+.invite-parents-and { display: block; margin: 6px 0; color: var(--invite-accent); font-family: Georgia, serif; font-size: 24px; font-style: italic; opacity: .8; }
+.invite-parents-tribute .invite-decoration-corner { width: clamp(80px, 12vw, 170px); opacity: .8; }
+@media (max-width: 760px) {
+  .invite-website .invite-extra-sections .invite-parents-tribute .invite-content-copy { padding: 72px 36px; }
+  .invite-website .invite-extra-sections .invite-parents-tribute .invite-parents-list { gap: 36px; margin-top: 30px; }
+  .invite-website .invite-extra-sections .invite-parents-tribute .invite-parents-list li { flex-basis: 100%; }
+  .invite-parents-ornament { width: 110px; height: 80px; }
+}
+
+/* Hide only the program's lower-left template ornament. */
+.invite-website .invite-content-program {
+  --template-bottom-left: none;
+}

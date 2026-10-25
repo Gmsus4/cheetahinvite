@@ -219,3 +219,56 @@
 .creation-onboarding button:disabled {
   cursor: not-allowed;
 }
+
+/* Keep navigation in view; only the current question's content scrolls. */
+.onboarding-form-content, .onboarding-form-footer { display: contents; }
+.creation-onboarding .editor-form-panel {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 144px);
+  min-height: 0;
+  padding: 28px 32px 20px;
+}
+.creation-onboarding .editor-heading { flex-shrink: 0; margin-bottom: 16px; }
+.creation-onboarding .onboarding-progress { flex-shrink: 0; }
+.creation-onboarding .onboarding-progress progress { margin: 10px 0 20px; }
+.creation-onboarding .onboarding-progress h2 { font-size: clamp(24px, 3vw, 30px); }
+.creation-onboarding .onboarding-progress > p { margin-bottom: 18px; font-size: 14px; }
+.creation-onboarding .editor-form { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 0; }
+.creation-onboarding .onboarding-form-content {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 4px 8px 16px 4px;
+  scroll-padding: 12px;
+}
+.creation-onboarding .onboarding-form-footer {
+  display: block;
+  flex-shrink: 0;
+  padding-top: 14px;
+  border-top: 1px solid #eee7e1;
+  background: #fff;
+}
+.creation-onboarding .creation-step-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; margin: 0; }
+.creation-onboarding .creation-step-actions > div { flex-basis: 100%; }
+.creation-onboarding .onboarding-skip { margin: 0 0 0 auto; padding: 8px 0; }
+.creation-onboarding .onboarding-preview-toggle { margin: 0; padding: 8px 0; }
+.creation-onboarding .onboarding-example-note { padding: 10px 12px; margin-bottom: 14px; font-size: 12px; }
+.creation-onboarding .editor-section-card { padding: 16px; }
+.creation-onboarding .editor-section-fields { gap: 14px; }
+@media (max-width: 600px) {
+  .creation-onboarding .editor-layout { padding-top: 12px; padding-bottom: 12px; }
+  .creation-onboarding .editor-form-panel { height: calc(100dvh - 124px); padding: 20px 16px 12px; }
+  .creation-onboarding .editor-heading { margin-bottom: 12px; }
+  .creation-onboarding .onboarding-progress progress { margin-bottom: 14px; }
+  .creation-onboarding .onboarding-progress h2 { font-size: 23px; margin-bottom: 8px; }
+  .creation-onboarding .onboarding-progress > p { margin-bottom: 12px; font-size: 13px; }
+}
+@media (max-height: 600px) {
+  .creation-onboarding .editor-heading { display: none; }
+  .creation-onboarding .onboarding-progress > p { display: none; }
+  .creation-onboarding .onboarding-progress progress { margin: 6px 0 10px; }
+  .creation-onboarding .onboarding-progress h2 { font-size: 22px; }
+}

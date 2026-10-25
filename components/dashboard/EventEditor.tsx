@@ -6,7 +6,7 @@ import { prepareEvent } from "@/app/crear/actions";
 import { InvitationTexturePicker } from "./InvitationTexturePicker";
 import { InvitationTemplatePicker } from "./InvitationTemplatePicker";
 import { InvitationDecoration } from "./InvitationDecoration";
-import { getInvitationTemplate, templateAccent, sectionDecoration } from "@/lib/invitation-templates";
+import { getInvitationTemplate, templateAccent, sectionDecoration, type InvitationTemplate } from "@/lib/invitation-templates";
 import { CustomInvitationLinkField } from "./CustomInvitationLinkField";
 import { invitationPath, normalizeInvitationSlug } from "@/lib/invitation-url";
 import { InvitationLivePreview } from "./InvitationLivePreview";
@@ -100,9 +100,13 @@ export function EventEditor({ event, saved, error, published, creation = false }
   const [activeExtra, setActiveExtra] = useState<string | null>(creation ? "default-story" : null);
   const questionRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
-    if (creation) questionRef.current?.focus();
+    if (creation) {
+      questionRef.current?.focus({ preventScroll: true });
+      contentRef.current?.scrollTo({ top: 0 });
+    }
   }, [step, activeExtra, creation]);
   const formRef = useRef<HTMLFormElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const draftId = useRef(event.id);
   const draftPromise = useRef<Promise<string> | null>(null);
   const [uploadCount, setUploadCount] = useState(0);
@@ -214,6 +218,7 @@ export function EventEditor({ event, saved, error, published, creation = false }
         {!dirty && (saved || (published && isPublished) || state) && <p className="editor-success" role="status"><FiCheck /> {published && isPublished ? "Tu invitación ya está publicada y lista para compartir." : "Cambios guardados correctamente."}</p>}
         {error && <p className="editor-error" role="alert">{error === "enlace-ocupado" ? "Ya tienes otra invitación con ese enlace. Elige otro nombre." : error === "enlace" ? "El enlace debe tener entre 2 y 80 caracteres, con letras, números y guiones." : error === "imagen" ? "Usa una URL válida que comience con http:// o https://." : "Revisa los campos e inténtalo de nuevo."}</p>}
         <form ref={formRef} id="event-editor-form" action={formAction} onSubmit={(e) => { if (creation && (step < 15 || uploadCount > 0)) { e.preventDefault(); if (!uploadCount) advanceCreation(); } }} className="editor-form">
+          <div className="onboarding-form-content" ref={contentRef}>
           <input type="hidden" name="sections" value={JSON.stringify(sections)} />
           <section className="editor-group" id="event-details" hidden={creation && step > 7}>
             <div className="editor-group-heading"><span className="editor-group-number">1</span><div><h2>Datos de la celebración</h2><p>Esta información aparecerá en tu invitación.</p></div></div>
@@ -274,12 +279,15 @@ export function EventEditor({ event, saved, error, published, creation = false }
             <div className="editor-add-section" hidden={creation && extraIndex < sections.length - 1}><label htmlFor="add-section">Agregar otro detalle</label><select id="add-section" value="" onChange={(e) => { const type = e.target.value as SectionType; if (type && sections.length < 12) { const section = creation ? makeExampleSection(type, eventType, crypto.randomUUID()) : makeSection(type, crypto.randomUUID()); setSections((current) => [...current, section]); setActiveExtra(section.id); } e.currentTarget.value = ""; }}><option value="">Elige qué quieres agregar…</option>{sectionOptions.map((option) => <option key={option.type} value={option.type}>{option.title}</option>)}</select><small>Elige una opción para agregarla a tu invitación. Puedes incluir hasta 12.</small></div>
           </section>
           {creation && step === 15 && <div className="onboarding-review"><dl>{[["Evento", name], ["Tipo", { wedding: "Boda", birthday: "Cumpleaños", graduation: "Graduación", baby_shower: "Baby shower", anniversary: "Aniversario", other: "Otro evento" }[eventType]], ["Fecha", eventDate ? prettyDate : "Por definir"], ["Hora", eventTime || "Por definir"], ["Lugar", venue || "Por definir"], ["Dirección", address || "Por definir"], ["Detalles adicionales", String(sections.filter((section) => section.enabled).length)]].map(([label, value], index) => <div key={label}><dt>{label}</dt><dd>{value}<button className="onboarding-review-edit" type="button" aria-label={`Modificar ${label?.toLowerCase()}`} onClick={() => setStep([0, 1, 3, 4, 5, 6, 14][index])}>Modificar</button></dd></div>)}</dl></div>}
+          </div>
+          <div className="onboarding-form-footer">
           {creation && <div className="creation-step-actions"><div>{step > 0 && <button className="onboarding-back" type="button" disabled={busy || uploadCount > 0} onClick={previousCreation}><FiArrowLeft /> Anterior</button>}{step < 15 && <button className="button" type="button" disabled={uploadCount > 0} onClick={() => advanceCreation()}>{step === 14 ? "Confirmar y continuar" : "Continuar"} <FiChevronRight /></button>}</div>{step > 1 && step < 15 && <button className="onboarding-skip" type="button" disabled={uploadCount > 0} onClick={() => advanceCreation(step === 14)}>{step >= 9 && step <= 13 ? "Usar diseño actual" : step === 14 ? "Omitir este apartado" : "Lo agregaré después"}</button>}<button className="onboarding-preview-toggle" type="button" onClick={() => { if (window.matchMedia("(min-width: 1024px)").matches) setShowCreationPreview((shown) => !shown); else setPreviewExpanded(true); }}><FiEye />{showCreationPreview ? "Ocultar vista previa" : "Ver cómo va quedando"}</button></div>}
           <div className="editor-form-actions" hidden={creation && step !== 15}>
             <p className={`editor-save-status${dirty ? " is-dirty" : ""}`} role="status" aria-live="polite">{busy ? "Guardando…" : dirty ? "Cambios sin guardar" : state || saved || published ? "Cambios guardados" : "Todo está al día"}</p>
             <button className={`button editor-save${isPublished ? " is-primary" : ""}`} type="submit" disabled={busy || uploadCount > 0 || (!creation && !dirty)}><FiSave /> {pending ? "Guardando…" : isPublished ? "Guardar cambios" : creation ? "Crear invitación" : "Guardar borrador"}</button>
             {!creation && !isPublished && <button className="button editor-publish" type="submit" formAction={publishAction} disabled={busy}><FiEye /> {publishing ? "Guardando…" : event.paidAt ? "Revisar publicación" : `Pagar y publicar · ${invitationPriceLabel} MXN`}</button>}
             <p>{isPublished ? "Al guardar, los cambios se verán en tu enlace público." : "Puedes editar y previsualizar gratis. El enlace se habilita después de confirmar el pago."}</p>
+          </div>
           </div>
         </form>
       </section>
@@ -486,7 +494,7 @@ function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eve
         if (section.id !== pairedSections[0].id) return null;
         return <div className="invite-practical-details" key={section.id}>{pairedSections.map((paired) => <InviteWebsiteSection key={paired.id} section={paired} index={visibleSections.indexOf(paired)} decoration={sectionDecoration(template, paired.type)} />)}</div>;
       }
-      return <InviteWebsiteSection key={section.id} section={section} index={index} decoration={sectionDecoration(template, section.type)} />;
+      return <InviteWebsiteSection key={section.id} section={section} index={index} decoration={sectionDecoration(template, section.type)} template={template} />;
     })}</section>}
     <section className="invite-countdown-panel">{template && <InvitationDecoration template={template} bottomOnly />}<span className="invite-section-kicker">RESERVA LA FECHA</span><h2>{dateAndTime}</h2>{eventDateKey && eventTime ? <CountdownTimer date={eventDateKey} time={eventTime} /> : <p>Nos encantará celebrar contigo</p>}<span className="invite-countdown-decoration">✦</span></section>
     <footer className="invite-website-footer"><span className="invite-footer-ornament">✦</span><p>Gracias por ser parte de este momento</p><strong>{title}</strong><small>HECHO CON CARIÑO PARA CELEBRAR</small></footer>
@@ -525,7 +533,21 @@ function CountdownTimer({ date, time }: { date: string; time: string }) {
   </div>;
 }
 
-function InviteWebsiteSection({ section, index = 0, decoration }: { section: InviteSection; index?: number; decoration?: string }) {
+function InviteWebsiteSection({ section, index = 0, decoration, template }: { section: InviteSection; index?: number; decoration?: string; template?: InvitationTemplate | null }) {
+  if (section.type === "parents") {
+    const ornament = decoration || template?.assets.flower || template?.assets.separator || template?.assets.decoration;
+    const families = section.content.split("\n").map((line) => line.trim()).filter(Boolean);
+    return <section className="invite-content-block invite-content-parents invite-parents-tribute">
+      {template && <InvitationDecoration template={template} bottomOnly />}
+      <div className="invite-content-copy">
+        {ornament && <div className="invite-parents-ornament" aria-hidden="true"><Image src={ornament} alt="" fill sizes="140px" unoptimized /></div>}
+        <span className="invite-section-kicker">CON LA BENDICIÓN DE</span>
+        <h2>{section.title === "Padres" ? "Nuestros padres" : section.title}</h2>
+        {section.detail && <p className="invite-content-detail">{section.detail}</p>}
+        <ul className="invite-parents-list">{families.map((family, index) => <li key={`${index}-${family}`}><span className="invite-parents-rule" aria-hidden="true" />{family.split(/\s+y\s+/i).map((name, nameIndex) => <span className="invite-parent-name" key={nameIndex}>{nameIndex > 0 && <span className="invite-parents-and" aria-label="y">&amp;</span>}{name}</span>)}</li>)}</ul>
+      </div>
+    </section>;
+  }
   const isGallery = section.type === "gallery";
   const isRsvp = section.type === "rsvp";
   const isGift = section.type === "gifts";
@@ -533,7 +555,7 @@ function InviteWebsiteSection({ section, index = 0, decoration }: { section: Inv
   return <section data-has-section-decoration={decoration ? "true" : undefined} className={`invite-content-block invite-content-${section.type}${index % 2 ? " invite-content-offset" : ""}${section.imageUrl || galleryImages.length ? " has-section-image" : ""}`}>
     {decoration && <span className="invite-section-decoration" aria-hidden="true"><Image src={decoration} alt="" fill sizes="(max-width: 760px) 48px, 90px" unoptimized /></span>}
     {isGallery && galleryImages.length > 0 ? <div className="invite-content-image invite-gallery-feature"><GalleryCarousel images={galleryImages} title={section.title} /></div> : section.imageUrl && <div className="invite-content-image" style={{ backgroundImage: `url("${section.imageUrl.replaceAll('"', '')}")` }} role="img" aria-label={section.title} />}
-      <div className="invite-content-copy"><span className="invite-content-icon">{sectionIcon(section.type)}</span><span className="invite-section-kicker">{section.type === "story" ? "NUESTRA HISTORIA" : section.type === "ceremony" ? "CEREMONIA" : section.type === "reception" ? "RECEPCIÓN" : section.type === "program" ? "HORARIOS Y ACTIVIDADES" : section.type === "parents" ? "CON LA BENDICIÓN DE" : section.type === "dress_code" ? "CÓDIGO DE VESTIMENTA" : section.type === "rsvp" ? "CONFIRMACIÓN" : section.type === "gifts" ? "MESA DE REGALOS" : section.type === "gallery" ? "NUESTROS MOMENTOS" : section.type === "music" ? "NUESTRA CANCIÓN" : "UN DETALLE ESPECIAL"}</span><h2>{section.title}</h2>{section.detail && <p className="invite-content-detail">{section.detail}</p>}{section.type === "program" && <ol className="invite-program-list">{section.content.split("\n").map(parseProgramEntry).filter((entry) => entry.description).map((entry, index) => <li key={entry.id}><span className={entry.time ? "invite-program-time" : "invite-program-index"}>{entry.time || String(index + 1).padStart(2, "0")}</span><div className="invite-program-copy"><i aria-hidden="true" /><p>{entry.description}</p></div></li>)}</ol>}{section.type === "parents" && <ul className="invite-parents-list">{section.content.split("\n").map((line) => line.trim()).filter(Boolean).map((line) => <li key={line}>{line}</li>)}</ul>}{section.content && section.type !== "program" && section.type !== "parents" && <p className="invite-content-body">{section.content}</p>}
+      <div className="invite-content-copy"><span className="invite-content-icon">{sectionIcon(section.type)}</span><span className="invite-section-kicker">{section.type === "story" ? "NUESTRA HISTORIA" : section.type === "ceremony" ? "CEREMONIA" : section.type === "reception" ? "RECEPCIÓN" : section.type === "program" ? "HORARIOS Y ACTIVIDADES" : section.type === "dress_code" ? "CÓDIGO DE VESTIMENTA" : section.type === "rsvp" ? "CONFIRMACIÓN" : section.type === "gifts" ? "MESA DE REGALOS" : section.type === "gallery" ? "NUESTROS MOMENTOS" : section.type === "music" ? "NUESTRA CANCIÓN" : "UN DETALLE ESPECIAL"}</span><h2>{section.title}</h2>{section.detail && <p className="invite-content-detail">{section.detail}</p>}{section.type === "program" && <ol className="invite-program-list">{section.content.split("\n").map(parseProgramEntry).filter((entry) => entry.description).map((entry, index) => <li key={entry.id}><span className={entry.time ? "invite-program-time" : "invite-program-index"}>{entry.time || String(index + 1).padStart(2, "0")}</span><div className="invite-program-copy"><i aria-hidden="true" /><p>{entry.description}</p></div></li>)}</ol>}{section.content && section.type !== "program" && <p className="invite-content-body">{section.content}</p>}
       {(section.link || isRsvp || isGift) && <span className="invite-static-link">{isRsvp ? "Confirmar asistencia al publicar" : isGift ? "Consultar mesa de regalos al publicar" : isGallery ? "Ver galería" : section.type === "music" ? "Escuchar al publicar" : "Abrir mapa al publicar"} <FiArrowDown /></span>}
     </div>
   </section>;

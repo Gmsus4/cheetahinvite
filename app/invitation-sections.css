@@ -58,3 +58,105 @@
  .invite-website .invite-extra-sections .invite-content-gallery .invite-content-copy{grid-row:1}
  .invite-website .invite-extra-sections .invite-content-gallery .invite-gallery-feature{grid-row:2;height:320px}
 }
+
+/* Give each moment a clear time marker and a continuous timeline. */
+.invite-website .invite-extra-sections .invite-content-program .invite-program-list {
+  max-width: 720px;
+  margin: 40px auto 0;
+  gap: 0;
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-list li {
+  grid-template-columns: 152px minmax(0, 1fr);
+  align-items: start;
+  gap: 0;
+  padding: 0;
+  border: 0;
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-list li > span {
+  justify-self: end;
+  max-width: calc(100% - 24px);
+  margin: 12px 24px 0 0;
+  padding: 7px 12px;
+  border: 1px solid color-mix(in srgb, var(--invite-accent) 18%, transparent);
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--invite-accent) 6%, var(--invite-paper, #fbf8f2));
+  color: var(--invite-accent);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  white-space: normal;
+  font-variant-numeric: tabular-nums;
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-copy {
+  position: relative;
+  min-height: 88px;
+  padding: 16px 0 32px 32px;
+  border: 0;
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-copy::after {
+  content: "";
+  position: absolute;
+  top: 30px;
+  bottom: -30px;
+  left: 0;
+  width: 1px;
+  background: color-mix(in srgb, var(--invite-accent) 25%, transparent);
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-copy > i {
+  z-index: 1;
+  top: 24px;
+  left: -5px;
+  width: 11px;
+  height: 11px;
+  border: 3px solid var(--invite-paper, #fbf8f2);
+  border-radius: 50%;
+  background: var(--invite-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--invite-accent) 35%, transparent);
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-copy p {
+  margin: 0;
+  font-family: var(--invite-body-font, inherit);
+  font-size: 17px;
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-list li:last-child .invite-program-copy::after { display: none; }
+.invite-website .invite-extra-sections .invite-content-program .invite-program-list li:last-child .invite-program-copy { min-height: 0; padding-bottom: 12px; }
+@media (max-width: 760px) {
+  .invite-website .invite-extra-sections .invite-content-program .invite-program-list { margin-top: 30px; }
+  .invite-website .invite-extra-sections .invite-content-program .invite-program-list li { grid-template-columns: 104px minmax(0, 1fr); }
+  .invite-website .invite-extra-sections .invite-content-program .invite-program-list li > span { max-width: calc(100% - 16px); margin-right: 16px; padding: 6px 8px; font-size: 11px; }
+  .invite-website .invite-extra-sections .invite-content-program .invite-program-copy { padding-left: 22px; min-height: 84px; }
+  .invite-website .invite-extra-sections .invite-content-program .invite-program-copy p { font-size: 15px; }
+}
+
+/* Center the program's activities and their time labels. */
+.invite-website .invite-extra-sections .invite-content-program .invite-program-list li {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-list li > span {
+  justify-self: center;
+  max-width: 100%;
+  margin: 12px 0 0;
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-copy {
+  width: 100%;
+  min-height: 0;
+  padding: 16px 16px 36px;
+  text-align: center;
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-copy > i {
+  display: none;
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-copy::after {
+  top: auto;
+  bottom: 4px;
+  left: 50%;
+  height: 20px;
+  transform: translateX(-50%);
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-copy p {
+  text-align: center;
+}
