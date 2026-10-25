@@ -21,7 +21,7 @@ import { getInvitationFont, invitationFonts, recommendedInvitationFonts, type Fo
 
 type EventData = {
   id: string; ownerId: string; customSlug: string | null; templateId: string; texture: string; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; paidAt: Date | null; expiresAt: Date | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED"; slug: string | null;
-  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; imageUploads: number; accent: string; typography: string; bodyTypography: string; sections: unknown;
+  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; imageUploads: number; accent: string; typography: string; bodyTypography: string; heroHorizontal?: string; heroVertical?: string; sections: unknown;
 };
 
 export type SectionType = "story" | "ceremony" | "reception" | "program" | "parents" | "dress_code" | "gifts" | "rsvp" | "gallery" | "music" | "custom";
@@ -137,6 +137,8 @@ export function EventEditor({ event, saved, error, published, creation = false }
   const [message, setMessage] = useState(event.message ?? "");
   const [imageUrl, setImageUrl] = useState(event.imageUrl ?? "");
   const [accent, setAccent] = useState(event.accent || "#E9560A");
+  const [heroHorizontal, setHeroHorizontal] = useState(event.heroHorizontal || "left");
+  const [heroVertical, setHeroVertical] = useState(event.heroVertical || "center");
   const [typography, setTypography] = useState(event.typography || "default");
   const [bodyTypography, setBodyTypography] = useState(event.bodyTypography || "inter");
   const [sections, setSections] = useState<InviteSection[]>(() => {
@@ -180,8 +182,8 @@ export function EventEditor({ event, saved, error, published, creation = false }
     return () => desktop.removeEventListener("change", adaptPreview);
   }, [creation, showCreationPreview]);
   const publish = publishEvent.bind(null, event.id);
-  const snapshot = JSON.stringify([name, eventType, eventDate, eventTime, hostNames, venue, address, message, imageUrl, accent, typography, bodyTypography, sections, customSlug, templateId, texture]);
-  const initialSnapshot = JSON.stringify([event.name, event.eventType, dateInputValue(event.eventDate), event.eventTime ?? "", event.hostNames ?? "", event.venue ?? "", event.address ?? "", event.message ?? "", event.imageUrl ?? "", event.accent || "#E9560A", event.typography || "default", event.bodyTypography || "inter", Array.isArray(event.sections) ? event.sections : ["story", "ceremony", "reception", "dress_code", "gifts", "rsvp"].map((type) => makeSection(type as SectionType)), event.customSlug ?? "", event.templateId ?? "none", event.texture ?? "none"]);
+  const snapshot = JSON.stringify([name, eventType, eventDate, eventTime, hostNames, venue, address, message, imageUrl, accent, typography, bodyTypography, sections, customSlug, templateId, texture, heroHorizontal, heroVertical]);
+  const initialSnapshot = JSON.stringify([event.name, event.eventType, dateInputValue(event.eventDate), event.eventTime ?? "", event.hostNames ?? "", event.venue ?? "", event.address ?? "", event.message ?? "", event.imageUrl ?? "", event.accent || "#E9560A", event.typography || "default", event.bodyTypography || "inter", Array.isArray(event.sections) ? event.sections : ["story", "ceremony", "reception", "dress_code", "gifts", "rsvp"].map((type) => makeSection(type as SectionType)), event.customSlug ?? "", event.templateId ?? "none", event.texture ?? "none", event.heroHorizontal || "left", event.heroVertical || "center"]);
   const [, publishAction, publishing] = useActionState(async (_: string, formData: FormData) => { await publish(formData); return ""; }, "");
   const [state, formAction, pending] = useActionState(async (_: string, formData: FormData) => {
     const submittedSnapshot = snapshot;
@@ -242,6 +244,8 @@ export function EventEditor({ event, saved, error, published, creation = false }
               <div className="onboarding-design-option" hidden={creation && step !== 9}><InvitationTemplatePicker eventType={eventType} value={templateId} onChange={(id) => { setTemplateId(id); const recommended = templateAccent(eventType, id); if (recommended) setAccent(recommended); }} /></div>
               <div className="onboarding-design-option" hidden={creation && step !== 10}><InvitationTexturePicker value={texture} onChange={setTexture} /></div>
               <div className="editor-field editor-color-field" hidden={creation && step !== 11}><label htmlFor="accent">Color principal</label><div><input id="accent" name="accent" type="color" value={accent} onChange={e => setAccent(e.target.value)} /><span>{accent.toUpperCase()}</span></div><small className="editor-field-help">Se usará en algunos detalles de diseño.</small></div>
+              <div className="editor-field" hidden={creation && step !== 8}><label htmlFor="heroHorizontal">Alineación del título de portada</label><select id="heroHorizontal" name="heroHorizontal" value={heroHorizontal} onChange={(e) => setHeroHorizontal(e.target.value)}><option value="left">Izquierda</option><option value="center">Centro</option><option value="right">Derecha</option></select></div>
+              <div className="editor-field" hidden={creation && step !== 8}><label htmlFor="heroVertical">Posición vertical del título de portada</label><select id="heroVertical" name="heroVertical" value={heroVertical} onChange={(e) => setHeroVertical(e.target.value)}><option value="top">Arriba</option><option value="center">Centro</option><option value="bottom">Abajo</option></select></div>
               <div className="onboarding-design-option" hidden={creation && step !== 12}><InvitationFontSelect role="heading" eventType={eventType} value={typography} onChange={setTypography} /></div>
               <div className="onboarding-design-option" hidden={creation && step !== 13}><InvitationFontSelect role="body" eventType={eventType} value={bodyTypography} onChange={setBodyTypography} /></div>
               <div hidden={creation && step !== 12 && step !== 13} className="editor-font-sample editor-group-wide" style={{ fontFamily: getInvitationFont(typography).family }}>{hostNames || name || "Tu celebración"}<span style={{ fontFamily: getInvitationFont(bodyTypography).family }}>Nos encantará compartir este día contigo. Una celebración para recordar.</span></div>
@@ -292,7 +296,7 @@ export function EventEditor({ event, saved, error, published, creation = false }
       </section>
       <aside className="editor-preview-panel" hidden={creation && !showCreationPreview && !previewExpanded}><div className="editor-preview-title"><div><span>VISTA PREVIA</span><small>Se actualiza al editar</small></div><span className="preview-draft-chip">{isPublished ? <><FiCheck /> PUBLICADA</> : <><FiLock /> PRIVADA</>}</span></div>
         {!creation && !event.paidAt && <div className="editor-payment-notice"><FiLock /><div><strong>Pendiente de pago</strong><p>{invitationPriceLabel} MXN por evento · 12 meses activa. Tu enlace permanece privado hasta confirmar el pago.</p><Link href={`/dashboard/eventos/${event.id}/pago`}>Ver detalles del pago</Link></div></div>}
-        <InvitationLivePreview expanded={previewExpanded} onClose={closePreview}><InvitationCanvas eventType={eventType} name={name} hostNames={hostNames} date={prettyDate} eventDateKey={eventDate} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} templateId={templateId} texture={texture} sections={sections} full /></InvitationLivePreview>
+        <InvitationLivePreview expanded={previewExpanded} onClose={closePreview}><InvitationCanvas eventType={eventType} name={name} hostNames={hostNames} date={prettyDate} eventDateKey={eventDate} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} heroHorizontal={heroHorizontal} heroVertical={heroVertical} templateId={templateId} texture={texture} sections={sections} full /></InvitationLivePreview>
         <button className="editor-open-preview" type="button" onClick={() => setPreviewExpanded(true)}><FiEye /> Ver invitación completa</button>
         <p className="editor-preview-note">La vista previa incluye tus cambios actuales. Abrirla no guarda ni publica.</p>
         {isPublished && event.slug && <>
@@ -456,14 +460,14 @@ function parseProgramEntry(line: string, index: number) {
   return { id: `${index}-${cleaned}`, time: "", description: cleaned };
 }
 
-export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, accent, typography = "default", bodyTypography = "inter", templateId = "none", texture = "none", sections }: {
-  eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; accent: string; typography?: string; bodyTypography?: string; templateId?: string; texture?: string; sections: InviteSection[]; full?: boolean;
+export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", templateId = "none", texture = "none", sections }: {
+  eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; templateId?: string; texture?: string; sections: InviteSection[]; full?: boolean;
 }) {
-  return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} templateId={templateId} texture={texture} sections={sections} />;
+  return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} heroHorizontal={heroHorizontal} heroVertical={heroVertical} templateId={templateId} texture={texture} sections={sections} />;
 }
 
-function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eventTime, venue, address, message, imageUrl, accent, typography = "default", bodyTypography = "inter", templateId = "none", texture = "none", sections }: {
-  eventType: string; name: string; hostNames: string; date: string; eventDateKey: string; eventTime: string; venue: string; address: string; message: string; imageUrl: string; accent: string; typography?: string; bodyTypography?: string; templateId?: string; texture?: string; sections: InviteSection[];
+function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eventTime, venue, address, message, imageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", templateId = "none", texture = "none", sections }: {
+  eventType: string; name: string; hostNames: string; date: string; eventDateKey: string; eventTime: string; venue: string; address: string; message: string; imageUrl: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; templateId?: string; texture?: string; sections: InviteSection[];
 }) {
   const visibleSections = sections.filter((section) => section.enabled && (section.content || section.detail || section.link || section.imageUrl || section.imageUrls?.length));
   const dressCode = visibleSections.find((section) => section.type === "dress_code");
@@ -473,7 +477,7 @@ function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eve
   const title = hostNames || name || "Una celebración especial";
   const dateAndTime = eventTime ? `${date} · ${formatEventTime(eventTime)}` : date;
   return <article className={`invite-website${eventType === "wedding" ? " invite-wedding-editorial" : ""}`} data-texture={texture} data-typography={typography} data-body-typography={bodyTypography} data-has-flower={template?.assets.flower ? "true" : undefined} data-has-separator={template?.assets.separator ? "true" : undefined} data-decorated={template ? "true" : undefined} data-template={template ? `${eventType}-${template.id}` : undefined} style={{ "--invite-accent": accent, "--invite-heading-font": getInvitationFont(typography).family, "--invite-body-font": getInvitationFont(bodyTypography).family, "--template-top-right": template?.assets.topRight ? `url("${template.assets.topRight}")` : "none", "--template-bottom-left": template?.assets.bottomLeft ? `url("${template.assets.bottomLeft}")` : "none", "--template-top-left": template?.assets.topLeft ? `url("${template.assets.topLeft}")` : "none", "--template-bottom-right": template?.assets.bottomRight ? `url("${template.assets.bottomRight}")` : "none", "--template-separator": template?.assets.separator ? `url("${template.assets.separator}")` : "none", "--template-decoration": template?.assets.decoration ? `url("${template.assets.decoration}")` : "none", "--template-flower": template?.assets.flower ? `url("${template.assets.flower}")` : "none" } as React.CSSProperties}>
-    <section className={`invite-website-hero${imageUrl ? " has-cover-image" : ""}`} style={imageUrl ? { backgroundImage: `linear-gradient(90deg,#10100fd9 0%,#10100f66 58%,#10100f12 100%),url("${imageUrl.replaceAll('"', '')}")` } : undefined}>
+    <section data-hero-horizontal={heroHorizontal} data-hero-vertical={heroVertical} className={`invite-website-hero${imageUrl ? " has-cover-image" : ""}`} style={imageUrl ? { backgroundImage: `linear-gradient(${heroHorizontal === "right" ? "270deg" : heroHorizontal === "center" ? "0deg" : "90deg"},#10100fd9 0%,#10100f66 58%,#10100f12 100%),url("${imageUrl.replaceAll('"', '')}")` } : undefined}>
       <div className="invite-hero-glow" aria-hidden="true" />
       <div className="invite-hero-content"><span className="invite-hero-kicker">{eventType === "wedding" ? "NOS CASAMOS" : "UNA FECHA · UN RECUERDO · UNA CELEBRACIÓN"}</span><span className="invite-hero-rule" /><p className="invite-hero-intro">Con mucha ilusión te invitamos a celebrar</p><h1>{title}</h1><p className="invite-hero-event-name">{name || eventLabels[eventType] || "Un día muy especial"}</p><div className="invite-hero-date"><FiCalendar /> {dateAndTime}</div><a className="invite-hero-button" href="#invite-details">Acompáñanos <FiArrowDown /></a></div>
       <div className="invite-hero-side-note"><span>ESTÁS INVITADO</span><i>✦</i><span>CON CARIÑO</span></div>

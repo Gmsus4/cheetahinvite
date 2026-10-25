@@ -47,7 +47,7 @@ async function InvitationData({ params }: InvitationPageProps) {
       accent={event.accent}
       texture={event.texture} templateId={event.templateId}
       typography={event.typography}
-      bodyTypography={event.bodyTypography}
+      bodyTypography={event.bodyTypography} heroHorizontal={event.heroHorizontal} heroVertical={event.heroVertical}
       sections={sections}
       full
     />
