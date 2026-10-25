@@ -28,22 +28,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `Cada imagen debe pesar ${ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB o menos.` }, { status: 413 });
   }
 
+  // Gallery uploads use the current gallery count, excluding cover and section images.
+  const imageScope = body?.get("imageScope");
+  if (imageScope !== "gallery" && imageScope !== "single") {
+    return NextResponse.json({ error: "Selecciona una sección válida para la imagen." }, { status: 400 });
+  }
+  const rawCount = body?.get("activeImageCount");
+  const activeImageCount = typeof rawCount === "string" && /^\d+$/.test(rawCount) ? Number(rawCount) : NaN;
+  if (!Number.isInteger(activeImageCount) || activeImageCount < 0) {
+    return NextResponse.json({ error: "No pudimos verificar las imágenes. Recarga el editor." }, { status: 400 });
+  }
+  const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { id: true } });
+  if (!event) return NextResponse.json({ error: "No encontramos este evento." }, { status: 404 });
+  if (imageScope === "gallery" && activeImageCount >= ACCOUNT_LIMITS.imagesPerGallery) {
+    return NextResponse.json({ error: `La galería ya tiene las ${ACCOUNT_LIMITS.imagesPerGallery} fotos en uso. Quita una para agregar otra.` }, { status: 409 });
+  }
+
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const apiKey = process.env.CLOUDINARY_API_KEY;
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
   const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
   if (!cloudName || !apiKey || !apiSecret || !uploadPreset) {
     return NextResponse.json({ error: "La carga de imágenes todavía no está configurada." }, { status: 503 });
-  }
-
-  const reservation = await prisma.event.updateMany({
-    where: { id: eventId, ownerId: session.user.id, imageUploads: { lt: ACCOUNT_LIMITS.imagesPerInvitation } },
-    data: { imageUploads: { increment: 1 } },
-  });
-  if (!reservation.count) {
-    const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { id: true } });
-    if (!event) return NextResponse.json({ error: "No encontramos este evento." }, { status: 404 });
-    return NextResponse.json({ error: `Ya usaste las ${ACCOUNT_LIMITS.imagesPerInvitation} imágenes disponibles para esta invitación.` }, { status: 409 });
   }
 
   const timestamp = Math.floor(Date.now() / 1000);
@@ -67,12 +73,11 @@ export async function POST(request: Request) {
       method: "POST", body: cloudinaryForm, signal: AbortSignal.timeout(60_000),
     });
   } catch {
-    // An interrupted connection may still have stored the file; keep the reserved slot.
+    // The draft is unchanged when the upload cannot be confirmed.
     return NextResponse.json({ error: "La conexión se interrumpió. Revisa la invitación antes de volver a intentarlo." }, { status: 502 });
   }
   const uploaded = await response.json().catch(() => null) as { secure_url?: string; error?: { message?: string } } | null;
   if (!response.ok || !uploaded?.secure_url) {
-    await prisma.event.updateMany({ where: { id: eventId, ownerId: session.user.id }, data: { imageUploads: { decrement: 1 } } });
     return NextResponse.json({ error: uploaded?.error?.message || "Cloudinary no pudo subir esta imagen." }, { status: 502 });
   }
   return NextResponse.json({ secureUrl: uploaded.secure_url.replace("/image/upload/", "/image/upload/f_auto,q_auto/") });

@@ -106,22 +106,13 @@ async function persistEvent(eventId: string, formData: FormData) {
   }
   const eventTypes = ["wedding", "birthday", "graduation", "baby_shower", "anniversary", "other"];
   const eventDate = dateValue ? new Date(`${dateValue}T12:00:00.000Z`) : null;
-  const imageReferences = new Set<string>([imageUrl]);
-  if (Array.isArray(sections)) {
-    for (const section of sections) {
-      if (!isValidSection(section)) continue;
-      if (section.imageUrl) imageReferences.add(section.imageUrl);
-      for (const url of section.imageUrls ?? []) if (url) imageReferences.add(url);
-    }
-  }
-
   if (
     name.length < 2 || name.length > 100 || !eventTypes.includes(eventType) || !isInvitationTemplate(eventType, templateId) || !isInvitationTexture(texture) ||
     hostNames.length > 120 || venue.length > 160 || address.length > 240 ||
     message.length > 1200 || !/^#[0-9a-fA-F]{6}$/.test(accent) || !isInvitationFont(typography) || !isInvitationFont(bodyTypography) ||
     (eventDate && Number.isNaN(eventDate.getTime())) ||
     (eventTime && (!/^([01]\d|2[0-3]):[0-5]\d$/.test(eventTime) || !eventDate)) ||
-    !Array.isArray(sections) || sections.length > 12 || imageReferences.size > ACCOUNT_LIMITS.imagesPerInvitation ||
+    !Array.isArray(sections) || sections.length > 12 ||
     sections.some((section) => !isValidSection(section))
   ) redirect(`/dashboard/eventos/${eventId}?error=datos`);
 
@@ -164,7 +155,7 @@ function isValidSection(value: unknown): value is {
   if (typeof section.enabled !== "boolean" || !types.includes(section.type as string)) return false;
   if ((section.id as string).length > 80 || (section.title as string).length > 100 || (section.content as string).length > 2000 || (section.detail as string).length > 240 || (section.link as string).length > 500 || (section.imageUrl as string).length > 1000) return false;
   if (section.layout !== undefined && !["auto", "split", "centered", "card"].includes(section.layout as string)) return false;
-  if (section.imageUrls !== undefined && (!Array.isArray(section.imageUrls) || section.imageUrls.length > 12 || section.imageUrls.some((url) => typeof url !== "string" || url.length > 1000 || !isHttpUrl(url)))) return false;
+  if (section.imageUrls !== undefined && (!Array.isArray(section.imageUrls) || section.imageUrls.length > ACCOUNT_LIMITS.imagesPerGallery || section.imageUrls.some((url) => typeof url !== "string" || url.length > 1000 || !isHttpUrl(url)))) return false;
   for (const value of [section.link, section.imageUrl] as string[]) {
     if (!value) continue;
     try {

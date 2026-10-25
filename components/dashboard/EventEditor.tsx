@@ -136,7 +136,6 @@ export function EventEditor({ event, saved, error, published, creation = false }
   const [address, setAddress] = useState(event.address ?? "");
   const [message, setMessage] = useState(event.message ?? "");
   const [imageUrl, setImageUrl] = useState(event.imageUrl ?? "");
-  const [imageUploads, setImageUploads] = useState(event.imageUploads);
   const [accent, setAccent] = useState(event.accent || "#E9560A");
   const [typography, setTypography] = useState(event.typography || "default");
   const [bodyTypography, setBodyTypography] = useState(event.bodyTypography || "inter");
@@ -239,8 +238,7 @@ export function EventEditor({ event, saved, error, published, creation = false }
           <section className="editor-group" id="event-cover" hidden={creation && (step < 8 || step > 13)}>
             <div className="editor-group-heading"><span className="editor-group-number">2</span><div><h2>Personaliza la portada</h2><p>Agrega una foto y elige un color. Puedes hacerlo ahora o después.</p></div></div>
             <div className="editor-group-fields editor-cover-fields">
-              <div className="editor-field" hidden={creation && step !== 8}><label>Foto de portada <span>(opcional)</span></label><input type="hidden" name="imageUrl" value={imageUrl} /><CloudinaryImageUpload ensureEvent={creation ? ensureEvent : undefined} onBusyChange={(busy) => setUploadCount((count) => count + (busy ? 1 : -1))} eventId={event.id} images={imageUrl ? [imageUrl] : []} multiple={false} imageUploads={imageUploads} onUpload={() => setImageUploads((count) => count + 1)} onChange={(images) => setImageUrl(images[0] ?? "")} /></div>
-              <p className="editor-field-help editor-image-quota" hidden={creation && step !== 8}>{imageUploads} de {ACCOUNT_LIMITS.imagesPerInvitation} imágenes subidas. Las imágenes reemplazadas también cuentan.</p>
+              <div className="editor-field" hidden={creation && step !== 8}><label>Foto de portada <span>(opcional)</span></label><input type="hidden" name="imageUrl" value={imageUrl} /><CloudinaryImageUpload ensureEvent={creation ? ensureEvent : undefined} onBusyChange={(busy) => setUploadCount((count) => count + (busy ? 1 : -1))} eventId={event.id} images={imageUrl ? [imageUrl] : []} multiple={false} onChange={(images) => setImageUrl(images[0] ?? "")} /></div>
               <div className="onboarding-design-option" hidden={creation && step !== 9}><InvitationTemplatePicker eventType={eventType} value={templateId} onChange={(id) => { setTemplateId(id); const recommended = templateAccent(eventType, id); if (recommended) setAccent(recommended); }} /></div>
               <div className="onboarding-design-option" hidden={creation && step !== 10}><InvitationTexturePicker value={texture} onChange={setTexture} /></div>
               <div className="editor-field editor-color-field" hidden={creation && step !== 11}><label htmlFor="accent">Color principal</label><div><input id="accent" name="accent" type="color" value={accent} onChange={e => setAccent(e.target.value)} /><span>{accent.toUpperCase()}</span></div><small className="editor-field-help">Se usará en algunos detalles de diseño.</small></div>
@@ -267,8 +265,8 @@ export function EventEditor({ event, saved, error, published, creation = false }
                     <div className="editor-field"><label htmlFor={`${base}-content`}>{section.type === "dress_code" ? "Indicaciones" : section.type === "rsvp" ? "Instrucciones" : section.type === "gifts" ? "Mensaje" : section.type === "program" ? "Horario y actividad (un momento por renglón)" : section.type === "parents" ? "Nombres (una pareja o persona por renglón)" : "Descripción"}</label><textarea id={`${base}-content`} rows={section.type === "program" || section.type === "parents" ? 5 : 3} maxLength={2000} value={section.content} onChange={(e) => updateSection(section.id, { content: e.target.value })} placeholder={section.type === "program" ? "5:30 p. m. — Recepción de invitados\n6:00 p. m. — Ceremonia\n7:00 p. m. — Cóctel" : section.type === "parents" ? "Ej. Joaquín Reyes y Patricia Fuentes\nRodrigo Navarro y Lucía Cortés" : "Escribe aquí la información para tus invitados…"} /></div>
                     {(section.type === "ceremony" || section.type === "reception" || section.type === "gallery") && <div className="editor-field"><label htmlFor={`${base}-detail`}>{section.type === "gallery" ? "Texto de apoyo" : "Fecha u horario"}</label><input id={`${base}-detail`} maxLength={240} value={section.detail} onChange={(e) => updateSection(section.id, { detail: e.target.value })} placeholder={section.type === "gallery" ? "Momentos que queremos recordar" : "Ej. 5:00 p. m."} /></div>}
                     {(section.type === "ceremony" || section.type === "reception" || section.type === "gifts") && <div className="editor-field"><label htmlFor={`${base}-link`}>{section.type === "gifts" ? "Enlace a mesa de regalos" : "Enlace a mapa"}</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://…" /></div>}
-                    {section.type === "gallery" && <div className="editor-field"><label>Fotos de la galería</label><CloudinaryImageUpload ensureEvent={creation ? ensureEvent : undefined} onBusyChange={(busy) => setUploadCount((count) => count + (busy ? 1 : -1))} eventId={event.id} images={section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : []} multiple imageUploads={imageUploads} onUpload={() => setImageUploads((count) => count + 1)} onChange={(images) => updateSection(section.id, { imageUrls: images, imageUrl: images[0] ?? "" })} /></div>}
-                    {(section.type === "ceremony" || section.type === "reception" || section.type === "story" || section.type === "custom") && <div className="editor-field"><label>Imagen de esta sección</label><CloudinaryImageUpload ensureEvent={creation ? ensureEvent : undefined} onBusyChange={(busy) => setUploadCount((count) => count + (busy ? 1 : -1))} eventId={event.id} images={section.imageUrl ? [section.imageUrl] : []} multiple={false} imageUploads={imageUploads} onUpload={() => setImageUploads((count) => count + 1)} onChange={(images) => updateSection(section.id, { imageUrl: images[0] ?? "" })} /></div>}
+                    {section.type === "gallery" && <div className="editor-field"><label>Fotos de la galería</label><CloudinaryImageUpload ensureEvent={creation ? ensureEvent : undefined} onBusyChange={(busy) => setUploadCount((count) => count + (busy ? 1 : -1))} eventId={event.id} images={section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : []} multiple onChange={(images) => updateSection(section.id, { imageUrls: images, imageUrl: images[0] ?? "" })} /></div>}
+                    {(section.type === "ceremony" || section.type === "reception" || section.type === "story" || section.type === "custom") && <div className="editor-field"><label>Imagen de esta sección</label><CloudinaryImageUpload ensureEvent={creation ? ensureEvent : undefined} onBusyChange={(busy) => setUploadCount((count) => count + (busy ? 1 : -1))} eventId={event.id} images={section.imageUrl ? [section.imageUrl] : []} multiple={false} onChange={(images) => updateSection(section.id, { imageUrl: images[0] ?? "" })} /></div>}
                     {section.type === "rsvp" && <div className="editor-field"><label htmlFor={`${base}-link`}>Enlace de confirmación o WhatsApp</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://wa.me/…" /></div>}
                     {["ceremony", "reception", "story", "custom"].includes(section.type) && <div className="editor-field"><label htmlFor={`${base}-layout`}>Composición</label><select id={`${base}-layout`} value={section.layout || "auto"} onChange={(e) => updateSection(section.id, { layout: e.target.value as InviteSection["layout"] })}><option value="auto">Automática según el contenido</option><option value="split">Dos columnas</option><option value="centered">Centrada</option><option value="card">Tarjeta</option></select></div>}
                     {section.type === "music" && <div className="editor-field"><label htmlFor={`${base}-link`}>Enlace de canción o playlist</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://…" /></div>}
@@ -319,29 +317,23 @@ function InvitationFontSelect({ role, eventType, value, onChange }: { role: Font
   </div>;
 }
 
-function CloudinaryImageUpload({ eventId, images, multiple, imageUploads, onUpload, onChange, ensureEvent, onBusyChange }: {
+function CloudinaryImageUpload({ eventId, images, multiple, onChange, ensureEvent, onBusyChange }: {
   ensureEvent?: () => Promise<string>;
   onBusyChange?: (busy: boolean) => void;
   eventId: string;
   images: string[];
   multiple: boolean;
-  imageUploads: number;
-  onUpload: () => void;
   onChange: (images: string[]) => void;
 }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const maxImages = multiple ? Math.max(0, ACCOUNT_LIMITS.imagesPerInvitation - imageUploads) : 1;
+  const maxImages = multiple ? Math.max(0, ACCOUNT_LIMITS.imagesPerGallery - images.length) : 1;
 
   async function uploadFiles(files: File[]) {
     setError("");
-    if (imageUploads >= ACCOUNT_LIMITS.imagesPerInvitation) {
-      setError(`Ya usaste las ${ACCOUNT_LIMITS.imagesPerInvitation} imágenes disponibles para esta invitación.`);
-      return;
-    }
-    const remaining = multiple ? Math.min(maxImages, ACCOUNT_LIMITS.imagesPerInvitation - images.length) : 1;
+    const remaining = maxImages;
     if (remaining <= 0) {
-      setError(imageUploads >= ACCOUNT_LIMITS.imagesPerInvitation ? `Ya se usaron las ${ACCOUNT_LIMITS.imagesPerInvitation} subidas permitidas para esta invitación.` : multiple ? "La galería ya tiene el máximo de fotos." : "Quita la imagen actual antes de subir otra.");
+      setError(`La galería ya tiene las ${ACCOUNT_LIMITS.imagesPerGallery} fotos permitidas. Quita una para agregar otra.`);
       return;
     }
     const selected = files.slice(0, remaining);
@@ -358,13 +350,14 @@ function CloudinaryImageUpload({ eventId, images, multiple, imageUploads, onUplo
         if (file.size > ACCOUNT_LIMITS.imageSizeBytes) throw new Error(`Cada imagen debe pesar ${ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB o menos.`);
         const uploadForm = new FormData();
         uploadForm.set("file", file);
+        uploadForm.set("imageScope", multiple ? "gallery" : "single");
+        uploadForm.set("activeImageCount", String(nextImages.length));
         uploadForm.set("eventId", ensureEvent ? await ensureEvent() : eventId);
         const uploadResponse = await fetch("/api/cloudinary/upload", { method: "POST", body: uploadForm });
         const uploaded = await uploadResponse.json() as { secureUrl?: string; error?: string };
         if (!uploadResponse.ok || !uploaded.secureUrl) throw new Error(uploaded.error || "No pudimos subir esta imagen.");
         nextImages.push(uploaded.secureUrl);
-        onChange(nextImages.slice(0, ACCOUNT_LIMITS.imagesPerInvitation));
-        onUpload();
+        onChange(nextImages.slice(0, ACCOUNT_LIMITS.imagesPerGallery));
       }
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : "No pudimos subir la imagen.");
@@ -383,7 +376,7 @@ function CloudinaryImageUpload({ eventId, images, multiple, imageUploads, onUplo
         if (files.length) void uploadFiles(files);
       }} />
     </label>
-    <small className="image-upload-help">JPG, PNG, WebP o AVIF · máximo {ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB por imagen · {Math.max(0, ACCOUNT_LIMITS.imagesPerInvitation - imageUploads)} subidas disponibles</small>
+    <small className="image-upload-help">JPG, PNG, WebP o AVIF · máximo {ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB por imagen {multiple && <> · {Math.max(0, ACCOUNT_LIMITS.imagesPerGallery - images.length)} de {ACCOUNT_LIMITS.imagesPerGallery} espacios disponibles en esta galería</>}</small>
     {error && <p className="image-upload-error" role="alert">{error}</p>}
     {images.length > 0 && <div className="image-upload-previews">{images.map((url, index) => <div className="image-upload-preview" key={`${url}-${index}`}>
       <Image src={url} alt={`Imagen ${index + 1}`} width={160} height={160} unoptimized />

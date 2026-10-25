@@ -110,3 +110,109 @@
   justify-content:flex-start;
   padding:var(--invite-section-space) var(--invite-gutter);
 }
+/* A continuous itinerary with a stable time column and readable activity column. */
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-content-copy {
+  width:min(100%,960px);
+  align-items:center;
+  text-align:center;
+}
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-list {
+  width:100%;
+  max-width:720px;
+  margin:40px auto 0;
+  padding:0;
+  gap:0;
+}
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-list li {
+  display:grid;
+  grid-template-columns:132px minmax(0,1fr);
+  align-items:stretch;
+  justify-items:stretch;
+  gap:0;
+  padding:0;
+  border:0;
+}
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-list li > span {
+  align-self:start;
+  justify-self:stretch;
+  max-width:none;
+  margin:0;
+  padding:4px 28px 0 0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:var(--invite-action);
+  font-size:16px;
+  font-weight:600;
+  line-height:1.75;
+  text-align:right;
+  white-space:normal;
+  font-variant-numeric:tabular-nums;
+}
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-copy {
+  position:relative;
+  width:100%;
+  min-height:88px;
+  padding:0 0 36px 32px;
+  border:0;
+  text-align:left;
+}
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-copy::after {
+  content:"";
+  position:absolute;
+  top:16px;
+  bottom:-16px;
+  left:0;
+  width:1px;
+  height:auto;
+  transform:none;
+  background:color-mix(in srgb,var(--invite-action) 22%,transparent);
+}
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-copy > i {
+  display:block;
+  position:absolute;
+  top:11px;
+  left:-4px;
+  z-index:1;
+  width:9px;
+  height:9px;
+  border:0;
+  border-radius:50%;
+  background:var(--invite-action);
+  box-shadow:0 0 0 5px var(--invite-paper);
+}
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-copy p {
+  margin:0;
+  color:var(--invite-ink);
+  font-size:clamp(17px,1.5vw,20px);
+  line-height:1.75;
+  text-align:left;
+  text-wrap:pretty;
+}
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-list li:last-child .invite-program-copy {
+  min-height:0;
+  padding-bottom:0;
+}
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-list li:last-child .invite-program-copy::after { display:none; }
+@media(max-width:600px) {
+  .invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-list { margin-top:32px; }
+  .invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-list li { grid-template-columns:90px minmax(0,1fr); }
+  .invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-list li > span { padding:2px 18px 0 0; font-size:14px; }
+  .invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-copy { padding-left:22px; padding-bottom:28px; min-height:76px; }
+  .invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-copy p { font-size:16px; }
+}
+/* Override centered and decorated layout padding with the itinerary spacing. */
+.invite-website.invite-website .invite-extra-sections .invite-content-block.invite-content-program[data-layout] .invite-content-copy {
+  padding:clamp(104px,8vw,144px) var(--invite-gutter) var(--invite-section-space);
+}
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-list {
+  margin-top:56px;
+}
+@media(max-width:600px) {
+  .invite-website.invite-website .invite-extra-sections .invite-content-block.invite-content-program[data-layout] .invite-content-copy {
+    padding-top:80px;
+  }
+  .invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-list {
+    margin-top:40px;
+  }
+}
