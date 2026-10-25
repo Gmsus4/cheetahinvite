@@ -78,3 +78,42 @@
 }
 
 .invite-website[data-decorated] .invite-extra-sections .invite-content-program .invite-content-copy{position:relative;z-index:1;padding-top:85px;padding-bottom:110px}
+.invite-website[data-decorated]:not([data-has-flower]) .invite-welcome .invite-ornament{display:none}
+.invite-website[data-decorated] .invite-content-block[data-has-section-decoration]{position:relative;isolation:isolate;overflow:hidden}
+.invite-section-decoration{position:absolute;top:32px;right:5%;z-index:2;width:76px;height:90px;pointer-events:none;user-select:none;mix-blend-mode:multiply}
+.invite-section-decoration img{object-fit:contain}
+.invite-content-program .invite-section-decoration{right:auto;left:5%}
+.invite-website[data-decorated] .invite-content-music[data-has-section-decoration]::after{display:none}
+.invite-website[data-decorated] .invite-content-program[data-has-section-decoration]::before{background-image:var(--template-top-right),var(--template-bottom-left);background-position:top right,bottom left;background-size:clamp(100px,15vw,210px) auto}
+.invite-website[data-decorated] .invite-extra-sections .invite-content-block[data-has-section-decoration]:not(.invite-content-music):not(.invite-content-program) .invite-content-copy{position:relative;z-index:1;padding-top:120px}
+.invite-website[data-template="wedding-plantilla3"]{--invite-paper:#fff7fc;--invite-panel:#f8e3f0;background:var(--invite-paper)}
+.invite-website[data-template="wedding-plantilla3"] .invite-main-location{background:var(--invite-panel)}
+.invite-website[data-template="wedding-plantilla3"] .invite-countdown-panel{background:#f7dfef}
+.invite-website[data-template="wedding-plantilla3"] .invite-website-footer,.invite-website[data-template="wedding-plantilla3"] .invite-extra-sections .invite-content-rsvp{background:#35162e}
+.invite-website[data-template="wedding-plantilla3"] .invite-extra-sections .invite-content-rsvp .invite-section-kicker{color:#f5c6e5}
+.invite-website[data-template="wedding-plantilla3"] .invite-extra-sections .invite-content-gifts{background:#f3d9ea}
+.invite-website[data-template="wedding-plantilla3"] :is(.invite-welcome,.invite-content-copy,.invite-location-main-copy,.invite-countdown-panel) h2{color:var(--invite-accent)}
+.invite-website[data-template="wedding-plantilla3"] .invite-extra-sections .invite-content-rsvp h2{color:#fff}
+.invite-website[data-template="wedding-plantilla3"] .invite-hero-kicker,.invite-website[data-template="wedding-plantilla3"] .invite-hero-event-name{color:#f6d9ee}
+.invite-website[data-template="wedding-plantilla3"] .invite-hero-date svg,.invite-website[data-template="wedding-plantilla3"] .invite-hero-button svg,.invite-website[data-template="wedding-plantilla3"] .invite-footer-ornament{color:#f2b7db}
+.invite-website[data-template="wedding-plantilla3"] .invite-countdown-panel>.invite-section-kicker{color:var(--invite-accent)}
+.invite-website[data-template="wedding-plantilla3"] .invite-gallery-open{background:#35162ecc}
+.invite-website[data-template="wedding-plantilla3"] .invite-gallery-open:hover,.invite-website[data-template="wedding-plantilla3"] .invite-gallery-arrow:hover{background:var(--invite-accent);border-color:var(--invite-accent)}
+.invite-website[data-template="wedding-plantilla3"] .invite-program-copy{border-left-color:#e6c5da}
+.invite-website[data-template="wedding-plantilla3"] .invite-program-copy>i{border-color:var(--invite-paper)}
+.invite-website[data-template="wedding-plantilla3"] .invite-program-list li:last-child .invite-program-copy{border-left-color:transparent}
+.invite-website[data-template="wedding-plantilla3"] .invite-decoration-corner.is-topLeft{mask-image:radial-gradient(ellipse at top left,#000 15%,transparent 78%)}
+.invite-website[data-template="wedding-plantilla3"] .invite-decoration-corner.is-topRight{mask-image:radial-gradient(ellipse at top right,#000 15%,transparent 78%)}
+.invite-website[data-template="wedding-plantilla3"] .invite-decoration-corner.is-bottomLeft{mask-image:radial-gradient(ellipse at bottom left,#000 15%,transparent 78%)}
+.invite-website[data-template="wedding-plantilla3"] .invite-decoration-corner.is-bottomRight{mask-image:radial-gradient(ellipse at bottom right,#000 15%,transparent 78%)}
+.invite-website[data-template="wedding-plantilla3"] .invite-section-decoration{mask-image:radial-gradient(ellipse,#000 30%,transparent 75%)}
+.invite-website[data-template="wedding-plantilla3"] .invite-content-music::before{mask-image:radial-gradient(ellipse 210px 240px at top left,#000 15%,transparent 85%),radial-gradient(ellipse 210px 240px at bottom right,#000 15%,transparent 85%)}
+.invite-website[data-template="wedding-plantilla3"] .invite-content-program::before{mask-image:radial-gradient(ellipse 210px 240px at top right,#000 15%,transparent 85%),radial-gradient(ellipse 210px 240px at bottom left,#000 15%,transparent 85%)}
+@media(max-width:760px){
+ .invite-section-decoration{top:24px;right:22px;width:48px;height:58px}
+ .invite-content-program .invite-section-decoration{left:22px}
+ .invite-website[data-decorated] .invite-content-program[data-has-section-decoration]::before{background-size:80px auto}
+ .invite-website[data-decorated] .invite-extra-sections .invite-content-block[data-has-section-decoration]:not(.invite-content-music):not(.invite-content-program) .invite-content-copy{padding-top:105px}
+ .invite-website[data-template="wedding-plantilla3"] .invite-content-music::before{mask-image:radial-gradient(ellipse 80px 100px at top left,#000 15%,transparent 85%),radial-gradient(ellipse 80px 100px at bottom right,#000 15%,transparent 85%)}
+ .invite-website[data-template="wedding-plantilla3"] .invite-content-program::before{mask-image:radial-gradient(ellipse 80px 100px at top right,#000 15%,transparent 85%),radial-gradient(ellipse 80px 100px at bottom left,#000 15%,transparent 85%)}
+}

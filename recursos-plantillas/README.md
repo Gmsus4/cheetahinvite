@@ -19,6 +19,12 @@ Conserva un solo archivo por adorno para evitar ambigüedades.
 | flor.png | Adorno pequeño de bienvenida |
 | decorate.png | Decoración adicional |
 
+Puedes agregar `decorate2.png`, `decorate3.png`, `decorate4.png`, etc.
+Se ordenan por número y se reparten entre Programa, Música, Nuestra historia,
+Código de vestimenta, Regalos, Padres, Ceremonia, Recepción, Galería, sección
+personalizada y Confirmación. Si solo existe `decorate`, Programa y Música
+lo reutilizan. Los demás adornos solo aparecen si existe el recurso adicional.
+
 Además de PNG, se admiten WebP, SVG, AVIF, JPG y JPEG. Preferir imágenes con
 transparencia y adornos de la misma colección. Los recursos ausentes se omiten;
 una plantilla sin imágenes aparece deshabilitada, con “Imágenes pendientes”.

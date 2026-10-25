@@ -14,7 +14,10 @@ export const templateManifest = [
       "separator": "/plantillas/boda/plantilla1/separator.png",
       "flower": "/plantillas/boda/plantilla1/flower.png",
       "decoration": "/plantillas/boda/plantilla1/decoration.png"
-    }
+    },
+    "decorations": [
+      "/plantillas/boda/plantilla1/decoration1.png"
+    ]
   },
   {
     "id": "plantilla2",
@@ -30,15 +33,30 @@ export const templateManifest = [
       "separator": "/plantillas/boda/plantilla2/separator.png",
       "flower": "/plantillas/boda/plantilla2/flower.png",
       "decoration": "/plantillas/boda/plantilla2/decoration.png"
-    }
+    },
+    "decorations": [
+      "/plantillas/boda/plantilla2/decoration1.png"
+    ]
   },
   {
     "id": "plantilla3",
     "eventType": "wedding",
-    "label": "Plantilla 3",
-    "available": false,
-    "accent": null,
-    "assets": {}
+    "label": "Bugambilias",
+    "available": true,
+    "accent": "#9E2467",
+    "assets": {
+      "topLeft": "/plantillas/boda/plantilla3/topLeft.png",
+      "topRight": "/plantillas/boda/plantilla3/topRight.png",
+      "bottomLeft": "/plantillas/boda/plantilla3/bottomLeft.png",
+      "bottomRight": "/plantillas/boda/plantilla3/bottomRight.png",
+      "decoration": "/plantillas/boda/plantilla3/decoration.png"
+    },
+    "decorations": [
+      "/plantillas/boda/plantilla3/decoration1.png",
+      "/plantillas/boda/plantilla3/decoration2.png",
+      "/plantillas/boda/plantilla3/decoration3.png",
+      "/plantillas/boda/plantilla3/decoration4.png"
+    ]
   },
   {
     "id": "plantilla1",
@@ -46,7 +64,8 @@ export const templateManifest = [
     "label": "Plantilla 1",
     "available": false,
     "accent": null,
-    "assets": {}
+    "assets": {},
+    "decorations": []
   },
   {
     "id": "plantilla2",
@@ -54,7 +73,8 @@ export const templateManifest = [
     "label": "Plantilla 2",
     "available": false,
     "accent": null,
-    "assets": {}
+    "assets": {},
+    "decorations": []
   },
   {
     "id": "plantilla3",
@@ -62,7 +82,8 @@ export const templateManifest = [
     "label": "Plantilla 3",
     "available": false,
     "accent": null,
-    "assets": {}
+    "assets": {},
+    "decorations": []
   },
   {
     "id": "plantilla1",
@@ -70,7 +91,8 @@ export const templateManifest = [
     "label": "Plantilla 1",
     "available": false,
     "accent": null,
-    "assets": {}
+    "assets": {},
+    "decorations": []
   },
   {
     "id": "plantilla2",
@@ -78,7 +100,8 @@ export const templateManifest = [
     "label": "Plantilla 2",
     "available": false,
     "accent": null,
-    "assets": {}
+    "assets": {},
+    "decorations": []
   },
   {
     "id": "plantilla3",
@@ -86,7 +109,8 @@ export const templateManifest = [
     "label": "Plantilla 3",
     "available": false,
     "accent": null,
-    "assets": {}
+    "assets": {},
+    "decorations": []
   },
   {
     "id": "plantilla1",
@@ -94,7 +118,8 @@ export const templateManifest = [
     "label": "Plantilla 1",
     "available": false,
     "accent": null,
-    "assets": {}
+    "assets": {},
+    "decorations": []
   },
   {
     "id": "plantilla2",
@@ -102,7 +127,8 @@ export const templateManifest = [
     "label": "Plantilla 2",
     "available": false,
     "accent": null,
-    "assets": {}
+    "assets": {},
+    "decorations": []
   },
   {
     "id": "plantilla3",
@@ -110,7 +136,8 @@ export const templateManifest = [
     "label": "Plantilla 3",
     "available": false,
     "accent": null,
-    "assets": {}
+    "assets": {},
+    "decorations": []
   },
   {
     "id": "plantilla1",
@@ -118,7 +145,8 @@ export const templateManifest = [
     "label": "Plantilla 1",
     "available": false,
     "accent": null,
-    "assets": {}
+    "assets": {},
+    "decorations": []
   },
   {
     "id": "plantilla2",
@@ -126,7 +154,8 @@ export const templateManifest = [
     "label": "Plantilla 2",
     "available": false,
     "accent": null,
-    "assets": {}
+    "assets": {},
+    "decorations": []
   },
   {
     "id": "plantilla3",
@@ -134,6 +163,7 @@ export const templateManifest = [
     "label": "Plantilla 3",
     "available": false,
     "accent": null,
-    "assets": {}
+    "assets": {},
+    "decorations": []
   }
 ];
