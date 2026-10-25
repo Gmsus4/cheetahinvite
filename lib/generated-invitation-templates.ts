@@ -59,6 +59,48 @@ export const templateManifest = [
     ]
   },
   {
+    "id": "plantilla4",
+    "eventType": "wedding",
+    "label": "Flores amarillas",
+    "available": true,
+    "accent": "#9A7418",
+    "assets": {
+      "topLeft": "/plantillas/boda/plantilla4/topLeft.png",
+      "topRight": "/plantillas/boda/plantilla4/topRight.png",
+      "bottomLeft": "/plantillas/boda/plantilla4/bottomLeft.png",
+      "bottomRight": "/plantillas/boda/plantilla4/bottomRight.png",
+      "separator": "/plantillas/boda/plantilla4/separator.png",
+      "flower": "/plantillas/boda/plantilla4/flower.png",
+      "decoration": "/plantillas/boda/plantilla4/decoration.png"
+    },
+    "decorations": [
+      "/plantillas/boda/plantilla4/decoration1.png",
+      "/plantillas/boda/plantilla4/decoration2.png"
+    ]
+  },
+  {
+    "id": "plantilla5",
+    "eventType": "wedding",
+    "label": "Flores blancas",
+    "available": true,
+    "accent": "#8C7455",
+    "assets": {
+      "topLeft": "/plantillas/boda/plantilla5/topLeft.png",
+      "topRight": "/plantillas/boda/plantilla5/topRight.png",
+      "bottomLeft": "/plantillas/boda/plantilla5/bottomLeft.png",
+      "bottomRight": "/plantillas/boda/plantilla5/bottomRight.png",
+      "flower": "/plantillas/boda/plantilla5/flower.png",
+      "decoration": "/plantillas/boda/plantilla5/decoration.png"
+    },
+    "decorations": [
+      "/plantillas/boda/plantilla5/decoration1.png",
+      "/plantillas/boda/plantilla5/decoration2.png",
+      "/plantillas/boda/plantilla5/decoration3.png",
+      "/plantillas/boda/plantilla5/decoration4.png",
+      "/plantillas/boda/plantilla5/decoration5.png"
+    ]
+  },
+  {
     "id": "plantilla1",
     "eventType": "birthday",
     "label": "Plantilla 1",

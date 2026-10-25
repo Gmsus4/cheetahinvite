@@ -9,9 +9,9 @@ require.extensions['.ts'] = (mod, filename) => mod._compile(ts.transpileModule(f
 }).outputText, filename);
 const { invitationTemplates, getInvitationTemplate, isInvitationTemplate, sectionDecoration } = require('../lib/invitation-templates.ts');
 
-test('all event types have three numbered slots and support no decoration', () => {
+test('event types retain their numbered slots and wedding includes five templates', () => {
   for (const eventType of ['wedding', 'birthday', 'graduation', 'baby_shower', 'anniversary']) {
-    assert.deepEqual(invitationTemplates.filter((t) => t.eventType === eventType).map((t) => t.id), ['plantilla1', 'plantilla2', 'plantilla3']);
+    assert.deepEqual(invitationTemplates.filter((t) => t.eventType === eventType).map((t) => t.id), eventType === 'wedding' ? ['plantilla1', 'plantilla2', 'plantilla3', 'plantilla4', 'plantilla5'] : ['plantilla1', 'plantilla2', 'plantilla3']);
     assert.equal(isInvitationTemplate(eventType, 'none'), true);
   }
 });
@@ -46,4 +46,32 @@ test('wedding template 2 resolves source filenames with spaces and its own palet
     assert.ok(template.assets[slot], `Missing ${slot}`);
     assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', template.assets[slot])));
   }
+});
+
+
+test('yellow flowers template resolves all corners and its numbered ornaments', () => {
+  const template = getInvitationTemplate('wedding', 'plantilla4');
+  assert.ok(template);
+  assert.equal(template.label, 'Flores amarillas');
+  assert.equal(template.accent, '#9A7418');
+  for (const slot of ['topLeft', 'topRight', 'bottomLeft', 'bottomRight', 'separator', 'flower', 'decoration']) {
+    assert.ok(template.assets[slot], `Missing ${slot}`);
+    assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', template.assets[slot])));
+  }
+  assert.equal(template.decorations.length, 2);
+  for (const resource of template.decorations) assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', resource)));
+});
+
+
+test('white flowers template includes its corners, flower and five ornaments', () => {
+  const template = getInvitationTemplate('wedding', 'plantilla5');
+  assert.ok(template);
+  assert.equal(template.label, 'Flores blancas');
+  assert.equal(template.accent, '#8C7455');
+  for (const slot of ['topLeft', 'topRight', 'bottomLeft', 'bottomRight', 'flower', 'decoration']) {
+    assert.ok(template.assets[slot], `Missing ${slot}`);
+    assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', template.assets[slot])));
+  }
+  assert.equal(template.decorations.length, 5);
+  for (const resource of template.decorations) assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', resource)));
 });

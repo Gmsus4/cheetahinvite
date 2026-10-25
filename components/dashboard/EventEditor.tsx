@@ -12,7 +12,7 @@ import { invitationPath, normalizeInvitationSlug } from "@/lib/invitation-url";
 import { InvitationLivePreview } from "./InvitationLivePreview";
 import Link from "next/link";
 import { useActionState, useCallback, useEffect, useRef, useState } from "react";
-import { FiArrowDown, FiArrowLeft, FiArrowUp, FiCalendar, FiCheck, FiChevronLeft, FiChevronRight, FiClock, FiEye, FiGift, FiHeart, FiImage, FiLock, FiMapPin, FiMusic, FiPlus, FiSave, FiTag, FiTrash2, FiUsers, FiX } from "react-icons/fi";
+import { FiArrowDown, FiArrowLeft, FiArrowUp, FiCalendar, FiCheck, FiChevronLeft, FiChevronRight, FiClock, FiEye, FiGift, FiHeart, FiImage, FiLock, FiMapPin, FiMaximize2, FiMusic, FiPlus, FiSave, FiTag, FiTrash2, FiUsers, FiX } from "react-icons/fi";
 import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 import { BrandEmblem } from "@/components/BrandEmblem";
 import { invitationPriceLabel, isInvitationPublished } from "@/lib/invitation-payment";
@@ -421,17 +421,14 @@ function GalleryCarousel({ images, title }: { images: string[]; title: string })
   if (!images.length) return null;
 
   return <>
-    <div className="invite-gallery-carousel" aria-label={`${title}: galería de fotos`}>
-      <div className="invite-gallery-image-frame">
-        <Image src={images[safeIndex]} alt={`${title}, foto ${safeIndex + 1} de ${images.length}`} fill sizes="(max-width: 760px) 100vw, 50vw" unoptimized />
+    <div className="invite-gallery-carousel invite-gallery-album" aria-label={`${title}: galería de fotos`}>
+      <div className="invite-gallery-stage">
+        <div className="invite-gallery-image-frame"><Image src={images[safeIndex]} alt={`${title}, foto ${safeIndex + 1} de ${images.length}`} fill sizes="(max-width: 760px) 100vw, 1100px" unoptimized /></div>
+        {images.length > 1 && <><button className="invite-gallery-arrow is-previous" type="button" aria-label="Foto anterior" onClick={() => change(-1)}><FiChevronLeft /></button><button className="invite-gallery-arrow is-next" type="button" aria-label="Foto siguiente" onClick={() => change(1)}><FiChevronRight /></button></>}
+        <button ref={openButtonRef} className="invite-gallery-open" type="button" aria-label="Ampliar fotografía" title="Ampliar fotografía" onClick={() => setLightboxOpen(true)}><FiMaximize2 aria-hidden="true" /></button>
       </div>
-      <button ref={openButtonRef} className="invite-gallery-open" type="button" onClick={() => setLightboxOpen(true)}><FiEye /> Ver imagen completa</button>
-      {images.length > 1 && <>
-        <button className="invite-gallery-arrow is-previous" type="button" aria-label="Foto anterior" onClick={() => change(-1)}><FiChevronLeft /></button>
-        <button className="invite-gallery-arrow is-next" type="button" aria-label="Foto siguiente" onClick={() => change(1)}><FiChevronRight /></button>
-        <span className="invite-gallery-count">{safeIndex + 1} / {images.length}</span>
-        <div className="invite-gallery-dots" aria-label="Selecciona una foto">{images.map((_, index) => <button key={index} type="button" aria-label={`Mostrar foto ${index + 1}`} aria-current={index === safeIndex} onClick={() => setActiveIndex(index)} />)}</div>
-      </>}
+      <div className="invite-gallery-toolbar"><span className="invite-gallery-count" role="status" aria-live="polite">{String(safeIndex + 1).padStart(2, "0")} <span>/ {String(images.length).padStart(2, "0")}</span></span></div>
+      {images.length > 1 && <div className="invite-gallery-thumbnails" aria-label="Selecciona una fotografía">{images.map((url, index) => <button key={`${url}-${index}`} type="button" aria-label={`Mostrar foto ${index + 1}`} aria-current={index === safeIndex ? "true" : undefined} onClick={() => setActiveIndex(index)}><Image src={url} alt="" width={100} height={80} unoptimized /></button>)}</div>}
     </div>
     {lightboxOpen && <div className="invite-gallery-lightbox" role="dialog" aria-modal="true" aria-label={`${title}: foto ${safeIndex + 1} de ${images.length}`} onClick={(event) => { if (event.target === event.currentTarget) setLightboxOpen(false); }}>
       <button ref={closeButtonRef} className="invite-gallery-lightbox-close" type="button" aria-label="Cerrar imagen ampliada" onClick={() => setLightboxOpen(false)}><FiX aria-hidden="true" /></button>

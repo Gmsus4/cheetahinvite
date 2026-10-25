@@ -7,7 +7,12 @@ const slots = { topLeft: 'Superior_izquierdo', topRight: 'Superior_derecho', bot
 const normalizeName = (name) => name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[\s_-]+/g, '');
 const templates = [];
 for (const [eventType, folder] of Object.entries(events)) {
-  for (let number = 1; number <= 3; number++) {
+  const eventFolder = path.join(root, 'recursos-plantillas', folder);
+  const discovered = fs.existsSync(eventFolder) ? fs.readdirSync(eventFolder, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && /^plantilla[1-9]\d*$/.test(entry.name))
+    .map((entry) => Number(entry.name.slice('plantilla'.length))) : [];
+  const numbers = [...new Set([1, 2, 3, ...discovered])].sort((a, b) => a - b);
+  for (const number of numbers) {
     const id = `plantilla${number}`;
     const source = path.join(root, 'recursos-plantillas', folder, id);
     fs.mkdirSync(source, { recursive: true });

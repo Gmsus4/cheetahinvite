@@ -5,3 +5,18 @@
 .editor-page .editor-texture-sample{display:grid;place-items:center;min-height:100px;border:1px solid #e5e0d7;border-radius:10px;background-color:#fbf7f0;background-image:var(--invite-texture,none);background-size:var(--invite-texture-size,auto);color:#63596a;font:24px Georgia,serif}
 .invite-website[data-texture]:not([data-texture="none"]) :is(.invite-welcome,.invite-main-location,.invite-countdown-panel),.invite-website[data-texture]:not([data-texture="none"]) .invite-extra-sections>.invite-content-block,.invite-website[data-texture]:not([data-texture="none"]) .invite-practical-details>.invite-content-block{background-image:var(--invite-texture);background-size:var(--invite-texture-size);background-repeat:repeat}
 .invite-website[data-texture]:not([data-texture="none"]) .invite-countdown-panel{background-color:var(--invite-panel,#eee9de)}
+
+/* Textures belong to the background; template artwork paints above them. */
+.invite-website[data-texture]:not([data-texture="none"]) :is(
+  .invite-decoration-corner,
+  .invite-section-decoration,
+  .invite-parents-ornament,
+  .invite-welcome .invite-ornament
+) {
+  mix-blend-mode: normal;
+}
+.invite-website[data-texture]:not([data-texture="none"]) .invite-content-program::before,
+.invite-website[data-texture]:not([data-texture="none"]) .invite-content-music::before,
+.invite-website[data-texture]:not([data-texture="none"]) .invite-content-music::after {
+  mix-blend-mode: normal;
+}

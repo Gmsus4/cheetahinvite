@@ -359,3 +359,121 @@
   .invite-website .invite-main-location .invite-location-main-copy { padding: 50px 8% 56px; }
   .invite-website .invite-main-location .invite-location-main-copy h2 { font-size: 39px; }
 }
+
+/* Gallery as a spacious photo album, with uncropped photos and thumbnails. */
+.invite-website .invite-extra-sections .invite-content-gallery { padding-bottom: clamp(40px, 6vw, 80px); }
+.invite-website .invite-extra-sections .invite-content-gallery .invite-content-copy { padding: 72px 28px 36px; }
+.invite-website .invite-extra-sections .invite-content-gallery .invite-content-copy h2 { font-size: clamp(36px, 4vw, 56px); }
+.invite-website .invite-extra-sections .invite-content-gallery .invite-content-body { max-width: 720px; font-size: 20px; }
+.invite-website .invite-extra-sections .invite-content-gallery .invite-content-image.invite-gallery-feature {
+  width: min(1100px, calc(100% - 64px));
+  height: auto;
+  min-height: 0;
+  margin: 0 auto;
+  background: transparent;
+  overflow: visible;
+}
+.invite-gallery-album.invite-gallery-carousel { height: auto; min-height: 0; background: transparent; overflow: visible; }
+.invite-gallery-album.invite-gallery-carousel::after { display: none; }
+.invite-gallery-stage { position: relative; height: clamp(360px, 50vw, 680px); overflow: hidden; border-radius: 20px; background: color-mix(in srgb, var(--invite-accent) 5%, var(--invite-paper, #fbf8f2)); border: 1px solid color-mix(in srgb, var(--invite-accent) 12%, transparent); }
+.invite-gallery-album .invite-gallery-image-frame { inset: 16px; width: auto; height: auto; }
+.invite-gallery-album .invite-gallery-image-frame img { object-fit: contain; }
+.invite-gallery-album .invite-gallery-arrow { width: 48px; height: 48px; background: #fffffff0; color: var(--invite-accent); border: 1px solid #00000012; box-shadow: 0 4px 20px #00000012; }
+.invite-gallery-album .invite-gallery-arrow:hover { color: #fff; background: var(--invite-accent); }
+.invite-gallery-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 2px; }
+.invite-gallery-album .invite-gallery-count { position: static; color: var(--invite-accent); font-size: 18px; font-variant-numeric: tabular-nums; letter-spacing: .08em; }
+.invite-gallery-count > span { opacity: .5; }
+.invite-gallery-album .invite-gallery-open { position: static; min-height: 44px; padding: 10px 16px; border: 1px solid color-mix(in srgb, var(--invite-accent) 25%, transparent); border-radius: 24px; background: transparent; color: var(--invite-accent); font-size: 13px; }
+.invite-gallery-album .invite-gallery-open:hover { background: var(--invite-accent); color: #fff; }
+.invite-gallery-thumbnails { display: flex; gap: 12px; padding: 4px 2px 10px; overflow-x: auto; scrollbar-width: thin; }
+.invite-gallery-thumbnails button { flex: 0 0 100px; height: 80px; padding: 4px; background: transparent; border: 2px solid transparent; border-radius: 12px; opacity: .55; cursor: pointer; transition: opacity .2s, border-color .2s; }
+.invite-gallery-thumbnails button[aria-current=true], .invite-gallery-thumbnails button:hover { opacity: 1; border-color: var(--invite-accent); }
+.invite-gallery-thumbnails img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 7px; }
+.invite-gallery-album button:focus-visible { outline: 2px solid var(--invite-accent); outline-offset: 4px; }
+@media (max-width: 760px) {
+  .invite-website .invite-extra-sections .invite-content-gallery .invite-content-copy { padding: 56px 24px 28px; }
+  .invite-website .invite-extra-sections .invite-content-gallery .invite-content-image.invite-gallery-feature { width: calc(100% - 32px); height: auto; }
+  .invite-gallery-stage { height: clamp(300px, 105vw, 520px); border-radius: 14px; }
+  .invite-gallery-album .invite-gallery-image-frame { inset: 8px; }
+  .invite-gallery-album .invite-gallery-arrow { width: 40px; height: 40px; }
+  .invite-gallery-thumbnails { gap: 8px; }
+  .invite-gallery-thumbnails button { flex-basis: 80px; height: 64px; }
+}
+
+.invite-gallery-album .invite-gallery-stage .invite-gallery-open {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid #ffffff80;
+  border-radius: 50%;
+  background: #ffffffe8;
+  color: #35332f;
+  box-shadow: 0 3px 14px #00000012;
+  cursor: pointer;
+}
+.invite-gallery-album .invite-gallery-stage .invite-gallery-open svg { width: 18px; height: 18px; }
+.invite-gallery-album .invite-gallery-stage .invite-gallery-open:hover { background: var(--invite-accent); color: #fff; border-color: var(--invite-accent); }
+.invite-gallery-album .invite-gallery-toolbar { justify-content: center; padding: 16px 2px; }
+@media (max-width: 760px) {
+  .invite-gallery-album .invite-gallery-stage .invite-gallery-open { top: 12px; right: 12px; }
+}
+
+/* Public invitation footer: 30% larger. */
+.invite-website .invite-website-footer { gap: 13px; padding: 65px 26px; }
+.invite-website.invite-wedding-editorial .invite-website-footer { padding: 42px 26px; }
+.invite-website .invite-website-footer .invite-footer-ornament { font-size: 21px; }
+.invite-website .invite-website-footer p { font-size: 17px; }
+.invite-website .invite-website-footer strong { font-size: 25px; overflow-wrap: anywhere; max-width: 100%; }
+.invite-website.invite-wedding-editorial .invite-website-footer strong { font-size: 36px; }
+.invite-website .invite-website-footer small { margin-top: 12px; font-size: 9px; }
+@media (max-width: 760px) {
+  .invite-website .invite-website-footer { padding: 52px 24px; }
+  .invite-website.invite-wedding-editorial .invite-website-footer { padding: 42px 24px; }
+}
+
+/* Match the welcome message to the story's body text at every viewport. */
+.invite-website .invite-welcome > p,
+.invite-website.invite-wedding-editorial .invite-welcome > p {
+  font-size: clamp(18.45px, 1.43vw, 21.81px);
+}
+@media (max-width: 760px) {
+  .invite-website .invite-welcome > p,
+  .invite-website.invite-wedding-editorial .invite-welcome > p { font-size: 18.45px; }
+}
+
+/* Yellow watercolor flowers: cream paper, warm gold and olive shadows. */
+.invite-website[data-template="wedding-plantilla4"] { --invite-paper: #fffdf5; --invite-panel: #f8f1d8; background: var(--invite-paper); }
+.invite-website[data-template="wedding-plantilla4"] .invite-main-location { background: var(--invite-panel); }
+.invite-website[data-template="wedding-plantilla4"] .invite-countdown-panel { background: #f8efd1; }
+.invite-website[data-template="wedding-plantilla4"] .invite-website-footer,
+.invite-website[data-template="wedding-plantilla4"] .invite-extra-sections .invite-content-rsvp { background: #343321; }
+.invite-website[data-template="wedding-plantilla4"] .invite-extra-sections .invite-content-gifts { background: #f4e9c5; }
+.invite-website[data-template="wedding-plantilla4"] :is(.invite-welcome,.invite-content-copy,.invite-location-main-copy,.invite-countdown-panel) h2 { color: var(--invite-accent); }
+.invite-website[data-template="wedding-plantilla4"] .invite-extra-sections .invite-content-rsvp h2 { color: #fff; }
+.invite-website[data-template="wedding-plantilla4"] .invite-extra-sections .invite-content-rsvp .invite-section-kicker,
+.invite-website[data-template="wedding-plantilla4"] .invite-footer-ornament,
+.invite-website[data-template="wedding-plantilla4"] .invite-hero-date svg { color: #f1d680; }
+.invite-website[data-template="wedding-plantilla4"] .invite-hero-kicker,
+.invite-website[data-template="wedding-plantilla4"] .invite-hero-event-name { color: #fff1c2; }
+.invite-website[data-template="wedding-plantilla4"] .invite-countdown-panel > .invite-section-kicker { color: var(--invite-accent); }
+
+/* White roses: ivory paper with champagne and warm taupe accents. */
+.invite-website[data-template="wedding-plantilla5"] { --invite-paper: #fffdf8; --invite-panel: #f3eee5; background: var(--invite-paper); }
+.invite-website[data-template="wedding-plantilla5"] .invite-main-location { background: var(--invite-panel); }
+.invite-website[data-template="wedding-plantilla5"] .invite-countdown-panel { background: #f2eadd; }
+.invite-website[data-template="wedding-plantilla5"] .invite-website-footer,
+.invite-website[data-template="wedding-plantilla5"] .invite-extra-sections .invite-content-rsvp { background: #38332b; }
+.invite-website[data-template="wedding-plantilla5"] .invite-extra-sections .invite-content-gifts { background: #eee5d8; }
+.invite-website[data-template="wedding-plantilla5"] :is(.invite-welcome,.invite-content-copy,.invite-location-main-copy,.invite-countdown-panel) h2 { color: var(--invite-accent); }
+.invite-website[data-template="wedding-plantilla5"] .invite-extra-sections .invite-content-rsvp h2 { color: #fff; }
+.invite-website[data-template="wedding-plantilla5"] .invite-extra-sections .invite-content-rsvp .invite-section-kicker,
+.invite-website[data-template="wedding-plantilla5"] .invite-footer-ornament,
+.invite-website[data-template="wedding-plantilla5"] .invite-hero-date svg { color: #e8d4b7; }
+.invite-website[data-template="wedding-plantilla5"] .invite-hero-kicker,
+.invite-website[data-template="wedding-plantilla5"] .invite-hero-event-name { color: #f7ecdc; }
+.invite-website[data-template="wedding-plantilla5"] .invite-countdown-panel > .invite-section-kicker { color: var(--invite-accent); }
