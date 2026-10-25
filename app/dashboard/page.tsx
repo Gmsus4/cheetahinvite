@@ -67,8 +67,8 @@ async function DashboardData() {
 
 function DashboardLoading() {
   return (
-    <main className="dashboard-loading" aria-label="Cargando tu panel">
-      <BrandEmblem size={43} className="dashboard-loading-mark" />
+    <main className="dashboard-loading dashboard-loading-animated" role="status" aria-label="Cargando tu panel">
+      <div className="dashboard-loading-orbit" aria-hidden="true"><BrandEmblem size={100} className="dashboard-loading-mark" priority /></div>
       <p>Preparando tu espacio para celebrar…</p>
     </main>
   );

@@ -178,3 +178,184 @@
 .invite-website .invite-content-program {
   --template-bottom-left: none;
 }
+
+/* Public invitation: enlarge additional sections by approximately 30%; gallery retains its larger size. */
+.invite-website .invite-extra-sections > .invite-content-block,
+.invite-website .invite-extra-sections .invite-practical-details > .invite-content-block {
+  min-height: 436.13px;
+}
+/* Public invitation: enlarge additional sections by approximately 30%; gallery retains its larger size. */
+.invite-website .invite-extra-sections > .invite-content-gallery,
+.invite-website .invite-extra-sections .invite-practical-details > .invite-content-gallery {
+  min-height: 520px;
+}
+.invite-website .invite-extra-sections .invite-content-block .invite-content-copy {
+  width: 100%;
+  padding: clamp(57.03px, 6.5vw, 114.06px) clamp(23.48px, 5.03vw, 93.94px);
+}
+
+.invite-website .invite-extra-sections .invite-content-gallery .invite-content-copy {
+  width: 100%;
+  padding: clamp(68px, 7.75vw, 136px) clamp(28px, 6vw, 112px);
+}
+.invite-website .invite-extra-sections .invite-content-block:not(.has-section-image) .invite-content-copy {
+  width: min(100%, 1174.19px);
+  padding: clamp(57.03px, 6.5vw, 104px) clamp(23.48px, 5.03vw, 93.94px);
+}
+
+.invite-website .invite-extra-sections .invite-content-gallery:not(.has-section-image) .invite-content-copy {
+  width: min(100%, 1400px);
+  padding: clamp(68px, 7.75vw, 124px) clamp(28px, 6vw, 112px);
+}
+.invite-website .invite-extra-sections .invite-content-block .invite-content-copy h2 {
+  max-width: 989.68px;
+  font-size: clamp(38.58px, 3.9vw, 62.06px);
+}
+
+.invite-website .invite-extra-sections .invite-content-gallery .invite-content-copy h2 {
+  max-width: 1180px;
+  font-size: clamp(46px, 4.65vw, 74px);
+}
+.invite-website .invite-extra-sections .invite-content-block .invite-content-body {
+  max-width: 855.48px;
+  font-size: clamp(18.45px, 1.43vw, 21.81px);
+}
+
+.invite-website .invite-extra-sections .invite-content-gallery .invite-content-body {
+  max-width: 1020px;
+  font-size: clamp(22px, 1.7vw, 26px);
+}
+.invite-website .invite-extra-sections .invite-content-block .invite-content-detail { font-size: 18.45px; }
+
+.invite-website .invite-extra-sections .invite-content-gallery .invite-content-detail { font-size: 22px; }
+.invite-website .invite-extra-sections .invite-content-block .invite-section-kicker { font-size: 13px; }
+
+.invite-website .invite-extra-sections .invite-content-gallery .invite-section-kicker { font-size: 15.5px; }
+.invite-website .invite-extra-sections .invite-content-block .invite-content-icon { width: 52px; height: 52px; }
+
+.invite-website .invite-extra-sections .invite-content-gallery .invite-content-icon { width: 62px; height: 62px; }
+.invite-website .invite-extra-sections .invite-content-block .invite-content-icon svg { width: 23.48px; height: 23.48px; }
+
+.invite-website .invite-extra-sections .invite-content-gallery .invite-content-icon svg { width: 28px; height: 28px; }
+.invite-website .invite-extra-sections .invite-content-block .invite-static-link {
+  font-size: 15.1px;
+  padding: 15.1px 21.81px;
+  gap: 12.58px;
+  max-width: 100%;
+  white-space: normal;
+}
+
+.invite-website .invite-extra-sections .invite-content-gallery .invite-static-link {
+  font-size: 18px;
+  padding: 18px 26px;
+  gap: 15px;
+  max-width: 100%;
+  white-space: normal;
+}
+.invite-website .invite-extra-sections .invite-content-block .invite-static-link svg { width: 18.45px; height: 18.45px; }
+
+.invite-website .invite-extra-sections .invite-content-gallery .invite-static-link svg { width: 22px; height: 22px; }
+.invite-website .invite-extra-sections .invite-content-block .invite-content-image { min-height: 545.16px; }
+
+.invite-website .invite-extra-sections .invite-content-gallery .invite-content-image { min-height: 650px; }
+.invite-website .invite-extra-sections .invite-content-gallery .invite-gallery-feature { height: clamp(496px, 60vw, 1054px); }
+.invite-website .invite-extra-sections .invite-content-program .invite-program-list { max-width: 922.58px; margin-top: 52px; }
+.invite-website .invite-extra-sections .invite-content-program .invite-program-list li > span {
+  margin-top: 15.1px;
+  padding: 9.23px 15.94px;
+  font-size: 16.77px;
+  border-radius: 31.87px;
+}
+.invite-website .invite-extra-sections .invite-content-program .invite-program-copy { padding: 20.97px 20.13px 46.97px; }
+.invite-website .invite-extra-sections .invite-content-program .invite-program-copy p { font-size: 21.81px; }
+.invite-website .invite-extra-sections .invite-content-program .invite-program-copy::after { height: 26px; bottom: 5.03px; }
+.invite-website .invite-extra-sections .invite-content-program .invite-program-list li:last-child .invite-program-copy { padding-bottom: 15.1px; }
+.invite-website .invite-extra-sections .invite-parents-tribute .invite-parents-list { gap: 57.03px 58.71px; margin-top: 52px; }
+.invite-website .invite-extra-sections .invite-parents-tribute .invite-parents-list li {
+  flex-basis: 335.48px;
+  max-width: 494.84px;
+  font-size: clamp(30.19px, 3.35vw, 41.94px);
+}
+.invite-website .invite-extra-sections .invite-parents-tribute .invite-parents-and { font-size: 31.03px; margin: 7.55px 0; }
+.invite-website .invite-extra-sections .invite-parents-tribute .invite-parents-rule { width: 62.06px; margin-bottom: 28.52px; }
+.invite-website .invite-extra-sections .invite-parents-ornament { width: 182px; height: 130px; margin-bottom: 31.03px; }
+.invite-website .invite-extra-sections .invite-parents-tribute .invite-decoration-corner { width: clamp(104px, 15.1vw, 221.42px); }
+.invite-website .invite-extra-sections .invite-section-decoration { width: 98.97px; height: 117.42px; }
+
+.invite-website .invite-extra-sections .invite-content-gallery .invite-section-decoration { width: 118px; height: 140px; }
+.invite-website[data-decorated] .invite-extra-sections .invite-content-block[data-has-section-decoration]:not(.invite-content-music):not(.invite-content-program) .invite-content-copy { padding-top: 156px; }
+
+.invite-website[data-decorated] .invite-extra-sections .invite-content-gallery[data-has-section-decoration]:not(.invite-content-music):not(.invite-content-program) .invite-content-copy { padding-top: 186px; }
+@media (max-width: 760px) {
+  .invite-website .invite-extra-sections > .invite-content-block,
+  .invite-website .invite-extra-sections .invite-practical-details > .invite-content-block { min-height: 0; }
+
+  .invite-website .invite-extra-sections > .invite-content-gallery,
+  .invite-website .invite-extra-sections .invite-practical-details > .invite-content-gallery { min-height: 0; }
+  .invite-website .invite-extra-sections .invite-content-block .invite-content-copy,
+  .invite-website .invite-extra-sections .invite-content-block:not(.has-section-image) .invite-content-copy {
+    padding: 57.03px 20.13px;
+  }
+
+  .invite-website .invite-extra-sections .invite-content-gallery .invite-content-copy,
+  .invite-website .invite-extra-sections .invite-content-gallery:not(.has-section-image) .invite-content-copy {
+    padding: 68px 24px;
+  }
+  .invite-website .invite-extra-sections .invite-content-block .invite-content-copy h2 { font-size: 41.1px; overflow-wrap: anywhere; }
+
+  .invite-website .invite-extra-sections .invite-content-gallery .invite-content-copy h2 { font-size: 49px; overflow-wrap: anywhere; }
+  .invite-website .invite-extra-sections .invite-content-block .invite-content-body { font-size: 18.45px; }
+
+  .invite-website .invite-extra-sections .invite-content-gallery .invite-content-body { font-size: 22px; }
+  .invite-website .invite-extra-sections .invite-content-block .invite-content-image { min-height: 0; height: clamp(335.48px, 83.87vw, 545.16px); }
+
+  .invite-website .invite-extra-sections .invite-content-gallery .invite-content-image { min-height: 0; height: clamp(400px, 100vw, 650px); }
+  .invite-website .invite-extra-sections .invite-content-gallery .invite-gallery-feature { height: 496px; }
+  .invite-website .invite-extra-sections .invite-content-program .invite-program-list { margin-top: 38.58px; }
+  .invite-website .invite-extra-sections .invite-content-program .invite-program-list li > span { font-size: 14.26px; padding: 7.55px 10.06px; }
+  .invite-website .invite-extra-sections .invite-content-program .invite-program-copy p { font-size: 19.29px; }
+  .invite-website .invite-extra-sections .invite-parents-tribute .invite-parents-list { gap: 46.97px; margin-top: 38.58px; }
+  .invite-website .invite-extra-sections .invite-parents-tribute .invite-parents-list li { flex-basis: 100%; }
+  .invite-website .invite-extra-sections .invite-parents-ornament { width: 142.58px; height: 104px; }
+  .invite-website .invite-extra-sections .invite-section-decoration { width: 62.06px; height: 75.48px; }
+
+  .invite-website .invite-extra-sections .invite-content-gallery .invite-section-decoration { width: 74px; height: 90px; }
+  .invite-website[data-decorated] .invite-extra-sections .invite-content-block[data-has-section-decoration]:not(.invite-content-music):not(.invite-content-program) .invite-content-copy { padding-top: 135.87px; }
+
+  .invite-website[data-decorated] .invite-extra-sections .invite-content-gallery[data-has-section-decoration]:not(.invite-content-music):not(.invite-content-program) .invite-content-copy { padding-top: 162px; }
+}
+
+
+/* Welcome shares the more spacious 30% presentation. */
+.invite-website .invite-welcome { max-width: 1027px; padding: 135px 32px 129px; }
+.invite-website .invite-welcome h2 { font-size: clamp(42px, 4.68vw, 60px); }
+.invite-website .invite-welcome > p { max-width: 767px; font-size: 21px; margin-top: 25px; margin-bottom: 23px; }
+.invite-website.invite-wedding-editorial .invite-welcome > p { font-size: 18px; }
+.invite-website .invite-welcome > strong { font-size: 16px; }
+.invite-website[data-decorated] .invite-welcome { max-width: none; padding: 130px 32px 143px; }
+.invite-website[data-decorated] .invite-welcome > :is(h2,p,strong) { max-width: min(780px, 72%); }
+.invite-website[data-decorated] .invite-welcome .invite-ornament { width: 94px; height: 81px; margin-bottom: 26px; }
+@media (max-width: 760px) {
+  .invite-website .invite-welcome { padding: 88px 24px 85px; }
+  .invite-website .invite-welcome h2 { font-size: 42px; }
+  .invite-website .invite-welcome > p { font-size: 18px; }
+  .invite-website[data-decorated] .invite-welcome { padding: 104px 24px 124px; }
+  .invite-website[data-decorated] .invite-welcome > :is(h2,p,strong) { max-width: 85%; }
+}
+
+/* Give the save-the-date location the same 30% increase. */
+.invite-website .invite-main-location { min-height: 520px; }
+.invite-website .invite-main-location .invite-location-photo { min-height: 520px; padding: 39px; }
+.invite-website .invite-main-location .invite-location-main-copy { padding: 78px 12%; }
+.invite-website .invite-main-location .invite-location-main-copy h2 { font-size: clamp(39px, 4.42vw, 57px); overflow-wrap: anywhere; }
+.invite-website .invite-main-location .invite-section-kicker { font-size: 13px; margin-bottom: 22px; }
+.invite-website .invite-main-location .invite-location-address { margin-top: 17px; font-size: 18px; }
+.invite-website .invite-main-location .invite-static-link { font-size: 16px; padding: 16px 22px; max-width: 100%; white-space: normal; }
+.invite-website .invite-main-location .invite-static-link svg { width: 20px; height: 20px; }
+.invite-website .invite-main-location .invite-photo-caption { font-size: 12px; }
+@media (max-width: 760px) {
+  .invite-website .invite-main-location { min-height: 0; }
+  .invite-website .invite-main-location .invite-location-photo { min-height: 351px; padding: 30px; }
+  .invite-website .invite-main-location .invite-location-main-copy { padding: 50px 8% 56px; }
+  .invite-website .invite-main-location .invite-location-main-copy h2 { font-size: 39px; }
+}
