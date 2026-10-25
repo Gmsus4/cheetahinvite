@@ -89,7 +89,11 @@ export function InvitationLivePreview({ children, expanded = false, onClose }: {
       const href = link?.getAttribute("href");
       if (!href?.startsWith("#")) return;
       const target = preview.getElementById(href.slice(1));
-      if (target) { event.preventDefault(); target.scrollIntoView({ behavior: "smooth" }); }
+      if (target) {
+        event.preventDefault();
+        const reducedMotion = preview.defaultView?.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        target.scrollIntoView({ behavior: reducedMotion ? "instant" : "smooth" });
+      }
     };
     preview.addEventListener("click", navigateWithinPreview);
     return () => { observer.disconnect(); preview.removeEventListener("click", navigateWithinPreview); };
