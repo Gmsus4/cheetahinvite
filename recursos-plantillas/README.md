@@ -26,11 +26,14 @@ una plantilla sin imágenes aparece deshabilitada, con “Imágenes pendientes�
 Opcionalmente añade `plantilla.json` con el color principal recomendado:
 
 ```json
-{ "primaryColor": "#77518A" }
+{ "name": "Jardín de azafrán", "primaryColor": "#77518A" }
 ```
 
 Ese color se aplica al seleccionar la plantilla; después se puede personalizar
 desde “Color principal” en el editor. Plantilla 1 de boda usa morado.
+
+`name` define el nombre visible en el editor. Las carpetas conservan sus nombres
+`plantilla1`, `plantilla2` y `plantilla3` aunque cambie el nombre mostrado.
 
 Conserva en cada carpeta el origen y la licencia de tus recursos.
 

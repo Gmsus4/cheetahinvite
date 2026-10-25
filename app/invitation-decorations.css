@@ -28,11 +28,10 @@
 .invite-website[data-decorated] .invite-welcome>h2,.invite-website[data-decorated] .invite-welcome>p,.invite-website[data-decorated] .invite-welcome>strong{position:relative;z-index:1;max-width:min(600px,64%);margin-right:auto;margin-left:auto}
 .invite-website[data-decorated] .invite-welcome .invite-ornament{position:relative;z-index:1;width:72px;height:62px;margin:0 auto 20px;font-size:0;background-image:var(--template-flower);background-position:center;background-size:contain;background-repeat:no-repeat;mix-blend-mode:multiply}
 .invite-website[data-decorated] .invite-content-program{position:relative;isolation:isolate}
-.invite-website[data-decorated] .invite-content-program>.invite-content-copy::before{display:block;flex:none;width:65px;height:110px;margin:0 auto 20px;background-image:var(--template-separator);background-position:center;background-size:contain;background-repeat:no-repeat;mix-blend-mode:multiply;content:""}
-.invite-website[data-decorated] .invite-content-program::before{position:absolute;top:32px;right:5%;z-index:-1;width:100px;height:110px;background-image:var(--template-decoration);background-position:center;background-size:contain;background-repeat:no-repeat;mix-blend-mode:multiply;opacity:.8;pointer-events:none;content:""}
+.invite-website[data-decorated] .invite-content-program::before{position:absolute;inset:0;z-index:0;background-image:var(--template-top-right),var(--template-bottom-left),var(--template-decoration);background-position:top right,bottom left,5% 30px;background-size:clamp(100px,15vw,210px) auto,clamp(100px,15vw,210px) auto,76px auto;background-repeat:no-repeat;mix-blend-mode:multiply;pointer-events:none;content:""}
 .invite-website[data-decorated] .invite-countdown-panel{position:relative;isolation:isolate;padding-bottom:100px;background:#f5eff4}
 .invite-website[data-decorated] .invite-countdown-panel>.invite-decoration-frame~*{position:relative;z-index:1}
-@media(max-width:760px){.invite-decoration-corner{width:95px}.invite-website[data-decorated] .invite-welcome{padding:80px 20px 95px}.invite-website[data-decorated] .invite-welcome>h2,.invite-website[data-decorated] .invite-welcome>p{max-width:80%}.invite-website[data-decorated] .invite-content-program::before{top:24px;right:16px;width:52px;height:60px;opacity:.5}.invite-website[data-decorated] .invite-countdown-panel{padding-bottom:95px}.invite-website[data-decorated] .invite-countdown-panel .invite-decoration-corner{width:80px}}
+@media(max-width:760px){.invite-decoration-corner{width:95px}.invite-website[data-decorated] .invite-welcome{padding:80px 20px 95px}.invite-website[data-decorated] .invite-welcome>h2,.invite-website[data-decorated] .invite-welcome>p{max-width:80%}.invite-website[data-decorated] .invite-content-program::before{background-size:80px auto,80px auto,45px auto;background-position:top right,bottom left,22px 25px}.invite-website[data-decorated] .invite-countdown-panel{padding-bottom:95px}.invite-website[data-decorated] .invite-countdown-panel .invite-decoration-corner{width:80px}}
 .invite-website[data-template="wedding-plantilla1"]{--invite-paper:#faf7fc;--invite-panel:#f0e8f4;background:var(--invite-paper)}
 .invite-website[data-template="wedding-plantilla1"] .invite-main-location{background:var(--invite-panel)}
 .invite-website[data-template="wedding-plantilla1"] .invite-countdown-panel{background:#f1e8f4}
@@ -51,7 +50,6 @@
 .invite-website[data-template="wedding-plantilla1"] .invite-hero-kicker,.invite-website[data-template="wedding-plantilla1"] .invite-hero-event-name{color:#e9dcf1}
 .invite-website[data-template="wedding-plantilla1"] .invite-hero-date svg,.invite-website[data-template="wedding-plantilla1"] .invite-hero-button svg{color:#d8bce8}
 .invite-website[data-template="wedding-plantilla1"] .invite-countdown-panel>.invite-section-kicker{color:var(--invite-accent)}
-.invite-website[data-decorated]:not([data-has-separator]) .invite-content-program>.invite-content-copy::before{display:none}
 .invite-website[data-template="wedding-plantilla2"]{--invite-paper:#fff9fb;--invite-panel:#faeaf1;background:var(--invite-paper)}
 .invite-website[data-template="wedding-plantilla2"] .invite-main-location{background:var(--invite-panel)}
 .invite-website[data-template="wedding-plantilla2"] .invite-countdown-panel{background:#f9e7ef}
@@ -69,3 +67,14 @@
 .invite-website[data-template="wedding-plantilla2"] .invite-program-copy{border-left-color:#e6c8d5}
 .invite-website[data-template="wedding-plantilla2"] .invite-program-copy>i{border-color:var(--invite-paper)}
 .invite-website[data-template="wedding-plantilla2"] .invite-program-list li:last-child .invite-program-copy{border-left-color:transparent}
+.invite-website[data-decorated] .invite-content-music{position:relative;isolation:isolate;overflow:hidden}
+.invite-website[data-decorated] .invite-content-music::before{position:absolute;z-index:0;inset:0;background-image:var(--template-top-left),var(--template-bottom-right);background-position:top left,bottom right;background-size:clamp(100px,15vw,210px) auto;background-repeat:no-repeat;mix-blend-mode:multiply;pointer-events:none;content:""}
+.invite-website[data-decorated] .invite-content-music::after{position:absolute;z-index:0;top:36px;right:5%;width:76px;height:86px;background-image:var(--template-decoration);background-position:center;background-size:contain;background-repeat:no-repeat;mix-blend-mode:multiply;opacity:.75;pointer-events:none;content:""}
+.invite-website[data-decorated] .invite-extra-sections .invite-content-music:not(.has-section-image) .invite-content-copy{position:relative;z-index:1;padding:75px clamp(40px,8vw,120px) 110px}
+@media(max-width:760px){
+ .invite-website[data-decorated] .invite-content-music::before{background-size:80px auto}
+ .invite-website[data-decorated] .invite-content-music::after{top:25px;right:22px;width:45px;height:55px;opacity:.6}
+ .invite-website[data-decorated] .invite-extra-sections .invite-content-music:not(.has-section-image) .invite-content-copy{padding:85px 32px 115px}
+}
+
+.invite-website[data-decorated] .invite-extra-sections .invite-content-program .invite-content-copy{position:relative;z-index:1;padding-top:85px;padding-bottom:110px}

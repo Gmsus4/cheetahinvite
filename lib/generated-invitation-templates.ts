@@ -3,7 +3,7 @@ export const templateManifest = [
   {
     "id": "plantilla1",
     "eventType": "wedding",
-    "label": "Plantilla 1",
+    "label": "Jardín de azafrán",
     "available": true,
     "accent": "#77518A",
     "assets": {
@@ -19,7 +19,7 @@ export const templateManifest = [
   {
     "id": "plantilla2",
     "eventType": "wedding",
-    "label": "Plantilla 2",
+    "label": "Flor de cerezo",
     "available": true,
     "accent": "#A83D68",
     "assets": {
