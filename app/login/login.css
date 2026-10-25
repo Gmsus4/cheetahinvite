@@ -1,0 +1,29 @@
+.login-illustration {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 380px);
+  margin: 28px 0 46px auto;
+  pointer-events: none;
+}
+
+.login-illustration img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter:
+    drop-shadow(2px 0 0 #fff)
+    drop-shadow(-2px 0 0 #fff)
+    drop-shadow(0 2px 0 #fff)
+    drop-shadow(0 -2px 0 #fff);
+}
+
+@media (max-width: 620px) {
+  .login-page .login-form-panel {
+    order: -1;
+  }
+
+  .login-illustration {
+    width: min(100%, 260px);
+    margin: 20px auto 36px;
+  }
+}

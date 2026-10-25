@@ -1,38 +1,13 @@
-import { FiArrowUpRight, FiAward, FiGift, FiHeart } from "react-icons/fi";
-
-const templates = [
-  {
-    name: "Jardín eterno",
-    type: "Boda",
-    eventType: "wedding",
-    tone: "garden",
-    mark: FiHeart,
-    detail: "Sofía & Mateo",
-  },
-  {
-    name: "Un día de estrellas",
-    type: "Cumpleaños",
-    eventType: "birthday",
-    tone: "stars",
-    mark: FiGift,
-    detail: "Emma cumple 5",
-  },
-  {
-    name: "El gran comienzo",
-    type: "Graduación",
-    eventType: "graduation",
-    tone: "grad",
-    mark: FiAward,
-    detail: "Lo logramos",
-  },
-];
+import { FiArrowUpRight } from "react-icons/fi";
+import { landingInvitationStyles } from "@/lib/landing-invitation-example";
+import { InvitationExampleFrame } from "./InvitationExampleFrame";
 
 export function TemplateGallery() {
   return (
-    <section className="templates-section" id="plantillas">
+    <section className="templates-section" id="personalizacion">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">DISEÑOS CON MUCHO CORAZÓN</span>
+          <span className="eyebrow">LOS DETALLES HACEN LA DIFERENCIA</span>
           <h2>
             Una invitación
             <br />
@@ -40,43 +15,29 @@ export function TemplateGallery() {
           </h2>
         </div>
         <p>
-          Elige un punto de partida y hazlo tuyo. Cada detalle está pensado para
-          que tu evento se sienta especial desde el primer clic.
+          Tus datos, tus fotos y los detalles que van contigo. Personaliza los
+          colores, las letras y las decoraciones de tu invitación.
         </p>
       </div>
 
-      <div className="template-grid">
-        {templates.map((template, index) => (
-          <article className="template-item" key={template.name}>
-            <div className={`template-preview ${template.tone}`}>
-              <span className="template-number">0{index + 1}</span>
-              <div className="template-ornament">
-                <template.mark aria-hidden="true" />
-              </div>
-              <div className="template-title">{template.detail}</div>
-              <div className="template-date">UNA FECHA · UN RECUERDO</div>
-              <a
-                className="template-arrow"
-                href={`/crear?tipo=${template.eventType}`}
-                aria-label={`Elegir plantilla ${template.name}`}
-              >
-                <FiArrowUpRight aria-hidden="true" />
-              </a>
+      <p className="personalization-note">La misma invitación, con diferentes decoraciones disponibles en el editor.</p>
+      <div className="personalization-grid">
+        {landingInvitationStyles.map(({ slug, template }) => (
+          <article className="personalization-example" key={slug}>
+            <div className="personalization-example-preview">
+              <InvitationExampleFrame styleSlug={slug} label={template.label} decorationOnly />
             </div>
-            <div className="template-meta">
-              <div>
-                <h3>{template.name}</h3>
-                <span>{template.type}</span>
-              </div>
-              <span className="template-count">0{index + 1}</span>
+            <div className="personalization-example-meta">
+              <h3>{template.label}</h3>
+              <span>Decoración para boda</span>
             </div>
           </article>
         ))}
       </div>
 
       <div className="center-link">
-        <a className="text-link" href="/plantillas">
-          Ver todas las plantillas <span><FiArrowUpRight aria-hidden="true" /></span>
+        <a className="text-link" href="#como-funciona">
+          Conoce cómo funciona <span><FiArrowUpRight aria-hidden="true" /></span>
         </a>
       </div>
     </section>

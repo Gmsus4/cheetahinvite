@@ -6,6 +6,7 @@ import { Navbar } from "@/components/landing/Navbar";
 import { Pricing } from "@/components/landing/Pricing";
 import { TemplateGallery } from "@/components/landing/TemplateGallery";
 import { TrustStrip } from "@/components/landing/TrustStrip";
+import "./landing-home.css";
 
 export default function Home() {
   return (
@@ -25,7 +26,7 @@ async function AuthenticatedHome() {
 
 function LandingContent() {
   return (
-    <main>
+    <main className="landing-home">
       <Navbar />
       <Hero />
       <TrustStrip />

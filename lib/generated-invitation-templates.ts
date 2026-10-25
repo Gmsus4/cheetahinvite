@@ -49,6 +49,7 @@ export const templateManifest = [
       "topRight": "/plantillas/boda/plantilla3/topRight.png",
       "bottomLeft": "/plantillas/boda/plantilla3/bottomLeft.png",
       "bottomRight": "/plantillas/boda/plantilla3/bottomRight.png",
+      "flower": "/plantillas/boda/plantilla3/flower.png",
       "decoration": "/plantillas/boda/plantilla3/decoration.png"
     },
     "decorations": [

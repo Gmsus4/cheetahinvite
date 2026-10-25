@@ -1,22 +1,22 @@
-import { FiArrowUpRight, FiEdit3, FiGrid, FiSend } from "react-icons/fi";
+import { FiArrowUpRight, FiCalendar, FiEdit3, FiSend } from "react-icons/fi";
 
 const steps = [
   {
     number: "01",
-    title: "Elige tu diseño",
-    description: "Encuentra una plantilla que vaya con tu celebración y hazla tuya.",
-    symbol: FiGrid,
+    title: "Crea tu evento",
+    description: "Agrega el nombre, la fecha, el lugar y los demás datos de tu celebración.",
+    symbol: FiCalendar,
   },
   {
     number: "02",
-    title: "Personaliza cada detalle",
-    description: "Agrega la información, tus fotos y ese toque que solo tú puedes darle.",
+    title: "Dale tu estilo",
+    description: "Incorpora tus fotos y elige colores, tipografía y decoraciones.",
     symbol: FiEdit3,
   },
   {
     number: "03",
-    title: "Comparte y celebra",
-    description: "Envía un solo enlace y recibe las confirmaciones de tus invitados.",
+    title: "Comparte tu invitación",
+    description: "Publica tu invitación y envía el enlace a tus invitados.",
     symbol: FiSend,
   },
 ];
@@ -31,13 +31,15 @@ export function HowItWorks() {
           <br />
           <em>Más emoción.</em>
         </h2>
-        <p>
-          Todo lo que necesitas para invitar, organizar y celebrar, en un solo
-          lugar.
-        </p>
-        <a className="button button-light" href="/crear">
-          Empieza a crear <span><FiArrowUpRight aria-hidden="true" /></span>
-        </a>
+        <div className="how-summary">
+          <p>
+            Todo lo que necesitas para invitar, organizar y celebrar, en un solo
+            lugar.
+          </p>
+          <a className="how-details-link" href="#precios">
+            Ver qué incluye <FiArrowUpRight aria-hidden="true" />
+          </a>
+        </div>
       </div>
 
       <div className="steps">

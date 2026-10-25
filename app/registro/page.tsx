@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { FiArrowLeft } from "react-icons/fi";
 import { BrandEmblem } from "@/components/BrandEmblem";
 import { RegisterForm } from "@/components/login/RegisterForm";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
 export const metadata: Metadata = {
   title: "Crear cuenta | Cheetah Invite",
@@ -12,11 +14,11 @@ export default function RegisterPage() {
   return (
     <main className="login-page">
       <header className="login-topbar">
-        <a className="brand" href="/" aria-label="Cheetah Invite, inicio">
+        <Link className="brand" href="/" aria-label="Cheetah Invite, inicio">
           <BrandEmblem size={40} priority />
           <span className="brand-name">Cheetah<span>Invite</span></span>
-        </a>
-        <a className="login-back" href="/"><FiArrowLeft aria-hidden="true" /> Volver al inicio</a>
+        </Link>
+        <Link className="login-back" href="/"><FiArrowLeft aria-hidden="true" /> Volver al inicio</Link>
       </header>
 
       <div className="login-layout register-layout">
@@ -48,11 +50,13 @@ export default function RegisterPage() {
           <div className="login-form-wrap">
             <span className="login-kicker">TU ESPACIO CHEETAH INVITE</span>
             <h2 id="register-title">Crea tu cuenta</h2>
-            <p className="login-description">Regístrate con tu correo para comenzar a crear.</p>
+            <p className="login-description">Regístrate con Google o con tu correo para comenzar a crear.</p>
+            <GoogleSignInButton />
+            <div className="auth-divider"><span>o regístrate con tu correo</span></div>
             <RegisterForm />
-            <p className="login-help">¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></p>
+            <p className="login-help">¿Ya tienes cuenta? <Link href="/login">Inicia sesión</Link></p>
           </div>
-          <small className="login-legal">Al continuar, aceptas nuestros <a href="/terminos">Términos y condiciones</a> y <a href="/aviso-de-privacidad">Aviso de privacidad</a>.</small>
+          <small className="login-legal">Al continuar, aceptas nuestros <Link href="/terminos">Términos y condiciones</Link> y <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>.</small>
         </section>
       </div>
     </main>

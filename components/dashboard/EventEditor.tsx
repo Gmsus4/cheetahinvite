@@ -21,6 +21,7 @@ import { invitationExternalUrl, invitationLinkLabel, invitationMapUrl } from "@/
 import { defaultButtonAppearance, eventButtonAppearance, type InvitationButtonAppearance } from "@/lib/invitation-buttons";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { getInvitationFont, invitationFonts, recommendedInvitationFonts, type FontRole } from "@/lib/invitation-fonts";
+import { getInvitationEventContent, eventExampleSections as exampleSections, makeEventExampleSection as makeExampleSection } from "@/lib/invitation-event-content";
 
 type EventData = {
   id: string; ownerId: string; customSlug: string | null; templateId: string; texture: string; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; paidAt: Date | null; expiresAt: Date | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED"; slug: string | null;
@@ -49,32 +50,6 @@ function makeSection(type: SectionType, id = `default-${type}`): InviteSection {
   return { id, type, title: option.title, content: "", detail: "", link: "", imageUrl: "", imageUrls: [], enabled: true };
 }
 
-function makeExampleSection(type: SectionType, eventType: string, id = `default-${type}`): InviteSection {
-  const wedding = eventType === "wedding";
-  const samples: Record<SectionType, Partial<InviteSection>> = {
-    story: { title: wedding ? "Nuestra historia" : "Un día para recordar", content: wedding ? "Todo comenzó con una coincidencia y muchas sonrisas. Hoy queremos celebrar un nuevo capítulo de nuestra historia junto a las personas que más queremos." : "Los mejores momentos se disfrutan en compañía. Queremos celebrar esta ocasión especial contigo y crear recuerdos que nos acompañen siempre." },
-    ceremony: { title: wedding ? "Ceremonia" : "El gran momento", content: wedding ? "Acompáñanos a dar el sí en la Capilla de las Flores. Te esperamos unos minutos antes para compartir este momento tan especial." : "Nos reuniremos en el Salón Las Flores para dar inicio a la celebración. ¡Nos encantará verte ahí!", detail: "5:00 p. m. · Llegada de invitados", link: "https://example.com/mapa-ceremonia" },
-    reception: { content: "Después del momento principal, te esperamos en el Jardín Los Olivos para disfrutar de una cena, música y una noche llena de alegría.", detail: "7:00 p. m. · Jardín Los Olivos", link: "https://example.com/mapa-recepcion" },
-    program: { content: "5:00 p. m. — Bienvenida a los invitados\n5:30 p. m. — Inicio de la celebración\n7:00 p. m. — Cena y brindis\n8:30 p. m. — Música y baile\n11:00 p. m. — Despedida" },
-    parents: { content: "Ana Martínez y Carlos López\nLaura García y Miguel Hernández" },
-    dress_code: { content: "Vestimenta formal. Te sugerimos tonos suaves y zapatos cómodos para disfrutar del jardín." },
-    gifts: { content: "Tu presencia es nuestro mejor regalo. Si deseas tener un detalle con nosotros, puedes consultar nuestra mesa de regalos en el siguiente enlace.", link: "https://example.com/mesa-de-regalos" },
-    rsvp: { title: "Confirma tu asistencia", content: "Nos encantará contar contigo. Confirma tu asistencia e indica cuántas personas te acompañarán al menos dos semanas antes del evento.", link: "https://example.com/confirmar-asistencia" },
-    gallery: { title: "Momentos especiales", detail: "Recuerdos que queremos compartir contigo", content: "Aquí reuniremos algunas de nuestras fotos favoritas. Pronto agregaremos más recuerdos." },
-    music: { content: "Preparamos una selección de canciones para acompañar este día. ¡Escucha nuestra playlist y empieza a celebrar con nosotros!", link: "https://example.com/playlist" },
-    custom: { title: "Antes de llegar", content: "El lugar cuenta con estacionamiento. Te recomendamos llegar 15 minutos antes y llevar un abrigo ligero para la noche.", detail: "Acceso por la entrada principal", link: "https://example.com/indicaciones" },
-  };
-  return { ...makeSection(type, id), ...samples[type] };
-}
-
-function exampleSections(eventType: string): InviteSection[] {
-  const types: SectionType[] = eventType === "wedding"
-    ? ["story", "ceremony", "reception", "program", "parents", "dress_code", "gifts", "rsvp"]
-    : ["story", "reception", "program", "dress_code", "gifts", "rsvp"];
-  return types.map((type) => makeExampleSection(type, eventType));
-}
-
-const eventLabels: Record<string, string> = { wedding: "Nuestra boda", birthday: "Una celebración especial", graduation: "Mi graduación", baby_shower: "Baby shower", anniversary: "Nuestro aniversario", other: "Una celebración especial" };
 const dateInputValue = (date: Date | null) => date ? new Date(date).toISOString().slice(0, 10) : "";
 
 const creationQuestions = [
@@ -137,7 +112,7 @@ export function EventEditor({ event, saved, error, published, creation = false }
   const [hostNames, setHostNames] = useState(event.hostNames ?? "");
   const [venue, setVenue] = useState(event.venue ?? "");
   const [address, setAddress] = useState(event.address ?? "");
-  const [message, setMessage] = useState(event.message ?? "");
+  const [message, setMessage] = useState(event.message ?? (creation ? getInvitationEventContent(event.eventType).message : ""));
   const [imageUrl, setImageUrl] = useState(event.imageUrl ?? "");
   const [accent, setAccent] = useState(event.accent || "#E9560A");
   const [buttonAppearance, setButtonAppearance] = useState(() => eventButtonAppearance(event));
@@ -228,17 +203,20 @@ export function EventEditor({ event, saved, error, published, creation = false }
           <section className="editor-group" id="event-details" hidden={creation && step > 7}>
             <div className="editor-group-heading"><span className="editor-group-number">1</span><div><h2>Datos de la celebración</h2><p>Esta información aparecerá en tu invitación.</p></div></div>
             <div className="editor-group-fields">
-              <div className="editor-field" hidden={creation && step !== 0}><label htmlFor="event-name">¿Cómo se llama tu evento? <span>(obligatorio)</span></label><input id="event-name" name="name" required minLength={2} maxLength={100} value={name} onChange={e => setName(e.target.value)} placeholder="Ej. Nuestra boda" /></div>
+              <div className="editor-field" hidden={creation && step !== 0}><label htmlFor="event-name">¿Cómo se llama tu evento? <span>(obligatorio)</span></label><input id="event-name" name="name" required minLength={2} maxLength={100} value={name} onChange={e => setName(e.target.value)} placeholder={`Ej. ${getInvitationEventContent(eventType).demo.name}`} /></div>
               {!creation && <CustomInvitationLinkField eventId={event.id} ownerId={event.ownerId} value={customSlug} savedValue={event.customSlug} suggestion={normalizeInvitationSlug(hostNames || name).slice(0, 80).replace(/-$/, "")} onChange={setCustomSlug} />}
               <div className="editor-field" hidden={creation && step !== 1}><label htmlFor="event-type">Tipo de celebración</label><select id="event-type" name="eventType" value={eventType} onChange={e => { const nextType = e.target.value;
-                if (creation) setSections((current) => JSON.stringify(current) === JSON.stringify(exampleSections(eventType)) ? exampleSections(nextType) : current);
+                if (creation) {
+                  setSections((current) => JSON.stringify(current) === JSON.stringify(exampleSections(eventType)) ? exampleSections(nextType) : current);
+                  setMessage((current) => current === getInvitationEventContent(eventType).message ? getInvitationEventContent(nextType).message : current);
+                }
                 setEventType(nextType); setTemplateId("none"); }}><option value="wedding">Boda</option><option value="birthday">Cumpleaños</option><option value="graduation">Graduación</option><option value="baby_shower">Baby shower</option><option value="anniversary">Aniversario</option><option value="other">Otro evento</option></select></div>
-              <div className="editor-field" hidden={creation && step !== 2}><label htmlFor="host-names">¿A quién celebramos? <span>(opcional)</span></label><input id="host-names" name="hostNames" placeholder="Ej. Mariana y Andrés" maxLength={120} value={hostNames} onChange={e => setHostNames(e.target.value)} /></div>
+              <div className="editor-field" hidden={creation && step !== 2}><label htmlFor="host-names">¿A quién celebramos? <span>(opcional)</span></label><input id="host-names" name="hostNames" placeholder={`Ej. ${getInvitationEventContent(eventType).demo.hostNames}`} maxLength={120} value={hostNames} onChange={e => setHostNames(e.target.value)} /></div>
               <div className="editor-field" hidden={creation && step !== 3}><label htmlFor="event-date">Fecha <span>(opcional)</span></label><div className="editor-input-icon"><FiCalendar /><input id="event-date" name="eventDate" type="date" value={eventDate} onChange={e => { setEventDate(e.target.value); if (!e.target.value) setEventTime(""); }} /></div></div>
               <div className="editor-field" hidden={creation && step !== 4}><label htmlFor="event-time">Hora <span>(opcional)</span></label><div className="editor-input-icon"><FiClock /><input id="event-time" name="eventTime" type="time" value={eventTime} onChange={e => setEventTime(e.target.value)} disabled={!eventDate} /></div><small className="editor-field-help">El contador se mostrará cuando agregues fecha y hora.</small></div>
-              <div className="editor-field" hidden={creation && step !== 5}><label htmlFor="venue">Lugar <span>(opcional)</span></label><input id="venue" name="venue" placeholder="Ej. Jardín Los Olivos" maxLength={160} value={venue} onChange={e => setVenue(e.target.value)} /></div>
+              <div className="editor-field" hidden={creation && step !== 5}><label htmlFor="venue">Lugar <span>(opcional)</span></label><input id="venue" name="venue" placeholder={`Ej. ${getInvitationEventContent(eventType).demo.venue}`} maxLength={160} value={venue} onChange={e => setVenue(e.target.value)} /></div>
               <div className="editor-field" hidden={creation && step !== 6}><label htmlFor="address">Dirección <span>(opcional)</span></label><input id="address" name="address" placeholder="Calle, ciudad" maxLength={240} value={address} onChange={e => setAddress(e.target.value)} /></div>
-              <div className="editor-field editor-group-wide" hidden={creation && step !== 7}><label htmlFor="message">Mensaje para tus invitados <span>(opcional)</span></label><textarea id="message" name="message" rows={3} maxLength={1200} placeholder="Nos encantará compartir este día contigo…" value={message} onChange={e => setMessage(e.target.value)} /></div>
+              <div className="editor-field editor-group-wide" hidden={creation && step !== 7}><label htmlFor="message">Mensaje para tus invitados <span>(opcional)</span></label><textarea id="message" name="message" rows={3} maxLength={1200} placeholder={getInvitationEventContent(eventType).message} value={message} onChange={e => setMessage(e.target.value)} /></div>
             </div>
           </section>
           <section className="editor-group" id="event-cover" hidden={creation && (step < 8 || step > 13)}>
@@ -282,7 +260,7 @@ export function EventEditor({ event, saved, error, published, creation = false }
                   <details className="editor-section-details" open={creation ? true : undefined}><summary>Editar esta sección</summary><div className="editor-section-fields">
                     <div className="editor-field"><label htmlFor={`${base}-title`}>Título</label><input id={`${base}-title`} value={section.title} maxLength={100} onChange={(e) => updateSection(section.id, { title: e.target.value })} /></div>
                     <div className="editor-field"><label htmlFor={`${base}-content`}>{section.type === "dress_code" ? "Indicaciones" : section.type === "rsvp" ? "Instrucciones" : section.type === "gifts" ? "Mensaje" : section.type === "program" ? "Horario y actividad (un momento por renglón)" : section.type === "parents" ? "Nombres (una pareja o persona por renglón)" : "Descripción"}</label><textarea id={`${base}-content`} rows={section.type === "program" || section.type === "parents" ? 5 : 3} maxLength={2000} value={section.content} onChange={(e) => updateSection(section.id, { content: e.target.value })} placeholder={section.type === "program" ? "5:30 p. m. — Recepción de invitados\n6:00 p. m. — Ceremonia\n7:00 p. m. — Cóctel" : section.type === "parents" ? "Ej. Joaquín Reyes y Patricia Fuentes\nRodrigo Navarro y Lucía Cortés" : "Escribe aquí la información para tus invitados…"} /></div>
-                    {(section.type === "ceremony" || section.type === "reception" || section.type === "gallery") && <div className="editor-field"><label htmlFor={`${base}-detail`}>{section.type === "gallery" ? "Texto de apoyo" : "Fecha u horario"}</label><input id={`${base}-detail`} maxLength={240} value={section.detail} onChange={(e) => updateSection(section.id, { detail: e.target.value })} placeholder={section.type === "gallery" ? "Momentos que queremos recordar" : "Ej. 5:00 p. m."} /></div>}
+                    {(section.type === "ceremony" || section.type === "reception" || section.type === "gallery" || section.type === "parents") && <div className="editor-field"><label htmlFor={`${base}-detail`}>{section.type === "parents" ? "Mensaje de agradecimiento" : section.type === "gallery" ? "Texto de apoyo" : "Fecha u horario"}</label><input id={`${base}-detail`} maxLength={240} value={section.detail} onChange={(e) => updateSection(section.id, { detail: e.target.value })} placeholder={getInvitationEventContent(eventType).sections[section.type].detail || "Agrega un detalle para tus invitados"} /></div>}
                     {(section.type === "ceremony" || section.type === "reception" || section.type === "gifts") && <div className="editor-field"><label htmlFor={`${base}-link`}>{section.type === "gifts" ? "Enlace a mesa de regalos" : "Enlace a mapa"}</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://…" /></div>}
                     {section.type === "gallery" && <div className="editor-field"><label>Fotos de la galería</label><CloudinaryImageUpload ensureEvent={creation ? ensureEvent : undefined} onBusyChange={(busy) => setUploadCount((count) => count + (busy ? 1 : -1))} eventId={event.id} images={section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : []} multiple onChange={(images) => updateSection(section.id, { imageUrls: images, imageUrl: images[0] ?? "" })} /></div>}
                     {(section.type === "ceremony" || section.type === "reception" || section.type === "story" || section.type === "custom") && <div className="editor-field"><label>Imagen de esta sección</label><CloudinaryImageUpload ensureEvent={creation ? ensureEvent : undefined} onBusyChange={(busy) => setUploadCount((count) => count + (busy ? 1 : -1))} eventId={event.id} images={section.imageUrl ? [section.imageUrl] : []} multiple={false} onChange={(images) => updateSection(section.id, { imageUrl: images[0] ?? "" })} /></div>}
@@ -480,16 +458,17 @@ function parseProgramEntry(line: string, index: number) {
   return { id: `${index}-${cleaned}`, time: "", description: cleaned };
 }
 
-export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", buttonAppearance = defaultButtonAppearance, templateId = "none", texture = "none", sections }: {
-  eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; buttonAppearance?: InvitationButtonAppearance; templateId?: string; texture?: string; sections: InviteSection[]; full?: boolean;
+export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, locationImageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", buttonAppearance = defaultButtonAppearance, templateId = "none", texture = "none", sections }: {
+  eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; locationImageUrl?: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; buttonAppearance?: InvitationButtonAppearance; templateId?: string; texture?: string; sections: InviteSection[]; full?: boolean;
 }) {
-  return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} heroHorizontal={heroHorizontal} heroVertical={heroVertical} buttonAppearance={buttonAppearance} templateId={templateId} texture={texture} sections={sections} />;
+  return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} locationImageUrl={locationImageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} heroHorizontal={heroHorizontal} heroVertical={heroVertical} buttonAppearance={buttonAppearance} templateId={templateId} texture={texture} sections={sections} />;
 }
 
-function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eventTime, venue, address, message, imageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", buttonAppearance = defaultButtonAppearance, templateId = "none", texture = "none", sections }: {
-  eventType: string; name: string; hostNames: string; date: string; eventDateKey: string; eventTime: string; venue: string; address: string; message: string; imageUrl: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; buttonAppearance?: InvitationButtonAppearance; templateId?: string; texture?: string; sections: InviteSection[];
+function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eventTime, venue, address, message, imageUrl, locationImageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", buttonAppearance = defaultButtonAppearance, templateId = "none", texture = "none", sections }: {
+  eventType: string; name: string; hostNames: string; date: string; eventDateKey: string; eventTime: string; venue: string; address: string; message: string; imageUrl: string; locationImageUrl?: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; buttonAppearance?: InvitationButtonAppearance; templateId?: string; texture?: string; sections: InviteSection[];
 }) {
   const motionRef = useInvitationMotion();
+  const content = getInvitationEventContent(eventType);
   const visibleSections = sections.filter((section) => section.enabled && (section.content || section.detail || section.link || section.imageUrl || section.imageUrls?.length));
   const dressCode = visibleSections.find((section) => section.type === "dress_code");
   const confirmation = visibleSections.find((section) => section.type === "rsvp");
@@ -500,17 +479,17 @@ function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eve
   return <article ref={motionRef} className={`invite-website${eventType === "wedding" ? " invite-wedding-editorial" : ""}`} data-button-shape={buttonAppearance.shape} data-button-filled={String(buttonAppearance.filled)} data-button-icons={String(buttonAppearance.icons)} data-button-border={String(buttonAppearance.border)} data-button-bold={String(buttonAppearance.bold)} data-texture={texture} data-typography={typography} data-body-typography={bodyTypography} data-has-flower={template?.assets.flower ? "true" : undefined} data-has-separator={template?.assets.separator ? "true" : undefined} data-decorated={template ? "true" : undefined} data-template={template ? `${eventType}-${template.id}` : undefined} style={{ "--invite-accent": accent, "--invite-heading-font": getInvitationFont(typography).family, "--invite-body-font": getInvitationFont(bodyTypography).family, "--template-top-right": template?.assets.topRight ? `url("${template.assets.topRight}")` : "none", "--template-bottom-left": template?.assets.bottomLeft ? `url("${template.assets.bottomLeft}")` : "none", "--template-top-left": template?.assets.topLeft ? `url("${template.assets.topLeft}")` : "none", "--template-bottom-right": template?.assets.bottomRight ? `url("${template.assets.bottomRight}")` : "none", "--template-separator": template?.assets.separator ? `url("${template.assets.separator}")` : "none", "--template-decoration": template?.assets.decoration ? `url("${template.assets.decoration}")` : "none", "--template-flower": template?.assets.flower ? `url("${template.assets.flower}")` : "none" } as React.CSSProperties}>
     <section data-hero-horizontal={heroHorizontal} data-hero-vertical={heroVertical} className={`invite-website-hero${imageUrl ? " has-cover-image" : ""}`} style={imageUrl ? { backgroundImage: `linear-gradient(${heroHorizontal === "right" ? "270deg" : heroHorizontal === "center" ? "0deg" : "90deg"},#10100fd9 0%,#10100f66 58%,#10100f12 100%),url("${imageUrl.replaceAll('"', '')}")` } : undefined}>
       <div className="invite-hero-glow" aria-hidden="true" />
-      <div className="invite-hero-content"><span className="invite-hero-kicker">{eventType === "wedding" ? "NOS CASAMOS" : "UNA FECHA · UN RECUERDO · UNA CELEBRACIÓN"}</span><span className="invite-hero-rule" /><p className="invite-hero-intro">Con mucha ilusión te invitamos a celebrar</p><h1>{title}</h1><p className="invite-hero-event-name">{name || eventLabels[eventType] || "Un día muy especial"}</p><div className="invite-hero-date"><FiCalendar /> {dateAndTime}</div><a className="invite-hero-button" href="#invite-details">Acompáñanos <FiArrowDown /></a></div>
+      <div className="invite-hero-content"><span className="invite-hero-kicker">{content.heroKicker}</span><span className="invite-hero-rule" /><p className="invite-hero-intro">{content.heroIntro}</p><h1>{title}</h1><p className="invite-hero-event-name">{name || content.defaultName}</p><div className="invite-hero-date"><FiCalendar /> {dateAndTime}</div><a className="invite-hero-button" href="#invite-details">Acompáñanos <FiArrowDown /></a></div>
       <div className="invite-hero-side-note"><span>ESTÁS INVITADO</span><i>✦</i><span>CON CARIÑO</span></div>
     </section>
-    <section className="invite-welcome" id="invite-details">{template && <InvitationDecoration template={template} />}<span className="invite-section-kicker">NOS ENCANTARÍA COMPARTIRLO CONTIGO</span><span className="invite-ornament">✦</span><h2>{eventType === "wedding" ? "Bienvenidos" : "Un momento para celebrar"}</h2><p>{message || "Hay días que se vuelven inolvidables cuando los compartimos con las personas que queremos. Nos encantará contar contigo."}</p><strong>{title}</strong></section>
-    {(venue || address) && <section className="invite-main-location"><div className="invite-location-photo" style={imageUrl ? { backgroundImage: `url("${imageUrl.replaceAll('"', '')}")` } : undefined}><span className="invite-photo-caption">EL LUGAR DE NUESTRO ENCUENTRO</span></div><div className="invite-location-main-copy"><span className="invite-section-kicker">GUARDA LA FECHA</span><h2>{venue || "El lugar de la celebración"}</h2><p className="invite-location-address">{address || "Pronto compartiremos la ubicación"}</p><a className="invite-static-link" href={invitationMapUrl(venue, address)} target="_blank" rel="noopener noreferrer"><FiMapPin /> Ver ubicación</a></div></section>}
+    <section className="invite-welcome" id="invite-details">{template && <InvitationDecoration template={template} />}<span className="invite-section-kicker">NOS ENCANTARÍA COMPARTIRLO CONTIGO</span><span className="invite-ornament">✦</span><h2>{content.welcomeTitle}</h2><p>{message || content.message}</p><strong>{title}</strong></section>
+    {(venue || address) && <section className={`invite-main-location${locationImageUrl ? " has-location-image" : ""}`}><div className="invite-location-photo" style={(locationImageUrl || imageUrl) ? { backgroundImage: `url("${(locationImageUrl || imageUrl).replaceAll('"', '')}")` } : undefined}><span className="invite-photo-caption">EL LUGAR DE NUESTRO ENCUENTRO</span></div><div className="invite-location-main-copy"><span className="invite-section-kicker">GUARDA LA FECHA</span><h2>{venue || "El lugar de la celebración"}</h2><p className="invite-location-address">{address || "Pronto compartiremos la ubicación"}</p><a className="invite-static-link" href={invitationMapUrl(venue, address)} target="_blank" rel="noopener noreferrer"><FiMapPin /> Ver ubicación</a></div></section>}
     {visibleSections.length > 0 && <section className="invite-extra-sections">{visibleSections.map((section, index) => {
       if (pairedSections.some((paired) => paired.id === section.id)) {
         if (section.id !== pairedSections[0].id) return null;
-        return <div className="invite-practical-details" key={section.id}>{pairedSections.map((paired) => <InviteWebsiteSection key={paired.id} section={paired} index={visibleSections.indexOf(paired)} decoration={sectionDecoration(template, paired.type)} />)}</div>;
+        return <div className="invite-practical-details" key={section.id}>{pairedSections.map((paired) => <InviteWebsiteSection eventType={eventType} key={paired.id} section={paired} index={visibleSections.indexOf(paired)} decoration={sectionDecoration(template, paired.type)} />)}</div>;
       }
-      return <InviteWebsiteSection key={section.id} section={section} index={index} decoration={sectionDecoration(template, section.type)} template={template} />;
+      return <InviteWebsiteSection eventType={eventType} key={section.id} section={section} index={index} decoration={sectionDecoration(template, section.type)} template={template} />;
     })}</section>}
     <section className="invite-countdown-panel">{template && <InvitationDecoration template={template} bottomOnly />}<span className="invite-section-kicker">RESERVA LA FECHA</span><h2>{dateAndTime}</h2>{eventDateKey && eventTime ? <CountdownTimer date={eventDateKey} time={eventTime} /> : <p>Nos encantará celebrar contigo</p>}<span className="invite-countdown-decoration">✦</span></section>
     <footer className="invite-website-footer"><span className="invite-footer-ornament">✦</span><p>Gracias por ser parte de este momento</p><strong>{title}</strong><small>HECHO CON CARIÑO PARA CELEBRAR</small></footer>
@@ -549,7 +528,7 @@ function CountdownTimer({ date, time }: { date: string; time: string }) {
   </div>;
 }
 
-function InviteWebsiteSection({ section, index = 0, decoration, template }: { section: InviteSection; index?: number; decoration?: string; template?: InvitationTemplate | null }) {
+function InviteWebsiteSection({ section, index = 0, decoration, template, eventType }: { section: InviteSection; index?: number; decoration?: string; template?: InvitationTemplate | null; eventType: string }) {
   if (section.type === "dress_code" || section.type === "gifts") decoration = undefined;
   if (section.type === "parents") {
     const ornament = decoration || template?.assets.flower || template?.assets.separator || template?.assets.decoration;
@@ -558,7 +537,7 @@ function InviteWebsiteSection({ section, index = 0, decoration, template }: { se
       {template && <InvitationDecoration template={template} bottomOnly />}
       <div className="invite-content-copy">
         {ornament && <div className="invite-parents-ornament" aria-hidden="true"><Image src={ornament} alt="" fill sizes="140px" unoptimized /></div>}
-        <span className="invite-section-kicker">CON LA BENDICIÓN DE</span>
+        <span className="invite-section-kicker">{eventType === "wedding" ? "CON LA BENDICIÓN DE" : "GRACIAS POR ESTAR"}</span>
         <h2>{section.title === "Padres" ? "Nuestros padres" : section.title}</h2>
         {section.detail && <p className="invite-content-detail">{section.detail}</p>}
         <ul className="invite-parents-list">{families.map((family, index) => <li key={`${index}-${family}`}><span className="invite-parents-rule" aria-hidden="true" />{family.split(/\s+y\s+/i).map((name, nameIndex) => <span className="invite-parent-name" key={nameIndex}>{nameIndex > 0 && <span className="invite-parents-and" aria-label="y">&amp;</span>}{name}</span>)}</li>)}</ul>

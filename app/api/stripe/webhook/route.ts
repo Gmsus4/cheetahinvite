@@ -3,8 +3,6 @@ import { revalidatePath } from "next/cache";
 import { getStripe } from "@/lib/stripe";
 import { fulfillInvitationPayment } from "@/lib/payment-fulfillment";
 
-export const runtime = "nodejs";
-
 export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
   const secret = process.env.STRIPE_WEBHOOK_SECRET;

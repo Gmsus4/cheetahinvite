@@ -1,7 +1,7 @@
 import { FiArrowUpRight, FiCheck } from "react-icons/fi";
 
 const features = [
-  "Plantilla premium personalizable",
+  "Invitación personalizable",
   "Tu propio enlace para compartir",
   "Confirmaciones de invitados",
   "Edición cuando la necesites",
@@ -24,12 +24,13 @@ export function Pricing() {
       </div>
 
       <div className="price-card">
-        <span className="price-label">INVITACIÓN DIGITAL</span>
-        <div className="price">
-          <small>$</small>499<span> MXN</span>
+        <div className="price-overview">
+          <span className="price-label">INVITACIÓN DIGITAL</span>
+          <div className="price">
+            <small>$</small>499<span> MXN</span>
+          </div>
+          <p>Un pago por evento · 12 meses activa</p>
         </div>
-        <p>Un pago por evento · 12 meses activa</p>
-        <div className="price-divider" />
         <ul>
           {features.map((feature) => (
             <li key={feature} className="flex flex-row">
@@ -37,12 +38,14 @@ export function Pricing() {
             </li>
           ))}
         </ul>
-        <a className="button" href="/crear">
-          Crear mi invitación <span><FiArrowUpRight aria-hidden="true" /></span>
-        </a>
-        <small className="price-footnote">
-          Empieza gratis. Paga cuando quieras publicar.
-        </small>
+        <div className="price-action">
+          <a className="button" href="/crear">
+            Crear mi invitación <span><FiArrowUpRight aria-hidden="true" /></span>
+          </a>
+          <small className="price-footnote">
+            Empieza gratis. Paga cuando quieras publicar.
+          </small>
+        </div>
       </div>
     </section>
   );

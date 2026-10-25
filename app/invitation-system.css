@@ -1,4 +1,8 @@
 /* Shared composition rules come after template skins so content stays readable. */
+@media(max-width:760px) {
+  .invite-main-location.has-location-image .invite-location-main-copy { order:1; }
+  .invite-main-location.has-location-image .invite-location-photo { order:2; }
+}
 .invite-website.invite-website {
   --invite-paper: color-mix(in srgb, var(--invite-accent) 3%, #fffdf9);
   --invite-panel: color-mix(in srgb, var(--invite-accent) 9%, #fffdf9);
@@ -21,7 +25,7 @@
 .invite-website.invite-website :is(.invite-content-detail,.invite-welcome>strong,.invite-hero-date) { font-size:16px; line-height:1.7; }
 .invite-website.invite-website :is(.invite-section-kicker,.invite-content-detail,.invite-welcome>strong) { color:var(--invite-action); }
 .invite-website.invite-website .invite-extra-sections>.invite-content-block { min-height:0; background-color:var(--invite-panel); }
-.invite-website.invite-website .invite-extra-sections>.invite-content-block:nth-child(even) { background-color:var(--invite-paper); }
+.invite-website.invite-website .invite-extra-sections>.invite-content-block:nth-child(even):not(.invite-content-rsvp) { background-color:var(--invite-paper); }
 .invite-website.invite-website .invite-extra-sections .invite-content-block:not(.has-section-image) .invite-content-copy { width:min(100%,1080px); align-items:center; text-align:center; }
 .invite-website.invite-website .invite-extra-sections .invite-content-body { max-width:62ch; }
 .invite-website.invite-website :is(.invite-static-link,.invite-hero-button) { min-height:46px; padding:12px 20px; font-size:14px; line-height:1.5; text-align:center; white-space:normal; }

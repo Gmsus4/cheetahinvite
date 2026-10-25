@@ -10,8 +10,8 @@ export function DashboardSignOut({ className = "dashboard-signout" }: { classNam
       onClick={() => signOut({ redirectTo: "/" })}
       type="button"
     >
-      <span className="dashboard-signout-icon"><FiLogOut aria-hidden="true" /></span>
       <span className="dashboard-signout-label">Cerrar sesión</span>
+      <FiLogOut aria-hidden="true" />
     </button>
   );
 }

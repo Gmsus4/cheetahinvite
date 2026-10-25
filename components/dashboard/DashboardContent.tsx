@@ -9,13 +9,10 @@ import {
   FiEdit2,
   FiFileText,
   FiGift,
-  FiHeart,
-  FiPlus,
   FiUsers,
 } from "react-icons/fi";
 import { DashboardSignOut } from "@/components/dashboard/DashboardSignOut";
 import { BrandEmblem } from "@/components/BrandEmblem";
-import { DashboardSectionNav } from "@/components/dashboard/DashboardSectionNav";
 import { CopyInvitationLink } from "@/components/dashboard/CopyInvitationLink";
 import { DeleteInvitationButton } from "@/components/dashboard/DeleteInvitationButton";
 
@@ -41,7 +38,6 @@ type DashboardContentProps = {
   userName: string;
   userEmail: string;
   events: DashboardEvent[];
-  view?: "summary" | "events";
 };
 
 const statusLabels: Record<EventStatus, string> = {
@@ -79,7 +75,7 @@ function getInitials(name: string) {
     .join("");
 }
 
-export function DashboardContent({ userName, userEmail, events, now, view = "summary" }: DashboardContentProps) {
+export function DashboardContent({ userName, userEmail, events, now }: DashboardContentProps) {
   const firstName = userName.trim().split(/\s+/)[0] || "bienvenido";
   const activeEvents = events.filter((event) => isInvitationPublished(event, new Date(now))).length;
   const drafts = events.filter((event) => event.status === "DRAFT").length;
@@ -94,61 +90,45 @@ export function DashboardContent({ userName, userEmail, events, now, view = "sum
 
   return (
     <div className="dashboard-page">
-      <aside className="dashboard-sidebar">
-        <Link className="brand dashboard-brand" href="/dashboard" aria-label="Cheetah Invite, panel">
-          <BrandEmblem size={32} className="dashboard-brand-mark" />
-          <span className="brand-name">Cheetah<span>Invite</span></span>
-        </Link>
-
-        <p className="dashboard-nav-label">ESPACIO DE TRABAJO</p>
-        <DashboardSectionNav eventCount={events.length} activeView={view} />
-
-        <div className="dashboard-sidebar-bottom">
-          <div className="dashboard-help-card">
-            <span className="dashboard-help-icon"><FiHeart aria-hidden="true" /></span>
-            <strong>¿Planeando algo especial?</strong>
-            <p>Encuentra el diseño que va con tu celebración.</p>
-            <Link href="/#plantillas">Explorar diseños <FiArrowUpRight aria-hidden="true" /></Link>
-          </div>
-          <div className="dashboard-sidebar-user">
-            <span className="dashboard-avatar">{getInitials(userName) || "C"}</span>
-            <span className="dashboard-user-copy"><strong>{userName || "Usuario"}</strong><small>{userEmail}</small></span>
-          </div>
-        </div>
-      </aside>
-
-      <main className="dashboard-main">
-        <header className="dashboard-mobile-header">
-          <Link className="brand dashboard-brand" href="/dashboard" aria-label="Cheetah Invite, panel">
-            <BrandEmblem size={32} className="dashboard-brand-mark" />
+      <a className="dashboard-skip-link" href="#mis-invitaciones">Ir a mis invitaciones</a>
+      <header className="dashboard-header">
+        <div className="dashboard-header-shell">
+          <Link className="brand" href="/dashboard" aria-label="Cheetah Invite, mi espacio">
+            <BrandEmblem size={40} priority />
             <span className="brand-name">Cheetah<span>Invite</span></span>
           </Link>
-        </header>
+          <div className="dashboard-account-actions">
+            <div className="dashboard-account">
+              <span className="dashboard-avatar">{getInitials(userName) || "C"}</span>
+              <span className="dashboard-user-copy"><strong>{userName || "Usuario"}</strong><small>{userEmail}</small></span>
+            </div>
+            <DashboardSignOut />
+          </div>
+        </div>
+      </header>
 
+      <main className="dashboard-main">
         <div className="dashboard-content">
           <div className="dashboard-welcome-row">
             <div>
-              <p className="dashboard-eyebrow">{view === "summary" ? "TU ESPACIO PERSONAL" : "GESTIÓN DE INVITACIONES"}</p>
-              <h1>{view === "summary" ? `¡Hola, ${firstName}!` : "Mis eventos"}</h1>
-              <p className="dashboard-subtitle">{view === "summary" ? "Aquí puedes organizar las invitaciones de tus momentos especiales." : "Consulta el estado de tus invitaciones y continúa editándolas o compartiéndolas."}</p>
+              <p className="dashboard-eyebrow"><span className="dashboard-eyebrow-dot" /> TU ESPACIO PARA CELEBRAR</p>
+              <h1>¡Hola, <em>{firstName}!</em></h1>
+              <p className="dashboard-subtitle">Cada celebración empieza con una invitación. Aquí puedes crear, editar y compartir las tuyas.</p>
             </div>
-            <div className="dashboard-welcome-actions">
-              <DashboardSignOut className="dashboard-signout dashboard-signout-prominent" />
-              <Link className="button dashboard-create-button" href="/crear">
-                <FiPlus aria-hidden="true" /> Nueva invitación
-              </Link>
-            </div>
+            <Link className="button dashboard-create-button" href="/crear">
+              Nueva invitación <FiArrowUpRight aria-hidden="true" />
+            </Link>
           </div>
 
-          {view === "summary" && <section className="dashboard-stats" aria-label="Resumen de eventos">
+          <section className="dashboard-stats" aria-label="Estado de tus invitaciones">
             <article className="dashboard-stat-card">
               <span className="dashboard-stat-icon stat-icon-orange"><FiCalendar aria-hidden="true" /></span>
-              <span className="dashboard-stat-copy"><small>Total de eventos</small><strong>{events.length}</strong></span>
+              <span className="dashboard-stat-copy"><small>Invitaciones</small><strong>{events.length}</strong></span>
               <span className="dashboard-stat-caption">en tu cuenta</span>
             </article>
             <article className="dashboard-stat-card">
               <span className="dashboard-stat-icon stat-icon-navy"><FiCheckCircle aria-hidden="true" /></span>
-              <span className="dashboard-stat-copy"><small>Invitaciones activas</small><strong>{activeEvents}</strong></span>
+              <span className="dashboard-stat-copy"><small>Activas</small><strong>{activeEvents}</strong></span>
               <span className="dashboard-stat-caption">publicadas</span>
             </article>
             <article className="dashboard-stat-card">
@@ -161,20 +141,20 @@ export function DashboardContent({ userName, userEmail, events, now, view = "sum
               <span className="dashboard-stat-copy"><small>Por vencer</small><strong>{expiring}</strong></span>
               <span className="dashboard-stat-caption">en 30 días</span>
             </article>
-          </section>}
+          </section>
 
-          <section className="dashboard-events-section">
+          <section className="dashboard-events-section" id="mis-invitaciones" aria-labelledby="dashboard-events-title" tabIndex={-1}>
             <div className="dashboard-section-heading">
               <div>
-                <p className="dashboard-eyebrow">{view === "summary" ? "ACTIVIDAD RECIENTE" : "TUS CELEBRACIONES"}</p>
-                <h2>{view === "summary" ? "Eventos recientes" : "Todos mis eventos"}</h2>
+                <p className="dashboard-eyebrow">TUS MOMENTOS ESPECIALES</p>
+                <h2 id="dashboard-events-title">Mis invitaciones</h2>
               </div>
-              {view === "summary" ? <Link className="dashboard-event-count dashboard-event-count-link" href="/dashboard/eventos">Ver todos <FiArrowUpRight aria-hidden="true" /></Link> : <span className="dashboard-event-count">{events.length} {events.length === 1 ? "evento" : "eventos"}</span>}
+              <span className="dashboard-event-count">{events.length} {events.length === 1 ? "invitación" : "invitaciones"}</span>
             </div>
 
             {events.length ? (
               <div className="dashboard-event-list">
-                {(view === "summary" ? events.slice(0, 3) : events).map((event) => (
+                {events.map((event) => (
                   <article className="dashboard-event-card" key={event.id}>
                     <span className={`dashboard-event-art${event.imageUrl ? " has-image" : ""}`}>
                       {event.imageUrl ? <img src={event.imageUrl} alt={`Portada de ${event.name}`} loading="lazy" /> : <FiGift aria-hidden="true" />}
@@ -192,7 +172,7 @@ export function DashboardContent({ userName, userEmail, events, now, view = "sum
                       <span>{formatDate(event.updatedAt)}</span>
                     </div>
                     <div className="dashboard-event-actions">
-                      <Link className="dashboard-event-edit" href={`/dashboard/eventos/${event.id}`} aria-label="Editar invitación" title="Editar invitación"><FiEdit2 aria-hidden="true" /><span>Editar</span></Link>
+                      <Link className="dashboard-event-edit" href={`/dashboard/eventos/${event.id}`} aria-label={`Editar invitación: ${event.name}`} title="Editar invitación"><FiEdit2 aria-hidden="true" /><span>Editar</span></Link>
                       {isInvitationPublished(event, new Date(now)) && event.slug && <CopyInvitationLink path={invitationPath(event)!} />}
                       <DeleteInvitationButton eventId={event.id} eventName={event.name} />
                     </div>
@@ -203,9 +183,9 @@ export function DashboardContent({ userName, userEmail, events, now, view = "sum
               <div className="dashboard-empty-state">
                 <span className="dashboard-empty-icon"><FiUsers aria-hidden="true" /></span>
                 <h3>Aquí empieza algo especial</h3>
-                <p>Aún no tienes eventos. Explora nuestros diseños y encuentra el indicado para tu próxima celebración.</p>
+                <p>Crea tu primera invitación y dale tu estilo con fotos, colores y los detalles de tu celebración.</p>
                 <Link className="button dashboard-empty-button" href="/crear">
-                  Crear mi primer evento <FiArrowUpRight aria-hidden="true" />
+                  Crear mi primera invitación <FiArrowUpRight aria-hidden="true" />
                 </Link>
               </div>
             )}
@@ -213,7 +193,10 @@ export function DashboardContent({ userName, userEmail, events, now, view = "sum
 
           <footer className="dashboard-footer">
             <span>Hecho para celebrar cada historia.</span>
-            <Link href="/">Volver a Cheetah Invite <FiArrowUpRight aria-hidden="true" /></Link>
+            <nav aria-label="Información legal">
+              <Link href="/terminos">Términos</Link>
+              <Link href="/aviso-de-privacidad">Privacidad</Link>
+            </nav>
           </footer>
         </div>
       </main>

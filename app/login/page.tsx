@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
+// import Image from "next/image";
+import Link from "next/link";
 import { FiArrowLeft } from "react-icons/fi";
 import { BrandEmblem } from "@/components/BrandEmblem";
 import { LoginForm } from "@/components/login/LoginForm";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+// import loginIllustration from "@/public/login.webp";
+import "./login.css";
 
 export const metadata: Metadata = {
   title: "Iniciar sesión | Cheetah Invite",
@@ -13,15 +17,15 @@ export default function LoginPage() {
   return (
     <main className="login-page">
       <header className="login-topbar">
-        <a className="brand" href="/" aria-label="Cheetah Invite, inicio">
+        <Link className="brand" href="/" aria-label="Cheetah Invite, inicio">
           <BrandEmblem size={40} priority />
           <span className="brand-name">
             Cheetah<span>Invite</span>
           </span>
-        </a>
-        <a className="login-back" href="/">
+        </Link>
+        <Link className="login-back" href="/">
           <FiArrowLeft aria-hidden="true" /> Volver al inicio
-        </a>
+        </Link>
       </header>
 
       <div className="login-layout">
@@ -38,14 +42,10 @@ export default function LoginPage() {
             Entra a tu espacio para continuar creando, editar tus invitaciones
             y mantener cada detalle bajo control.
           </p>
+          {/* <div className="login-illustration" aria-hidden="true">
+            <Image src={loginIllustration} alt="" sizes="(max-width: 620px) 260px, 380px" loading="eager" />
+          </div> */}
           <div className="login-decoration" aria-hidden="true">
-            <div className="login-ticket">
-              <span>UNA FECHA PARA RECORDAR</span>
-              <strong>Sofía <i>&</i> Mateo</strong>
-              <small>12 · OCTUBRE · 2026</small>
-              <div className="ticket-rule" />
-              <b>ACOMPÁÑANOS</b>
-            </div>
             <div className="login-orbit orbit-one" />
             <div className="login-orbit orbit-two" />
           </div>
@@ -63,11 +63,11 @@ export default function LoginPage() {
             <div className="auth-divider"><span>o inicia con tu correo</span></div>
             <LoginForm />
             <p className="login-help">
-              ¿Aún no tienes cuenta? <a href="/registro">Regístrate con tu correo</a>
+              ¿Aún no tienes cuenta? <Link href="/registro">Regístrate con tu correo</Link>
             </p>
           </div>
           <small className="login-legal">
-            Al continuar, aceptas nuestros <a href="/terminos">Términos y condiciones</a> y <a href="/aviso-de-privacidad">Aviso de privacidad</a>.
+            Al continuar, aceptas nuestros <Link href="/terminos">Términos y condiciones</Link> y <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>.
           </small>
         </section>
       </div>
