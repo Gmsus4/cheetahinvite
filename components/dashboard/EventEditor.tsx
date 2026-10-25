@@ -16,6 +16,7 @@ import { FiArrowDown, FiArrowLeft, FiArrowUp, FiCalendar, FiCheck, FiChevronLeft
 import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 import { BrandEmblem } from "@/components/BrandEmblem";
 import { invitationPriceLabel, isInvitationPublished } from "@/lib/invitation-payment";
+import { invitationExternalUrl, invitationLinkLabel, invitationMapUrl } from "@/lib/invitation-links";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { getInvitationFont, invitationFonts, recommendedInvitationFonts, type FontRole } from "@/lib/invitation-fonts";
 
@@ -389,21 +390,29 @@ function CloudinaryImageUpload({ eventId, images, multiple, onChange, ensureEven
   </div>;
 }
 
-function GalleryCarousel({ images, title }: { images: string[]; title: string }) {
+function GalleryBento({ images, title }: { images: string[]; title: string }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const openButtonRef = useRef<HTMLButtonElement>(null);
+  const openButtonRef = useRef<HTMLButtonElement | null>(null);
   const safeIndex = images.length ? Math.min(activeIndex, images.length - 1) : 0;
   const change = (direction: -1 | 1) => setActiveIndex((safeIndex + direction + images.length) % images.length);
 
   useEffect(() => {
     if (!lightboxOpen) return;
     const ownerDocument = closeButtonRef.current?.ownerDocument ?? document;
+    const opener = openButtonRef.current;
     const previousOverflow = ownerDocument.body.style.overflow;
     ownerDocument.body.style.overflow = "hidden";
     closeButtonRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        const controls = Array.from(closeButtonRef.current?.parentElement?.querySelectorAll<HTMLButtonElement>("button") ?? []);
+        const first = controls[0];
+        const last = controls.at(-1);
+        if (event.shiftKey && ownerDocument.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && ownerDocument.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }
       if (event.key === "Escape") setLightboxOpen(false);
       if (event.key === "ArrowLeft" && images.length > 1) setActiveIndex((current) => (current - 1 + images.length) % images.length);
       if (event.key === "ArrowRight" && images.length > 1) setActiveIndex((current) => (current + 1) % images.length);
@@ -412,21 +421,18 @@ function GalleryCarousel({ images, title }: { images: string[]; title: string })
     return () => {
       ownerDocument.removeEventListener("keydown", onKeyDown);
       ownerDocument.body.style.overflow = previousOverflow;
-      openButtonRef.current?.focus();
+      opener?.focus();
     };
   }, [lightboxOpen, images.length]);
 
   if (!images.length) return null;
 
   return <>
-    <div className="invite-gallery-carousel invite-gallery-album" aria-label={`${title}: galería de fotos`}>
-      <div className="invite-gallery-stage">
-        <div className="invite-gallery-image-frame"><Image src={images[safeIndex]} alt={`${title}, foto ${safeIndex + 1} de ${images.length}`} fill sizes="(max-width: 760px) 100vw, 1100px" unoptimized /></div>
-        {images.length > 1 && <><button className="invite-gallery-arrow is-previous" type="button" aria-label="Foto anterior" onClick={() => change(-1)}><FiChevronLeft /></button><button className="invite-gallery-arrow is-next" type="button" aria-label="Foto siguiente" onClick={() => change(1)}><FiChevronRight /></button></>}
-        <button ref={openButtonRef} className="invite-gallery-open" type="button" aria-label="Ampliar fotografía" title="Ampliar fotografía" onClick={() => setLightboxOpen(true)}><FiMaximize2 aria-hidden="true" /></button>
-      </div>
-      <div className="invite-gallery-toolbar"><span className="invite-gallery-count" role="status" aria-live="polite">{String(safeIndex + 1).padStart(2, "0")} <span>/ {String(images.length).padStart(2, "0")}</span></span></div>
-      {images.length > 1 && <div className="invite-gallery-thumbnails" aria-label="Selecciona una fotografía">{images.map((url, index) => <button key={`${url}-${index}`} type="button" aria-label={`Mostrar foto ${index + 1}`} aria-current={index === safeIndex ? "true" : undefined} onClick={() => setActiveIndex(index)}><Image src={url} alt="" width={100} height={80} unoptimized /></button>)}</div>}
+    <div className="invite-gallery-bento" data-photo-count={images.length} aria-label={`${title}: galería de fotos`}>
+      {images.map((url, index) => <button className="invite-gallery-tile" type="button" key={`${url}-${index}`} aria-label={`Ver foto ${index + 1} de ${images.length} completa`} onClick={(event) => { openButtonRef.current = event.currentTarget; setActiveIndex(index); setLightboxOpen(true); }}>
+        <Image src={url} alt={`${title}, foto ${index + 1}`} fill sizes={index % 6 === 0 ? "(max-width: 760px) 100vw, 560px" : "(max-width: 760px) 50vw, 280px"} unoptimized />
+        <span className="invite-gallery-tile-open" aria-hidden="true"><FiMaximize2 /></span>
+      </button>)}
     </div>
     {lightboxOpen && <div className="invite-gallery-lightbox" role="dialog" aria-modal="true" aria-label={`${title}: foto ${safeIndex + 1} de ${images.length}`} onClick={(event) => { if (event.target === event.currentTarget) setLightboxOpen(false); }}>
       <button ref={closeButtonRef} className="invite-gallery-lightbox-close" type="button" aria-label="Cerrar imagen ampliada" onClick={() => setLightboxOpen(false)}><FiX aria-hidden="true" /></button>
@@ -483,7 +489,7 @@ function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eve
       <div className="invite-hero-side-note"><span>ESTÁS INVITADO</span><i>✦</i><span>CON CARIÑO</span></div>
     </section>
     <section className="invite-welcome" id="invite-details">{template && <InvitationDecoration template={template} />}<span className="invite-section-kicker">NOS ENCANTARÍA COMPARTIRLO CONTIGO</span><span className="invite-ornament">✦</span><h2>{eventType === "wedding" ? "Bienvenidos" : "Un momento para celebrar"}</h2><p>{message || "Hay días que se vuelven inolvidables cuando los compartimos con las personas que queremos. Nos encantará contar contigo."}</p><strong>{title}</strong></section>
-    {(venue || address) && <section className="invite-main-location"><div className="invite-location-photo" style={imageUrl ? { backgroundImage: `url("${imageUrl.replaceAll('"', '')}")` } : undefined}><span className="invite-photo-caption">EL LUGAR DE NUESTRO ENCUENTRO</span></div><div className="invite-location-main-copy"><span className="invite-section-kicker">GUARDA LA FECHA</span><h2>{venue || "El lugar de la celebración"}</h2><p className="invite-location-address">{address || "Pronto compartiremos la ubicación"}</p><span className="invite-static-link"><FiMapPin /> Ver ubicación al publicar</span></div></section>}
+    {(venue || address) && <section className="invite-main-location"><div className="invite-location-photo" style={imageUrl ? { backgroundImage: `url("${imageUrl.replaceAll('"', '')}")` } : undefined}><span className="invite-photo-caption">EL LUGAR DE NUESTRO ENCUENTRO</span></div><div className="invite-location-main-copy"><span className="invite-section-kicker">GUARDA LA FECHA</span><h2>{venue || "El lugar de la celebración"}</h2><p className="invite-location-address">{address || "Pronto compartiremos la ubicación"}</p><a className="invite-static-link" href={invitationMapUrl(venue, address)} target="_blank" rel="noopener noreferrer"><FiMapPin /> Ver ubicación</a></div></section>}
     {visibleSections.length > 0 && <section className="invite-extra-sections">{visibleSections.map((section, index) => {
       if (pairedSections.some((paired) => paired.id === section.id)) {
         if (section.id !== pairedSections[0].id) return null;
@@ -529,7 +535,7 @@ function CountdownTimer({ date, time }: { date: string; time: string }) {
 }
 
 function InviteWebsiteSection({ section, index = 0, decoration, template }: { section: InviteSection; index?: number; decoration?: string; template?: InvitationTemplate | null }) {
-  if (section.type === "dress_code") decoration = undefined;
+  if (section.type === "dress_code" || section.type === "gifts") decoration = undefined;
   if (section.type === "parents") {
     const ornament = decoration || template?.assets.flower || template?.assets.separator || template?.assets.decoration;
     const families = section.content.split("\n").map((line) => line.trim()).filter(Boolean);
@@ -545,14 +551,15 @@ function InviteWebsiteSection({ section, index = 0, decoration, template }: { se
     </section>;
   }
   const isGallery = section.type === "gallery";
-  const isRsvp = section.type === "rsvp";
-  const isGift = section.type === "gifts";
+  const sectionUrl = invitationExternalUrl(section.link);
+  const giftLeft = section.type === "gifts" ? template?.assets.decoration : undefined;
+  const giftRight = section.type === "gifts" ? template?.decorations?.[0] : undefined;
   const galleryImages = section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : [];
   return <section data-layout={section.layout === "auto" || !section.layout ? (section.imageUrl ? "split" : "centered") : section.layout} data-has-section-decoration={decoration ? "true" : undefined} className={`invite-content-block invite-content-${section.type}${index % 2 ? " invite-content-offset" : ""}${section.imageUrl || galleryImages.length ? " has-section-image" : ""}`}>
     {decoration && section.type !== "story" && <span className="invite-section-decoration" aria-hidden="true"><Image src={decoration} alt="" fill sizes="(max-width: 760px) 48px, 90px" unoptimized /></span>}
-    {isGallery && galleryImages.length > 0 ? <div className="invite-content-image invite-gallery-feature"><GalleryCarousel images={galleryImages} title={section.title} /></div> : section.imageUrl && <div className="invite-content-image" style={{ backgroundImage: `url("${section.imageUrl.replaceAll('"', '')}")` }} role="img" aria-label={section.title} />}
-      <div className="invite-content-copy"><span className="invite-content-icon">{sectionIcon(section.type)}</span>{section.type === "story" && decoration && <span className="invite-story-ornament" aria-hidden="true"><Image src={decoration} alt="" fill sizes="94px" unoptimized /></span>}<h2>{section.title}</h2>{section.detail && <p className="invite-content-detail">{section.detail}</p>}{section.type === "program" && <ol className="invite-program-list">{section.content.split("\n").map(parseProgramEntry).filter((entry) => entry.description).map((entry, index) => <li key={entry.id}><span className={entry.time ? "invite-program-time" : "invite-program-index"}>{entry.time || String(index + 1).padStart(2, "0")}</span><div className="invite-program-copy"><i aria-hidden="true" /><p>{entry.description}</p></div></li>)}</ol>}{section.content && section.type !== "program" && <p className="invite-content-body">{section.content}</p>}
-      {(section.link || isRsvp || isGift) && <span className="invite-static-link">{isRsvp ? "Confirmar asistencia al publicar" : isGift ? "Consultar mesa de regalos al publicar" : isGallery ? "Ver galería" : section.type === "music" ? "Escuchar al publicar" : "Abrir mapa al publicar"} <FiArrowDown /></span>}
+    {isGallery && galleryImages.length > 0 ? <div className="invite-content-image invite-gallery-feature"><GalleryBento images={galleryImages} title={section.title} /></div> : section.imageUrl && <div className="invite-content-image" style={{ backgroundImage: `url("${section.imageUrl.replaceAll('"', '')}")` }} role="img" aria-label={section.title} />}
+      <div className="invite-content-copy"><span className="invite-content-icon">{sectionIcon(section.type)}</span>{section.type === "story" && decoration && <span className="invite-story-ornament" aria-hidden="true"><Image src={decoration} alt="" fill sizes="94px" unoptimized /></span>}{section.type === "gifts" && (giftLeft || giftRight) ? <div className="invite-gifts-heading">{giftLeft && <span className="invite-gifts-heading-ornament" aria-hidden="true"><Image src={giftLeft} alt="" fill sizes="(max-width: 760px) 44px, 96px" unoptimized /></span>}<h2>{section.title}</h2>{giftRight && <span className="invite-gifts-heading-ornament" aria-hidden="true"><Image src={giftRight} alt="" fill sizes="(max-width: 760px) 44px, 96px" unoptimized /></span>}</div> : <h2>{section.title}</h2>}{section.detail && <p className="invite-content-detail">{section.detail}</p>}{section.type === "program" && <ol className="invite-program-list">{section.content.split("\n").map(parseProgramEntry).filter((entry) => entry.description).map((entry, index) => <li key={entry.id}><span className={entry.time ? "invite-program-time" : "invite-program-index"}>{entry.time || String(index + 1).padStart(2, "0")}</span><div className="invite-program-copy"><i aria-hidden="true" /><p>{entry.description}</p></div></li>)}</ol>}{section.content && section.type !== "program" && <p className="invite-content-body">{section.content}</p>}
+      {sectionUrl && <a className="invite-static-link" href={sectionUrl} target="_blank" rel="noopener noreferrer">{invitationLinkLabel(section.type)} <FiArrowDown /></a>}
     </div>
   </section>;
 }
