@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "prisma generate",
+    "predev": "prisma generate && npm run templates:sync",
     "dev": "next dev",
-    "prebuild": "prisma generate",
+    "prebuild": "prisma generate && npm run templates:sync",
+    "templates:sync": "node scripts/sync-template-assets.cjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

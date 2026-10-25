@@ -1,0 +1,1 @@
+ALTER TABLE "Event" ADD COLUMN "templateId" TEXT NOT NULL DEFAULT 'none';

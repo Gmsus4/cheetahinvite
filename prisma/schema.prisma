@@ -45,6 +45,7 @@ model Event {
   sections     Json        @default("[]")
   slug         String?     @unique
   customSlug   String?     @db.VarChar(80)
+  templateId   String      @default("none")
   status       EventStatus @default(DRAFT)
   eventDate    DateTime?
   eventTime    String?     @db.VarChar(5)

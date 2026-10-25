@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { isInvitationFont } from "@/lib/invitation-fonts";
 import { isValidInvitationSlug, normalizeInvitationSlug } from "@/lib/invitation-url";
+import { isInvitationTemplate } from "@/lib/invitation-templates";
 
 export async function deleteEvent(eventId: string) {
   const session = await auth();
@@ -84,6 +85,7 @@ async function persistEvent(eventId: string, formData: FormData) {
   const customSlug = normalizeInvitationSlug(String(formData.get("customSlug") ?? ""));
   if (hasCustomSlug && customSlug && !isValidInvitationSlug(customSlug)) redirect(`/dashboard/eventos/${eventId}?error=enlace`);
   const eventType = String(formData.get("eventType") ?? "");
+  const templateId = String(formData.get("templateId") ?? "none");
   const dateValue = String(formData.get("eventDate") ?? "");
   const eventTime = String(formData.get("eventTime") ?? "");
   const hostNames = String(formData.get("hostNames") ?? "").trim();
@@ -112,7 +114,7 @@ async function persistEvent(eventId: string, formData: FormData) {
   }
 
   if (
-    name.length < 2 || name.length > 100 || !eventTypes.includes(eventType) ||
+    name.length < 2 || name.length > 100 || !eventTypes.includes(eventType) || !isInvitationTemplate(eventType, templateId) ||
     hostNames.length > 120 || venue.length > 160 || address.length > 240 ||
     message.length > 1200 || !/^#[0-9a-fA-F]{6}$/.test(accent) || !isInvitationFont(typography) || !isInvitationFont(bodyTypography) ||
     (eventDate && Number.isNaN(eventDate.getTime())) ||
@@ -138,7 +140,7 @@ async function persistEvent(eventId: string, formData: FormData) {
   try {
     result = await prisma.event.updateMany({
     where: { id: eventId, ownerId: session.user.id },
-    data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, accent, typography, bodyTypography, sections, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
+    data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, accent, typography, bodyTypography, templateId, sections, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
   });
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "P2002") redirect(`/dashboard/eventos/${eventId}?error=enlace-ocupado`);

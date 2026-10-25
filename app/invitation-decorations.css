@@ -1,0 +1,71 @@
+.editor-template-picker{min-width:0;margin:0;padding:0;border:0}
+.editor-template-picker legend{margin-bottom:8px;font-size:14px;font-weight:600;color:#26364a}
+.editor-template-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.editor-template-option{position:relative;display:flex;flex-direction:column;gap:12px;min-width:0;padding:12px;border:1px solid #e5e8ed;border-radius:12px;background:#fff;cursor:pointer}
+.editor-template-option input{position:absolute;top:20px;left:20px;z-index:1;accent-color:#c56a48}
+.editor-template-option.is-selected{border-color:#c56a48;box-shadow:0 0 0 2px #c56a4820}
+.editor-template-option:focus-within{outline:2px solid #c56a48;outline-offset:3px}
+.editor-template-option.is-unavailable{opacity:.55;cursor:default}
+.editor-template-option strong{font-size:13px;color:#26364a}
+.editor-template-thumbnail{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;height:140px;overflow:hidden;border-radius:8px;background:#fbf8f2}
+.editor-template-thumbnail i{position:relative;z-index:1;font:22px Georgia,serif;color:#5b4b61;text-align:center}
+.editor-template-thumbnail>span{position:relative;z-index:1;font-size:9px;color:#78747c;text-align:center}
+.editor-template-thumbnail img{position:absolute;width:68px;height:78px;object-fit:contain;mix-blend-mode:multiply}
+.template-thumb-top-left{top:0;left:0}
+.template-thumb-bottom-right{bottom:0;right:0}
+.invite-decoration-frame{position:absolute;inset:0;overflow:hidden;pointer-events:none;user-select:none;z-index:0}
+.invite-decoration-corner{position:absolute;width:clamp(100px,17vw,240px);aspect-ratio:1/1.15;mix-blend-mode:multiply}
+.invite-decoration-corner img{object-fit:contain}
+.invite-decoration-corner.is-topLeft{top:0;left:0}
+.invite-decoration-corner.is-topLeft img{object-position:top left}
+.invite-decoration-corner.is-topRight{top:0;right:0}
+.invite-decoration-corner.is-topRight img{object-position:top right}
+.invite-decoration-corner.is-bottomLeft{bottom:0;left:0}
+.invite-decoration-corner.is-bottomLeft img{object-position:bottom left}
+.invite-decoration-corner.is-bottomRight{bottom:0;right:0}
+.invite-decoration-corner.is-bottomRight img{object-position:bottom right}
+.invite-website[data-decorated] .invite-welcome{position:relative;isolation:isolate;width:100%;max-width:none;padding:100px 24px 110px;background:var(--invite-paper,#fbf8f2)}
+.invite-website[data-decorated] .invite-welcome>h2,.invite-website[data-decorated] .invite-welcome>p,.invite-website[data-decorated] .invite-welcome>strong{position:relative;z-index:1;max-width:min(600px,64%);margin-right:auto;margin-left:auto}
+.invite-website[data-decorated] .invite-welcome .invite-ornament{position:relative;z-index:1;width:72px;height:62px;margin:0 auto 20px;font-size:0;background-image:var(--template-flower);background-position:center;background-size:contain;background-repeat:no-repeat;mix-blend-mode:multiply}
+.invite-website[data-decorated] .invite-content-program{position:relative;isolation:isolate}
+.invite-website[data-decorated] .invite-content-program>.invite-content-copy::before{display:block;flex:none;width:65px;height:110px;margin:0 auto 20px;background-image:var(--template-separator);background-position:center;background-size:contain;background-repeat:no-repeat;mix-blend-mode:multiply;content:""}
+.invite-website[data-decorated] .invite-content-program::before{position:absolute;top:32px;right:5%;z-index:-1;width:100px;height:110px;background-image:var(--template-decoration);background-position:center;background-size:contain;background-repeat:no-repeat;mix-blend-mode:multiply;opacity:.8;pointer-events:none;content:""}
+.invite-website[data-decorated] .invite-countdown-panel{position:relative;isolation:isolate;padding-bottom:100px;background:#f5eff4}
+.invite-website[data-decorated] .invite-countdown-panel>.invite-decoration-frame~*{position:relative;z-index:1}
+@media(max-width:760px){.invite-decoration-corner{width:95px}.invite-website[data-decorated] .invite-welcome{padding:80px 20px 95px}.invite-website[data-decorated] .invite-welcome>h2,.invite-website[data-decorated] .invite-welcome>p{max-width:80%}.invite-website[data-decorated] .invite-content-program::before{top:24px;right:16px;width:52px;height:60px;opacity:.5}.invite-website[data-decorated] .invite-countdown-panel{padding-bottom:95px}.invite-website[data-decorated] .invite-countdown-panel .invite-decoration-corner{width:80px}}
+.invite-website[data-template="wedding-plantilla1"]{--invite-paper:#faf7fc;--invite-panel:#f0e8f4;background:var(--invite-paper)}
+.invite-website[data-template="wedding-plantilla1"] .invite-main-location{background:var(--invite-panel)}
+.invite-website[data-template="wedding-plantilla1"] .invite-countdown-panel{background:#f1e8f4}
+.invite-website[data-template="wedding-plantilla1"] .invite-website-footer{background:#2c2335}
+.invite-website[data-template="wedding-plantilla1"] .invite-extra-sections .invite-content-rsvp{background:#2c2335}
+.invite-website[data-template="wedding-plantilla1"] .invite-extra-sections .invite-content-rsvp .invite-section-kicker{color:#decbe8}
+.invite-website[data-template="wedding-plantilla1"] .invite-extra-sections .invite-content-gifts{background:#eee3f2}
+.invite-website[data-template="wedding-plantilla1"] .invite-gallery-open:hover,.invite-website[data-template="wedding-plantilla1"] .invite-gallery-arrow:hover{background:var(--invite-accent);border-color:var(--invite-accent)}
+.invite-website[data-template="wedding-plantilla1"] .invite-gallery-open{background:#2c2335cc}
+.invite-website[data-template="wedding-plantilla1"] .invite-footer-ornament{color:#d5b7e6}
+.invite-website[data-template="wedding-plantilla1"] .invite-program-copy{border-left-color:#d9cce2}
+.invite-website[data-template="wedding-plantilla1"] .invite-program-copy>i{border-color:var(--invite-paper)}
+.invite-website[data-template="wedding-plantilla1"] .invite-program-list li:last-child .invite-program-copy{border-left-color:transparent}
+.invite-website[data-template="wedding-plantilla1"] :is(.invite-welcome,.invite-content-copy,.invite-location-main-copy,.invite-countdown-panel) h2{color:var(--invite-accent)}
+.invite-website[data-template="wedding-plantilla1"] .invite-extra-sections .invite-content-rsvp h2{color:#fff}
+.invite-website[data-template="wedding-plantilla1"] .invite-hero-kicker,.invite-website[data-template="wedding-plantilla1"] .invite-hero-event-name{color:#e9dcf1}
+.invite-website[data-template="wedding-plantilla1"] .invite-hero-date svg,.invite-website[data-template="wedding-plantilla1"] .invite-hero-button svg{color:#d8bce8}
+.invite-website[data-template="wedding-plantilla1"] .invite-countdown-panel>.invite-section-kicker{color:var(--invite-accent)}
+.invite-website[data-decorated]:not([data-has-separator]) .invite-content-program>.invite-content-copy::before{display:none}
+.invite-website[data-template="wedding-plantilla2"]{--invite-paper:#fff9fb;--invite-panel:#faeaf1;background:var(--invite-paper)}
+.invite-website[data-template="wedding-plantilla2"] .invite-main-location{background:var(--invite-panel)}
+.invite-website[data-template="wedding-plantilla2"] .invite-countdown-panel{background:#f9e7ef}
+.invite-website[data-template="wedding-plantilla2"] .invite-website-footer{background:#39242e}
+.invite-website[data-template="wedding-plantilla2"] .invite-extra-sections .invite-content-rsvp{background:#39242e}
+.invite-website[data-template="wedding-plantilla2"] .invite-extra-sections .invite-content-rsvp .invite-section-kicker{color:#f4c8dc}
+.invite-website[data-template="wedding-plantilla2"] .invite-extra-sections .invite-content-gifts{background:#f7e2eb}
+.invite-website[data-template="wedding-plantilla2"] :is(.invite-welcome,.invite-content-copy,.invite-location-main-copy,.invite-countdown-panel) h2{color:var(--invite-accent)}
+.invite-website[data-template="wedding-plantilla2"] .invite-extra-sections .invite-content-rsvp h2{color:#fff}
+.invite-website[data-template="wedding-plantilla2"] .invite-hero-kicker,.invite-website[data-template="wedding-plantilla2"] .invite-hero-event-name{color:#f5deea}
+.invite-website[data-template="wedding-plantilla2"] .invite-hero-date svg,.invite-website[data-template="wedding-plantilla2"] .invite-hero-button svg,.invite-website[data-template="wedding-plantilla2"] .invite-footer-ornament{color:#efbad2}
+.invite-website[data-template="wedding-plantilla2"] .invite-countdown-panel>.invite-section-kicker{color:var(--invite-accent)}
+.invite-website[data-template="wedding-plantilla2"] .invite-gallery-open{background:#39242ecc}
+.invite-website[data-template="wedding-plantilla2"] .invite-gallery-open:hover,.invite-website[data-template="wedding-plantilla2"] .invite-gallery-arrow:hover{background:var(--invite-accent);border-color:var(--invite-accent)}
+.invite-website[data-template="wedding-plantilla2"] .invite-program-copy{border-left-color:#e6c8d5}
+.invite-website[data-template="wedding-plantilla2"] .invite-program-copy>i{border-color:var(--invite-paper)}
+.invite-website[data-template="wedding-plantilla2"] .invite-program-list li:last-child .invite-program-copy{border-left-color:transparent}
