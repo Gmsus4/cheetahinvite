@@ -1,5 +1,7 @@
 "use server";
 
+import { parseButtonAppearance } from "@/lib/invitation-buttons";
+
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { redirect } from "next/navigation";
@@ -98,6 +100,7 @@ async function persistEvent(eventId: string, formData: FormData) {
   const accent = String(formData.get("accent") ?? "#E9560A");
   const typography = String(formData.get("typography") ?? "default");
   const bodyTypography = String(formData.get("bodyTypography") ?? "inter");
+  const buttonAppearance = parseButtonAppearance(formData);
   const heroHorizontal = String(formData.get("heroHorizontal") ?? "left");
   const heroVertical = String(formData.get("heroVertical") ?? "center");
   let sections: unknown;
@@ -109,7 +112,7 @@ async function persistEvent(eventId: string, formData: FormData) {
   const eventTypes = ["wedding", "birthday", "graduation", "baby_shower", "anniversary", "other"];
   const eventDate = dateValue ? new Date(`${dateValue}T12:00:00.000Z`) : null;
   if (
-    !["left", "center", "right"].includes(heroHorizontal) || !["top", "center", "bottom"].includes(heroVertical) ||
+    !buttonAppearance || !["left", "center", "right"].includes(heroHorizontal) || !["top", "center", "bottom"].includes(heroVertical) ||
     name.length < 2 || name.length > 100 || !eventTypes.includes(eventType) || !isInvitationTemplate(eventType, templateId) || !isInvitationTexture(texture) ||
     hostNames.length > 120 || venue.length > 160 || address.length > 240 ||
     message.length > 1200 || !/^#[0-9a-fA-F]{6}$/.test(accent) || !isInvitationFont(typography) || !isInvitationFont(bodyTypography) ||
@@ -136,7 +139,7 @@ async function persistEvent(eventId: string, formData: FormData) {
   try {
     result = await prisma.event.updateMany({
     where: { id: eventId, ownerId: session.user.id },
-    data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, accent, typography, bodyTypography, heroHorizontal, heroVertical, templateId, texture, sections, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
+    data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, accent, typography, bodyTypography, heroHorizontal, heroVertical, buttonShape: buttonAppearance.shape, buttonFilled: buttonAppearance.filled, buttonIcons: buttonAppearance.icons, buttonBorder: buttonAppearance.border, buttonBold: buttonAppearance.bold, templateId, texture, sections, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
   });
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "P2002") redirect(`/dashboard/eventos/${eventId}?error=enlace-ocupado`);

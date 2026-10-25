@@ -325,8 +325,8 @@ body,p,a,button,input,textarea,select,li,small,nav,label{font-family:var(--font-
 .invite-static-link svg{width:16px;height:16px;flex:0 0 auto;transform:none}
 .invite-static-link.is-disabled{background:#a7adb5;border-color:#a7adb5;color:#fff!important;cursor:not-allowed;opacity:.8}
 .invite-static-link.is-disabled:hover{transform:none;background:#a7adb5;border-color:#a7adb5}
-.invite-content-gallery .invite-static-link{background:transparent;color:#f1bd9b!important;border-color:#f1bd9b}
-.invite-content-gallery .invite-static-link:hover{background:#f1bd9b;color:#17202c!important}
+.invite-content-gallery .invite-static-link{background:transparent;color:#f1bd9b;border-color:#f1bd9b}
+.invite-content-gallery .invite-static-link:hover{background:#f1bd9b;color:#17202c}
 @media(max-width:760px){.invite-static-link{min-height:48px;padding:0 16px;font-size:12px}}
 .invite-gallery-image-frame{width:100%;height:100%;position:absolute;z-index:0;inset:0}
 .invite-gallery-image-frame img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover}

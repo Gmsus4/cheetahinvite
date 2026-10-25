@@ -1,0 +1,1 @@
+ALTER TABLE "Event" ADD COLUMN "buttonBold" BOOLEAN NOT NULL DEFAULT true;

@@ -1,3 +1,4 @@
+import { eventButtonAppearance } from "@/lib/invitation-buttons";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { invitationPath } from "@/lib/invitation-url";
@@ -57,7 +58,7 @@ async function ShowInvitationData({ params }: ShowPageProps) {
         accent={event.accent}
         texture={event.texture} templateId={event.templateId}
       typography={event.typography}
-        bodyTypography={event.bodyTypography} heroHorizontal={event.heroHorizontal} heroVertical={event.heroVertical}
+        bodyTypography={event.bodyTypography} heroHorizontal={event.heroHorizontal} heroVertical={event.heroVertical} buttonAppearance={eventButtonAppearance(event)}
         sections={sections}
         full
       />

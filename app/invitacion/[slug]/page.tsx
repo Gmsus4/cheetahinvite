@@ -1,3 +1,4 @@
+import { eventButtonAppearance } from "@/lib/invitation-buttons";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { connection } from "next/server";
@@ -47,7 +48,7 @@ async function InvitationData({ params }: InvitationPageProps) {
       accent={event.accent}
       texture={event.texture} templateId={event.templateId}
       typography={event.typography}
-      bodyTypography={event.bodyTypography} heroHorizontal={event.heroHorizontal} heroVertical={event.heroVertical}
+      bodyTypography={event.bodyTypography} heroHorizontal={event.heroHorizontal} heroVertical={event.heroVertical} buttonAppearance={eventButtonAppearance(event)}
       sections={sections}
       full
     />

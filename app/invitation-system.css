@@ -349,3 +349,38 @@
 .invite-gifts-heading-ornament:last-child img {
   transform:scaleX(-1);
 }
+/* Invitation actions share the saved appearance; gallery controls remain independent. */
+.invite-website[data-button-shape="square"] { --invite-button-radius:0px; }
+.invite-website[data-button-shape="rounded"] { --invite-button-radius:10px; }
+.invite-website[data-button-shape="pill"] { --invite-button-radius:999px; }
+.invite-website.invite-website.invite-website[data-button-shape] :is(.invite-static-link,.invite-hero-button) {
+  --button-ink:var(--invite-action);
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  width:fit-content;
+  max-width:100%;
+  min-height:46px;
+  padding:12px 22px;
+  border:1px solid transparent;
+  border-radius:var(--invite-button-radius);
+  background:var(--invite-action);
+  color:#fff;
+  line-height:1.5;
+  text-align:center;
+  white-space:normal;
+  transition:filter .2s ease;
+}
+.invite-website.invite-website.invite-website[data-button-shape] :is(.invite-website-hero,.invite-content-rsvp) :is(.invite-static-link,.invite-hero-button) { --button-ink:#fff; }
+.invite-website.invite-website.invite-website[data-button-filled="false"] :is(.invite-static-link,.invite-hero-button) { background:transparent; color:var(--button-ink); }
+.invite-website.invite-website.invite-website[data-button-border="true"] :is(.invite-static-link,.invite-hero-button) { border-color:currentColor; }
+.invite-website.invite-website.invite-website[data-button-shape] :is(.invite-static-link,.invite-hero-button):hover { filter:brightness(.9); }
+.invite-website.invite-website.invite-website[data-button-shape] :is(.invite-static-link,.invite-hero-button):focus-visible { outline:2px solid currentColor; outline-offset:4px; }
+.invite-website.invite-website.invite-website[data-button-shape] :is(.invite-static-link,.invite-hero-button) svg { flex-shrink:0; color:currentColor; }
+.invite-website.invite-website.invite-website[data-button-icons="false"] :is(.invite-static-link,.invite-hero-button) svg { display:none; }
+@media(prefers-reduced-motion:reduce) {
+  .invite-website.invite-website.invite-website[data-button-shape] :is(.invite-static-link,.invite-hero-button) { transition:none; }
+}
+.invite-website.invite-website.invite-website[data-button-bold="true"] :is(.invite-static-link,.invite-hero-button) { font-weight:700; }
+.invite-website.invite-website.invite-website[data-button-bold="false"] :is(.invite-static-link,.invite-hero-button) { font-weight:400; }

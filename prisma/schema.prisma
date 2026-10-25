@@ -40,6 +40,11 @@ model Event {
   imageUrl     String?     @db.Text
   imageUploads Int         @default(0)
   accent       String      @default("#E9560A")
+  buttonShape String @default("square")
+  buttonFilled Boolean @default(true)
+  buttonIcons Boolean @default(true)
+  buttonBold Boolean @default(true)
+  buttonBorder Boolean @default(false)
   heroHorizontal String @default("left")
   heroVertical String @default("center")
   typography   String      @default("default")
