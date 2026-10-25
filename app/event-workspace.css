@@ -113,3 +113,109 @@
 @media(max-width:1100px){.editor-page .editor-layout{grid-template-columns:minmax(0,1fr) minmax(300px,.7fr);gap:20px;padding:24px 20px 44px}.editor-page .editor-form-panel{padding:24px}.editor-page .editor-preview-panel{padding:16px}.editor-page .editor-group-fields,.editor-page .editor-section-fields{grid-template-columns:1fr}.editor-page .editor-group-fields .editor-field{grid-column:1}.editor-page .editor-section-card-head{flex-wrap:wrap}.editor-page .editor-section-actions{margin-left:auto}}
 @media(max-width:800px){.editor-page .editor-layout{grid-template-columns:minmax(0,1fr)}.editor-page .editor-preview-panel{position:static;max-height:none;overflow:visible}.editor-page .editor-group-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.editor-page .editor-group-fields .editor-group-wide{grid-column:1/-1}.editor-page .invitation-preview-cover{height:340px}}
 @media(max-width:600px){.editor-page .editor-header{padding:16px;gap:12px;flex-wrap:wrap}.editor-page .editor-back{font-size:12px}.editor-page .editor-layout{gap:20px;padding:18px 12px 32px}.editor-page .editor-form-panel{padding:24px 18px;border-radius:14px}.editor-page .editor-heading h1{font-size:28px}.editor-page .editor-group-fields{grid-template-columns:1fr}.editor-page .editor-group-fields .editor-group-wide{grid-column:1}.editor-page .editor-step-nav{flex-wrap:nowrap;overflow-x:auto;padding-bottom:16px}.editor-page .editor-step-nav a{font-size:11px}.editor-page .editor-section-card{padding:16px}.editor-page .editor-section-toggle-copy small{font-size:11px}.editor-page .editor-section-toggle-copy strong{white-space:normal}.editor-page .editor-section-actions button{width:40px;height:40px}.editor-page .editor-add-section{grid-template-columns:1fr}.editor-page .editor-add-section small{grid-column:1}.editor-page .editor-preview-panel{padding:16px;border-radius:14px}.show-preview-page .show-preview-toolbar{grid-template-columns:1fr auto;gap:10px;padding:14px 16px}.show-preview-page .show-preview-private{font-size:9px}.show-preview-page .show-preview-footer{padding:12px 16px;font-size:11px}}
+
+.editor-form [hidden] { display: none !important; }
+.editor-step-nav button { display:flex; align-items:center; gap:8px; padding:10px; border:1px solid #e8e3df; border-radius:10px; background:white; color:inherit; font:inherit; cursor:pointer; }
+.editor-step-nav button[aria-current="step"] { border-color:#e9560a; color:#c44608; background:#fff5ee; }
+.editor-step-nav button:disabled { opacity:.5; cursor:default; }
+.creation-step-actions { margin-top:24px; }
+.creation-step-actions > div { display:flex; gap:12px; justify-content:space-between; flex-wrap:wrap; }
+.creation-step-actions > p { margin-bottom:12px; color:#72665f; }
+
+/* Creation: one question at a time, with preview available on demand. */
+.onboarding-design-option { display: contents; }
+.editor-page [hidden] { display: none !important; }
+.creation-onboarding .editor-layout { display: flex; flex-direction: column; align-items: center; padding: 36px 20px 64px; }
+.creation-onboarding .editor-form-panel { width: 100%; max-width: 720px; padding: 40px; }
+.creation-onboarding .editor-heading h1 { font-size: 18px; margin-bottom: 0; }
+.creation-onboarding .editor-heading > p:not(.dashboard-eyebrow),
+.creation-onboarding .editor-draft-reminder,
+.creation-onboarding .editor-group-heading,
+.creation-onboarding .editor-save-status { display: none; }
+.creation-onboarding .editor-heading { margin-bottom: 28px; }
+.onboarding-progress > div { display: flex; justify-content: space-between; gap: 12px; color: #786c63; font-size: 12px; }
+.onboarding-progress progress { display: block; width: 100%; height: 5px; margin: 12px 0 32px; border: 0; border-radius: 8px; overflow: hidden; accent-color: #e9560a; background: #eee7e1; }
+.onboarding-progress progress::-webkit-progress-bar { background: #eee7e1; }
+.onboarding-progress progress::-webkit-progress-value { background: #e9560a; border-radius: 8px; transition: width .2s; }
+.onboarding-progress h2 { font-size: clamp(25px, 4vw, 34px); line-height: 1.2; letter-spacing: -.025em; margin: 0 0 12px; outline: none; }
+.onboarding-progress > p { color: #786c63; line-height: 1.6; margin: 0 0 28px; }
+.creation-onboarding .editor-group { padding: 0; border: 0; margin: 0; }
+.creation-onboarding .editor-group-fields { display: flex; flex-direction: column; gap: 18px; }
+.creation-onboarding .editor-field { width: 100%; }
+.creation-onboarding .editor-field > label { font-size: 14px; }
+.creation-onboarding .editor-field input:not([type=color]):not([type=hidden]),
+.creation-onboarding .editor-field select { min-height: 54px; font-size: 17px; }
+.creation-onboarding .editor-sections-field { margin: 0; padding: 0; border: 0; }
+.creation-onboarding .editor-section-list { display: block; }
+.creation-onboarding .editor-section-details > summary { display: none; }
+.creation-onboarding .editor-section-fields { grid-template-columns: 1fr; }
+.creation-onboarding .editor-preview-panel { width: 100%; max-width: 720px; position: static; max-height: none; }
+.creation-step-actions { margin-top: 32px; }
+.creation-step-actions > div { align-items: center; }
+.creation-step-actions > div > .button { margin-left: auto; }
+.onboarding-back, .onboarding-skip, .onboarding-preview-toggle { border: 0; background: transparent; color: #786c63; font: inherit; cursor: pointer; padding: 12px 0; }
+.onboarding-back { display: inline-flex; align-items: center; gap: 8px; }
+.onboarding-skip { display: block; margin: 10px 0 0 auto; font-size: 13px; text-decoration: underline; text-underline-offset: 4px; }
+.onboarding-preview-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 22px; }
+.onboarding-extra-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.onboarding-extra-list button { display: flex; align-items: center; gap: 10px; border: 1px solid #e8e3df; border-radius: 24px; background: white; padding: 10px 14px; color: #66584e; cursor: pointer; }
+.onboarding-extra-list button[aria-pressed=true] { border-color: #e9560a; background: #fff5ee; }
+.onboarding-review dl { margin: 0; }
+.onboarding-review dl > div { display: flex; justify-content: space-between; gap: 20px; padding: 14px 0; border-bottom: 1px solid #eee7e1; }
+.onboarding-review dt { color: #786c63; }
+.onboarding-review dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .creation-onboarding .editor-layout { padding: 20px 12px 40px; }
+  .creation-onboarding .editor-form-panel { padding: 26px 20px; }
+  .creation-onboarding .editor-heading h1 { font-size: 17px; }
+}
+.onboarding-review-edit { display: block; margin: 4px 0 0 auto; padding: 3px 0; border: 0; background: transparent; color: #bd460c; font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer; }
+
+/* Keep the onboarding preview beside the current question on wide screens. */
+@media (min-width: 1024px) {
+  .creation-onboarding .editor-layout.has-creation-preview {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(24px, 3vw, 48px);
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  .creation-onboarding .has-creation-preview .editor-form-panel { max-width: none; }
+  .creation-onboarding .has-creation-preview .editor-preview-panel {
+    position: sticky;
+    top: 24px;
+    max-width: none;
+    max-height: calc(100dvh - 48px);
+    overflow: auto;
+  }
+}
+@media (max-width: 1023px) {
+  .creation-onboarding .editor-preview-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    max-width: none;
+    width: 100%;
+    height: 100dvh;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    overflow: auto;
+  }
+  .creation-onboarding .editor-preview-panel > :not(.editor-live-preview) { display: none; }
+  .creation-onboarding .editor-preview-panel .editor-live-preview:not(.is-expanded) { display: none; }
+}
+.onboarding-example-note { margin: 0 0 20px; padding: 14px 16px; border-radius: 10px; background: #fff5ee; color: #835339; font-size: 13px; line-height: 1.7; }
+
+/* Make every available onboarding button visibly interactive. */
+.creation-onboarding button:not(:disabled),
+.creation-onboarding .button:not(:disabled),
+.creation-onboarding .image-upload-button:has(input:not(:disabled)),
+.creation-onboarding .editor-template-option:has(input:not(:disabled)),
+.creation-onboarding .editor-texture-option:has(input:not(:disabled)) {
+  cursor: pointer;
+}
+.creation-onboarding button:disabled {
+  cursor: not-allowed;
+}

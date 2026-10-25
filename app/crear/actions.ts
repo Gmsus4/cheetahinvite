@@ -14,7 +14,7 @@ const eventTypes = new Set([
   "other",
 ]);
 
-export async function createEvent(formData: FormData) {
+export async function prepareEvent(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=%2Fcrear");
 
@@ -36,10 +36,10 @@ export async function createEvent(formData: FormData) {
     });
     if (!slot.count) return false;
 
-    await tx.event.create({ data: { ownerId: session.user.id, name, eventType, eventDate } });
-    return true;
+    const event = await tx.event.create({ data: { ownerId: session.user.id, name, eventType, eventDate, sections: [] } });
+    return event.id;
   });
   if (!created) redirect("/crear?error=limite");
 
-  redirect("/dashboard");
+  return created;
 }

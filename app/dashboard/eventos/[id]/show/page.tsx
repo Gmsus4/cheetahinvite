@@ -55,7 +55,7 @@ async function ShowInvitationData({ params }: ShowPageProps) {
         message={event.message ?? ""}
         imageUrl={event.imageUrl ?? ""}
         accent={event.accent}
-        templateId={event.templateId}
+        texture={event.texture} templateId={event.templateId}
       typography={event.typography}
         bodyTypography={event.bodyTypography}
         sections={sections}

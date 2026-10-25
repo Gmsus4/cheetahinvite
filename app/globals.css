@@ -449,3 +449,36 @@ body,p,a,button,input,textarea,select,li,small,nav,label{font-family:var(--font-
 .brand:not(.dashboard-brand):not(.editor-brand)>.brand-emblem{margin-right:6px}
 .dashboard-brand-mark.brand-emblem,.dashboard-loading-mark.brand-emblem{background:#E9560A;color:inherit;font-size:0;line-height:0}
 @media(max-width:640px){.brand-emblem{width:var(--brand-emblem-size,36px);height:var(--brand-emblem-size,36px);flex-basis:var(--brand-emblem-size,36px)}.brand:not(.dashboard-brand):not(.editor-brand)>.brand-emblem{margin-right:4px}}
+
+.create-event-card.create-event-limit-card {
+  width: min(100%, 680px);
+  padding: 56px 48px;
+  border-radius: 16px;
+}
+.create-event-limit-card .create-event-icon {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 28px;
+}
+.create-event-limit-card h1 {
+  max-width: 540px;
+  margin: 0 auto;
+  line-height: 1.3;
+}
+.create-event-limit-card > p {
+  margin: 22px auto 0;
+  color: #707b89;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.create-event-limit-card > .button {
+  margin-top: 32px;
+  min-height: 48px;
+  padding: 14px 26px;
+  border-radius: 8px;
+}
+@media (max-width: 600px) {
+  .create-event-card.create-event-limit-card { padding: 36px 24px; }
+  .create-event-limit-card > p { font-size: 15px; }
+  .create-event-limit-card > .button { margin-top: 26px; }
+}

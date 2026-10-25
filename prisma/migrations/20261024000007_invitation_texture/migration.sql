@@ -1,0 +1,1 @@
+ALTER TABLE "Event" ADD COLUMN "texture" TEXT NOT NULL DEFAULT 'none';

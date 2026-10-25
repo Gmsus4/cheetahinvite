@@ -46,6 +46,7 @@ model Event {
   slug         String?     @unique
   customSlug   String?     @db.VarChar(80)
   templateId   String      @default("none")
+  texture      String      @default("none")
   status       EventStatus @default(DRAFT)
   eventDate    DateTime?
   eventTime    String?     @db.VarChar(5)
