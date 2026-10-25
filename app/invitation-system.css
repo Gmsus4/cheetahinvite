@@ -1,0 +1,112 @@
+/* Shared composition rules come after template skins so content stays readable. */
+.invite-website.invite-website {
+  --invite-paper: color-mix(in srgb, var(--invite-accent) 3%, #fffdf9);
+  --invite-panel: color-mix(in srgb, var(--invite-accent) 9%, #fffdf9);
+  --invite-ink: color-mix(in srgb, var(--invite-accent) 15%, #202124);
+  --invite-muted: color-mix(in srgb, var(--invite-accent) 10%, #50545a);
+  --invite-action: color-mix(in srgb, var(--invite-accent) 45%, #202124);
+  --invite-dark: color-mix(in srgb, var(--invite-accent) 22%, #19202a);
+  --invite-section-space: clamp(56px, 7vw, 96px);
+  --invite-gutter: clamp(24px, 5vw, 80px);
+  background-color: var(--invite-paper);
+  color: var(--invite-ink);
+}
+.invite-website.invite-website :is(h1,h2,p,strong,a,span) { overflow-wrap: anywhere; }
+.invite-website.invite-website :is(.invite-welcome,.invite-countdown-panel) { width:100%; max-width:none; padding:var(--invite-section-space) var(--invite-gutter); background-color:var(--invite-paper); }
+.invite-website.invite-website :is(.invite-welcome,.invite-content-copy,.invite-location-main-copy,.invite-countdown-panel) h2 { font-size:clamp(34px,3.8vw,54px); line-height:1.22; letter-spacing:-.025em; color:var(--invite-ink); text-wrap:balance; }
+.invite-website.invite-website .invite-extra-sections .invite-content-copy { padding:var(--invite-section-space) var(--invite-gutter); }
+.invite-website.invite-website :is(.invite-content-body,.invite-location-address,.invite-welcome>p) { max-width:62ch; font-size:clamp(16px,1.3vw,19px); line-height:1.85; color:var(--invite-muted); }
+.invite-website.invite-website .invite-welcome>p { max-width:min(58ch,80%); margin:24px auto; }
+.invite-website.invite-website :is(.invite-section-kicker,.invite-hero-kicker) { font-size:12px; line-height:1.7; letter-spacing:.15em; }
+.invite-website.invite-website :is(.invite-content-detail,.invite-welcome>strong,.invite-hero-date) { font-size:16px; line-height:1.7; }
+.invite-website.invite-website :is(.invite-section-kicker,.invite-content-detail,.invite-welcome>strong) { color:var(--invite-action); }
+.invite-website.invite-website .invite-extra-sections>.invite-content-block { min-height:0; background-color:var(--invite-panel); }
+.invite-website.invite-website .invite-extra-sections>.invite-content-block:nth-child(even) { background-color:var(--invite-paper); }
+.invite-website.invite-website .invite-extra-sections .invite-content-block:not(.has-section-image) .invite-content-copy { width:min(100%,1080px); align-items:center; text-align:center; }
+.invite-website.invite-website .invite-extra-sections .invite-content-body { max-width:62ch; }
+.invite-website.invite-website :is(.invite-static-link,.invite-hero-button) { min-height:46px; padding:12px 20px; font-size:14px; line-height:1.5; text-align:center; white-space:normal; }
+.invite-website.invite-website .invite-static-link { color:var(--invite-action); }
+.invite-website.invite-website :is(.invite-static-link,.invite-hero-button) { border:0; }
+.invite-website.invite-website .invite-extra-sections .invite-content-rsvp,.invite-website.invite-website .invite-website-footer { background-color:var(--invite-dark); color:#fff; }
+.invite-website.invite-website .invite-content-rsvp :is(h2,.invite-content-body,.invite-section-kicker,.invite-static-link) { color:#fff; border-color:#ffffff80; }
+.invite-website.invite-website .invite-extra-sections .invite-content-gifts { background-color:var(--invite-panel); }
+.invite-website.invite-website .invite-website-footer small { font-size:11px; line-height:1.7; }
+.invite-website.invite-website .invite-extra-sections .invite-content-image { min-height:0; aspect-ratio:4/3; align-self:stretch; }
+.invite-website.invite-website .invite-extra-sections .invite-content-gallery .invite-gallery-feature { width:min(100% - 48px,1120px); height:auto; aspect-ratio:16/10; margin:0 auto var(--invite-section-space); }
+.invite-website.invite-website .invite-extra-sections .invite-content-music { min-height:0; }
+.invite-website.invite-website .invite-extra-sections .invite-content-music .invite-content-copy { width:min(100%,900px); margin:auto; align-items:center; text-align:center; }
+/* Explicit variants reuse the same content and image markup. */
+.invite-website.invite-website .invite-extra-sections .invite-content-block:is([data-layout="centered"],[data-layout="card"]) { grid-template-columns:minmax(0,1fr); }
+.invite-website.invite-website .invite-extra-sections .invite-content-block:is([data-layout="centered"],[data-layout="card"]) .invite-content-copy { grid-column:1; grid-row:1; width:min(100%,960px); margin:auto; align-items:center; text-align:center; }
+.invite-website.invite-website .invite-extra-sections .invite-content-block:is([data-layout="centered"],[data-layout="card"]) .invite-content-image:not(.invite-gallery-feature) { grid-column:1; grid-row:2; width:min(100% - 48px,880px); margin:0 auto var(--invite-section-space); }
+.invite-website.invite-website .invite-extra-sections .invite-content-block[data-layout="card"] { width:min(100% - 48px,1040px); margin:clamp(24px,4vw,48px) auto; border:1px solid color-mix(in srgb,var(--invite-action) 20%,transparent); border-radius:8px; overflow:hidden; }
+/* Ornaments occupy their own row rather than requiring empty padding. */
+.invite-website.invite-website .invite-extra-sections .invite-content-block[data-has-section-decoration] .invite-section-decoration { position:relative; inset:auto; grid-column:1/-1; grid-row:1; justify-self:center; margin:32px auto 0; width:64px; height:76px; }
+.invite-website.invite-website .invite-extra-sections .invite-content-block[data-has-section-decoration] .invite-content-copy { grid-row:2; padding-top:32px; }
+.invite-website.invite-website .invite-extra-sections .invite-content-block[data-has-section-decoration] .invite-content-image { grid-row:2; }
+.invite-website.invite-website .invite-extra-sections .invite-content-block[data-has-section-decoration]:is([data-layout="centered"],[data-layout="card"]) .invite-content-image { grid-row:3; }
+.invite-website.invite-website .invite-extra-sections .invite-content-gallery[data-has-section-decoration] .invite-gallery-feature { grid-row:3; }
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-copy p { color:var(--invite-muted); font-size:17px; }
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-program-list li>span { color:var(--invite-action); font-size:14px; }
+@media(max-width:760px) {
+  .invite-website.invite-website .invite-welcome>p { max-width:100%; }
+  .invite-website.invite-website .invite-extra-sections .invite-content-block .invite-content-image { height:auto; aspect-ratio:4/3; grid-column:1; grid-row:1; }
+  .invite-website.invite-website .invite-extra-sections .invite-content-block .invite-content-copy { grid-column:1; grid-row:2; }
+  .invite-website.invite-website .invite-extra-sections .invite-content-block[data-has-section-decoration] .invite-content-image { grid-row:2; }
+  .invite-website.invite-website .invite-extra-sections .invite-content-block[data-has-section-decoration].has-section-image .invite-content-copy { grid-row:3; }
+  .invite-website.invite-website .invite-extra-sections .invite-content-gallery .invite-gallery-feature { aspect-ratio:4/5; }
+  .invite-website.invite-website .invite-extra-sections .invite-content-gallery[data-has-section-decoration] .invite-content-copy { grid-row:2; }
+  .invite-website.invite-website .invite-extra-sections .invite-content-gallery[data-has-section-decoration] .invite-gallery-feature { grid-row:3; }
+  .invite-website.invite-website .invite-extra-sections .invite-practical-details .invite-content-copy { padding:var(--invite-section-space) var(--invite-gutter); }
+}
+@media(max-width:760px) {
+  .invite-website.invite-website .invite-extra-sections .invite-content-block[data-has-section-decoration].has-section-image:is([data-layout="centered"],[data-layout="card"]) .invite-content-copy { grid-row:2; }
+  .invite-website.invite-website .invite-extra-sections .invite-content-block[data-has-section-decoration].has-section-image:is([data-layout="centered"],[data-layout="card"]) .invite-content-image { grid-row:3; }
+}
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-section-decoration { grid-row:auto; }
+.invite-website.invite-website .invite-extra-sections .invite-content-program .invite-content-copy { padding-top:var(--invite-section-space); }
+
+/* Split photographs fill the content row, including when the copy grows. */
+@media(min-width:761px) {
+  .invite-website.invite-website .invite-extra-sections .invite-content-block:not([data-layout="centered"]):not([data-layout="card"]):not(.invite-content-gallery) > .invite-content-image {
+    height:auto;
+    aspect-ratio:auto;
+    align-self:stretch;
+    background-size:cover;
+    background-position:center;
+  }
+}
+/* Story follows the welcome rhythm: kicker, flower, heading and message. */
+.invite-website.invite-website .invite-extra-sections .invite-content-story[data-has-section-decoration] .invite-content-copy {
+  padding-top:var(--invite-section-space);
+}
+.invite-website.invite-website .invite-content-story[data-has-section-decoration] .invite-content-icon { display:none; }
+.invite-website.invite-website .invite-content-story[data-has-section-decoration] .invite-section-kicker { margin-bottom:0; }
+.invite-website.invite-website .invite-content-story .invite-story-ornament {
+  position:relative;
+  display:block;
+  flex:none;
+  width:94px;
+  height:81px;
+  margin:0 0 26px;
+}
+.invite-story-ornament img { object-fit:contain; }
+.invite-website.invite-website .invite-content-story .invite-content-body { margin-top:24px; }
+/* Paired practical sections share a heading baseline; artwork stays out of flow. */
+.invite-website.invite-website .invite-extra-sections .invite-practical-details > .invite-content-block {
+  position:relative;
+}
+.invite-website.invite-website .invite-extra-sections .invite-practical-details > .invite-content-block .invite-section-decoration {
+  position:absolute;
+  top:20px;
+  left:50%;
+  right:auto;
+  margin:0;
+  transform:translateX(-50%);
+  width:40px;
+  height:40px;
+}
+.invite-website.invite-website .invite-extra-sections .invite-practical-details > .invite-content-block .invite-content-copy {
+  justify-content:flex-start;
+  padding:var(--invite-section-space) var(--invite-gutter);
+}

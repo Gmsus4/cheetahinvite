@@ -7,6 +7,7 @@ import "./dashboard-workspace.css";
 import "./invitation-sections.css";
 import "./invitation-decorations.css";
 import "./invitation-textures.css";
+import "./invitation-system.css";
 
 export const metadata: Metadata = {
   title: "Cheetah Invite — Invitaciones digitales para celebrar",
