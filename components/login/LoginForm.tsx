@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { FiArrowUpRight, FiEye, FiEyeOff, FiLock, FiMail } from "react-icons/fi";
 
 export function LoginForm() {
@@ -53,6 +54,7 @@ export function LoginForm() {
 
       <div className="login-password-heading">
         <label htmlFor="login-password">Contraseña</label>
+        <Link className="login-forgot-password" href="/recuperar-contrasena">¿Olvidaste tu contraseña?</Link>
       </div>
       <div className="login-input-wrap">
         <FiLock aria-hidden="true" />

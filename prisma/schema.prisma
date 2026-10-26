@@ -14,6 +14,9 @@ model User {
   emailVerified   DateTime?
   image           String?
   passwordHash    String?
+  sessionVersion  Int       @default(0)
+  passwordResetHash String? @unique
+  passwordResetExpiresAt DateTime?
   invitationCount Int       @default(0)
   accounts        Account[]
   sessions        Session[]
@@ -104,4 +107,12 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model PasswordRecoveryLimit {
+  key       String   @id
+  count     Int      @default(1)
+  expiresAt DateTime
+
+  @@index([expiresAt])
 }

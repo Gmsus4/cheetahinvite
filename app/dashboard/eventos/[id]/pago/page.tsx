@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FiArrowLeft, FiArrowUpRight, FiExternalLink } from "react-icons/fi";
 import { invitationPath } from "@/lib/invitation-url";
 import { Suspense } from "react";
 import { connection } from "next/server";
@@ -11,6 +12,8 @@ import { fulfillInvitationPayment } from "@/lib/payment-fulfillment";
 import { invitationPriceLabel, isInvitationPublished } from "@/lib/invitation-payment";
 import { PaymentRefresh } from "@/components/dashboard/PaymentRefresh";
 import { startCheckout } from "./actions";
+import { SupportRequest } from "@/components/SupportRequest";
+import "@/app/ayuda/soporte.css";
 
 export const metadata: Metadata = { title: "Publicar invitación | Cheetah Invite" };
 
@@ -45,11 +48,12 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
   const waiting = !event.paidAt && query.payment === "received";
   const ready = stripeIsConfigured();
   return <main className="invitation-payment-page"><div className="invitation-payment-card">
-    <Link className="editor-back" href={`/dashboard/eventos/${id}`}>← Volver al editor</Link>
+    <Link className="editor-back" href="/dashboard"><FiArrowLeft aria-hidden="true" /> Volver a mis invitaciones</Link>
     <p className="dashboard-eyebrow">PUBLICACIÓN DE TU INVITACIÓN</p>
     <h1>{published ? "Tu invitación está lista para compartir" : event.paidAt ? "Pago registrado" : "Un último paso para compartir"}</h1>
     <p>{event.name}</p>
-    {published ? <><p>Tu pago está confirmado y tu invitación está publicada.</p><Link className="button" href={invitationPath(event)!} target="_blank" rel="noopener noreferrer">Abrir invitación pública ↗</Link></> : event.paidAt ? <p>Tu pago está registrado. Revisa la vigencia de tu invitación desde el editor.</p> : <>
+    <p className="purchase-reference">Referencia de tu invitación: <strong>{event.id}</strong></p>
+    {published ? <><p>Tu pago está confirmado y tu invitación está publicada.</p><Link className="button" href={invitationPath(event)!} target="_blank" rel="noopener noreferrer">Abrir invitación pública <FiExternalLink aria-hidden="true" /></Link></> : event.paidAt ? <p>Tu pago está registrado. Revisa la vigencia de tu invitación desde el editor.</p> : <>
       <strong className="invitation-payment-price">{invitationPriceLabel} <small>MXN</small></strong>
       <p>Un pago por evento · 12 meses a partir de la confirmación · Sin renovación automática.</p>
       <ul><li>Invitación publicada con enlace para compartir.</li><li>Edición disponible durante la vigencia.</li><li>Tu borrador y vista previa permanecen privados hasta confirmar el pago.</li></ul>
@@ -60,5 +64,7 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
       </>}
     </>}
     <Link href={`/dashboard/eventos/${id}/show`}>Ver mi invitación en privado</Link>
+    <details className="purchase-support"><summary>Tengo un problema con mi compra</summary><SupportRequest initialEmail={session.user.email ?? ""} eventId={event.id} eventName={event.name} /></details>
+    <Link className="purchase-help-link" href="/ayuda">Ver ayuda y preguntas frecuentes <FiArrowUpRight aria-hidden="true" /></Link>
   </div></main>;
 }

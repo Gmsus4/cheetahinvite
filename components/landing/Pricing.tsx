@@ -2,9 +2,9 @@ import { FiArrowUpRight, FiCheck } from "react-icons/fi";
 
 const features = [
   "Invitación personalizable",
-  "Tu propio enlace para compartir",
-  "Confirmaciones de invitados",
-  "Edición cuando la necesites",
+  "Enlace público para compartir",
+  "Fotos, colores y tipografías",
+  "Edición durante la vigencia",
 ];
 
 export function Pricing() {
@@ -26,9 +26,7 @@ export function Pricing() {
       <div className="price-card">
         <div className="price-overview">
           <span className="price-label">INVITACIÓN DIGITAL</span>
-          <div className="price">
-            <small>$</small>499<span> MXN</span>
-          </div>
+          <div className="price price-pending">Un pago por evento</div>
           <p>Un pago por evento · 12 meses activa</p>
         </div>
         <ul>
@@ -43,7 +41,7 @@ export function Pricing() {
             Crear mi invitación <span><FiArrowUpRight aria-hidden="true" /></span>
           </a>
           <small className="price-footnote">
-            Empieza gratis. Paga cuando quieras publicar.
+            Crea y previsualiza gratis. Consulta el total antes de pagar y publicar.
           </small>
         </div>
       </div>

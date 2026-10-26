@@ -1,3 +1,24 @@
+.login-page :is(.login-input-wrap, .login-submit, .google-signin-button) {
+  border-radius: 12px;
+}
+
+.login-page .login-input-wrap input {
+  border-radius: inherit;
+}
+
+.login-forgot-password { margin-bottom: 8px; color: #c94708; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+.recovery-password-help { margin-top: 8px; color: #697386; font-size: 11px; }
+.recovery-result { margin-top: 20px; padding: 16px; border: 1px solid #dce1e8; border-radius: 12px; background: #f2f4f7; color: #1e2a3a; font-size: 13px; line-height: 1.7; }
+.manual-recovery h3 { margin: 0 0 12px; color: #0b1320; font-size: 17px; }
+.manual-recovery > p, .manual-recovery ol { color: #596575; font-size: 12px; line-height: 1.8; }
+.manual-recovery ol { margin: 18px 0 24px; padding-left: 20px; }
+.manual-recovery li + li { margin-top: 10px; }
+.manual-recovery a { color: #c94708; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.manual-recovery-note { margin: 12px 0 0; color: #697386; font-size: 11px; line-height: 1.7; }
+.recovery-automatic { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e8ebef; }
+.recovery-automatic summary { color: #c94708; font-size: 12px; line-height: 1.7; cursor: pointer; }
+.recovery-automatic[open] > .manual-recovery-note { margin-bottom: 18px; }
+
 .login-illustration {
   position: relative;
   z-index: 1;

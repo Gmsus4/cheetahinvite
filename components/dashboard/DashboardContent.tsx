@@ -1,5 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
+import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { invitationPath } from "@/lib/invitation-url";
+import { supportMailto } from "@/lib/support";
 import { isInvitationPublished } from "@/lib/invitation-payment";
 import {
   FiArrowUpRight,
@@ -9,7 +12,11 @@ import {
   FiEdit2,
   FiFileText,
   FiGift,
-  FiUsers,
+  FiPlus,
+  FiHelpCircle,
+  FiCreditCard,
+  FiExternalLink,
+  FiCopy,
 } from "react-icons/fi";
 import { DashboardSignOut } from "@/components/dashboard/DashboardSignOut";
 import { BrandEmblem } from "@/components/BrandEmblem";
@@ -76,6 +83,7 @@ function getInitials(name: string) {
 }
 
 export function DashboardContent({ userName, userEmail, events, now }: DashboardContentProps) {
+  const availableSlots = Math.max(0, ACCOUNT_LIMITS.invitations - events.length);
   const firstName = userName.trim().split(/\s+/)[0] || "bienvenido";
   const activeEvents = events.filter((event) => isInvitationPublished(event, new Date(now))).length;
   const drafts = events.filter((event) => event.status === "DRAFT").length;
@@ -115,10 +123,59 @@ export function DashboardContent({ userName, userEmail, events, now }: Dashboard
               <h1>¡Hola, <em>{firstName}!</em></h1>
               <p className="dashboard-subtitle">Cada celebración empieza con una invitación. Aquí puedes crear, editar y compartir las tuyas.</p>
             </div>
-            <Link className="button dashboard-create-button" href="/crear">
+            {availableSlots > 0 ? <Link className="button dashboard-create-button" href="/crear">
               Nueva invitación <FiArrowUpRight aria-hidden="true" />
-            </Link>
+            </Link> : <span className="dashboard-capacity-full">Tus {ACCOUNT_LIMITS.invitations} espacios están ocupados</span>}
           </div>
+
+
+
+          <section className="dashboard-events-section" id="mis-invitaciones" aria-labelledby="dashboard-events-title" tabIndex={-1}>
+            <div className="dashboard-section-heading">
+              <div>
+                <p className="dashboard-eyebrow">TUS MOMENTOS ESPECIALES</p>
+                <h2 id="dashboard-events-title">Mis invitaciones</h2>
+              </div>
+              <div className="dashboard-slot-meter"><span><strong>{events.length}</strong> de {ACCOUNT_LIMITS.invitations} espacios utilizados</span><div role="img" aria-label={`${events.length} de ${ACCOUNT_LIMITS.invitations} espacios utilizados`}>{Array.from({ length: ACCOUNT_LIMITS.invitations }, (_, index) => <i key={index} className={index < events.length ? "is-used" : ""} />)}</div></div>
+            </div>
+
+              <div className="dashboard-invitation-grid">
+                {events.map((event, index) => (
+                  <article className="dashboard-invitation-card" key={event.id}>
+                    <div className={`dashboard-invitation-cover${event.imageUrl ? " has-image" : ""}`}>
+                      {event.imageUrl ? <Image src={event.imageUrl} alt={`Portada de ${event.name}`} fill unoptimized sizes="(max-width: 640px) 100vw, (max-width: 1050px) 50vw, 33vw" /> : <FiGift className="dashboard-cover-gift" aria-hidden="true" />}
+                      <span className={`dashboard-status status-${event.status.toLowerCase()}`}><i aria-hidden="true" />{statusLabels[event.status]}</span>
+                      <span className="dashboard-invitation-number">INVITACIÓN {String(index + 1).padStart(2, "0")}</span>
+                    </div>
+                    <div className="dashboard-invitation-body">
+                      <span className="dashboard-invitation-type">{eventLabels[event.eventType] ?? event.eventType}</span>
+                      <h3>{event.name}</h3>
+                      <span className="dashboard-invitation-date"><FiCalendar aria-hidden="true" /> {formatDate(event.eventDate)}</span>
+                      <div className="dashboard-invitation-actions">
+                        <Link className="dashboard-card-edit" href={`/dashboard/eventos/${event.id}`} aria-label={`Editar invitación: ${event.name}`}><FiEdit2 aria-hidden="true" /> Editar invitación</Link>
+                        <div className="dashboard-card-share">
+                          {isInvitationPublished(event, new Date(now)) && event.slug ? <CopyInvitationLink path={invitationPath(event)!} /> : <>
+                            <button className="dashboard-event-open" type="button" disabled title="Disponible cuando tu invitación esté publicada" aria-label="Ver invitación: disponible cuando esté publicada"><FiExternalLink aria-hidden="true" /><span>Ver</span></button>
+                            <button className="dashboard-event-share" type="button" disabled title="Disponible cuando tu invitación esté publicada" aria-label="Compartir invitación: disponible cuando esté publicada"><FiCopy aria-hidden="true" /><span>Compartir</span></button>
+                          </>}
+                        </div>
+                        <Link className="dashboard-card-payment" href={`/dashboard/eventos/${event.id}/pago`} aria-label={`Ver pago y soporte de ${event.name}`}><FiCreditCard aria-hidden="true" /> Pago y soporte</Link>
+                      </div>
+                      <div className="dashboard-card-footer"><a href={supportMailto({ email: userEmail, eventId: event.id, eventName: event.name })} aria-label={`Pedir soporte para ${event.name}`}><FiHelpCircle aria-hidden="true" /> Ayuda</a><DeleteInvitationButton eventId={event.id} eventName={event.name} /></div>
+                      <small className="dashboard-card-updated">Actualizada el {formatDate(event.updatedAt)}</small>
+                    </div>
+                  </article>
+                ))}
+                {Array.from({ length: availableSlots }, (_, index) => <Link href="/crear" className="dashboard-invitation-slot" key={`slot-${index}`}>
+                  <span className="dashboard-slot-number">ESPACIO {String(events.length + index + 1).padStart(2, "0")}</span>
+                  <span className="dashboard-slot-plus"><FiPlus aria-hidden="true" /></span>
+                  <h3>{events.length === 0 && index === 0 ? "Tu primera invitación" : "Tu próxima celebración"}</h3>
+                  <p>Un nuevo momento merece su propia invitación. Dale tu estilo y compártelo.</p>
+                  <span className="dashboard-slot-cta">Crear invitación <FiArrowUpRight aria-hidden="true" /></span>
+                </Link>)}
+              </div>
+            <p className="dashboard-slot-explanation">Puedes tener hasta {ACCOUNT_LIMITS.invitations} invitaciones en tu cuenta.{availableSlots === 0 ? " Si necesitas crear otra, primero elimina una que ya no uses." : ` Te ${availableSlots === 1 ? "queda 1 espacio disponible" : `quedan ${availableSlots} espacios disponibles`}.`}</p>
+          </section>
 
           <section className="dashboard-stats" aria-label="Estado de tus invitaciones">
             <article className="dashboard-stat-card">
@@ -143,57 +200,10 @@ export function DashboardContent({ userName, userEmail, events, now }: Dashboard
             </article>
           </section>
 
-          <section className="dashboard-events-section" id="mis-invitaciones" aria-labelledby="dashboard-events-title" tabIndex={-1}>
-            <div className="dashboard-section-heading">
-              <div>
-                <p className="dashboard-eyebrow">TUS MOMENTOS ESPECIALES</p>
-                <h2 id="dashboard-events-title">Mis invitaciones</h2>
-              </div>
-              <span className="dashboard-event-count">{events.length} {events.length === 1 ? "invitación" : "invitaciones"}</span>
-            </div>
-
-            {events.length ? (
-              <div className="dashboard-event-list">
-                {events.map((event) => (
-                  <article className="dashboard-event-card" key={event.id}>
-                    <span className={`dashboard-event-art${event.imageUrl ? " has-image" : ""}`}>
-                      {event.imageUrl ? <img src={event.imageUrl} alt={`Portada de ${event.name}`} loading="lazy" /> : <FiGift aria-hidden="true" />}
-                    </span>
-                    <div className="dashboard-event-info">
-                      <span className="dashboard-event-type">{eventLabels[event.eventType] ?? event.eventType}</span>
-                      <h3>{event.name}</h3>
-                      <span className="dashboard-event-date"><FiCalendar aria-hidden="true" /> {formatDate(event.eventDate)}</span>
-                    </div>
-                    <span className={`dashboard-status status-${event.status.toLowerCase()}`}>
-                      <i aria-hidden="true" />{statusLabels[event.status]}
-                    </span>
-                    <div className="dashboard-event-updated">
-                      <small>Actualizado</small>
-                      <span>{formatDate(event.updatedAt)}</span>
-                    </div>
-                    <div className="dashboard-event-actions">
-                      <Link className="dashboard-event-edit" href={`/dashboard/eventos/${event.id}`} aria-label={`Editar invitación: ${event.name}`} title="Editar invitación"><FiEdit2 aria-hidden="true" /><span>Editar</span></Link>
-                      {isInvitationPublished(event, new Date(now)) && event.slug && <CopyInvitationLink path={invitationPath(event)!} />}
-                      <DeleteInvitationButton eventId={event.id} eventName={event.name} />
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div className="dashboard-empty-state">
-                <span className="dashboard-empty-icon"><FiUsers aria-hidden="true" /></span>
-                <h3>Aquí empieza algo especial</h3>
-                <p>Crea tu primera invitación y dale tu estilo con fotos, colores y los detalles de tu celebración.</p>
-                <Link className="button dashboard-empty-button" href="/crear">
-                  Crear mi primera invitación <FiArrowUpRight aria-hidden="true" />
-                </Link>
-              </div>
-            )}
-          </section>
-
           <footer className="dashboard-footer">
             <span>Hecho para celebrar cada historia.</span>
             <nav aria-label="Información legal">
+              <Link href="/ayuda">Ayuda y soporte</Link>
               <Link href="/terminos">Términos</Link>
               <Link href="/aviso-de-privacidad">Privacidad</Link>
             </nav>

@@ -32,6 +32,7 @@ export function Footer() {
       <div className="home-footer-bottom">
       <small>© 2026 Cheetah Invite</small>
       <nav className="footer-legal-links" aria-label="Información legal">
+        <a href="/ayuda">Ayuda y soporte</a>
         <a href="/terminos">Términos y condiciones</a>
         <a href="/aviso-de-privacidad">Privacidad</a>
       </nav>

@@ -1,0 +1,37 @@
+/* Match the homepage's 12px button corners throughout the workspace. */
+.editor-purchase-access { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin: 20px 0; padding: 18px; border: 1px solid #e3e7ec; border-radius: 12px; background: #f8f9fb; }
+.editor-purchase-access strong { color: #0b1320; font-size: 14px; }
+.editor-purchase-access p { margin: 6px 0; color: #596575; font-size: 12px; line-height: 1.7; }
+.editor-purchase-access small { color: #596575; font-size: 11px; overflow-wrap: anywhere; }
+.editor-purchase-access > div { min-width: 0; }
+.editor-page .editor-purchase-access .button { min-height: 42px; padding: 10px 16px; border: 1px solid #dce1e8; background: #fff; color: #26364a; font-size: 12px; font-weight: 500; }
+.editor-page .editor-purchase-access .button:hover { border-color: #e9560a; background: #fff6f0; color: #c94708; transform: none; }
+.dashboard-page.dashboard-page :is(button, .button, .dashboard-event-actions > a, .dashboard-skip-link),
+.editor-page.editor-page :is(button, .button, .image-upload-button, .editor-public-invitation):not(:where(.invite-website *, .invitation-preview *)),
+.create-event-page.create-event-page :is(button, .button),
+.invitation-delete-modal.invitation-delete-modal button,
+.editor-expanded-preview-header.editor-expanded-preview-header button,
+.invitation-payment-card.invitation-payment-card .button {
+  border-radius: 12px;
+}
+
+/* Keep control icons readable and independent of text size or flex pressure. */
+.editor-page.editor-page :is(.button, .editor-back, .editor-public-invitation, .editor-open-preview, .onboarding-back, .onboarding-preview-toggle):not(:where(.invite-website *, .invitation-preview *)),
+.invitation-payment-card :is(.button, .editor-back, .purchase-help-link),
+.login-page :is(.login-submit, .login-back),
+.support-request .button {
+  display: inline-flex;
+  align-items: center;
+  column-gap: 10px;
+}
+.editor-page.editor-page :is(.button, .editor-back, .editor-public-invitation, .editor-open-preview, .onboarding-back, .onboarding-preview-toggle):not(:where(.invite-website *, .invitation-preview *)) > svg,
+.invitation-payment-card :is(.button, .editor-back, .purchase-help-link) > svg,
+.login-page :is(.login-submit, .login-back) > svg,
+.support-request .button > svg {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  flex-shrink: 0;
+}
+.dashboard-page .dashboard-event-actions :is(a, button) { column-gap: 8px; }
+.dashboard-page .dashboard-event-actions :is(a, button) > svg { width: 18px; height: 18px; min-width: 18px; flex-shrink: 0; }

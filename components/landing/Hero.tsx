@@ -21,7 +21,7 @@ export function Hero() {
         </h1>
         <p className="hero-lead">
           Crea una invitación digital tan especial como tu celebración.
-          Personalízala, compártela y disfruta cada respuesta.
+          Personalízala y comparte los detalles de tu celebración en un solo lugar.
         </p>
         <div className="hero-actions">
           <a className="button" href="/crear">
@@ -35,7 +35,6 @@ export function Hero() {
 
       <div className="hero-art hero-product-stage" aria-label="Ejemplo de una invitación creada con el editor">
         <div className="art-sun sun-one" />
-        <div className="art-sun sun-two" />
         <div className="floating-note note-top">
           <span><FiStar aria-hidden="true" /></span> Tu historia, tu estilo
         </div>

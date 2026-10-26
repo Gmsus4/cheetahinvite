@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
-import { BrandEmblem } from "@/components/BrandEmblem";
+import { BrandLoader } from "@/components/BrandLoader";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<DashboardLoading />}>
+    <Suspense fallback={<BrandLoader />}>
       <DashboardData />
     </Suspense>
   );
@@ -62,14 +62,5 @@ async function DashboardData() {
       userEmail={account?.email || user.email || ""}
       events={events}
     />
-  );
-}
-
-function DashboardLoading() {
-  return (
-    <main className="dashboard-loading dashboard-loading-animated" role="status" aria-label="Cargando tu panel">
-      <div className="dashboard-loading-orbit" aria-hidden="true"><BrandEmblem size={100} className="dashboard-loading-mark" priority /></div>
-      <p>Preparando tu espacio para celebrar…</p>
-    </main>
   );
 }

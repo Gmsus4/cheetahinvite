@@ -33,13 +33,6 @@ export default function RegisterPage() {
           </h1>
           <p>Crea tu cuenta y prepara un espacio especial para cada momento que quieras compartir.</p>
           <div className="login-decoration" aria-hidden="true">
-            <div className="login-ticket">
-              <span>UNA FECHA PARA RECORDAR</span>
-              <strong>Sofía <i>&</i> Mateo</strong>
-              <small>12 · OCTUBRE · 2026</small>
-              <div className="ticket-rule" />
-              <b>ACOMPÁÑANOS</b>
-            </div>
             <div className="login-orbit orbit-one" />
             <div className="login-orbit orbit-two" />
           </div>

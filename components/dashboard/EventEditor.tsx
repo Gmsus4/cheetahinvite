@@ -195,6 +195,10 @@ export function EventEditor({ event, saved, error, published, creation = false }
       <section className="editor-form-panel">
         <div className="editor-heading"><p className="dashboard-eyebrow">TU INVITACIÓN</p><h1>{creation ? "Crea tu invitación paso a paso" : "Completa los detalles"}</h1><p>Completa los datos, personaliza el diseño y agrega detalles opcionales. Puedes modificar todo después.</p><div className="editor-draft-reminder">{isPublished ? <><FiCheck /> Invitación publicada</> : <><FiLock /> Tu invitación es privada hasta confirmar el pago</>}</div></div>
         {creation ? <div className="onboarding-progress"><div><span>{step < 8 ? "Tu celebración" : step < 14 ? "Tu estilo" : "Los últimos detalles"}</span><span>{step + 1} de {creationQuestions.length}</span></div><progress aria-label="Progreso de tu invitación" value={step + 1} max={creationQuestions.length} /><h2 ref={questionRef} tabIndex={-1}>{step === 14 && currentExtra ? currentExtra.title : creationQuestions[step][0]}</h2><p>{step === 14 && currentExtra ? `Detalle ${extraIndex + 1} de ${sections.length}. Personalízalo o continúa sin incluirlo.` : creationQuestions[step][1]}</p></div> : <nav className="editor-step-nav" aria-label="Secciones del editor"><a href="#event-details"><span>1</span> Datos</a><a href="#event-cover"><span>2</span> Portada</a><a href="#event-extras"><span>3</span> Detalles opcionales</a></nav>}
+        {!creation && <div className="editor-purchase-access">
+          <div><strong>Pago y soporte</strong><p>Consulta el estado de tu compra y la referencia de esta invitación.</p><small>Referencia: {event.id}</small></div>
+          <Link className="button" href={`/dashboard/eventos/${event.id}/pago`}>Ver pago y soporte</Link>
+        </div>}
         {!dirty && (saved || (published && isPublished) || state) && <p className="editor-success" role="status"><FiCheck /> {published && isPublished ? "Tu invitación ya está publicada y lista para compartir." : "Cambios guardados correctamente."}</p>}
         {error && <p className="editor-error" role="alert">{error === "enlace-ocupado" ? "Ya tienes otra invitación con ese enlace. Elige otro nombre." : error === "enlace" ? "El enlace debe tener entre 2 y 80 caracteres, con letras, números y guiones." : error === "imagen" ? "Usa una URL válida que comience con http:// o https://." : "Revisa los campos e inténtalo de nuevo."}</p>}
         <form ref={formRef} id="event-editor-form" action={formAction} onSubmit={(e) => { if (creation && (step < 15 || uploadCount > 0)) { e.preventDefault(); if (!uploadCount) advanceCreation(); } }} className="editor-form">
@@ -293,7 +297,7 @@ export function EventEditor({ event, saved, error, published, creation = false }
         <button className="editor-open-preview" type="button" onClick={() => setPreviewExpanded(true)}><FiEye /> Ver invitación completa</button>
         <p className="editor-preview-note">La vista previa incluye tus cambios actuales. Abrirla no guarda ni publica.</p>
         {isPublished && event.slug && <>
-          <Link className="editor-public-invitation" href={invitationPath(event)!} target="_blank" rel="noopener noreferrer"><FiEye /> Abrir invitación pública ↗</Link>
+          <Link className="editor-public-invitation" href={invitationPath(event)!} target="_blank" rel="noopener noreferrer"><FiEye aria-hidden="true" /> Abrir invitación pública</Link>
           {dirty && <p className="editor-preview-note">El enlace público muestra la última versión guardada. Guarda tus cambios para actualizarla.</p>}
         </>}
       </aside>

@@ -13,8 +13,9 @@ const connectionString = explicitSslMode(configuredConnectionString);
 
 const adapter = new PrismaPg({ connectionString });
 
-// A regenerated Event model must not reuse a client from the previous schema.
-const schemaKey = Object.values(Prisma.EventScalarFieldEnum).sort().join(",");
+// Regenerated models must not reuse a client from the previous schema.
+const schemaKey = [Prisma.EventScalarFieldEnum, Prisma.UserScalarFieldEnum, Prisma.PasswordRecoveryLimitScalarFieldEnum]
+  .map(fields => Object.values(fields).sort().join(",")).join(";");
 const cached = globalForPrisma.cheetahInvitePrisma;
 export const prisma = cached?.schemaKey === schemaKey
   ? cached.client

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { BrandLoader } from "@/components/BrandLoader";
 
 export function InvitationExampleFrame({ styleSlug, label, decorationOnly = false, viewportHeight }: {
   styleSlug: string;
@@ -11,6 +12,7 @@ export function InvitationExampleFrame({ styleSlug, label, decorationOnly = fals
   const viewport = useRef<HTMLDivElement>(null);
   const decorationObserver = useRef<ResizeObserver | null>(null);
   const [width, setWidth] = useState(0);
+  const [loaded, setLoaded] = useState(false);
   const [decorationHeight, setDecorationHeight] = useState(400);
   const height = viewportHeight ?? (decorationOnly ? decorationHeight : 740);
 
@@ -28,16 +30,19 @@ export function InvitationExampleFrame({ styleSlug, label, decorationOnly = fals
   return <div
     ref={viewport}
     className="invitation-example-viewport"
+    aria-busy={!loaded}
     style={{ aspectRatio: `390 / ${height}` }}
     role={decorationOnly ? "img" : undefined}
     aria-label={decorationOnly ? `Invitación de boda con decoración ${label}` : undefined}
   >
+    {!loaded && <BrandLoader className="invitation-example-loader" message="Preparando tu invitación…" />}
     <div inert={decorationOnly || undefined} aria-hidden={decorationOnly || undefined}>
       <iframe
         title={`Invitación de ejemplo · ${label}`}
         src={`/ejemplo-invitacion/${styleSlug}${decorationOnly ? "?vista=decoracion" : ""}`}
         loading="lazy"
         onLoad={(event) => {
+          setLoaded(true);
           decorationObserver.current?.disconnect();
           if (!decorationOnly || viewportHeight !== undefined) return;
           const welcome = event.currentTarget.contentDocument?.querySelector(".invite-welcome");
@@ -48,8 +53,9 @@ export function InvitationExampleFrame({ styleSlug, label, decorationOnly = fals
           decorationObserver.current.observe(welcome);
           updateHeight();
         }}
-        tabIndex={decorationOnly ? -1 : undefined}
-        style={{ width: 390, height, transform: `scale(${width ? width / 390 : 1})` }}
+        tabIndex={decorationOnly || !loaded ? -1 : undefined}
+        aria-hidden={!loaded || undefined}
+        style={{ width: 390, height, opacity: loaded ? 1 : 0, pointerEvents: loaded ? undefined : "none", transform: `scale(${width ? width / 390 : 1})` }}
       />
     </div>
   </div>;

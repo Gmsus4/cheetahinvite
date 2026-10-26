@@ -75,15 +75,6 @@
   border-radius: 24px;
   background: #F2F4F7;
 }
-.landing-home .hero-art::before {
-  content: "";
-  position: absolute;
-  inset: 28px 10%;
-  border: 1px solid #d9dee5;
-  border-radius: 50%;
-  transform: rotate(-10deg);
-  pointer-events: none;
-}
 .landing-home .sun-one { width: 300px; height: 300px; right: 7%; top: 12px; }
 .landing-home .sun-two { width: 190px; height: 190px; left: 10%; bottom: 16px; }
 .landing-home .note-top { top: 48px; right: 5%; padding: 15px 18px; transform: rotate(3deg); }
@@ -275,6 +266,8 @@
 /* The example uses the public invitation renderer in its own mobile viewport. */
 .landing-home .invitation-example-viewport { position: relative; width: 100%; overflow: hidden; background: #fff; }
 .landing-home .invitation-example-viewport iframe { position: absolute; top: 0; left: 0; display: block; border: 0; transform-origin: top left; }
+.landing-home .invitation-example-loader { position: absolute; inset: 0; min-height: 0; height: 100%; gap: 24px; padding: 24px 18px; }
+.landing-home .invitation-example-loader p { font-size: 14px; }
 .landing-home .hero-product-stage { display: grid; grid-template-columns: 1fr 320px 1fr; gap: 32px; height: auto; min-height: 670px; padding: 40px; }
 .landing-home .hero-example-phone { position: relative; z-index: 2; grid-column: 2; grid-row: 1; width: 320px; max-width: 100%; aspect-ratio: 541 / 1114; }
 /* Match the transparent screen opening of public/iphone.png. */
@@ -363,3 +356,4 @@
   .landing-home .home-footer-bottom { align-items: flex-start; flex-direction: column; gap: 16px; }
   .landing-home .footer-back-top { margin-left: 0; }
 }
+.landing-home .price.price-pending { font-size: clamp(25px, 3vw, 34px); line-height: 1.3; letter-spacing: -.04em; }
