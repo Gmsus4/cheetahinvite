@@ -1,0 +1,11 @@
+{
+  "name": "cheetahinvite-image-cleanup",
+  "main": "index.ts",
+  "compatibility_date": "2026-10-26",
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "secrets": { "required": ["CRON_SECRET"] },
+  "vars": { "APP_ORIGIN": "" }
+}

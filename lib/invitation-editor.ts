@@ -1,0 +1,71 @@
+import type { InvitationButtonAppearance } from "@/lib/invitation-buttons";
+
+export type SectionType = "story" | "ceremony" | "reception" | "program" | "parents" | "dress_code" | "gifts" | "rsvp" | "gallery" | "music" | "custom";
+export type InviteSection = { id: string; type: SectionType; title: string; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; layout?: "auto" | "split" | "centered" | "card"; enabled: boolean };
+export type EditorValues = {
+  name: string; eventType: string; eventDate: string; eventTime: string; hostNames: string; venue: string; address: string;
+  message: string; imageUrl: string; accent: string; typography: string; bodyTypography: string; sections: InviteSection[];
+  customSlug: string; templateId: string; texture: string; heroHorizontal: string; heroVertical: string; buttonAppearance: InvitationButtonAppearance;
+};
+export type EditorSaveResult = { ok: true; eventId: string; version: number } | {
+  ok: false; code: "validation" | "auth" | "conflict" | "published" | "not-found" | "unavailable";
+  message: string; version?: number;
+};
+export type EditorWizard = { step: number; activeExtra: string | null };
+export class EditorSaveFailure extends Error {
+  constructor(public result: Extract<EditorSaveResult, { ok: false }>) { super(result.message); }
+}
+export const EDITOR_AUTOSAVE_DELAY = 1500;
+export const EDITOR_DRAFT_LIFETIME = 7 * 24 * 60 * 60 * 1000;
+export const editorDraftPrefix = (ownerId: string, scope: string) => `cheetahinvite:editor:v1:${ownerId}:${scope || "new"}:`;
+export const validCreationKey = (key: string) => /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(key);
+
+export function editorFormData(snapshot: string, version: number, creationKey = "") {
+  const values = JSON.parse(snapshot) as EditorValues;
+  const form = new FormData();
+  for (const [key, value] of Object.entries(values)) {
+    if (key === "buttonAppearance") continue;
+    form.set(key, typeof value === "string" ? value : JSON.stringify(value));
+  }
+  const buttons = values.buttonAppearance;
+  form.set("buttonShape", buttons.shape);
+  form.set("buttonFilled", String(buttons.filled));
+  form.set("buttonIcons", String(buttons.icons));
+  form.set("buttonBorder", String(buttons.border));
+  form.set("buttonBold", String(buttons.bold));
+  form.set("contentVersion", String(version));
+  if (creationKey) form.set("creationKey", creationKey);
+  return form;
+}
+
+export type EditorDraftRecord = {
+  schema: 1; ownerId: string; eventId: string; creationKey: string; snapshot: string; version: number;
+  updatedAt: number; wizard: EditorWizard; key?: string;
+};
+
+// Local storage is untrusted and may contain obsolete or partially written records.
+// Partial form values are valid backups even when the server cannot save them yet.
+export function parseEditorDraft(raw: string | null, ownerId: string, scope: string, now: number): EditorDraftRecord | null {
+  if (!raw || raw.length > 256_000) return null;
+  try {
+    const record = JSON.parse(raw) as EditorDraftRecord;
+    if (record.schema !== 1 || record.ownerId !== ownerId || (scope && record.eventId !== scope)
+      || typeof record.eventId !== "string" || (record.eventId && !/^[a-zA-Z0-9_-]{1,80}$/.test(record.eventId))
+      || !validCreationKey(record.creationKey) || !Number.isSafeInteger(record.version) || record.version < 0
+      || !Number.isFinite(record.updatedAt) || record.updatedAt > now + 60_000 || record.updatedAt < now - EDITOR_DRAFT_LIFETIME
+      || typeof record.snapshot !== "string" || !record.wizard || !Number.isInteger(record.wizard.step)
+      || record.wizard.step < 0 || record.wizard.step > 15 || !(record.wizard.activeExtra === null || typeof record.wizard.activeExtra === "string")) return null;
+    const values = JSON.parse(record.snapshot) as EditorValues;
+    const strings = ["name", "eventType", "eventDate", "eventTime", "hostNames", "venue", "address", "message", "imageUrl", "accent", "typography", "bodyTypography", "customSlug", "templateId", "texture", "heroHorizontal", "heroVertical"] as const;
+    if (!values || !strings.every(key => typeof values[key] === "string")
+      || (values.eventDate && (!/^\d{4}-\d{2}-\d{2}$/.test(values.eventDate) || !Number.isFinite(Date.parse(`${values.eventDate}T12:00:00Z`))))
+      || !Array.isArray(values.sections) || values.sections.length > 12) return null;
+    const types = ["story", "ceremony", "reception", "program", "parents", "dress_code", "gifts", "rsvp", "gallery", "music", "custom"];
+    if (values.sections.some(section => !section || !types.includes(section.type) || typeof section.enabled !== "boolean"
+      || !["id", "title", "content", "detail", "link", "imageUrl"].every(key => typeof section[key as keyof InviteSection] === "string")
+      || (section.imageUrls !== undefined && (!Array.isArray(section.imageUrls) || section.imageUrls.length > 12 || section.imageUrls.some(url => typeof url !== "string"))))) return null;
+    const buttons = values.buttonAppearance;
+    if (!buttons || !["square", "rounded", "pill"].includes(buttons.shape) || ![buttons.filled, buttons.icons, buttons.border, buttons.bold].every(value => typeof value === "boolean")) return null;
+    return record;
+  } catch { return null; }
+}

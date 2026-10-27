@@ -18,12 +18,12 @@ import {
   FiExternalLink,
   FiCopy,
 } from "react-icons/fi";
-import { DashboardSignOut } from "@/components/dashboard/DashboardSignOut";
+import { DashboardAccountMenu } from "@/components/dashboard/DashboardAccountMenu";
 import { BrandEmblem } from "@/components/BrandEmblem";
 import { CopyInvitationLink } from "@/components/dashboard/CopyInvitationLink";
 import { DeleteInvitationButton } from "@/components/dashboard/DeleteInvitationButton";
 
-type EventStatus = "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED";
+type EventStatus = "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED" | "SUSPENDED" | "REFUNDED";
 
 type DashboardEvent = {
   id: string;
@@ -44,6 +44,7 @@ type DashboardContentProps = {
   now: number;
   userName: string;
   userEmail: string;
+  userImage?: string | null;
   events: DashboardEvent[];
 };
 
@@ -53,6 +54,8 @@ const statusLabels: Record<EventStatus, string> = {
   PUBLISHED: "Publicado",
   EXPIRED: "Vencido",
   ARCHIVED: "Archivado",
+  SUSPENDED: "Suspendido por disputa",
+  REFUNDED: "Reembolsado",
 };
 
 const eventLabels: Record<string, string> = {
@@ -73,16 +76,7 @@ function formatDate(date: Date | null) {
   }).format(date);
 }
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
-
-export function DashboardContent({ userName, userEmail, events, now }: DashboardContentProps) {
+export function DashboardContent({ userName, userEmail, userImage, events, now }: DashboardContentProps) {
   const availableSlots = Math.max(0, ACCOUNT_LIMITS.invitations - events.length);
   const firstName = userName.trim().split(/\s+/)[0] || "bienvenido";
   const activeEvents = events.filter((event) => isInvitationPublished(event, new Date(now))).length;
@@ -105,13 +99,7 @@ export function DashboardContent({ userName, userEmail, events, now }: Dashboard
             <BrandEmblem size={40} priority />
             <span className="brand-name">Cheetah<span>Invite</span></span>
           </Link>
-          <div className="dashboard-account-actions">
-            <div className="dashboard-account">
-              <span className="dashboard-avatar">{getInitials(userName) || "C"}</span>
-              <span className="dashboard-user-copy"><strong>{userName || "Usuario"}</strong><small>{userEmail}</small></span>
-            </div>
-            <DashboardSignOut />
-          </div>
+          <DashboardAccountMenu name={userName} email={userEmail} image={userImage} />
         </div>
       </header>
 

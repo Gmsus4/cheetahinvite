@@ -17,7 +17,10 @@ una invitación; no prueban propiedad ni autorizan cambios.
    al correo registrado antes de divulgar datos o realizar cambios sensibles.
 2. Localizar el pago en Stripe mediante el identificador de evento en
    `client_reference_id` o los metadatos `eventId` y `ownerId`. La base de datos
-   guarda `stripeCheckoutSessionId` y, al acreditar, `stripePaymentIntentId`.
+   conserva cada intento en `InvitationPayment`, con su referencia de compra,
+   `stripeCheckoutSessionId`, `stripePaymentIntentId` y `stripeChargeId` al acreditar.
+   El registro no se borra al eliminar una invitación o cuenta. El cliente puede
+   consultar sus operaciones en `/dashboard/compras`, incluso sin la invitación.
 3. Revisar si se trata de pruebas o producción, importe, moneda, fecha, estado
    real del pago y relación con el evento. No acreditar mediante una captura,
    una URL de retorno o un correo como única evidencia.
@@ -58,21 +61,36 @@ usuario o eliminación voluntaria, sin excluir derechos legales irrenunciables.
 Comprobar la operación y la falla antes de aprobar; comunicar resultado e importe
 y no prometer fechas bancarias. Falta asignar al responsable de aprobación.
 
-La app todavía no sincroniza reembolsos o disputas de Stripe con la publicación
-local. Si se autoriza un reembolso, el responsable debe registrar la operación
-y determinar expresamente qué ocurre con la invitación, con seguimiento técnico
-del estado local. No asumir que reembolsar en Stripe despublica la invitación.
+El responsable ejecuta el reembolso aprobado en Stripe. El webhook sincroniza
+su estado; también existe «Actualizar estado del pago» en Mis compras. No se
+emiten reembolsos desde la aplicación ni se automatizan movimientos de dinero.
+
+- Reembolso total confirmado: se retira el enlace público.
+- Reembolso parcial confirmado: se mantiene la publicación durante su vigencia.
+- Reembolso pendiente, cancelado o fallido: no retira el enlace. Si Stripe revierte
+  un reembolso previamente confirmado, se recalcula el acceso con el estado actual.
+- Disputa abierta: se suspende la publicación; una disputa perdida permanece suspendida.
+- Disputa ganada o investigación cerrada: se recupera el acceso con la fecha de
+  vencimiento original, salvo reembolso total, invitación vencida, archivada o eliminada.
+
+Revisar entregas fallidas del webhook en Stripe, corregir la causa y reenviar.
+Las entregas pueden repetirse y llegar fuera de orden: la app vuelve a consultar
+el estado actual y serializa la conciliación por compra. Un fallo devuelve 500
+para permitir reintentos; nunca se registra una conciliación incompleta.
+Un cobro que llega después de eliminar la invitación queda en el historial para
+resolución de soporte; no recrea la invitación ni genera un reembolso automático.
+Un segundo cobro se conserva y no altera la vigencia ni el acceso del primero.
 No eliminar una invitación como sustituto de un reembolso.
 
 ## Pendientes antes de abrir ventas
 
-- Confirmar precio definitivo; los importes del código actual no representan
-  una decisión comercial final.
-- Asignar responsables de reembolsos y determinar el estado de publicación tras
-  reembolsos o disputas; completar los datos de identidad de los textos legales.
+- Precio confirmado: $269 MXN por evento, IVA incluido. Revisar que la
+  configuración publicada coincida con ese total.
+- Asignar responsables de aprobar reembolsos y atender disputas; completar los
+  datos de identidad de los textos legales y definir la retención de registros de compra.
 - Comprobar acceso del equipo al buzón y a Stripe con permisos adecuados.
-- Probar cobro, cancelación, webhook repetido y recuperación de una entrega
-  fallida usando exclusivamente el entorno de pruebas de Stripe.
+- Registrar todos los eventos de `docs/stripe.md` y comprobar cobro, reembolsos,
+  disputa, eliminación y recuperación en el entorno de pruebas de Stripe.
 
 No se crea un panel administrativo ni se automatizan movimientos de dinero
 con esta implementación.

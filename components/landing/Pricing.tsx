@@ -1,4 +1,5 @@
 import { FiArrowUpRight, FiCheck } from "react-icons/fi";
+import { invitationPriceLabel } from "@/lib/invitation-payment";
 
 const features = [
   "Invitación personalizable",
@@ -26,8 +27,8 @@ export function Pricing() {
       <div className="price-card">
         <div className="price-overview">
           <span className="price-label">INVITACIÓN DIGITAL</span>
-          <div className="price price-pending">Un pago por evento</div>
-          <p>Un pago por evento · 12 meses activa</p>
+          <div className="price">{invitationPriceLabel} <span>MXN</span></div>
+          <p>IVA incluido · Un pago por evento · 12 meses activa</p>
         </div>
         <ul>
           {features.map((feature) => (
@@ -41,7 +42,7 @@ export function Pricing() {
             Crear mi invitación <span><FiArrowUpRight aria-hidden="true" /></span>
           </a>
           <small className="price-footnote">
-            Crea y previsualiza gratis. Consulta el total antes de pagar y publicar.
+            Crea y previsualiza gratis. Paga solo al publicar.
           </small>
         </div>
       </div>

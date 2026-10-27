@@ -82,6 +82,8 @@
 .invite-website[data-decorated] .invite-content-block[data-has-section-decoration]{position:relative;isolation:isolate;overflow:hidden}
 .invite-section-decoration{position:absolute;top:32px;right:5%;z-index:2;width:76px;height:90px;pointer-events:none;user-select:none;mix-blend-mode:multiply}
 .invite-section-decoration img{object-fit:contain}
+.invite-website:is([data-template="wedding-plantilla1"],[data-template="wedding-plantilla4"]) img:is([src$="/decoration1.png"]){transform:scaleX(1)}
+.invite-website:is([data-template="wedding-plantilla1"],[data-template="wedding-plantilla4"]) img:is([src$="/decoration.png"]){transform:scaleX(-1)}
 .invite-content-program .invite-section-decoration{right:auto;left:5%}
 .invite-website[data-decorated] .invite-content-music[data-has-section-decoration]::after{display:none}
 .invite-website[data-decorated] .invite-content-program[data-has-section-decoration]::before{background-image:var(--template-top-right),var(--template-bottom-left);background-position:top right,bottom left;background-size:clamp(100px,15vw,210px) auto}

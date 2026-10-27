@@ -29,6 +29,8 @@ enum EventStatus {
   PUBLISHED
   EXPIRED
   ARCHIVED
+  SUSPENDED
+  REFUNDED
 }
 
 model Event {
@@ -42,6 +44,7 @@ model Event {
   message      String?     @db.Text
   imageUrl     String?     @db.Text
   imageUploads Int         @default(0)
+  contentVersion Int       @default(0)
   accent       String      @default("#E9560A")
   buttonShape String @default("square")
   buttonFilled Boolean @default(true)
@@ -115,4 +118,75 @@ model PasswordRecoveryLimit {
   expiresAt DateTime
 
   @@index([expiresAt])
+}
+
+enum CloudinaryAssetState {
+  UPLOADING
+  READY
+  DELETE_PENDING
+}
+
+// No cascading foreign keys: cleanup records must survive event/account deletion.
+model CloudinaryAsset {
+  publicId      String @id
+  ownerId       String
+  eventId       String
+  url           String? @db.Text
+  bytes         Int
+  state         CloudinaryAssetState @default(UPLOADING)
+  expiresAt     DateTime?
+  nextAttemptAt DateTime?
+  attempts      Int @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([eventId, state])
+  @@index([ownerId])
+  @@index([state, expiresAt])
+  @@index([state, nextAttemptAt])
+}
+
+model ImageUploadBudget {
+  key       String @id
+  ownerId   String
+  count     Int @default(1)
+  expiresAt DateTime
+
+  @@index([ownerId, expiresAt])
+}
+
+enum InvitationPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+}
+
+// Purchase records survive invitation/account deletion. Store no card data.
+model InvitationPayment {
+  id                      String @id @default(uuid())
+  ownerId                 String
+  eventId                 String
+  eventName               String
+  amount                  Int
+  currency                String
+  status                  InvitationPaymentStatus @default(PENDING)
+  livemode                Boolean
+  stripeCheckoutSessionId String? @unique
+  stripePaymentIntentId   String? @unique
+  stripeChargeId          String? @unique
+  checkoutExpiresAt       DateTime
+  paidAt                  DateTime?
+  expiresAt               DateTime?
+  refundedAmount          Int @default(0)
+  refundPendingAmount     Int @default(0)
+  refunds                 Json @default("[]")
+  disputes                Json @default("[]")
+  disputeStatus           String?
+  lastSyncedAt            DateTime?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([ownerId, createdAt])
+  @@index([eventId])
 }

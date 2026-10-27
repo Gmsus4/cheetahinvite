@@ -42,6 +42,7 @@ export function DeleteInvitationButton({ eventId, eventName }: { eventId: string
         <span className="invitation-delete-icon"><FiTrash2 aria-hidden="true" /></span>
         <h2 id={`${id}-title`}>¿Eliminar invitación?</h2>
         <p id={`${id}-description`}>Vas a eliminar <strong>«{eventName}»</strong>. Esta acción no se puede deshacer y el enlace de la invitación dejará de estar disponible.</p>
+        <p>El historial permanece en Mis compras. Eliminar la invitación no cancela un pago abierto ni solicita un reembolso.</p>
         <label htmlFor={`${id}-confirmation`}>Escribe <strong>ENTENDIDO</strong> para confirmar</label>
         <input id={`${id}-confirmation`} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} placeholder="ENTENDIDO" autoComplete="off" autoFocus disabled={pending} />
         {error && <p className="invitation-delete-error" role="alert">{error}</p>}

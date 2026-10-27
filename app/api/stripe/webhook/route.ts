@@ -1,7 +1,7 @@
 import type Stripe from "stripe";
 import { revalidatePath } from "next/cache";
 import { getStripe } from "@/lib/stripe";
-import { fulfillInvitationPayment } from "@/lib/payment-fulfillment";
+import { fulfillInvitationPayment, reconcileStripeObject, stripeLiveMode } from "@/lib/payment-fulfillment";
 
 export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
@@ -14,11 +14,18 @@ export async function POST(request: Request) {
   } catch {
     return Response.json({ error: "Invalid signature" }, { status: 400 });
   }
-  if (event.type !== "checkout.session.completed" && event.type !== "checkout.session.async_payment_succeeded") return Response.json({ received: true });
-  const session = event.data.object as Stripe.Checkout.Session;
-  if (event.livemode !== session.livemode) return Response.json({ received: true });
+  if (event.livemode !== stripeLiveMode()) return Response.json({ received: true });
   try {
-    const invitation = await fulfillInvitationPayment(session, new Date(event.created * 1000));
+    let result: Awaited<ReturnType<typeof fulfillInvitationPayment>> = null;
+    if (["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.expired", "checkout.session.async_payment_failed"].includes(event.type)) {
+      const session = event.data.object as Stripe.Checkout.Session;
+      if (session.livemode === event.livemode) result = await fulfillInvitationPayment(session);
+    } else if (["charge.refunded", "refund.created", "refund.updated", "refund.failed", "charge.dispute.created", "charge.dispute.updated", "charge.dispute.closed", "charge.dispute.funds_withdrawn", "charge.dispute.funds_reinstated"].includes(event.type)) {
+      result = await reconcileStripeObject(event.data.object as Stripe.Charge | Stripe.Refund | Stripe.Dispute);
+    }
+    if (!result) return Response.json({ received: true });
+    revalidatePath("/dashboard/compras");
+    const invitation = result.invitation;
     if (!invitation) return Response.json({ received: true });
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/eventos");

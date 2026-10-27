@@ -1,5 +1,8 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+La operación de compras con Stripe, historial independiente, reembolsos y disputas
+se documenta en [docs/stripe.md](docs/stripe.md) y [docs/support-operations.md](docs/support-operations.md).
+
 ## Getting Started
 
 First, run the development server:
@@ -18,7 +21,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Image uploads
 
-Event cover photos, section photos, and gallery images use signed direct uploads to Cloudinary. Add these values to `.env`:
+Event cover photos, section photos, and gallery images upload through an authenticated server route to Cloudinary. Add these values to `.env`:
 
 ```env
 CLOUDINARY_CLOUD_NAME="..."
@@ -27,7 +30,13 @@ CLOUDINARY_API_SECRET="..."
 CLOUDINARY_UPLOAD_PRESET="..."
 ```
 
-Create a **signed** upload preset in the Cloudinary console and restrict it to JPG, PNG, WebP, and AVIF images with a 10 MB maximum file size. Keep the API secret server-side; never add it to a `NEXT_PUBLIC_` variable. The editor supports one cover photo and up to 12 gallery photos per event. Uploaded images are delivered with automatic format and quality selection.
+Create a **signed** upload preset in the Cloudinary console and restrict it to JPG, PNG, WebP, and AVIF images with a **5 MB** maximum file size. Disable unsigned upload presets for this application. Keep the API secret server-side; never add it to a `NEXT_PUBLIC_` variable. Each gallery supports up to 12 photos. Uploaded images are delivered with automatic format and quality selection.
+
+Server-enforced budgets, asset tracking, and retryable cleanup require the database migration and scheduler described in [Cloudinary storage](docs/cloudinary-storage.md). Limits are centralized in `lib/limits.ts`: 20 upload attempts/hour and 60/day per account, with 40 retained files and 100 MB per event. Pending uploads and deletions count toward storage until cleanup succeeds.
+
+## Editor recovery
+
+Unpaid drafts autosave after 1.5 seconds. Published invitations keep local changes until the owner explicitly saves. Device backups, creation recovery, conflict detection and verification are described in [Editor protection](docs/editor-protection.md). Apply the editor-version migration before deploying.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

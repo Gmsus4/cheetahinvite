@@ -11,7 +11,12 @@ import { CustomInvitationLinkField } from "./CustomInvitationLinkField";
 import { invitationPath, normalizeInvitationSlug } from "@/lib/invitation-url";
 import { InvitationLivePreview } from "./InvitationLivePreview";
 import { useInvitationMotion } from "./useInvitationMotion";
-import Link from "next/link";
+import { useEditorProtection } from "./useEditorProtection";
+import { EditorSaveFailure, editorFormData, type EditorValues, type InviteSection, type SectionType } from "@/lib/invitation-editor";
+export type { InviteSection, SectionType } from "@/lib/invitation-editor";
+import { EditorProtectedLink } from "./EditorProtectedLink";
+import { EditorLeaveDialog } from "./EditorLeaveDialog";
+import { EditorRecoveryDialog } from "./EditorRecoveryDialog";
 import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 import { FiArrowDown, FiArrowLeft, FiArrowUp, FiCalendar, FiCheck, FiChevronLeft, FiChevronRight, FiClock, FiEye, FiGift, FiHeart, FiImage, FiLock, FiMapPin, FiMaximize2, FiMusic, FiPlus, FiSave, FiTag, FiTrash2, FiUsers, FiX } from "react-icons/fi";
 import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
@@ -24,12 +29,10 @@ import { getInvitationFont, invitationFonts, recommendedInvitationFonts, type Fo
 import { getInvitationEventContent, eventExampleSections as exampleSections, makeEventExampleSection as makeExampleSection } from "@/lib/invitation-event-content";
 
 type EventData = {
-  id: string; ownerId: string; customSlug: string | null; templateId: string; texture: string; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; paidAt: Date | null; expiresAt: Date | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED"; slug: string | null;
+  id: string; ownerId: string; contentVersion: number; customSlug: string | null; templateId: string; texture: string; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; paidAt: Date | null; expiresAt: Date | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED" | "SUSPENDED" | "REFUNDED"; slug: string | null;
   venue: string | null; address: string | null; message: string | null; imageUrl: string | null; imageUploads: number; accent: string; typography: string; bodyTypography: string; heroHorizontal?: string; heroVertical?: string; buttonShape?: string; buttonFilled?: boolean; buttonIcons?: boolean; buttonBorder?: boolean; buttonBold?: boolean; sections: unknown;
 };
 
-export type SectionType = "story" | "ceremony" | "reception" | "program" | "parents" | "dress_code" | "gifts" | "rsvp" | "gallery" | "music" | "custom";
-export type InviteSection = { id: string; type: SectionType; title: string; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; layout?: "auto" | "split" | "centered" | "card"; enabled: boolean };
 
 const sectionOptions: { type: SectionType; title: string; description: string }[] = [
   { type: "story", title: "Nuestra historia", description: "Cuenta algo especial sobre el evento." },
@@ -85,12 +88,18 @@ export function EventEditor({ event, saved, error, published, creation = false }
   }, [step, activeExtra, creation]);
   const formRef = useRef<HTMLFormElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const draftId = useRef(event.id);
   const draftPromise = useRef<Promise<string> | null>(null);
   const [uploadCount, setUploadCount] = useState(0);
-  async function ensureEvent() {
-    if (draftId.current) return draftId.current;
-    if (!draftPromise.current) draftPromise.current = prepareEvent(new FormData(formRef.current!)).then((id) => { draftId.current = id; return id; }).catch((error) => { draftPromise.current = null; throw error; });
+  async function ensureEvent(currentSnapshot = snapshot) {
+    if (persistence.getEventId()) return persistence.getEventId();
+    if (!draftPromise.current) {
+      draftPromise.current = prepareEvent(editorFormData(currentSnapshot, persistence.getVersion(), persistence.getCreationKey())).then((result) => {
+        if (!result.ok) throw new EditorSaveFailure(result);
+        persistence.setEventId(result.eventId);
+        if (creation) router.replace(`/crear?resume=${result.eventId}`);
+        return result.eventId;
+      }).catch((failure) => { draftPromise.current = null; throw failure; });
+    }
     return draftPromise.current;
   }
   function nextStep(target: number) {
@@ -145,9 +154,8 @@ export function EventEditor({ event, saved, error, published, creation = false }
     }
   }
   const isPublished = isInvitationPublished(event);
-  const save = updateEvent.bind(null, event.id);
   const [previewExpanded, setPreviewExpanded] = useState(false);
-  const closePreview = useCallback(() => setPreviewExpanded(false), []);
+  const closePreview = useCallback(() => setPreviewExpanded(false), [setPreviewExpanded]);
   useEffect(() => {
     if (!creation || !showCreationPreview) return;
     const desktop = window.matchMedia("(min-width: 1024px)");
@@ -160,22 +168,52 @@ export function EventEditor({ event, saved, error, published, creation = false }
     desktop.addEventListener("change", adaptPreview);
     return () => desktop.removeEventListener("change", adaptPreview);
   }, [creation, showCreationPreview]);
-  const publish = publishEvent.bind(null, event.id);
-  const snapshot = JSON.stringify([name, eventType, eventDate, eventTime, hostNames, venue, address, message, imageUrl, accent, typography, bodyTypography, sections, customSlug, templateId, texture, heroHorizontal, heroVertical, buttonAppearance]);
-  const initialSnapshot = JSON.stringify([event.name, event.eventType, dateInputValue(event.eventDate), event.eventTime ?? "", event.hostNames ?? "", event.venue ?? "", event.address ?? "", event.message ?? "", event.imageUrl ?? "", event.accent || "#E9560A", event.typography || "default", event.bodyTypography || "inter", Array.isArray(event.sections) ? event.sections : ["story", "ceremony", "reception", "dress_code", "gifts", "rsvp"].map((type) => makeSection(type as SectionType)), event.customSlug ?? "", event.templateId ?? "none", event.texture ?? "none", event.heroHorizontal || "left", event.heroVertical || "center", eventButtonAppearance(event)]);
-  const [, publishAction, publishing] = useActionState(async (_: string, formData: FormData) => { await publish(formData); return ""; }, "");
-  const [state, formAction, pending] = useActionState(async (_: string, formData: FormData) => {
-    const submittedSnapshot = snapshot;
-    if (creation) {
-      const id = await ensureEvent();
-      await updateEvent(id, formData);
-      router.push(`/dashboard/eventos/${id}/show`);
-    } else await save(formData);
-    return submittedSnapshot;
-  }, "");
+  const snapshot = JSON.stringify({ name, eventType, eventDate, eventTime, hostNames, venue, address, message, imageUrl, accent, typography, bodyTypography, sections, customSlug, templateId, texture, heroHorizontal, heroVertical, buttonAppearance } satisfies EditorValues);
+  const { controller: persistence, state: protection, confirmNavigation, navigation } = useEditorProtection({
+    ownerId: event.ownerId, eventId: event.id, snapshot, version: event.contentVersion, creation,
+    manualOnly: Boolean(event.paidAt) || !["DRAFT", "PENDING_PAYMENT"].includes(event.status),
+    save: async (submitted, version, automatic) => {
+      const id = await ensureEvent(submitted);
+      return updateEvent(id, editorFormData(submitted, version), automatic ? "auto" : "manual");
+    },
+  });
+  useEffect(() => {
+    persistence.update(snapshot, uploadCount > 0, { step, activeExtra }, Boolean(event.paidAt) || !["DRAFT", "PENDING_PAYMENT"].includes(event.status));
+  }, [persistence, snapshot, uploadCount, step, activeExtra, event.paidAt, event.status]);
 
-  const dirty = snapshot !== (state || initialSnapshot);
-  const busy = pending || publishing;
+  function recoverDraft() {
+    const record = persistence.recover();
+    if (!record) return;
+    const values = JSON.parse(record.snapshot) as EditorValues;
+    setName(values.name); setCustomSlug(values.customSlug); setEventType(values.eventType);
+    setTemplateId(values.templateId); setTexture(values.texture); setEventDate(values.eventDate); setEventTime(values.eventTime);
+    setHostNames(values.hostNames); setVenue(values.venue); setAddress(values.address); setMessage(values.message);
+    setImageUrl(values.imageUrl); setAccent(values.accent); setTypography(values.typography); setBodyTypography(values.bodyTypography);
+    setSections(values.sections); setHeroHorizontal(values.heroHorizontal); setHeroVertical(values.heroVertical); setButtonAppearance(values.buttonAppearance);
+    if (creation) { setStep(record.wizard.step); setActiveExtra(record.wizard.activeExtra); }
+    if (creation && record.eventId) router.replace(`/crear?resume=${record.eventId}`);
+  }
+  const [, formAction, pending] = useActionState(async (count: number, formData: FormData) => {
+    const result = await persistence.saveNow(false, formData.get("resolveConflict") === "overwrite" ? protection.conflictVersion : undefined);
+    if (result.ok && creation) router.push(`/dashboard/eventos/${result.eventId}/show`);
+    return count + 1;
+  }, 0);
+  const [, publishAction, publishing] = useActionState(async (count: number) => {
+    const result = await persistence.saveNow();
+    if (result.ok) {
+      try {
+        const next = await publishEvent(result.eventId, result.version);
+        if (next.ok) router.push(`/dashboard/eventos/${result.eventId}/pago`);
+        else persistence.acceptFailure(next);
+      } catch { persistence.reportError("No pudimos abrir el pago. Tu invitación ya está guardada; intenta de nuevo."); }
+    }
+    return count + 1;
+  }, 0);
+  const dirty = snapshot !== protection.acknowledged || protection.code === "conflict";
+  const busy = pending || publishing || !protection.ready || Boolean(protection.recovery);
+  const saveStatus = uploadCount ? "Subiendo fotos…" : protection.saving ? "Guardando en el servidor…" : dirty
+    ? protection.local ? "Copia local guardada · cambios pendientes" : "Cambios pendientes de guardar"
+    : protection.lastSaved ? "Cambios guardados" : "Todo está al día";
   const prettyDate = eventDate ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${eventDate}T12:00:00Z`)) : "La fecha";
   const updateSection = (id: string, changes: Partial<InviteSection>) => setSections((current) => current.map((section) => section.id === id ? { ...section, ...changes } : section));
   const moveSection = (index: number, direction: -1 | 1) => setSections((current) => {
@@ -187,21 +225,35 @@ export function EventEditor({ event, saved, error, published, creation = false }
   });
 
   return <main className={`editor-page${creation ? " creation-onboarding" : ""}`}>
+    {protection.recovery && <EditorRecoveryDialog onRecover={recoverDraft} onDiscard={() => persistence.discardRecovery()} />}
+    {navigation.destination && <EditorLeaveDialog onStay={navigation.stay} onLeave={navigation.leave} />}
     <header className="editor-header">
-      <Link className="brand editor-brand" href="/dashboard"><BrandEmblem size={36} /><span className="brand-name">Cheetah<span>Invite</span></span></Link>
-      <Link className="editor-back" href="/dashboard"><FiArrowLeft /> Volver a mis eventos</Link>
+      <EditorProtectedLink guard={confirmNavigation} className="brand editor-brand" href="/dashboard"><BrandEmblem size={36} /><span className="brand-name">Cheetah<span>Invite</span></span></EditorProtectedLink>
+      <EditorProtectedLink guard={confirmNavigation} className="editor-back" href="/dashboard"><FiArrowLeft /> Volver a mis eventos</EditorProtectedLink>
     </header>
     <div className={`editor-layout${creation && showCreationPreview ? " has-creation-preview" : ""}`}>
       <section className="editor-form-panel">
-        <div className="editor-heading"><p className="dashboard-eyebrow">TU INVITACIÓN</p><h1>{creation ? "Crea tu invitación paso a paso" : "Completa los detalles"}</h1><p>Completa los datos, personaliza el diseño y agrega detalles opcionales. Puedes modificar todo después.</p><div className="editor-draft-reminder">{isPublished ? <><FiCheck /> Invitación publicada</> : <><FiLock /> Tu invitación es privada hasta confirmar el pago</>}</div></div>
+        <div className="editor-heading"><p className="dashboard-eyebrow">TU INVITACIÓN</p><h1>{creation ? "Crea tu invitación paso a paso" : "Completa los detalles"}</h1><p>Completa los datos, personaliza el diseño y agrega detalles opcionales. Puedes modificar todo después.</p><div className="editor-draft-reminder">{isPublished ? <><FiCheck /> Invitación publicada</> : <><FiLock /> {event.status === "REFUNDED" ? "Enlace retirado por reembolso total" : event.status === "SUSPENDED" ? "Enlace suspendido por disputa del pago" : event.paidAt ? "Enlace fuera de vigencia o archivado" : "Tu invitación es privada hasta confirmar el pago"}</>}</div></div>
         {creation ? <div className="onboarding-progress"><div><span>{step < 8 ? "Tu celebración" : step < 14 ? "Tu estilo" : "Los últimos detalles"}</span><span>{step + 1} de {creationQuestions.length}</span></div><progress aria-label="Progreso de tu invitación" value={step + 1} max={creationQuestions.length} /><h2 ref={questionRef} tabIndex={-1}>{step === 14 && currentExtra ? currentExtra.title : creationQuestions[step][0]}</h2><p>{step === 14 && currentExtra ? `Detalle ${extraIndex + 1} de ${sections.length}. Personalízalo o continúa sin incluirlo.` : creationQuestions[step][1]}</p></div> : <nav className="editor-step-nav" aria-label="Secciones del editor"><a href="#event-details"><span>1</span> Datos</a><a href="#event-cover"><span>2</span> Portada</a><a href="#event-extras"><span>3</span> Detalles opcionales</a></nav>}
         {!creation && <div className="editor-purchase-access">
           <div><strong>Pago y soporte</strong><p>Consulta el estado de tu compra y la referencia de esta invitación.</p><small>Referencia: {event.id}</small></div>
-          <Link className="button" href={`/dashboard/eventos/${event.id}/pago`}>Ver pago y soporte</Link>
+          <EditorProtectedLink guard={confirmNavigation} className="button" href={`/dashboard/eventos/${event.id}/pago`}>Ver pago y soporte</EditorProtectedLink>
         </div>}
-        {!dirty && (saved || (published && isPublished) || state) && <p className="editor-success" role="status"><FiCheck /> {published && isPublished ? "Tu invitación ya está publicada y lista para compartir." : "Cambios guardados correctamente."}</p>}
-        {error && <p className="editor-error" role="alert">{error === "enlace-ocupado" ? "Ya tienes otra invitación con ese enlace. Elige otro nombre." : error === "enlace" ? "El enlace debe tener entre 2 y 80 caracteres, con letras, números y guiones." : error === "imagen" ? "Usa una URL válida que comience con http:// o https://." : "Revisa los campos e inténtalo de nuevo."}</p>}
-        <form ref={formRef} id="event-editor-form" action={formAction} onSubmit={(e) => { if (creation && (step < 15 || uploadCount > 0)) { e.preventDefault(); if (!uploadCount) advanceCreation(); } }} className="editor-form">
+        {!dirty && (saved || (published && isPublished) || protection.lastSaved) && <p className="editor-success" role="status"><FiCheck /> {published && isPublished ? "Tu invitación ya está publicada y lista para compartir." : "Cambios guardados correctamente."}</p>}
+        {error && <p className="editor-error" role="alert">{error === "imagenes" ? "Una de las fotos ya no está disponible. Recarga el editor y vuelve a subirla." : error === "enlace-ocupado" ? "Ya tienes otra invitación con ese enlace. Elige otro nombre." : error === "enlace" ? "El enlace debe tener entre 2 y 80 caracteres, con letras, números y guiones." : error === "imagen" ? "Usa una URL válida que comience con http:// o https://." : "Revisa los campos e inténtalo de nuevo."}</p>}
+        <p className={`editor-protection-status${dirty ? " is-dirty" : ""}`} role="status" aria-live="polite">{saveStatus}</p>
+        <p className="editor-save-help">{creation || protection.manualOnly ? "Conservamos una copia en este dispositivo mientras editas. Guarda para aplicar tus cambios." : "Tu borrador se guarda automáticamente al dejar de escribir."}</p>
+        {protection.localWarning && <p className="editor-error" role="alert">Este navegador no permite guardar una copia local. Mantén esta página abierta hasta guardar en el servidor.</p>}
+        {protection.error && <div className="editor-save-error" role="alert">
+          <p>{protection.error}</p>
+          {protection.code === "conflict" && <div>
+            {persistence.getEventId() && <EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${persistence.getEventId()}/show`} target="_blank" rel="noopener noreferrer">Revisar versión guardada</EditorProtectedLink>}
+            {protection.conflictVersion !== undefined && <button type="submit" form="event-editor-form" name="resolveConflict" value="overwrite" disabled={busy || uploadCount > 0}>Guardar mi versión</button>}
+          </div>}
+          {protection.code === "unavailable" && !creation && <button type="submit" form="event-editor-form" disabled={busy || uploadCount > 0}>Reintentar guardado</button>}
+          {protection.code === "auth" && <EditorProtectedLink guard={confirmNavigation} href={`/login?callbackUrl=${encodeURIComponent(creation ? "/crear" : `/dashboard/eventos/${event.id}`)}`}>Iniciar sesión</EditorProtectedLink>}
+        </div>}
+        <form ref={formRef} id="event-editor-form" inert={busy || undefined} aria-busy={pending || publishing || protection.saving} action={formAction} onSubmit={(e) => { if (creation && (step < 15 || uploadCount > 0)) { e.preventDefault(); if (!uploadCount) advanceCreation(); } }} className="editor-form">
           <div className="onboarding-form-content" ref={contentRef}>
           <input type="hidden" name="sections" value={JSON.stringify(sections)} />
           <section className="editor-group" id="event-details" hidden={creation && step > 7}>
@@ -283,21 +335,20 @@ export function EventEditor({ event, saved, error, published, creation = false }
           <div className="onboarding-form-footer">
           {creation && <div className="creation-step-actions"><div>{step > 0 && <button className="onboarding-back" type="button" disabled={busy || uploadCount > 0} onClick={previousCreation}><FiArrowLeft /> Anterior</button>}{step < 15 && <button className="button" type="button" disabled={uploadCount > 0} onClick={() => advanceCreation()}>{step === 14 ? "Confirmar y continuar" : "Continuar"} <FiChevronRight /></button>}</div>{step > 1 && step < 15 && <button className="onboarding-skip" type="button" disabled={uploadCount > 0} onClick={() => advanceCreation(step === 14)}>{step >= 9 && step <= 13 ? "Usar diseño actual" : step === 14 ? "Omitir este apartado" : "Lo agregaré después"}</button>}<button className="onboarding-preview-toggle" type="button" onClick={() => { if (window.matchMedia("(min-width: 1024px)").matches) setShowCreationPreview((shown) => !shown); else setPreviewExpanded(true); }}><FiEye />{showCreationPreview ? "Ocultar vista previa" : "Ver cómo va quedando"}</button></div>}
           <div className="editor-form-actions" hidden={creation && step !== 15}>
-            <p className={`editor-save-status${dirty ? " is-dirty" : ""}`} role="status" aria-live="polite">{busy ? "Guardando…" : dirty ? "Cambios sin guardar" : state || saved || published ? "Cambios guardados" : "Todo está al día"}</p>
             <button className={`button editor-save${isPublished ? " is-primary" : ""}`} type="submit" disabled={busy || uploadCount > 0 || (!creation && !dirty)}><FiSave /> {pending ? "Guardando…" : isPublished ? "Guardar cambios" : creation ? "Crear invitación" : "Guardar borrador"}</button>
-            {!creation && !isPublished && <button className="button editor-publish" type="submit" formAction={publishAction} disabled={busy}><FiEye /> {publishing ? "Guardando…" : event.paidAt ? "Revisar publicación" : `Pagar y publicar · ${invitationPriceLabel} MXN`}</button>}
+            {!creation && !isPublished && <button className="button editor-publish" type="submit" formAction={publishAction} disabled={busy || uploadCount > 0 || protection.code === "conflict"}><FiEye /> {publishing ? "Guardando…" : event.paidAt ? "Revisar publicación" : `Pagar y publicar · ${invitationPriceLabel} MXN`}</button>}
             <p>{isPublished ? "Al guardar, los cambios se verán en tu enlace público." : "Puedes editar y previsualizar gratis. El enlace se habilita después de confirmar el pago."}</p>
           </div>
           </div>
         </form>
       </section>
       <aside className="editor-preview-panel" hidden={creation && !showCreationPreview && !previewExpanded}><div className="editor-preview-title"><div><span>VISTA PREVIA</span><small>Se actualiza al editar</small></div><span className="preview-draft-chip">{isPublished ? <><FiCheck /> PUBLICADA</> : <><FiLock /> PRIVADA</>}</span></div>
-        {!creation && !event.paidAt && <div className="editor-payment-notice"><FiLock /><div><strong>Pendiente de pago</strong><p>{invitationPriceLabel} MXN por evento · 12 meses activa. Tu enlace permanece privado hasta confirmar el pago.</p><Link href={`/dashboard/eventos/${event.id}/pago`}>Ver detalles del pago</Link></div></div>}
+        {!creation && !event.paidAt && <div className="editor-payment-notice"><FiLock /><div><strong>Pendiente de pago</strong><p>{invitationPriceLabel} MXN por evento · IVA incluido · 12 meses activa. Tu enlace permanece privado hasta confirmar el pago.</p><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${event.id}/pago`}>Ver detalles del pago</EditorProtectedLink></div></div>}
         <InvitationLivePreview expanded={previewExpanded} onClose={closePreview}><InvitationCanvas eventType={eventType} name={name} hostNames={hostNames} date={prettyDate} eventDateKey={eventDate} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} heroHorizontal={heroHorizontal} heroVertical={heroVertical} buttonAppearance={buttonAppearance} templateId={templateId} texture={texture} sections={sections} full /></InvitationLivePreview>
         <button className="editor-open-preview" type="button" onClick={() => setPreviewExpanded(true)}><FiEye /> Ver invitación completa</button>
         <p className="editor-preview-note">La vista previa incluye tus cambios actuales. Abrirla no guarda ni publica.</p>
         {isPublished && event.slug && <>
-          <Link className="editor-public-invitation" href={invitationPath(event)!} target="_blank" rel="noopener noreferrer"><FiEye aria-hidden="true" /> Abrir invitación pública</Link>
+          <EditorProtectedLink guard={confirmNavigation} className="editor-public-invitation" href={invitationPath(event)!} target="_blank" rel="noopener noreferrer"><FiEye aria-hidden="true" /> Abrir invitación pública</EditorProtectedLink>
           {dirty && <p className="editor-preview-note">El enlace público muestra la última versión guardada. Guarda tus cambios para actualizarla.</p>}
         </>}
       </aside>
@@ -351,8 +402,6 @@ function CloudinaryImageUpload({ eventId, images, multiple, onChange, ensureEven
         if (file.size > ACCOUNT_LIMITS.imageSizeBytes) throw new Error(`Cada imagen debe pesar ${ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB o menos.`);
         const uploadForm = new FormData();
         uploadForm.set("file", file);
-        uploadForm.set("imageScope", multiple ? "gallery" : "single");
-        uploadForm.set("activeImageCount", String(nextImages.length));
         uploadForm.set("eventId", ensureEvent ? await ensureEvent() : eventId);
         const uploadResponse = await fetch("/api/cloudinary/upload", { method: "POST", body: uploadForm });
         const uploaded = await uploadResponse.json() as { secureUrl?: string; error?: string };

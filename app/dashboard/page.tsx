@@ -51,7 +51,7 @@ async function DashboardData() {
     }),
     prisma.user.findUnique({
       where: { id: user.id },
-      select: { name: true, email: true },
+      select: { name: true, email: true, image: true },
     }),
   ]);
 
@@ -60,6 +60,7 @@ async function DashboardData() {
       now={now}
       userName={account?.name || user.name || "Usuario"}
       userEmail={account?.email || user.email || ""}
+      userImage={account?.image || user.image}
       events={events}
     />
   );

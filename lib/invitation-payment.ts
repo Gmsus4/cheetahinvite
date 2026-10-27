@@ -1,4 +1,4 @@
-export const INVITATION_PRICE = { amount: 49900, currency: "mxn", months: 12 } as const;
+export const INVITATION_PRICE = { amount: 26900, currency: "mxn", months: 12 } as const;
 export const invitationPriceLabel = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(INVITATION_PRICE.amount / 100);
 
 export function isInvitationPublished(event: { status: string; paidAt: Date | null; expiresAt: Date | null; slug: string | null }, now = new Date()) {

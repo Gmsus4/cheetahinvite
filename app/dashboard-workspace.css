@@ -1,4 +1,16 @@
 /* Match the event editor's cards, borders and soft elevation. */
+.dashboard-purchases-link{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;white-space:nowrap}
+.dashboard-status.status-suspended,.dashboard-status.status-refunded{background:#fff1ed;color:#a33316}
+.purchase-history{width:min(800px,calc(100% - 32px));margin:40px auto 80px;color:#182435;line-height:1.65}
+.purchase-history h1{font-size:32px;margin:8px 0}.purchase-history h2{font-size:20px;margin:0 0 12px}
+.purchase-history>.dashboard-eyebrow{margin-top:28px}.purchase-history>p{margin-bottom:24px}
+.purchase-history-card{padding:24px;margin:20px 0;background:#fff;border:1px solid #e5e8ed;border-radius:16px;box-shadow:0 4px 16px #18243508;overflow-wrap:anywhere}
+.purchase-history-card>form{margin-top:16px}.purchase-history-pagination{display:flex;justify-content:space-between;gap:24px}
+.purchase-price-update{margin:0 0 18px;padding:14px 16px;border:1px solid #f0d7bd;border-radius:12px;background:#fff8ef;color:#74451f;font-size:13px;line-height:1.7}
+.payment-receipt{padding:16px 0;line-height:1.6;overflow-wrap:anywhere}.payment-receipt-state{font-weight:700;margin-bottom:12px}
+.payment-receipt dl{display:grid;gap:10px;margin:0 0 12px}.payment-receipt dl>div{display:flex;justify-content:space-between;gap:16px}
+.payment-receipt dt{color:#596575}.payment-receipt dd{margin:0;text-align:right;max-width:60%}.payment-receipt small{color:#596575;font-size:12px}
+@media(max-width:600px){.purchase-history-card{padding:18px}.dashboard-purchases-link{font-size:11px;gap:4px}.payment-receipt dl>div{flex-direction:column;gap:2px}.payment-receipt dd{text-align:left;max-width:100%}}
 .dashboard-delete-action{position:relative;display:flex;align-items:center}
 .dashboard-event-delete{min-height:38px;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 9px;border:1px solid #efcaca;border-radius:8px;background:#fff;color:#b42318;font:600 9px Arial,sans-serif;cursor:pointer}
 .dashboard-event-delete svg{width:12px;height:12px;flex-shrink:0}
@@ -138,6 +150,9 @@
   .dashboard-page .dashboard-empty-state h3 { font-size: 20px; }
   .dashboard-page .dashboard-empty-button { gap: 16px; padding: 0 18px; }
   .dashboard-page .dashboard-footer { flex-direction: column; margin-top: 28px; }
+}
+@media (max-width: 600px) {
+  .dashboard-page .dashboard-header-shell { gap: 12px; }
 }
 @media (max-width: 360px) {
   .dashboard-page .dashboard-header-shell { gap: 8px; }

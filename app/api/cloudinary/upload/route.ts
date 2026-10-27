@@ -1,84 +1,86 @@
-import { createHash, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
-import { prisma } from "@/prisma";
+import { cloudinaryConfig, ownedCloudinaryPublicId, signedCloudinaryForm } from "@/lib/cloudinary";
+import { failCloudinaryImage, finishCloudinaryImage, ImageStorageError, reserveCloudinaryImage, scheduleCloudinaryCleanup } from "@/lib/cloudinary-storage";
 
+export const maxDuration = 60;
 const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
+
+// Content-Length may be absent or forged. Bound the stream before parsing multipart.
+async function readUploadForm(request: Request) {
+  const maximum = ACCOUNT_LIMITS.imageSizeBytes + 128 * 1024;
+  if (Number(request.headers.get("content-length")) > maximum) throw new ImageStorageError("Cada imagen debe pesar 5 MB o menos.", 413);
+  const reader = request.body?.getReader();
+  if (!reader) throw new ImageStorageError("Selecciona una imagen válida.", 400);
+  const chunks: Uint8Array<ArrayBuffer>[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > maximum) {
+        await reader.cancel();
+        throw new ImageStorageError("Cada imagen debe pesar 5 MB o menos.", 413);
+      }
+      chunks.push(new Uint8Array(value));
+    }
+  } finally { reader.releaseLock(); }
+  try {
+    return await new Response(new Blob(chunks), { headers: { "content-type": request.headers.get("content-type") ?? "" } }).formData();
+  } catch { throw new ImageStorageError("Selecciona una imagen válida.", 400); }
+}
 
 export async function POST(request: Request) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Inicia sesión para subir imágenes." }, { status: 401 });
-
-  const contentLength = Number(request.headers.get("content-length") ?? 0);
-  if (contentLength > ACCOUNT_LIMITS.imageSizeBytes + 128 * 1024) {
-    return NextResponse.json({ error: "Cada imagen debe pesar 5 MB o menos." }, { status: 413 });
-  }
-
-  const body = await request.formData().catch(() => null);
-  const eventId = body?.get("eventId");
-  const file = body?.get("file");
-  if (typeof eventId !== "string" || !eventId || eventId.length > 80 || !(file instanceof File)) {
-    return NextResponse.json({ error: "Selecciona una imagen válida." }, { status: 400 });
-  }
-  if (!acceptedTypes.has(file.type)) {
-    return NextResponse.json({ error: "Usa una imagen JPG, PNG, WebP o AVIF." }, { status: 400 });
-  }
-  if (file.size > ACCOUNT_LIMITS.imageSizeBytes) {
-    return NextResponse.json({ error: `Cada imagen debe pesar ${ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB o menos.` }, { status: 413 });
-  }
-
-  // Gallery uploads use the current gallery count, excluding cover and section images.
-  const imageScope = body?.get("imageScope");
-  if (imageScope !== "gallery" && imageScope !== "single") {
-    return NextResponse.json({ error: "Selecciona una sección válida para la imagen." }, { status: 400 });
-  }
-  const rawCount = body?.get("activeImageCount");
-  const activeImageCount = typeof rawCount === "string" && /^\d+$/.test(rawCount) ? Number(rawCount) : NaN;
-  if (!Number.isInteger(activeImageCount) || activeImageCount < 0) {
-    return NextResponse.json({ error: "No pudimos verificar las imágenes. Recarga el editor." }, { status: 400 });
-  }
-  const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { id: true } });
-  if (!event) return NextResponse.json({ error: "No encontramos este evento." }, { status: 404 });
-  if (imageScope === "gallery" && activeImageCount >= ACCOUNT_LIMITS.imagesPerGallery) {
-    return NextResponse.json({ error: `La galería ya tiene las ${ACCOUNT_LIMITS.imagesPerGallery} fotos en uso. Quita una para agregar otra.` }, { status: 409 });
-  }
-
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-  const apiKey = process.env.CLOUDINARY_API_KEY;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET;
-  const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
-  if (!cloudName || !apiKey || !apiSecret || !uploadPreset) {
-    return NextResponse.json({ error: "La carga de imágenes todavía no está configurada." }, { status: 503 });
-  }
-
-  const timestamp = Math.floor(Date.now() / 1000);
-  const folder = `cheetahinvite/${session.user.id}/${eventId}`;
-  const publicId = randomUUID();
-  const parameters = { folder, public_id: publicId, timestamp: String(timestamp), upload_preset: uploadPreset };
-  const toSign = Object.entries(parameters).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => `${key}=${value}`).join("&");
-  const signature = createHash("sha1").update(`${toSign}${apiSecret}`).digest("hex");
-  const cloudinaryForm = new FormData();
-  cloudinaryForm.set("file", file, file.name);
-  cloudinaryForm.set("api_key", apiKey);
-  cloudinaryForm.set("timestamp", String(timestamp));
-  cloudinaryForm.set("folder", folder);
-  cloudinaryForm.set("public_id", publicId);
-  cloudinaryForm.set("upload_preset", uploadPreset);
-  cloudinaryForm.set("signature", signature);
-
-  let response: Response;
+  const ownerId = session?.user?.id;
+  if (!ownerId) return NextResponse.json({ error: "Inicia sesión para subir imágenes." }, { status: 401 });
+  let reservation: Awaited<ReturnType<typeof reserveCloudinaryImage>> | undefined;
+  let uncertain = true;
   try {
-    response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`, {
-      method: "POST", body: cloudinaryForm, signal: AbortSignal.timeout(60_000),
+    const body = await readUploadForm(request);
+    const eventId = body.get("eventId");
+    const file = body.get("file");
+    if (typeof eventId !== "string" || !/^[a-zA-Z0-9_-]{1,80}$/.test(eventId) || !(file instanceof File) || !file.size) {
+      throw new ImageStorageError("Selecciona una imagen válida.", 400);
+    }
+    if (!acceptedTypes.has(file.type)) throw new ImageStorageError("Usa una imagen JPG, PNG, WebP o AVIF.", 400);
+    if (file.size > ACCOUNT_LIMITS.imageSizeBytes) throw new ImageStorageError("Cada imagen debe pesar 5 MB o menos.", 413);
+    let config: ReturnType<typeof cloudinaryConfig>;
+    try { config = cloudinaryConfig(); }
+    catch { throw new ImageStorageError("La carga de imágenes todavía no está configurada.", 503); }
+    reservation = await reserveCloudinaryImage(ownerId, eventId);
+    const form = signedCloudinaryForm({
+      public_id: reservation.publicId, timestamp: String(Math.floor(Date.now() / 1000)),
+      upload_preset: config.uploadPreset, overwrite: "false", allowed_formats: "jpg,png,webp,avif",
     });
-  } catch {
-    // The draft is unchanged when the upload cannot be confirmed.
-    return NextResponse.json({ error: "La conexión se interrumpió. Revisa la invitación antes de volver a intentarlo." }, { status: 502 });
+    form.set("file", file, file.name);
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(config.cloudName)}/image/upload`, {
+      method: "POST", body: form, signal: AbortSignal.timeout(40_000),
+    });
+    const uploaded = await response.json().catch(() => null);
+    if (!response.ok) {
+      uncertain = false;
+      throw new ImageStorageError("Cloudinary no pudo subir esta imagen. Intenta de nuevo.", 502);
+    }
+    if (uploaded?.public_id !== reservation.publicId || uploaded?.resource_type !== "image" || uploaded?.type !== "upload"
+      || !Number.isInteger(uploaded?.bytes) || uploaded.bytes <= 0 || uploaded.bytes > ACCOUNT_LIMITS.imageSizeBytes
+      || typeof uploaded?.secure_url !== "string" || ownedCloudinaryPublicId(uploaded.secure_url, ownerId, eventId) !== reservation.publicId) {
+      throw new ImageStorageError("No pudimos verificar la imagen subida. Intenta de nuevo.", 502);
+    }
+    const secureUrl = uploaded.secure_url.replace("/image/upload/", "/image/upload/f_auto,q_auto/");
+    await finishCloudinaryImage(ownerId, eventId, reservation.publicId, secureUrl, uploaded.bytes);
+    scheduleCloudinaryCleanup(ownerId);
+    return NextResponse.json({ secureUrl }, { headers: { "Cache-Control": "no-store" } });
+  } catch (error) {
+    if (reservation) {
+      try { await failCloudinaryImage(ownerId, reservation.publicId, uncertain); }
+      catch { console.error("Image upload recovery deferred to scheduled cleanup"); }
+      scheduleCloudinaryCleanup(ownerId);
+    }
+    if (error instanceof ImageStorageError) return NextResponse.json({ error: error.message }, { status: error.status });
+    console.error("Image upload could not complete");
+    return NextResponse.json({ error: "No pudimos completar la carga. Intenta de nuevo más tarde." }, { status: 502 });
   }
-  const uploaded = await response.json().catch(() => null) as { secure_url?: string; error?: { message?: string } } | null;
-  if (!response.ok || !uploaded?.secure_url) {
-    return NextResponse.json({ error: uploaded?.error?.message || "Cloudinary no pudo subir esta imagen." }, { status: 502 });
-  }
-  return NextResponse.json({ secureUrl: uploaded.secure_url.replace("/image/upload/", "/image/upload/f_auto,q_auto/") });
 }

@@ -5,6 +5,7 @@ import { invitationPath } from "@/lib/invitation-url";
 import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { BrandLoader } from "@/components/BrandLoader";
 import { FiArrowLeft, FiEdit2, FiLock } from "react-icons/fi";
 import { isInvitationPublished } from "@/lib/invitation-payment";
 import { auth } from "@/auth";
@@ -16,7 +17,7 @@ export const metadata: Metadata = { title: "Vista previa privada | Cheetah Invit
 type ShowPageProps = Pick<PageProps<"/dashboard/eventos/[id]/show">, "params">;
 
 export default function ShowInvitationPage({ params }: ShowPageProps) {
-  return <Suspense fallback={<div className="editor-loading">Preparando la vista previa…</div>}>
+  return <Suspense fallback={<BrandLoader message="Preparando la vista previa…" />}>
     <ShowInvitationData params={params} />
   </Suspense>;
 }

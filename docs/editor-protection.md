@@ -1,0 +1,16 @@
+# Protección de cambios del editor
+
+- Los borradores existentes, todavía sin pagar, se guardan en el servidor 1,5 segundos después de dejar de editar. No hay guardados paralelos de una misma sesión.
+- Las invitaciones pagadas o publicadas requieren **Guardar cambios** para aplicar modificaciones. Mientras se editan, conservan copia local; el autoguardado no cambia el enlace público.
+- La creación guiada conserva textos, diseño, fotos ya subidas y paso actual en este dispositivo. Al preparar el evento para subir una foto o finalizar se reutiliza un identificador de creación, incluso si se pierde la respuesta y se reintenta. La URL `crear?resume=…` solo reabre borradores de la cuenta autenticada.
+- Se escribe una copia local por sesión de edición, separada por cuenta e invitación. Al volver, si hay cambios recuperables, se abre un modal con **Recuperar cambios** o **Descartar cambios**. Es necesario elegir una opción para continuar editando; Escape y los clics fuera del modal no descartan la copia. Descartar mantiene la última versión guardada. Las copias de otra pestaña no se eliminan al guardar la actual. Se recuperan copias con antigüedad máxima de siete días.
+- Sin conexión o ante errores se conservan los datos y se muestran mensajes y reintento. Si el navegador bloquea el almacenamiento local se muestra una advertencia; el servidor sigue disponible.
+- Las fotos en proceso bloquean el guardado y la publicación. Los archivos binarios no se copian al navegador: una subida interrumpida debe seleccionarse de nuevo. Las fotos subidas pero sin guardar están sujetas a la limpieza temporal de Cloudinary de 24 horas; tras ese plazo puede ser necesario volver a subirlas, conservando los textos.
+- Los enlaces del editor piden confirmación al salir con cambios o cargas pendientes. Recargar/cerrar usa el aviso nativo de `beforeunload`, que depende del navegador. Se respalda también al ocultar la página o usar el historial; no se altera el historial del navegador para interceptar Atrás. La recuperación local protege la vuelta incluso si no aparece un diálogo.
+- `contentVersion` evita sobrescribir una versión más reciente. Ante conflicto se conserva la copia, se puede revisar la versión guardada y elegir explícitamente **Guardar mi versión**. Los errores de validación no redirigen ni vacían el formulario.
+
+Aplicar `npx prisma migrate deploy` y `npx prisma generate` antes de desplegar. Las copias locales dependen del navegador/dispositivo y pueden desaparecer si se borra su almacenamiento. Cerrar sesión no ofrece esas copias a otra cuenta; las claves y la validación incluyen la cuenta propietaria.
+
+Verificación: `node --test tests/*.test.cjs`. La prueba explícita `node tests/editor-saving.postgres.cjs` comprueba las versiones y la creación idempotente en PostgreSQL real usando datos temporales propios. `node tests/editor-browser-fixture.cjs create` prepara una cuenta temporal para probar el navegador; finalizar con `node tests/editor-browser-fixture.cjs cleanup`, después de cerrar sus pestañas. No ejecutar esas pruebas en datos de usuarios.
+
+Referencias: [Next.js onNavigate](https://nextjs.org/docs/app/api-reference/components/link#blocking-navigation), [beforeunload](https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event).

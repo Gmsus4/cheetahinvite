@@ -7,6 +7,7 @@ con los datos reales del operador y revisarse para la operación concreta.
 
 - Hasta tres invitaciones por cuenta, incluidos borradores.
 - Crear y previsualizar gratis; pagar por la publicación de cada evento.
+- Precio confirmado: $269 MXN por evento, IVA incluido.
 - Enlace público que puede reenviarse; sin contraseña ni control de asistentes.
 - Publicación de doce meses desde confirmar el pago, sin renovación automática.
 - Confirmaciones integradas pendientes; solo se ofrecen enlaces externos.
@@ -22,12 +23,13 @@ con los datos reales del operador y revisarse para la operación concreta.
 
 1. Nombre completo o razón social y domicilio del responsable/proveedor.
 2. Teléfono comercial y responsable de atender privacidad y derechos ARCO.
-3. Precio definitivo e información fiscal que corresponda. La landing ya no
-   anuncia el importe provisional; el checkout y el editor todavía usan el
-   importe configurado en `lib/invitation-payment.ts`, que debe revisarse.
+3. Información fiscal y de facturación que corresponda. El precio confirmado
+   se centraliza en `lib/invitation-payment.ts` y se muestra en landing, editor y pago.
 4. Alojamiento de producción y verificación de entidades, contratos, regiones
    y flujos de datos de Google/Gmail, Cloudinary, Neon, Stripe y Resend.
 5. Plazos de conservación de compras, soporte, registros técnicos y respaldos.
+   El historial independiente de pagos ya conserva referencias, importes y estados
+   al borrar una invitación; falta definir su periodo de retención antes de ventas.
 6. Inventario final de cookies y duraciones en producción; la revisión del código
    no encontró analítica ni publicidad, pero no sustituye la inspección del
    entorno desplegado ni de las pantallas de terceros.
@@ -40,7 +42,9 @@ para operar legalmente ni que los documentos garantizan cumplimiento.
 
 El vencimiento deshabilita el enlace mediante la comprobación de vigencia.
 El proyecto no incluye aún una tarea automática que elimine eventos vencidos
-ni un flujo completo para borrar archivos de Cloudinary o sus respaldos.
+o sus respaldos. La limpieza de imágenes reemplazadas, eliminadas y temporales
+está implementada con cola persistente; requiere el scheduler descrito en
+`cloudinary-storage.md` y no sustituye la eliminación de eventos vencidos.
 
 Para cumplir la política de tres meses, el equipo debe establecer y ejecutar
 un procedimiento de revisión y eliminación, manual o automatizado, que:
