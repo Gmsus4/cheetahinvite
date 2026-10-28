@@ -6,14 +6,15 @@ const { hashPassword } = require('../lib/password.ts');
 const file = path.resolve('node_modules/.cache/editor-browser-fixture.json');
 (async () => {
   try {
-    if (['create', 'create-payments', 'create-rsvp'].includes(process.argv[2])) {
+    if (['create', 'create-empty', 'create-payments', 'create-rsvp'].includes(process.argv[2])) {
       assert.equal(fs.existsSync(file), false, 'Clean up the previous fixture first');
       const ownerId = `__editor_browser_${randomUUID()}`;
       const password = `Editor-${randomBytes(20).toString('hex')}`;
       const email = `editor-${randomUUID()}@example.invalid`;
-      await prisma.user.create({ data: { id: ownerId, name: 'Prueba del editor', email, passwordHash: await hashPassword(password), invitationCount: 2 } });
-      const draft = await prisma.event.create({ data: { ownerId, name: 'Prueba de autoguardado', eventType: 'wedding', sections: [] } });
-      const published = await prisma.event.create({ data: { ownerId, name: 'Prueba publicada', eventType: 'wedding', paidAt: new Date(), expiresAt: new Date(Date.now() + 86400000), status: 'PUBLISHED', slug: `editor-fixture-${randomUUID()}`, sections: [] } });
+      const empty = process.argv[2] === 'create-empty';
+      await prisma.user.create({ data: { id: ownerId, name: 'Prueba del editor', email, passwordHash: await hashPassword(password), invitationCount: empty ? 0 : 2 } });
+      const draft = empty ? null : await prisma.event.create({ data: { ownerId, name: 'Prueba de autoguardado', eventType: 'wedding', sections: [] } });
+      const published = empty ? null : await prisma.event.create({ data: { ownerId, name: 'Prueba publicada', eventType: 'wedding', paidAt: new Date(), expiresAt: new Date(Date.now() + 86400000), status: 'PUBLISHED', slug: `editor-fixture-${randomUUID()}`, sections: [] } });
       if (process.argv[2] === 'create-payments') {
         const originalExpiry = new Date(Date.now() + 86400000);
         const paymentData = { ownerId, amount: 49900, currency: 'mxn', livemode: false, status: 'PAID', paidAt: new Date(), expiresAt: originalExpiry, checkoutExpiresAt: new Date(), lastSyncedAt: new Date() };
@@ -28,7 +29,7 @@ const file = path.resolve('node_modules/.cache/editor-browser-fixture.json');
         await prisma.event.update({ where: { id: draft.id }, data: { sections: [{ ...confirmation, rsvpMode: 'external' }] } });
       }
       fs.mkdirSync(path.dirname(file), { recursive: true });
-      fs.writeFileSync(file, JSON.stringify({ ownerId, email, password, draftId: draft.id, publishedId: published.id, publishedSlug: published.slug, publicPath: process.argv[2] === 'create-rsvp' ? `/invitacion/${ownerId}/rsvp-fixture` : `/invitacion/${published.slug}` }));
+      fs.writeFileSync(file, JSON.stringify({ ownerId, email, password, draftId: draft?.id, publishedId: published?.id, publishedSlug: published?.slug, publicPath: published ? process.argv[2] === 'create-rsvp' ? `/invitacion/${ownerId}/rsvp-fixture` : `/invitacion/${published.slug}` : undefined }));
       console.log('Browser fixture created; temporary credentials stored locally.');
     } else if (process.argv[2] === 'cleanup') {
       const data = JSON.parse(fs.readFileSync(file, 'utf8'));

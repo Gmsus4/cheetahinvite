@@ -172,6 +172,30 @@ test('creation resumes the same prepared event and a successful completion leave
   assert.equal(first.storage.length, 0);
 });
 
+test('consecutive creation sessions start empty and save distinct events without changing the previous one', async t => {
+  const storage = new MemoryStorage();
+  const saved = new Map();
+  const save = async (snapshot, version) => {
+    const id = randomUUID(); saved.set(id, snapshot);
+    return { ok: true, eventId: id, version: version + 1 };
+  };
+  const first = setup(t, { storage, eventId: '', snapshot: values(''), creation: true, save });
+  edit(first.controller, 'Primer evento');
+  const firstResult = await first.controller.saveNow(); first.controller.stop();
+  assert.equal(storage.length, 0);
+  const second = setup(t, { storage, eventId: '', snapshot: values(''), creation: true, save });
+  assert.equal(second.controller.getEventId(), '');
+  assert.equal(second.controller.getSnapshot().acknowledged, values(''));
+  assert.equal(second.controller.getSnapshot().recovery, null);
+  assert.notEqual(second.controller.getCreationKey(), first.controller.getCreationKey());
+  edit(second.controller, 'Segundo evento');
+  const secondResult = await second.controller.saveNow(); second.controller.stop();
+  assert.notEqual(firstResult.eventId, secondResult.eventId);
+  assert.equal(saved.get(firstResult.eventId), values('Primer evento'));
+  assert.equal(saved.get(secondResult.eventId), values('Segundo evento'));
+  assert.equal(storage.length, 0);
+});
+
 test('restoring a copy older than the server requires a conflict decision', async t => {
   const first = setup(t); edit(first.controller, 'Viejo local'); first.controller.stop();
   const next = setup(t, { storage: first.storage, version: 2, snapshot: values('Nuevo servidor') });

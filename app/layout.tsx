@@ -11,6 +11,8 @@ import "./invitation-textures.css";
 import "./invitation-system.css";
 import "./invitation-rsvp.css";
 import "./invitation-motion.css";
+import "./wedding-designs.css";
+import "./guided-editor.css";
 
 export const metadata: Metadata = {
   title: "Cheetah Invite — Invitaciones digitales para celebrar",

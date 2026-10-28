@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { validCreationKey, type EditorSaveResult } from "@/lib/invitation-editor";
+import { getWeddingDesign } from "@/lib/wedding-designs";
 
 const eventTypes = new Set([
   "wedding",
@@ -22,6 +23,7 @@ export async function prepareEvent(formData: FormData): Promise<EditorSaveResult
   const eventType = String(formData.get("eventType") ?? "");
   const dateValue = String(formData.get("eventDate") ?? "");
   const creationKey = String(formData.get("creationKey") ?? "");
+  const design = eventType === "wedding" ? getWeddingDesign(String(formData.get("templateId") ?? "")) : null;
 
   if (name.length < 2 || name.length > 100 || !eventTypes.has(eventType) || !validCreationKey(creationKey)) {
     return { ok: false, code: "validation", message: "Revisa el nombre y el tipo de evento antes de continuar." };
@@ -40,7 +42,7 @@ export async function prepareEvent(formData: FormData): Promise<EditorSaveResult
     });
     if (!slot.count) return false;
 
-    const event = await tx.event.create({ data: { id: creationKey, ownerId: session.user.id, name, eventType, eventDate, sections: [] } });
+    const event = await tx.event.create({ data: { id: creationKey, ownerId: session.user.id, name, eventType, eventDate, sections: [], ...(design ? { templateId: design.id, accent: design.palettes[0].accent, typography: design.typography, bodyTypography: design.bodyTypography } : {}) } });
     return event.id;
     });
     if (!created) {

@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { prepareEvent } from "@/app/crear/actions";
+import { WeddingInvitation } from "@/components/invitation/WeddingInvitation";
+import { getWeddingDesign } from "@/lib/wedding-designs";
 import { InvitationTexturePicker } from "./InvitationTexturePicker";
 import { InvitationTemplatePicker } from "./InvitationTemplatePicker";
 import { InvitationDecoration } from "./InvitationDecoration";
@@ -29,7 +31,7 @@ import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { getInvitationFont, invitationFonts, recommendedInvitationFonts, type FontRole } from "@/lib/invitation-fonts";
 import { getInvitationEventContent, eventExampleSections as exampleSections, makeEventExampleSection as makeExampleSection } from "@/lib/invitation-event-content";
 
-type EventData = {
+export type EventData = {
   id: string; ownerId: string; contentVersion: number; customSlug: string | null; templateId: string; texture: string; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; paidAt: Date | null; expiresAt: Date | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED" | "SUSPENDED" | "REFUNDED"; slug: string | null;
   venue: string | null; address: string | null; message: string | null; imageUrl: string | null; imageUploads: number; accent: string; typography: string; bodyTypography: string; heroHorizontal?: string; heroVertical?: string; buttonShape?: string; buttonFilled?: boolean; buttonIcons?: boolean; buttonBorder?: boolean; buttonBold?: boolean; sections: unknown;
 };
@@ -196,7 +198,7 @@ export function EventEditor({ event, saved, error, published, creation = false }
   }
   const [, formAction, pending] = useActionState(async (count: number, formData: FormData) => {
     const result = await persistence.saveNow(false, formData.get("resolveConflict") === "overwrite" ? protection.conflictVersion : undefined);
-    if (result.ok && creation) router.push(`/dashboard/eventos/${result.eventId}/show`);
+    if (result.ok && creation) router.replace(`/dashboard/eventos/${result.eventId}/show`);
     return count + 1;
   }, 0);
   const [, publishAction, publishing] = useActionState(async (count: number) => {
@@ -374,7 +376,7 @@ function InvitationFontSelect({ role, eventType, value, onChange }: { role: Font
   </div>;
 }
 
-function CloudinaryImageUpload({ eventId, images, multiple, onChange, ensureEvent, onBusyChange }: {
+export function CloudinaryImageUpload({ eventId, images, multiple, onChange, ensureEvent, onBusyChange }: {
   ensureEvent?: () => Promise<string>;
   onBusyChange?: (busy: boolean) => void;
   eventId: string;
@@ -519,6 +521,7 @@ function parseProgramEntry(line: string, index: number) {
 export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, locationImageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", buttonAppearance = defaultButtonAppearance, templateId = "none", texture = "none", sections, publicEventId }: {
   eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; locationImageUrl?: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; buttonAppearance?: InvitationButtonAppearance; templateId?: string; texture?: string; sections: InviteSection[]; full?: boolean; publicEventId?: string;
 }) {
+  if (eventType === "wedding" && getWeddingDesign(templateId)) return <WeddingInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
   return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} locationImageUrl={locationImageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} heroHorizontal={heroHorizontal} heroVertical={heroVertical} buttonAppearance={buttonAppearance} templateId={templateId} texture={texture} sections={sections} publicEventId={publicEventId} />;
 }
 

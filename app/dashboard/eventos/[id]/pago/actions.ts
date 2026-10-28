@@ -5,6 +5,7 @@ import { prisma } from "@/prisma";
 import { stripeIsConfigured } from "@/lib/stripe";
 import { prepareInvitationCheckout } from "@/lib/payment-checkout";
 import { redirect } from "next/navigation";
+import { weddingEventPublicationIssues } from "@/lib/wedding-designs";
 
 export async function startCheckout(eventId: string) {
   const session = await auth();
@@ -12,6 +13,7 @@ export async function startCheckout(eventId: string) {
   const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
   if (!event) redirect("/dashboard?error=evento");
   if (event.paidAt) redirect(`/dashboard/eventos/${eventId}/pago`);
+  if (weddingEventPublicationIssues(event).length) redirect(`/dashboard/eventos/${eventId}?error=pendientes`);
   if (!stripeIsConfigured()) redirect(`/dashboard/eventos/${eventId}/pago?error=disponibilidad`);
 
   let checkoutUrl: string | null = null;

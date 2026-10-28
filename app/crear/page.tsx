@@ -7,7 +7,7 @@ import { BrandLoader } from "@/components/BrandLoader";
 import { FiArrowLeft, FiGift } from "react-icons/fi";
 import { auth } from "@/auth";
 import { BrandEmblem } from "@/components/BrandEmblem";
-import { EventEditor } from "@/components/dashboard/EventEditor";
+import { EventEditor } from "@/components/dashboard/InvitationEditor";
 import { prisma } from "@/prisma";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { CreationDraftResume } from "@/components/dashboard/CreationDraftResume";

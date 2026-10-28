@@ -5,17 +5,18 @@ import { createPortal } from "react-dom";
 
 const previewDocument = '<!doctype html><html lang="es"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head><body style="margin:0"><div id="invitation-preview-root"></div></body></html>';
 
-export function InvitationLivePreview({ children, expanded = false, onClose }: { children: ReactNode; expanded?: boolean; onClose?: () => void }) {
+export function InvitationLivePreview({ children, expanded = false, onClose, initialDevice = "desktop", fitViewport = false }: { children: ReactNode; expanded?: boolean; onClose?: () => void; initialDevice?: "desktop" | "mobile"; fitViewport?: boolean }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const container = useRef<HTMLDivElement>(null);
   const [root, setRoot] = useState<HTMLElement | null>(null);
   const [availableWidth, setAvailableWidth] = useState(0);
-  const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
+  const [availableHeight, setAvailableHeight] = useState(0);
+  const [device, setDevice] = useState<"desktop" | "mobile">(initialDevice);
   const closeButton = useRef<HTMLButtonElement>(null);
   const previewContainer = useRef<HTMLDivElement>(null);
   const width = device === "desktop" ? 1280 : 390;
-  const height = 860;
   const scale = Math.min(1, availableWidth / width);
+  const height = fitViewport && !expanded && availableHeight && scale > 0 ? Math.floor(availableHeight / scale) : 860;
 
   useEffect(() => {
     if (!expanded) return;
@@ -65,7 +66,7 @@ export function InvitationLivePreview({ children, expanded = false, onClose }: {
 
   useEffect(() => {
     if (!container.current) return;
-    const observer = new ResizeObserver(([entry]) => setAvailableWidth(entry.contentRect.width));
+    const observer = new ResizeObserver(([entry]) => { setAvailableWidth(entry.contentRect.width); setAvailableHeight(entry.contentRect.height); });
     observer.observe(container.current);
     return () => observer.disconnect();
   }, []);

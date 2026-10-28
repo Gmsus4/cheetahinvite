@@ -3,6 +3,8 @@
 import type { EditorSaveResult } from "@/lib/invitation-editor";
 import { invitationSectionUrl } from "@/lib/invitation-links";
 import { parseButtonAppearance } from "@/lib/invitation-buttons";
+import { getWeddingDesign, orderedWeddingSections, weddingPalette, weddingEventPublicationIssues } from "@/lib/wedding-designs";
+import type { InviteSection } from "@/lib/invitation-editor";
 
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
@@ -73,9 +75,11 @@ export async function publishEvent(eventId: string, version: number): Promise<Ed
   const session = await auth();
   if (!session?.user?.id) return failure("auth", "Tu sesión expiró. Tus cambios se conservan en este dispositivo; inicia sesión de nuevo.");
   if (!Number.isInteger(version) || version < 0) return failure("validation", "Guarda tus cambios antes de continuar.");
-  const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { id: true, paidAt: true, contentVersion: true } });
+  const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
   if (!event) return failure("not-found", "No encontramos esta invitación. Tu copia local sigue disponible.");
   if (event.contentVersion !== version) return { ...failure("conflict", "La invitación cambió en otra pestaña. Revisa tus cambios antes de continuar."), version: event.contentVersion };
+  const issues = weddingEventPublicationIssues(event);
+  if (issues.length) return failure("validation", issues[0].message);
   if (!event.paidAt) {
     const changed = await prisma.event.updateMany({ where: { id: event.id, ownerId: session.user.id, paidAt: null, contentVersion: version }, data: { status: "PENDING_PAYMENT" } });
     if (!changed.count) {
@@ -155,6 +159,14 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     const duplicate = await prisma.event.findFirst({ where: { ownerId: session.user.id, customSlug, id: { not: eventId } }, select: { id: true } });
     if (duplicate) return failure("validation", "Ya tienes otra invitación con ese enlace. Elige otro nombre.");
   }
+  const design = eventType === "wedding" ? getWeddingDesign(templateId) : null;
+  const curated = design ? {
+    accent: weddingPalette(design, accent).accent, typography: design.typography, bodyTypography: design.bodyTypography,
+    texture: "none", heroHorizontal: "center", heroVertical: "center",
+    buttonShape: design.buttons.shape, buttonFilled: design.buttons.filled, buttonIcons: design.buttons.icons,
+    buttonBorder: design.buttons.border, buttonBold: design.buttons.bold,
+    sections: orderedWeddingSections(sections as InviteSection[]).map(section => ({ ...section, layout: "auto" as const })),
+  } : {};
   try {
     const result = await withImageLock(session.user.id, async tx => {
       const previous = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, sections: true, contentVersion: true, status: true, paidAt: true } });
@@ -165,14 +177,14 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
       }
       const changed = await tx.event.updateMany({
         where: { id: eventId, ownerId: session.user.id, contentVersion: version, ...(automatic ? { paidAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] } } : {}) },
-        data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, accent, typography, bodyTypography, heroHorizontal, heroVertical, buttonShape: buttonAppearance.shape, buttonFilled: buttonAppearance.filled, buttonIcons: buttonAppearance.icons, buttonBorder: buttonAppearance.border, buttonBold: buttonAppearance.bold, templateId, texture, sections, contentVersion: { increment: 1 }, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
+        data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, accent, typography, bodyTypography, heroHorizontal, heroVertical, buttonShape: buttonAppearance.shape, buttonFilled: buttonAppearance.filled, buttonIcons: buttonAppearance.icons, buttonBorder: buttonAppearance.border, buttonBold: buttonAppearance.bold, templateId, texture, sections, ...curated, contentVersion: { increment: 1 }, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
       });
       if (!changed.count) {
         const latest = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { contentVersion: true, paidAt: true, status: true } });
         if (automatic && latest && (latest.paidAt || !["DRAFT", "PENDING_PAYMENT"].includes(latest.status))) throw new EditorWriteError(failure("published", "Tu invitación se publicó. Usa Guardar cambios para aplicar las modificaciones pendientes."));
         throw new EditorWriteError({ ...failure("conflict", "La invitación cambió mientras guardabas. Tu copia local sigue disponible."), version: latest?.contentVersion });
       }
-      await syncCloudinaryImages(tx, session.user.id, eventId, previous, { imageUrl, sections });
+      await syncCloudinaryImages(tx, session.user.id, eventId, previous, { imageUrl, sections: curated.sections ?? sections });
       return { ok: true as const, eventId, version: version + 1 };
     });
     scheduleCloudinaryCleanup(session.user.id);

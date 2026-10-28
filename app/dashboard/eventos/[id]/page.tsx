@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { BrandLoader } from "@/components/BrandLoader";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
-import { EventEditor } from "@/components/dashboard/EventEditor";
+import { EventEditor } from "@/components/dashboard/InvitationEditor";
 
 export const metadata: Metadata = { title: "Editar invitación | Cheetah Invite" };
 

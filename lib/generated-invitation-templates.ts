@@ -102,6 +102,23 @@ export const templateManifest = [
     ]
   },
   {
+    "id": "plantilla6",
+    "eventType": "wedding",
+    "label": "Olivo y lino",
+    "available": true,
+    "accent": "#526348",
+    "assets": {
+      "topLeft": "/plantillas/boda/plantilla6/topLeft.png",
+      "bottomRight": "/plantillas/boda/plantilla6/bottomRight.png",
+      "flower": "/plantillas/boda/plantilla6/flower.png",
+      "decoration": "/plantillas/boda/plantilla6/decoration.png",
+      "texture": "/plantillas/boda/plantilla6/texture.jpg"
+    },
+    "decorations": [
+      "/plantillas/boda/plantilla6/decoration1.png"
+    ]
+  },
+  {
     "id": "plantilla1",
     "eventType": "birthday",
     "label": "Plantilla 1",

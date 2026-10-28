@@ -5,6 +5,13 @@ import { useEffect, useRef } from "react";
 // Reveal content rather than containers so the gallery dialog stays fixed to
 // the viewport and long sections appear gradually as they are read.
 const revealSelector = [
+  ".wedding-hero-copy > *",
+  ".wedding-hero-photo",
+  ".wedding-welcome > *",
+  ".wedding-section-heading > *",
+  ".wedding-section-body > *",
+  ".wedding-finale > *",
+  ".wedding-footer > *",
   ".invite-hero-content > *",
   ".invite-hero-side-note",
   ".invite-welcome > :not(.invite-decoration-frame)",

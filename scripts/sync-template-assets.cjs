@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const events = { wedding: 'boda', birthday: 'cumpleanos', graduation: 'graduacion', baby_shower: 'baby-shower', anniversary: 'aniversario' };
-const slots = { topLeft: 'Superior_izquierdo', topRight: 'Superior_derecho', bottomLeft: 'Inferior_izquierdo', bottomRight: 'Inferior_derecho', separator: 'separador', flower: 'flor', decoration: 'decorate' };
+const slots = { topLeft: 'Superior_izquierdo', topRight: 'Superior_derecho', bottomLeft: 'Inferior_izquierdo', bottomRight: 'Inferior_derecho', separator: 'separador', flower: 'flor', decoration: 'decorate', texture: 'textura' };
 const normalizeName = (name) => name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[\s_-]+/g, '');
 const templates = [];
 for (const [eventType, folder] of Object.entries(events)) {
