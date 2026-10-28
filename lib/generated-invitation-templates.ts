@@ -119,6 +119,42 @@ export const templateManifest = [
     ]
   },
   {
+    "id": "plantilla7",
+    "eventType": "wedding",
+    "label": "Costa mediterránea",
+    "available": true,
+    "accent": "#24577A",
+    "assets": {
+      "topLeft": "/plantillas/boda/plantilla7/topLeft.png",
+      "bottomRight": "/plantillas/boda/plantilla7/bottomRight.png",
+      "flower": "/plantillas/boda/plantilla7/flower.png",
+      "decoration": "/plantillas/boda/plantilla7/decoration.png",
+      "texture": "/plantillas/boda/plantilla7/texture.jpg"
+    },
+    "decorations": [
+      "/plantillas/boda/plantilla7/decoration1.png"
+    ]
+  },
+  {
+    "id": "plantilla8",
+    "eventType": "wedding",
+    "label": "Carta de amor",
+    "available": true,
+    "accent": "#873C3E",
+    "assets": {
+      "topLeft": "/plantillas/boda/plantilla8/topLeft.png",
+      "topRight": "/plantillas/boda/plantilla8/topRight.png",
+      "bottomLeft": "/plantillas/boda/plantilla8/bottomLeft.png",
+      "bottomRight": "/plantillas/boda/plantilla8/bottomRight.png",
+      "flower": "/plantillas/boda/plantilla8/flower.png",
+      "decoration": "/plantillas/boda/plantilla8/decoration.png",
+      "texture": "/plantillas/boda/plantilla8/texture.jpg"
+    },
+    "decorations": [
+      "/plantillas/boda/plantilla8/decoration1.png"
+    ]
+  },
+  {
     "id": "plantilla1",
     "eventType": "birthday",
     "label": "Plantilla 1",

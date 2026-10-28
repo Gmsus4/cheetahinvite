@@ -1,0 +1,80 @@
+/* A coastal postcard: oversized type, a panoramic photograph and loose ceramic pieces. */
+/* Stitchable grain stays continuous across the whole paper surface. The
+   ceramic artwork remains a separate resource used only by the tile piece. */
+:is(.wedding-invitation,.guided-design-sample)[data-design="mediterranean"]{--med-paper-grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='paper' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23000' opacity='.13' filter='url(%23paper)' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}
+.wedding-invitation[data-design="mediterranean"]{--med-lemon:#f1d66b;background-color:var(--w-paper);background-image:var(--med-paper-grain);background-size:180px 180px;background-blend-mode:multiply}
+.wedding-invitation[data-design="mediterranean"] :is(.wedding-rsvp,.wedding-footer){background:transparent}
+.wedding-invitation[data-design="mediterranean"] :is(.wedding-location,.wedding-finale){background-image:var(--med-paper-grain);background-size:180px 180px;background-blend-mode:multiply}
+.wedding-invitation[data-design="mediterranean"] .wedding-hero{display:block;min-height:0;padding:40px 8% 72px;text-align:left}
+.mediterranean-masthead{display:flex;justify-content:space-between;gap:20px;padding-bottom:22px;border-bottom:1px solid var(--w-accent);font-size:10px;letter-spacing:.18em;color:var(--w-accent)}
+.wedding-invitation[data-design="mediterranean"] .wedding-hero-copy{width:100%;max-width:none}
+.wedding-invitation[data-design="mediterranean"] .wedding-hero h1{display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:0 .18em;max-width:none;margin:48px 0 28px;font-size:clamp(68px,9vw,144px);line-height:1.05;letter-spacing:-.045em;color:var(--w-accent)}
+.mediterranean-cover-copy h1>span{min-width:0;max-width:100%}
+.mediterranean-cover-copy h1>i{font-size:.55em;font-weight:400;color:var(--w-accent)}
+.mediterranean-cover-details{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:0 0 44px}
+.mediterranean-cover-details>p{font-size:14px;line-height:1.7;color:var(--w-muted)}
+.wedding-invitation[data-design="mediterranean"] .wedding-date{justify-content:flex-end;margin:0;font-size:12px}
+.mediterranean-scene{position:relative;margin:0 22px 44px 32px;padding-bottom:24px;isolation:isolate}
+.mediterranean-tile-piece{position:absolute;left:-32px;bottom:0;width:26%;height:78%;background:var(--w-texture) left top/260px auto;transform:rotate(-4deg);z-index:0;pointer-events:none}
+.wedding-invitation[data-design="mediterranean"] .wedding-hero-photo{width:100%;aspect-ratio:2/1;z-index:1;border-radius:0;border:0;box-shadow:none}
+.wedding-invitation[data-design="mediterranean"] .wedding-hero-photo img{object-position:center 20%}
+.mediterranean-cover-lemons{position:absolute;right:-48px;bottom:-16px;width:clamp(130px,21%,230px);height:auto;z-index:2;transform:rotate(12deg);pointer-events:none}
+.mediterranean-scene.is-illustrated{height:250px;max-width:550px;margin:28px auto 60px}
+.mediterranean-scene.is-illustrated .mediterranean-tile-piece{width:210px;height:210px;left:10%;bottom:14px}
+.mediterranean-scene.is-illustrated .mediterranean-cover-lemons{width:220px;right:8%;bottom:-8px}
+.wedding-invitation[data-design="mediterranean"] .wedding-button{border:0;border-bottom:1px solid var(--w-accent);padding:10px 0;border-radius:0;background:transparent;color:var(--w-accent)!important;font-size:12px;min-height:44px}
+.wedding-invitation[data-design="mediterranean"] .mediterranean-discover{display:flex;width:max-content;max-width:100%;margin:auto;gap:24px}
+.wedding-invitation[data-design="mediterranean"] .wedding-welcome{display:grid;grid-template-columns:1.1fr 1fr;column-gap:80px;align-items:start;padding:80px 12% 110px;text-align:left}
+.wedding-invitation[data-design="mediterranean"] .wedding-welcome-flower{grid-column:1;width:54px;height:60px;margin:0 0 20px}
+.wedding-invitation[data-design="mediterranean"] .wedding-welcome>.wedding-eyebrow{grid-column:1/-1;padding-top:20px;border-top:3px solid var(--med-lemon)}
+.wedding-invitation[data-design="mediterranean"] .wedding-welcome h2{font-size:clamp(38px,4.4vw,66px);color:var(--w-accent);margin:24px 0 0}
+.wedding-invitation[data-design="mediterranean"] .wedding-welcome>p{margin:28px 0 0;font-size:15px}
+.wedding-invitation[data-design="mediterranean"] .wedding-small-ornament{display:none}
+.wedding-invitation[data-design="mediterranean"] .wedding-section{display:block;width:min(calc(100% - 96px),920px);margin:auto;padding:64px 8%;text-align:center;border-top:1px solid color-mix(in srgb,var(--w-accent) 16%,transparent)}
+.wedding-invitation[data-design="mediterranean"] .wedding-section-heading h2{font-size:clamp(36px,4vw,56px);margin:12px 0 30px;color:var(--w-accent)}
+.wedding-invitation[data-design="mediterranean"] .wedding-section-body>p{margin:0 auto 24px}
+.wedding-invitation[data-design="mediterranean"] .wedding-section-ornament{width:38px;height:40px;margin:0 auto 18px}
+.wedding-invitation[data-design="mediterranean"] .wedding-location{display:grid;grid-template-columns:.8fr 1.2fr;gap:44px;width:min(calc(100% - 96px),1120px);padding:64px;margin:24px auto;background-color:var(--w-panel);border:0;text-align:left}
+.wedding-invitation[data-design="mediterranean"] .wedding-location .wedding-section-heading{border-left:4px solid var(--med-lemon);padding-left:26px}
+.wedding-invitation[data-design="mediterranean"] .wedding-timeline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;text-align:left}
+.wedding-invitation[data-design="mediterranean"] .wedding-timeline li{display:block;border:0;border-top:3px solid var(--med-lemon);padding:18px 0}
+.wedding-invitation[data-design="mediterranean"] .wedding-timeline li>span{display:block;margin-bottom:12px;font-size:20px;font-family:var(--w-heading)}
+.wedding-invitation[data-design="mediterranean"] .wedding-rsvp{background:transparent}
+.wedding-invitation[data-design="mediterranean"] .invite-rsvp-form{margin:0 auto;text-align:left}
+.wedding-invitation[data-design="mediterranean"] .wedding-gallery{gap:24px;align-items:start}
+.wedding-invitation[data-design="mediterranean"] .wedding-gallery a{border-radius:0}
+.wedding-invitation[data-design="mediterranean"] .wedding-gallery a:nth-child(even){margin-top:54px}
+.wedding-invitation[data-design="mediterranean"] .wedding-finale{padding:90px 24px;background-color:var(--w-panel);border:0}
+.wedding-invitation[data-design="mediterranean"] .wedding-finale h2{color:var(--w-accent)}
+.wedding-invitation[data-design="mediterranean"] .wedding-footer{position:relative;gap:18px;padding:64px 24px;background:transparent;color:var(--w-accent)}
+.wedding-mediterranean-footer-lemons{width:64px;height:auto}
+.wedding-invitation[data-design="mediterranean"][data-long-names] .wedding-hero h1{font-size:clamp(56px,7.2vw,112px)}
+@media(max-width:760px){
+ .wedding-invitation[data-design="mediterranean"] .wedding-hero{padding:26px 24px 50px}
+ .mediterranean-masthead{font-size:8px;letter-spacing:.12em;gap:12px;padding-bottom:18px}
+ .wedding-invitation[data-design="mediterranean"] .wedding-hero h1{font-size:clamp(52px,14vw,90px);gap:0 .15em;margin:36px 0 24px}
+ .wedding-invitation[data-design="mediterranean"][data-long-names] .wedding-hero h1{font-size:clamp(42px,11vw,64px)}
+ .mediterranean-cover-details{display:block;padding-bottom:32px;text-align:center}
+ .mediterranean-cover-details>p{font-size:12px}
+ .wedding-invitation[data-design="mediterranean"] .wedding-date{justify-content:center;margin-top:18px;font-size:10px;gap:8px 12px}
+ .wedding-invitation[data-design="mediterranean"] .wedding-date>span+span{padding-left:12px}
+ .mediterranean-scene{margin:0 8px 38px 12px;padding-bottom:18px}
+ .mediterranean-tile-piece{left:-12px;background-size:180px auto;width:36%;height:72%;transform:rotate(-3deg)}
+ .wedding-invitation[data-design="mediterranean"] .wedding-hero-photo{aspect-ratio:5/4}
+ .mediterranean-cover-lemons{width:115px;right:-24px;bottom:-12px}
+ .mediterranean-scene.is-illustrated{height:205px;margin:10px 0 34px}
+ .mediterranean-scene.is-illustrated .mediterranean-tile-piece{width:155px;height:175px;left:5%}
+ .mediterranean-scene.is-illustrated .mediterranean-cover-lemons{width:155px;right:2%}
+ .wedding-invitation[data-design="mediterranean"] .wedding-welcome{display:block;padding:40px 28px 64px}
+ .wedding-invitation[data-design="mediterranean"] .wedding-welcome h2{font-size:42px}
+ .wedding-invitation[data-design="mediterranean"] .wedding-welcome>p{margin-top:24px;font-size:14px}
+ .wedding-invitation[data-design="mediterranean"] .wedding-section{width:calc(100% - 48px);padding:48px 0}
+ .wedding-invitation[data-design="mediterranean"] .wedding-section-heading h2{font-size:36px;margin-bottom:24px}
+ .wedding-invitation[data-design="mediterranean"] .wedding-location{display:block;width:calc(100% - 32px);padding:36px 24px}
+ .wedding-invitation[data-design="mediterranean"] .wedding-location .wedding-section-heading{padding-left:18px;margin-bottom:24px}
+ .wedding-invitation[data-design="mediterranean"] .wedding-timeline{grid-template-columns:1fr;gap:4px}
+ .wedding-invitation[data-design="mediterranean"] .wedding-timeline li{display:grid;grid-template-columns:64px 1fr;gap:18px;padding:18px 0;border-top-width:1px}
+ .wedding-invitation[data-design="mediterranean"] .wedding-timeline li>span{margin:0}
+ .wedding-invitation[data-design="mediterranean"] .wedding-gallery{gap:12px}
+ .wedding-invitation[data-design="mediterranean"] .wedding-gallery a:nth-child(even){margin-top:32px}
+}

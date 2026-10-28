@@ -16,9 +16,10 @@ export function WeddingDesignPicker({ value, onChange }: { value: string; onChan
       const selected = value === design.id;
       return <label key={design.id} className={`guided-design-card${selected ? " is-selected" : ""}`}>
         <input type="radio" name="wedding-design" value={design.id} aria-label={design.label} checked={selected} onChange={() => onChange(design.id)} />
-        <span className="guided-design-sample" data-design={design.kind} data-artwork={design.artwork} style={{ "--sample-heading": getInvitationFont(design.typography).family, "--sample-paper": palette.paper, "--sample-panel": palette.panel, "--sample-ink": palette.ink, "--sample-accent": palette.accent, "--sample-texture": art.texture ? `url("${art.texture}")` : "none" } as CSSProperties}>
+        <span className="guided-design-sample" data-design={design.kind} data-artwork={design.artwork} data-paper-texture={design.texture ? "true" : undefined} style={{ "--sample-moon": design.celestial ? `url("${design.celestial.moon}")` : "none", "--sample-sky": design.celestial ? `url("${design.celestial.sky}")` : "none", "--sample-heading": getInvitationFont(design.typography).family, "--sample-foil": design.foil ? `url("${design.foil}")` : "none", "--sample-paper": palette.paper, "--sample-panel": palette.panel, "--sample-ink": palette.ink, "--sample-accent": palette.accent, "--sample-texture": art.texture ? `url("${art.texture}")` : "none" } as CSSProperties}>
           {art.topLeft && <Image className="guided-sample-art guided-sample-art-top" src={art.topLeft} alt="" width={160} height={160} unoptimized />}
           {art.bottomRight && <Image className="guided-sample-art guided-sample-art-bottom" src={art.bottomRight} alt="" width={160} height={160} unoptimized />}
+          {design.kind === "love-letter" && art.flower && <Image className="guided-sample-seal" src={art.flower} alt="" width={36} height={38} unoptimized />}
           <small>NOS CASAMOS</small><span className="guided-sample-title">Nosotros<br /><i>y el mundo.</i></span><small>UN DÍA PARA RECORDAR</small>
         </span>
         <span className="guided-design-label"><strong>{design.label}</strong>{selected && <FiCheck aria-hidden="true" />}</span>

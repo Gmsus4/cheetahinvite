@@ -4,15 +4,19 @@ import { templateManifest } from "./generated-invitation-templates";
 
 export type WeddingPalette = { label: string; accent: string; paper: string; panel: string; ink: string; muted: string; dark: string };
 export type WeddingDesign = {
-  id: string; label: string; description: string; kind: "floral" | "editorial" | "minimal" | "garden" | "blossom" | "bougainvillea" | "sunlight" | "olive";
-  artwork?: "plantilla1" | "plantilla2" | "plantilla3" | "plantilla4" | "plantilla5" | "plantilla6";
+  id: string; label: string; description: string; kind: "floral" | "editorial" | "minimal" | "garden" | "blossom" | "bougainvillea" | "sunlight" | "olive" | "mediterranean" | "art-deco" | "love-letter" | "starlight";
+  artwork?: "plantilla1" | "plantilla2" | "plantilla3" | "plantilla4" | "plantilla5" | "plantilla6" | "plantilla7" | "plantilla8";
   typography: string; bodyTypography: string; buttons: InvitationButtonAppearance; palettes: WeddingPalette[];
+  texture?: string;
+  foil?: string;
+  celestial?: { sky: string; nebula: string; moon: string };
 };
 
 // Versioned identities keep existing invitations independent of future designs.
 export const weddingDesigns: WeddingDesign[] = [
   {
     id: "wedding-floral-v1", label: "Floral romántico", kind: "floral", artwork: "plantilla5",
+    texture: "/textures/wedding/cotton.webp",
     description: "Flores delicadas, letras con encanto y una celebración llena de calidez.",
     typography: "great-vibes", bodyTypography: "lora",
     buttons: { shape: "pill", filled: true, border: false, icons: true, bold: false },
@@ -27,6 +31,7 @@ export const weddingDesigns: WeddingDesign[] = [
   },
   {
     id: "wedding-editorial-v1", label: "Editorial elegante", kind: "editorial",
+    texture: "/textures/wedding/cotton.webp",
     description: "Fotografías protagonistas y una composición inspirada en una revista.",
     typography: "cormorant-garamond", bodyTypography: "dm-sans",
     buttons: { shape: "square", filled: true, border: false, icons: false, bold: true },
@@ -41,6 +46,7 @@ export const weddingDesigns: WeddingDesign[] = [
   },
   {
     id: "wedding-minimal-v1", label: "Minimalista", kind: "minimal",
+    texture: "/textures/wedding/cotton.webp",
     description: "Líneas limpias, mucho aire y belleza en los detalles más sencillos.",
     typography: "playfair-display", bodyTypography: "inter",
     buttons: { shape: "rounded", filled: false, border: true, icons: false, bold: false },
@@ -55,6 +61,7 @@ export const weddingDesigns: WeddingDesign[] = [
   },
   {
     id: "wedding-garden-v1", label: "Jardín de azafrán", kind: "garden", artwork: "plantilla1",
+    texture: "/textures/wedding/paper.webp",
     description: "Acuarelas violetas, un marco delicado y el encanto de una carta de amor.",
     typography: "alex-brush", bodyTypography: "libre-baskerville",
     buttons: { shape: "rounded", filled: true, border: false, icons: true, bold: false },
@@ -69,6 +76,7 @@ export const weddingDesigns: WeddingDesign[] = [
   },
   {
     id: "wedding-blossom-v1", label: "Flor de cerezo", kind: "blossom", artwork: "plantilla2",
+    texture: "/textures/wedding/paper.webp",
     description: "Ramas de cerezo, un retrato redondo y capítulos suaves en tonos de primavera.",
     typography: "dancing-script", bodyTypography: "quicksand",
     buttons: { shape: "pill", filled: true, border: false, icons: true, bold: true },
@@ -83,6 +91,7 @@ export const weddingDesigns: WeddingDesign[] = [
   },
   {
     id: "wedding-bougainvillea-v1", label: "Bugambilias", kind: "bougainvillea", artwork: "plantilla3",
+    texture: "/textures/wedding/cotton.webp",
     description: "Flores vibrantes, un retrato en arco y una portada con mucha personalidad.",
     typography: "cinzel", bodyTypography: "montserrat",
     buttons: { shape: "square", filled: true, border: false, icons: true, bold: true },
@@ -97,6 +106,7 @@ export const weddingDesigns: WeddingDesign[] = [
   },
   {
     id: "wedding-sunlight-v1", label: "Flores amarillas", kind: "sunlight", artwork: "plantilla4",
+    texture: "/textures/wedding/linen.webp",
     description: "Flores doradas, mariposas y una composición luminosa para celebrar al aire libre.",
     typography: "eb-garamond", bodyTypography: "nunito",
     buttons: { shape: "rounded", filled: true, border: false, icons: true, bold: true },
@@ -123,11 +133,214 @@ export const weddingDesigns: WeddingDesign[] = [
       { label: "Bosque profundo", accent: "#3F5440", paper: "#FAFAF2", panel: "#E4E8D9", ink: "#283528", muted: "#56624C", dark: "#2C3D2D" },
     ],
   },
+  {
+    id: "wedding-mediterranean-v1", label: "Costa mediterránea", kind: "mediterranean", artwork: "plantilla7",
+    description: "Azulejos azules, limones en acuarela y la luz de una celebración junto al mar.",
+    typography: "eb-garamond", bodyTypography: "dm-sans",
+    buttons: { shape: "square", filled: false, border: true, icons: true, bold: false },
+    palettes: [
+      { label: "Azul cerámica", accent: "#24577A", paper: "#FFFEF9", panel: "#EDF3F5", ink: "#243A48", muted: "#526675", dark: "#193F59" },
+      { label: "Mar Egeo", accent: "#2D627E", paper: "#FCFDFC", panel: "#E7F0F3", ink: "#233D4A", muted: "#506976", dark: "#1E455A" },
+      { label: "Limón y arena", accent: "#6E622B", paper: "#FFFCF2", panel: "#F3EDDA", ink: "#383622", muted: "#666249", dark: "#444323" },
+      { label: "Riviera", accent: "#386B6B", paper: "#FBFEFC", panel: "#E6F0EB", ink: "#283E3A", muted: "#536A62", dark: "#254A43" },
+      { label: "Cobalto", accent: "#304F83", paper: "#FEFDFA", panel: "#EAEFF6", ink: "#29384F", muted: "#56667C", dark: "#243B64" },
+      { label: "Azul y terracota", accent: "#94543D", paper: "#FFFBF6", panel: "#F3E9DF", ink: "#3E322C", muted: "#735E52", dark: "#51392E" },
+    ],
+  },
+  {
+    id: "wedding-art-deco-v1", label: "Art Déco", kind: "art-deco",
+    description: "Oro sobre ónix, abanicos geométricos y una celebración con el encanto de los años veinte.",
+    typography: "cinzel", bodyTypography: "raleway",
+    foil: "/textures/wedding/gold-leaf.jpg",
+    buttons: { shape: "square", filled: false, border: true, icons: true, bold: false },
+    palettes: [
+      {
+            "label": "Oro y ónix",
+            "accent": "#DFC38A",
+            "paper": "#101115",
+            "panel": "#1B1D23",
+            "ink": "#FAF3E5",
+            "muted": "#C8BEAC",
+            "dark": "#090A0D"
+      },
+      {
+            "label": "Champaña",
+            "accent": "#E6CFA8",
+            "paper": "#181513",
+            "panel": "#25211E",
+            "ink": "#FFF5E7",
+            "muted": "#CEC1AF",
+            "dark": "#100D0B"
+      },
+      {
+            "label": "Esmeralda nocturna",
+            "accent": "#D8CA93",
+            "paper": "#101B18",
+            "panel": "#1B2A24",
+            "ink": "#F5F3E5",
+            "muted": "#B8C7BA",
+            "dark": "#09120F"
+      },
+      {
+            "label": "Zafiro",
+            "accent": "#D5C49F",
+            "paper": "#101722",
+            "panel": "#1B2636",
+            "ink": "#F5F1E8",
+            "muted": "#BBC5D0",
+            "dark": "#090E17"
+      },
+      {
+            "label": "Borgoña",
+            "accent": "#E3C096",
+            "paper": "#201116",
+            "panel": "#302029",
+            "ink": "#FCF0E6",
+            "muted": "#D0BAC0",
+            "dark": "#160A0F"
+      },
+      {
+            "label": "Plata y carbón",
+            "accent": "#CFD2DB",
+            "paper": "#15161B",
+            "panel": "#22242D",
+            "ink": "#F3F1F5",
+            "muted": "#C2C2CC",
+            "dark": "#0D0E12"
+      }
+],
+  },
+  {
+    id: "wedding-love-letter-v1", label: "Carta de amor", kind: "love-letter", artwork: "plantilla8",
+    description: "Una carta manuscrita, papel antiguo y un sello de cera que guarda su historia.",
+    typography: "alex-brush", bodyTypography: "libre-baskerville",
+    buttons: { shape: "square", filled: false, border: true, icons: true, bold: false },
+    palettes: [
+      {
+            "label": "Tinta de vino",
+            "accent": "#873C3E",
+            "paper": "#FFF9EC",
+            "panel": "#EAE0CE",
+            "ink": "#49342D",
+            "muted": "#75604D",
+            "dark": "#4B302A"
+      },
+      {
+            "label": "Rosa antiguo",
+            "accent": "#8B4B54",
+            "paper": "#FFFAF2",
+            "panel": "#EEE1D6",
+            "ink": "#4D3635",
+            "muted": "#755C53",
+            "dark": "#523538"
+      },
+      {
+            "label": "Sepia",
+            "accent": "#76513A",
+            "paper": "#FFFAEE",
+            "panel": "#EAE0CD",
+            "ink": "#42342A",
+            "muted": "#6D604E",
+            "dark": "#48352A"
+      },
+      {
+            "label": "Ciruela",
+            "accent": "#76506A",
+            "paper": "#FFFAF3",
+            "panel": "#E9DFDA",
+            "ink": "#44313E",
+            "muted": "#705966",
+            "dark": "#482E40"
+      },
+      {
+            "label": "Oliva de época",
+            "accent": "#596340",
+            "paper": "#FFFCF0",
+            "panel": "#E6E3D0",
+            "ink": "#353B29",
+            "muted": "#60654D",
+            "dark": "#39412D"
+      },
+      {
+            "label": "Azul de tinta",
+            "accent": "#4F6175",
+            "paper": "#FFFBF3",
+            "panel": "#E2E3E1",
+            "ink": "#303B47",
+            "muted": "#56606A",
+            "dark": "#344052"
+      }
+],
+  },
+  {
+    id: "wedding-starlight-v1", label: "Bajo las estrellas", kind: "starlight",
+    description: "Azul noche, una luna dorada y constelaciones que acompañan el comienzo de su historia.",
+    typography: "cormorant-garamond", bodyTypography: "manrope",
+    celestial: { sky: "/celestial/night-sky.jpg", nebula: "/celestial/golden-nebula.jpg", moon: "/celestial/full-moon.png" },
+    buttons: { shape: "rounded", filled: false, border: true, icons: true, bold: false },
+    palettes: [
+      {
+            "label": "Noche y oro suave",
+            "accent": "#C6A75E",
+            "paper": "#131E35",
+            "panel": "#1F2A44",
+            "ink": "#E8DCC8",
+            "muted": "#C3C7D1",
+            "dark": "#0B1222"
+      },
+      {
+            "label": "Luz de luna",
+            "accent": "#D6DEEB",
+            "paper": "#151F34",
+            "panel": "#232F46",
+            "ink": "#F0E9DD",
+            "muted": "#C1CAD8",
+            "dark": "#0C1425"
+      },
+      {
+            "label": "Azul profundo",
+            "accent": "#D8C295",
+            "paper": "#0F2138",
+            "panel": "#1B324B",
+            "ink": "#F4EAD8",
+            "muted": "#BAC8D5",
+            "dark": "#081729"
+      },
+      {
+            "label": "Noche amatista",
+            "accent": "#D7BFA1",
+            "paper": "#231C36",
+            "panel": "#332B48",
+            "ink": "#F6EADB",
+            "muted": "#CDC0D4",
+            "dark": "#161021"
+      },
+      {
+            "label": "Aurora",
+            "accent": "#B9D8C9",
+            "paper": "#102A2B",
+            "panel": "#1C3B3B",
+            "ink": "#F3EAD9",
+            "muted": "#B9CCC6",
+            "dark": "#091B1D"
+      },
+      {
+            "label": "Cielo de champaña",
+            "accent": "#E0C6A2",
+            "paper": "#252333",
+            "panel": "#363246",
+            "ink": "#FAEEDF",
+            "muted": "#CFC4D3",
+            "dark": "#171522"
+      }
+],
+  },
 ];
 
 export function getWeddingDesign(id: string) { return weddingDesigns.find(design => design.id === id) ?? null; }
-export function weddingArtwork(design: WeddingDesign): Partial<Record<"topLeft" | "bottomRight" | "flower" | "decoration" | "texture", string>> {
-  return templateManifest.find(template => template.eventType === "wedding" && template.id === design.artwork && template.available)?.assets ?? {};
+export function weddingArtwork(design: WeddingDesign): Partial<Record<"topLeft" | "topRight" | "bottomLeft" | "bottomRight" | "flower" | "decoration" | "texture", string>> {
+  const assets = templateManifest.find(template => template.eventType === "wedding" && template.id === design.artwork && template.available)?.assets ?? {};
+  return design.texture ? { ...assets, texture: design.texture } : assets;
 }
 export function weddingPalette(design: WeddingDesign, accent: string) {
   return design.palettes.find(palette => palette.accent.toLowerCase() === accent.toLowerCase()) ?? design.palettes[0];

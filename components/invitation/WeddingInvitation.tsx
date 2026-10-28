@@ -9,6 +9,9 @@ import { getInvitationFont } from "@/lib/invitation-fonts";
 import { invitationMapUrl, invitationSectionUrl } from "@/lib/invitation-links";
 import { useInvitationMotion } from "@/components/dashboard/useInvitationMotion";
 import { RsvpForm } from "./RsvpForm";
+import { StarlightCover, StarlightPortrait } from "./StarlightCover";
+import { ArtDecoCover, ArtDecoPortrait } from "./ArtDecoCover";
+import { LoveLetterCover, LoveLetterMemory, LoveLetterClosing } from "./LoveLetterCover";
 
 type Props = {
   templateId: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string;
@@ -20,7 +23,7 @@ export function WeddingInvitation({ templateId, accent, name, hostNames, date, e
   const motion = useInvitationMotion();
   const design = getWeddingDesign(templateId)!;
   const artwork = weddingArtwork(design);
-  const botanical = Boolean(design.artwork && design.kind !== "floral");
+  const botanical = Boolean(design.artwork && design.kind !== "floral" && design.kind !== "love-letter");
   const palette = weddingPalette(design, accent);
   const title = hostNames.trim() || "Nuestra boda";
   const names = title.split(/\s+(?:y|&)\s+/i);
@@ -33,10 +36,14 @@ export function WeddingInvitation({ templateId, accent, name, hostNames, date, e
     "--w-ink": palette.ink, "--w-muted": palette.muted, "--w-dark": palette.dark,
     "--w-heading": getInvitationFont(design.typography).family, "--w-body": getInvitationFont(design.bodyTypography).family,
     "--w-texture": artwork.texture ? `url("${artwork.texture}")` : "none",
+    "--w-night-sky": design.celestial ? `url("${design.celestial.sky}")` : "none",
+    "--w-nebula": design.celestial ? `url("${design.celestial.nebula}")` : "none",
+    "--w-foil": design.foil ? `url("${design.foil}")` : "none",
   } as CSSProperties;
 
-  return <article ref={motion} className="wedding-invitation" data-design={design.kind} data-artwork={design.artwork} data-long-names={title.length > 24 ? "true" : undefined} style={style}>
+  return <article ref={motion} className="wedding-invitation" data-design={design.kind} data-artwork={design.artwork} data-paper-texture={design.texture ? "true" : undefined} data-long-names={title.length > 24 ? "true" : undefined} style={style}>
     <header className={`wedding-hero${imageUrl ? " has-photo" : ""}`}>
+      {design.kind === "starlight" ? <StarlightCover moon={design.celestial!.moon} title={title} names={names} date={eventDateKey ? date : "La fecha, muy pronto"} time={time} /> : design.kind === "love-letter" ? <LoveLetterCover title={title} names={names} date={eventDateKey ? date : "La fecha, muy pronto"} time={time} artwork={artwork} /> : design.kind === "art-deco" ? <ArtDecoCover title={title} names={names} date={eventDateKey ? date : "La fecha, muy pronto"} time={time} /> : design.kind === "mediterranean" ? <MediterraneanCover title={title} names={names} date={eventDateKey ? date : "La fecha, muy pronto"} time={time} imageUrl={imageUrl} lemons={artwork.flower} /> : <>
       {design.artwork && <FloralCorners artwork={artwork} />}
       <div className="wedding-hero-copy">
         {design.kind === "olive" && artwork.decoration && <Image className="wedding-olive-butterfly" src={artwork.decoration} alt="" width={72} height={49} unoptimized />}
@@ -50,9 +57,14 @@ export function WeddingInvitation({ templateId, accent, name, hostNames, date, e
       {imageUrl && <div className="wedding-hero-photo"><Image src={imageUrl} alt={hostNames ? `La pareja: ${hostNames}` : "Fotografía de la pareja"} fill sizes="(max-width: 760px) 100vw, 55vw" priority unoptimized /></div>}
       {design.kind === "editorial" && <span className="wedding-edition">{name || "Nuestra boda"} <span>UNA NUEVA ETAPA</span></span>}
       {!imageUrl && design.kind === "editorial" && <span className="wedding-type-art" aria-hidden="true">Sí,<br /><i>para siempre.</i></span>}
+      </>}
     </header>
+    {design.kind === "art-deco" && imageUrl && <ArtDecoPortrait src={imageUrl} title={title} />}
 
+    {design.kind === "love-letter" && imageUrl && <LoveLetterMemory src={imageUrl} title={title} butterfly={artwork.decoration} />}
+    {design.kind === "starlight" && imageUrl && <StarlightPortrait src={imageUrl} title={title} />}
     <section id="wedding-celebration" className="wedding-welcome">
+      {design.kind === "love-letter" && artwork.decoration && <Image className="love-welcome-butterfly" src={artwork.decoration} alt="" width={64} height={64} unoptimized />}
       {botanical && artwork.flower && <Image className="wedding-welcome-flower" src={artwork.flower} alt="" width={100} height={100} unoptimized />}
       <span className="wedding-eyebrow">CON LAS PERSONAS QUE MÁS QUEREMOS</span>
       <h2>Un día nuestro.<br /><em>Un recuerdo de todos.</em></h2>
@@ -66,8 +78,24 @@ export function WeddingInvitation({ templateId, accent, name, hostNames, date, e
     </section>}
     {remaining.map(section => <WeddingSection key={section.id} section={section} publicEventId={publicEventId} ornament={botanical && ["ceremony", "parents", "gifts"].includes(section.type) ? artwork.decoration : undefined} />)}
     {eventDateKey && <section className="wedding-finale"><span className="wedding-eyebrow">CADA VEZ FALTA MENOS</span><h2>El comienzo de<br /><em>nuestro siempre.</em></h2><WeddingCountdown date={eventDateKey} time={eventTime} /><p>{date}</p></section>}
-    <footer className="wedding-footer"><span className="wedding-eyebrow">GRACIAS POR SER PARTE DE NUESTRA HISTORIA</span><strong>{title}</strong><small>Hecho con cariño · Cheetah Invite</small></footer>
+    <footer className="wedding-footer">{design.kind === "love-letter" && <LoveLetterClosing artwork={artwork} />}{design.kind === "mediterranean" && artwork.flower && <Image className="wedding-mediterranean-footer-lemons" src={artwork.flower} alt="" width={100} height={112} unoptimized />}<span className="wedding-eyebrow">GRACIAS POR SER PARTE DE NUESTRA HISTORIA</span><strong>{title}</strong><small>Hecho con cariño · Cheetah Invite</small></footer>
   </article>;
+}
+
+function MediterraneanCover({ title, names, date, time, imageUrl, lemons }: { title: string; names: string[]; date: string; time: string; imageUrl: string; lemons?: string }) {
+  return <>
+    <div className="mediterranean-masthead"><span>NOS CASAMOS</span><span>UN DÍA PARA RECORDAR</span></div>
+    <div className="wedding-hero-copy mediterranean-cover-copy">
+      <h1 aria-label={title}>{names.length === 2 ? <><span>{names[0]}</span><i aria-hidden="true">&amp;</i><span>{names[1]}</span></> : <span>{title}</span>}</h1>
+      <div className="mediterranean-cover-details"><p>La alegría de encontrarnos.<br />El comienzo de nuestro siempre.</p><div className="wedding-date"><span>{date}</span>{time && <span>{time}</span>}</div></div>
+    </div>
+    <div className={`mediterranean-scene${imageUrl ? "" : " is-illustrated"}`}>
+      <span className="mediterranean-tile-piece" aria-hidden="true" />
+      {imageUrl && <div className="wedding-hero-photo"><Image src={imageUrl} alt={`La pareja: ${title}`} fill sizes="(max-width: 760px) 100vw, 85vw" priority unoptimized /></div>}
+      {lemons && <Image className="mediterranean-cover-lemons" src={lemons} alt="" width={220} height={246} unoptimized />}
+    </div>
+    <a className="wedding-button mediterranean-discover" href="#wedding-celebration">Celebremos juntos <FiArrowDown aria-hidden="true" /></a>
+  </>;
 }
 
 function FloralCorners({ artwork }: { artwork: ReturnType<typeof weddingArtwork> }) {

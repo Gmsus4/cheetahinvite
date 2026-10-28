@@ -1,4 +1,18 @@
 /* Each versioned wedding identity owns its typography, palette and composition. */
+/* Shared paper treatment for the original seven designs and their picker samples. */
+:is(.wedding-invitation,.guided-design-sample)[data-paper-texture]{--w-texture-size:800px auto;--w-texture-strength:.34;--w-texture-reading:.17}
+:is(.wedding-invitation,.guided-design-sample)[data-design="editorial"]{--w-texture-size:1100px auto;--w-texture-strength:.2;--w-texture-reading:.1}
+:is(.wedding-invitation,.guided-design-sample)[data-design="minimal"]{--w-texture-size:1200px auto;--w-texture-strength:.14;--w-texture-reading:.08}
+:is(.wedding-invitation,.guided-design-sample)[data-design="garden"]{--w-texture-size:640px auto;--w-texture-strength:.4;--w-texture-reading:.2}
+:is(.wedding-invitation,.guided-design-sample)[data-design="blossom"]{--w-texture-size:760px auto;--w-texture-strength:.28;--w-texture-reading:.14}
+:is(.wedding-invitation,.guided-design-sample)[data-design="bougainvillea"]{--w-texture-size:650px auto;--w-texture-strength:.42;--w-texture-reading:.22}
+:is(.wedding-invitation,.guided-design-sample)[data-design="sunlight"]{--w-texture-size:960px auto;--w-texture-strength:.3;--w-texture-reading:.14}
+.wedding-invitation[data-paper-texture]{background-image:linear-gradient(color-mix(in srgb,var(--w-paper) 92%,transparent),color-mix(in srgb,var(--w-paper) 92%,transparent)),var(--w-texture);background-size:auto,var(--w-texture-size)}
+.wedding-invitation[data-paper-texture]>:is(.wedding-hero,.wedding-welcome,.wedding-section,.wedding-finale,.wedding-footer){position:relative;isolation:isolate}
+.wedding-invitation[data-paper-texture]>:is(.wedding-hero,.wedding-welcome,.wedding-section,.wedding-finale,.wedding-footer)::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background-image:var(--w-texture);background-size:var(--w-texture-size);background-repeat:repeat;mix-blend-mode:multiply;opacity:var(--w-texture-reading);pointer-events:none}
+.wedding-invitation[data-paper-texture]>:is(.wedding-hero,.wedding-welcome)::before{opacity:var(--w-texture-strength)}
+.wedding-invitation[data-paper-texture]>.wedding-footer::before{opacity:.07}
+
 .wedding-invitation{--invite-action:var(--w-accent);--invite-ink:var(--w-ink);--invite-muted:var(--w-muted);--invite-paper:var(--w-paper);--invite-body-font:var(--w-body);width:100%;overflow:clip;background:var(--w-paper);color:var(--w-ink);font-family:var(--w-body);font-size:16px;line-height:1.8;text-align:left}
 .wedding-invitation *{box-sizing:border-box}
 .wedding-invitation :is(h1,h2,h3,p){margin:0;overflow-wrap:anywhere}
@@ -206,6 +220,12 @@
 .wedding-invitation[data-design="bougainvillea"] .wedding-finale{background:var(--w-panel)}
 
 /* Golden flowers: a light-filled cover and a wide photo above a row of chapters. */
+/* Keep the original smooth backgrounds. Linen appears only in small, softly
+   feathered accents behind the cover title and welcome ornament. */
+.wedding-invitation[data-design="sunlight"][data-paper-texture]{background-image:none}
+.wedding-invitation[data-design="sunlight"][data-paper-texture]>:is(.wedding-hero,.wedding-welcome,.wedding-section,.wedding-finale,.wedding-footer)::before{content:none}
+.wedding-invitation[data-design="sunlight"][data-paper-texture]>:is(.wedding-hero,.wedding-welcome)::before{content:"";inset:40px auto auto 50%;width:min(82%,600px);height:500px;max-height:70%;transform:translateX(-50%);background-size:cover;background-position:center;background-repeat:no-repeat;mask-image:radial-gradient(ellipse closest-side,#000 15%,transparent 100%);opacity:.16}
+.wedding-invitation[data-design="sunlight"][data-paper-texture]>.wedding-welcome::before{top:12px;width:min(70%,300px);height:260px;opacity:.12}
 .wedding-invitation[data-design="sunlight"] .wedding-hero{min-height:760px;padding:110px 8% 70px;background:linear-gradient(var(--w-panel),var(--w-paper))}
 .wedding-invitation[data-design="sunlight"] .wedding-hero-copy{width:min(100%,850px)}
 .wedding-invitation[data-design="sunlight"] .wedding-hero h1{font-size:clamp(60px,7vw,102px);line-height:1.15;font-style:italic}

@@ -12,6 +12,10 @@ import "./invitation-system.css";
 import "./invitation-rsvp.css";
 import "./invitation-motion.css";
 import "./wedding-designs.css";
+import "./wedding-mediterranean.css";
+import "./wedding-art-deco.css";
+import "./wedding-love-letter.css";
+import "./wedding-starlight.css";
 import "./guided-editor.css";
 
 export const metadata: Metadata = {

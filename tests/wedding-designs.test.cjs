@@ -20,11 +20,11 @@ function contrast(first, second) {
   return (values[0] + .05) / (values[1] + .05);
 }
 
-test('expanded wedding catalog uses published artwork from all six collections and readable approved palettes', () => {
+test('expanded wedding catalog uses published artwork from all eight collections and readable approved palettes', () => {
   const { weddingDesigns, weddingArtwork } = setup();
-  assert.equal(weddingDesigns.length, 8);
+  assert.equal(weddingDesigns.length, 12);
   assert.equal(new Set(weddingDesigns.map(design => design.id)).size, weddingDesigns.length);
-  assert.deepEqual(new Set(weddingDesigns.map(design => design.artwork).filter(Boolean)), new Set(['plantilla1', 'plantilla2', 'plantilla3', 'plantilla4', 'plantilla5', 'plantilla6']));
+  assert.deepEqual(new Set(weddingDesigns.map(design => design.artwork).filter(Boolean)), new Set(['plantilla1', 'plantilla2', 'plantilla3', 'plantilla4', 'plantilla5', 'plantilla6', 'plantilla7', 'plantilla8']));
   for (const design of weddingDesigns) {
     assert.equal(design.palettes.length, 6);
     assert.equal(new Set(design.palettes.map(palette => palette.accent.toLowerCase())).size, 6);
@@ -39,7 +39,8 @@ test('expanded wedding catalog uses published artwork from all six collections a
       for (const background of ['paper', 'panel']) for (const foreground of ['ink', 'muted']) {
         assert.ok(contrast(palette[foreground], palette[background]) >= 4.5, `${design.label} / ${palette.label}: ${foreground} on ${background}`);
       }
-      assert.ok(contrast('#ffffff', palette.accent) >= 4.5, `${design.label} / ${palette.label}: button text`);
+      if (design.buttons.filled) assert.ok(contrast('#ffffff', palette.accent) >= 4.5, `${design.label} / ${palette.label}: button text`);
+      else for (const background of ['paper', 'panel']) assert.ok(contrast(palette.accent, palette[background]) >= 4.5, `${design.label} / ${palette.label}: outlined button text`);
     }
   }
 });
@@ -55,6 +56,58 @@ test('olive and linen publishes all five supplied assets unchanged, including th
     assert.deepEqual(fs.readFileSync(path.join(__dirname, '..', 'public', art[slot])), fs.readFileSync(path.join(__dirname, '..', 'recursos-plantillas', 'boda', 'plantilla6', source)));
   }
   assert.equal(art.texture, '/plantillas/boda/plantilla6/texture.jpg');
+});
+
+test('Mediterranean coast publishes all five supplied assets and keeps tiles out of the global paper texture', () => {
+  const { getWeddingDesign, weddingArtwork } = setup();
+  const design = getWeddingDesign('wedding-mediterranean-v1');
+  assert.equal(design.label, 'Costa mediterránea');
+  assert.equal(design.artwork, 'plantilla7');
+  assert.equal(design.texture, undefined);
+  const art = weddingArtwork(design);
+  for (const [slot, source] of Object.entries({ topLeft: 'Superior_izquierdo.png', bottomRight: 'Inferior_derecho.png', flower: 'flor.png', decoration: 'decorate.png', texture: 'textura.jpg' })) {
+    assert.ok(art[slot]);
+    assert.deepEqual(fs.readFileSync(path.join(__dirname, '..', 'public', art[slot])), fs.readFileSync(path.join(__dirname, '..', 'recursos-plantillas', 'boda', 'plantilla7', source)));
+  }
+  assert.equal(art.texture, '/plantillas/boda/plantilla7/texture.jpg');
+});
+
+test('Art Deco uses a separate gold foil resource without activating paper or floral artwork', () => {
+  const { getWeddingDesign } = setup();
+  const design = getWeddingDesign('wedding-art-deco-v1');
+  assert.equal(design.typography, 'cinzel');
+  assert.equal(design.buttons.filled, false);
+  assert.equal(design.artwork, undefined);
+  assert.equal(design.texture, undefined);
+  assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', design.foil)));
+  assert.notEqual(design.foil, getWeddingDesign('wedding-mediterranean-v1').texture);
+});
+
+test('love letter publishes all four corners, wax seal, butterfly and paper without changing the originals', () => {
+  const { getWeddingDesign, weddingArtwork } = setup();
+  const design = getWeddingDesign('wedding-love-letter-v1');
+  assert.equal(design.label, 'Carta de amor');
+  assert.equal(design.texture, undefined);
+  const art = weddingArtwork(design);
+  for (const [slot, source] of Object.entries({ topLeft: 'Superior_izquierdo.png', topRight: 'Superior_derecho.png', bottomLeft: 'Inferior_izquierdo.png', bottomRight: 'Inferior_derecho.png', flower: 'flor.png', decoration: 'decorate.png', texture: 'textura.jpg' })) {
+    assert.ok(art[slot], `Missing letter resource: ${slot}`);
+    assert.deepEqual(fs.readFileSync(path.join(__dirname, '..', 'public', art[slot])), fs.readFileSync(path.join(__dirname, '..', 'recursos-plantillas', 'boda', 'plantilla8', source)));
+  }
+});
+
+test('starlight publishes its celestial backgrounds and transparent full moon without activating paper or floral artwork', () => {
+  const { getWeddingDesign } = setup();
+  const design = getWeddingDesign('wedding-starlight-v1');
+  assert.equal(design.label, 'Bajo las estrellas');
+  assert.equal(design.artwork, undefined);
+  assert.equal(design.texture, undefined);
+  for (const [kind, asset] of Object.entries(design.celestial)) {
+    assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', asset)));
+    const bytes = fs.readFileSync(path.join(__dirname, '..', 'public', asset));
+    if (kind === 'moon') assert.deepEqual(bytes.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    else assert.deepEqual(bytes.subarray(0, 2), Buffer.from([0xff, 0xd8]));
+  }
+  assert.equal(new Set(Object.values(design.celestial)).size, 3);
 });
 
 test('all new and existing wedding palettes survive server saving without falling back to the default', async () => {

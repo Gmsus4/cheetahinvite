@@ -1,0 +1,73 @@
+/* A symmetrical, ink-dark invitation with stepped metalwork and engraved fans. */
+.wedding-invitation[data-design="art-deco"]{display:flow-root;counter-reset:deco-chapter;--deco-line:color-mix(in srgb,var(--w-accent) 45%,transparent);background:var(--w-paper);font-size:15px}
+.wedding-invitation[data-design="art-deco"] .wedding-hero{min-height:850px;width:calc(100% - 64px);margin:32px auto 0;padding:90px 10%;background:radial-gradient(ellipse at top,var(--w-panel),var(--w-paper) 75%)}
+.deco-cover-frame{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;stroke:var(--w-accent);stroke-width:1}
+.deco-cover-frame path{vector-effect:non-scaling-stroke}
+.wedding-invitation[data-design="art-deco"] .deco-cover-copy{width:min(100%,850px)}
+.deco-fan{display:block;width:128px;height:auto;margin:0 auto 40px;stroke:var(--w-accent);stroke-width:1.2}
+.wedding-invitation[data-design="art-deco"] .wedding-eyebrow{font-size:9px;letter-spacing:.26em;line-height:2.1;color:var(--w-accent)}
+.wedding-invitation[data-design="art-deco"] .wedding-hero h1{margin:30px 0 20px;font-size:clamp(44px,6vw,90px);line-height:1.25;letter-spacing:.045em;text-transform:uppercase;color:var(--w-ink)}
+.deco-cover-copy h1>span{display:block}
+.deco-cover-copy h1>i{display:block;margin:12px 0;font-family:'Cormorant Garamond Variable',Georgia,serif;font-size:.4em;font-weight:400;color:var(--w-accent)}
+.deco-invitation-line{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--w-accent)}
+.deco-date{display:flex;flex-direction:column;align-items:center;gap:9px;margin:30px auto 28px;font-size:12px;letter-spacing:.13em;color:var(--w-ink)}
+.deco-date::before,.deco-date::after{content:"";width:92px;height:2px;background:var(--w-accent) var(--w-foil) center/cover}
+.deco-date::before{margin-bottom:12px}.deco-date::after{margin-top:12px}
+.wedding-invitation[data-design="art-deco"] .wedding-button{padding:12px 26px;border:1px solid var(--w-accent);border-radius:0;background:transparent;color:var(--w-accent)!important;font-size:10px;letter-spacing:.14em;text-transform:uppercase;min-height:46px}
+.wedding-invitation[data-design="art-deco"] .wedding-button:hover{background:var(--w-panel);box-shadow:none}
+.deco-cover-diamond{display:block;width:13px;height:13px;margin:32px auto 0;transform:rotate(45deg);background:var(--w-accent) var(--w-foil) center/cover}
+.deco-portrait-wrap{position:relative;width:min(calc(100% - 144px),960px);margin:80px auto 0;padding:2px;background:var(--w-accent) var(--w-foil) center/cover;clip-path:polygon(24px 0,calc(100% - 24px) 0,100% 24px,100% calc(100% - 24px),calc(100% - 24px) 100%,24px 100%,0 calc(100% - 24px),0 24px)}
+.deco-portrait{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;clip-path:polygon(23px 0,calc(100% - 23px) 0,100% 23px,100% calc(100% - 23px),calc(100% - 23px) 100%,23px 100%,0 calc(100% - 23px),0 23px)}
+.deco-portrait img{object-fit:cover;object-position:center 20%}
+.deco-portrait-wrap>span{position:absolute;left:50%;bottom:0;transform:translateX(-50%);padding:5px 14px;background:var(--w-paper);color:var(--w-accent);font-size:12px}
+.wedding-invitation[data-design="art-deco"] .wedding-welcome{padding:100px max(28px,18%) 80px}
+.wedding-invitation[data-design="art-deco"] h2{font-size:clamp(30px,3.8vw,52px);line-height:1.3;letter-spacing:.035em}
+.wedding-invitation[data-design="art-deco"] h2 em{font-style:normal;color:var(--w-accent)}
+.wedding-invitation[data-design="art-deco"] .wedding-welcome>p{font-size:15px;line-height:2;color:var(--w-muted)}
+.wedding-invitation[data-design="art-deco"] .wedding-small-ornament{width:16px;height:16px;margin:44px auto 0;font-size:0;transform:rotate(45deg);background:var(--w-accent) var(--w-foil) center/cover}
+.wedding-invitation[data-design="art-deco"] .wedding-section{position:relative;display:block;width:min(calc(100% - 120px),960px);margin:0 auto;padding:70px 9%;border-top:1px solid var(--deco-line);text-align:center;background:transparent;counter-increment:deco-chapter}
+.wedding-invitation[data-design="art-deco"] .wedding-section::before{content:counter(deco-chapter,decimal-leading-zero);display:block;width:max-content;margin:-84px auto 34px;padding:0 18px;background:var(--w-paper);color:var(--w-accent);font-family:var(--w-heading);font-size:13px;letter-spacing:.2em}
+.wedding-invitation[data-design="art-deco"] .wedding-section-heading h2{margin:18px 0 32px}
+.wedding-invitation[data-design="art-deco"] .wedding-section-body>p{margin:0 auto 24px}
+.wedding-invitation[data-design="art-deco"] .wedding-section-body>h3{font-size:25px;line-height:1.5;color:var(--w-accent)}
+.wedding-invitation[data-design="art-deco"] .wedding-timeline{max-width:560px;margin:auto;text-align:left}
+.wedding-invitation[data-design="art-deco"] .wedding-timeline li{grid-template-columns:80px 1fr;border-color:var(--deco-line);padding:24px 0}
+.wedding-invitation[data-design="art-deco"] .wedding-timeline li>span{font-family:var(--w-heading);font-size:15px}
+.wedding-invitation[data-design="art-deco"] .wedding-gallery{gap:22px}
+.wedding-invitation[data-design="art-deco"] .wedding-gallery a{padding:5px;border:1px solid var(--deco-line);border-radius:0}
+.wedding-invitation[data-design="art-deco"] .wedding-gallery img{filter:saturate(.7)}
+.wedding-invitation[data-design="art-deco"] .wedding-finale{padding:80px 24px 100px;background:var(--w-paper)}
+.wedding-invitation[data-design="art-deco"] .wedding-countdown{gap:36px}
+.wedding-invitation[data-design="art-deco"] .wedding-countdown strong{color:var(--w-accent);font-size:46px}
+.wedding-invitation[data-design="art-deco"] .wedding-footer{margin:0 32px 32px;padding:56px 24px;border:1px solid var(--deco-line);background:var(--w-dark);color:var(--w-ink)}
+.wedding-invitation[data-design="art-deco"] .wedding-footer strong{font-size:32px;text-transform:uppercase;letter-spacing:.05em}
+.wedding-invitation[data-design="art-deco"] .invite-rsvp-form{--rsvp-border:var(--deco-line);--rsvp-tint:var(--w-panel);margin:0 auto;border-radius:0;box-shadow:none;background:var(--w-paper);color:var(--w-ink)}
+.wedding-invitation[data-design="art-deco"] .invite-rsvp-field input,.wedding-invitation[data-design="art-deco"] .invite-rsvp-form button{border-radius:0;background:var(--w-panel);color:var(--w-ink)}
+.wedding-invitation[data-design="art-deco"] .invite-rsvp-field input::placeholder{color:var(--w-muted)}
+.wedding-invitation[data-design="art-deco"] .invite-rsvp-choice-icon{background:var(--w-paper);color:var(--w-accent);border-radius:0}
+.wedding-invitation[data-design="art-deco"] .invite-rsvp-choice[aria-pressed="true"] .invite-rsvp-choice-icon{background:var(--w-accent);color:var(--w-paper)}
+.wedding-invitation[data-design="art-deco"][data-long-names] .wedding-hero h1{font-size:clamp(36px,4.8vw,72px)}
+@media(max-width:760px){
+ .wedding-invitation[data-design="art-deco"] .wedding-hero{width:calc(100% - 24px);margin-top:12px;padding:74px 28px 60px;min-height:720px}
+ .deco-fan{width:94px;margin-bottom:28px}
+ .wedding-invitation[data-design="art-deco"] .wedding-eyebrow{font-size:8px;letter-spacing:.18em}
+ .wedding-invitation[data-design="art-deco"] .wedding-hero h1{font-size:clamp(32px,9vw,56px);letter-spacing:.02em;margin-top:24px}
+ .wedding-invitation[data-design="art-deco"][data-long-names] .wedding-hero h1{font-size:clamp(25px,7vw,42px)}
+ .deco-invitation-line{font-size:10px;letter-spacing:.23em}
+ .deco-date{font-size:11px;letter-spacing:.06em}
+ .deco-portrait-wrap{width:calc(100% - 48px);margin-top:48px}
+ .deco-portrait{aspect-ratio:4/5}
+ .wedding-invitation[data-design="art-deco"] .wedding-welcome{padding:64px 28px}
+ .wedding-invitation[data-design="art-deco"] .wedding-welcome>p{font-size:14px}
+ .wedding-invitation[data-design="art-deco"] h2{font-size:30px}
+ .wedding-invitation[data-design="art-deco"] .wedding-section{width:calc(100% - 48px);padding:56px 0}
+ .wedding-invitation[data-design="art-deco"] .wedding-section::before{margin-top:-69px;margin-bottom:28px}
+ .wedding-invitation[data-design="art-deco"] .wedding-section-heading h2{margin:16px 0 28px}
+ .wedding-invitation[data-design="art-deco"] .wedding-timeline li{grid-template-columns:60px 1fr;gap:16px}
+ .wedding-invitation[data-design="art-deco"] .wedding-gallery{gap:12px}
+ .wedding-invitation[data-design="art-deco"] .invite-rsvp-form{padding:22px 16px}
+ .wedding-invitation[data-design="art-deco"] .wedding-countdown{gap:18px}
+ .wedding-invitation[data-design="art-deco"] .wedding-countdown strong{font-size:36px}
+ .wedding-invitation[data-design="art-deco"] .wedding-footer{margin:0 12px 12px;padding:42px 24px}
+ .wedding-invitation[data-design="art-deco"] .wedding-footer strong{font-size:24px}
+}
