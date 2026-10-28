@@ -7,6 +7,9 @@
 .purchase-history-card{padding:24px;margin:20px 0;background:#fff;border:1px solid #e5e8ed;border-radius:16px;box-shadow:0 4px 16px #18243508;overflow-wrap:anywhere}
 .purchase-history-card>form{margin-top:16px}.purchase-history-pagination{display:flex;justify-content:space-between;gap:24px}
 .purchase-price-update{margin:0 0 18px;padding:14px 16px;border:1px solid #f0d7bd;border-radius:12px;background:#fff8ef;color:#74451f;font-size:13px;line-height:1.7}
+.rsvp-dashboard-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:24px 0}.rsvp-dashboard-stats>div{padding:16px;border:1px solid #e3e7ec;border-radius:12px;background:#fff}.rsvp-dashboard-stats dt{font-size:12px;color:#596575}.rsvp-dashboard-stats dd{margin:8px 0 0;font-size:28px;font-weight:700}
+.rsvp-dashboard-actions{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}.rsvp-dashboard-table{overflow-x:auto;margin:24px 0;border:1px solid #e3e7ec;border-radius:12px;background:#fff}.rsvp-dashboard-table table{width:100%;border-collapse:collapse;font-size:13px;text-align:left}.rsvp-dashboard-table caption{padding:16px;text-align:left;font-weight:700}.rsvp-dashboard-table :is(th,td){padding:12px 16px;border-top:1px solid #edf0f4}.rsvp-dashboard-table tbody th{min-width:140px;max-width:240px;overflow-wrap:anywhere}.rsvp-dashboard-table thead{background:#f8f9fb}
+@media(max-width:600px){.rsvp-dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .payment-receipt{padding:16px 0;line-height:1.6;overflow-wrap:anywhere}.payment-receipt-state{font-weight:700;margin-bottom:12px}
 .payment-receipt dl{display:grid;gap:10px;margin:0 0 12px}.payment-receipt dl>div{display:flex;justify-content:space-between;gap:16px}
 .payment-receipt dt{color:#596575}.payment-receipt dd{margin:0;text-align:right;max-width:60%}.payment-receipt small{color:#596575;font-size:12px}
@@ -213,3 +216,6 @@
 .dashboard-page .dashboard-events-section + .dashboard-stats { margin-top: 24px; margin-bottom: 0; }
 @media (max-width: 1050px) { .dashboard-invitation-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 640px) { .dashboard-invitation-grid { grid-template-columns: minmax(0,1fr); gap: 18px; } .dashboard-invitation-slot { min-height: 300px; padding: 24px; } .dashboard-slot-number { margin-bottom: 20px; } .dashboard-invitation-cover { height: 210px; } .dashboard-slot-meter { width: 100%; } .dashboard-capacity-full { font-size: 12px; } }
+
+.rsvp-delete-action{max-width:300px}
+.purchase-history.purchase-history .rsvp-delete-icon{width:42px;height:42px;padding:0}

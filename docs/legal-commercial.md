@@ -8,9 +8,11 @@ con los datos reales del operador y revisarse para la operación concreta.
 - Hasta tres invitaciones por cuenta, incluidos borradores.
 - Crear y previsualizar gratis; pagar por la publicación de cada evento.
 - Precio confirmado: $269 MXN por evento, IVA incluido.
-- Enlace público que puede reenviarse; sin contraseña ni control de asistentes.
+- Enlace público que puede reenviarse; sin contraseña ni control de entrada.
 - Publicación de doce meses desde confirmar el pago, sin renovación automática.
-- Confirmaciones integradas pendientes; solo se ofrecen enlaces externos.
+- Confirmaciones integradas opcionales: nombre, Sí/No y hasta cinco acompañantes
+  extra, con consulta privada y CSV para el organizador. También se mantienen
+  enlaces externos. Los nombres no son identidades verificadas; ver `rsvp.md`.
 - Soporte: cheetahinvite@gmail.com. La ayuda y recuperación manual preparan
   un correo que el usuario debe enviar; no crean tickets automáticamente.
 - Reembolsos comerciales por fallas propias que impidan prestar el servicio,

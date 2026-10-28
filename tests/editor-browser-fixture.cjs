@@ -6,7 +6,7 @@ const { hashPassword } = require('../lib/password.ts');
 const file = path.resolve('node_modules/.cache/editor-browser-fixture.json');
 (async () => {
   try {
-    if (['create', 'create-payments'].includes(process.argv[2])) {
+    if (['create', 'create-payments', 'create-rsvp'].includes(process.argv[2])) {
       assert.equal(fs.existsSync(file), false, 'Clean up the previous fixture first');
       const ownerId = `__editor_browser_${randomUUID()}`;
       const password = `Editor-${randomBytes(20).toString('hex')}`;
@@ -22,8 +22,13 @@ const file = path.resolve('node_modules/.cache/editor-browser-fixture.json');
         await prisma.event.update({ where: { id: draft.id }, data: { paidAt: new Date(), status: 'SUSPENDED', expiresAt: originalExpiry } });
         await prisma.invitationPayment.create({ data: { ...paymentData, eventId: `__deleted_fixture_${randomUUID()}`, eventName: 'Invitación eliminada · reembolso total', refundedAmount: 49900 } });
       }
+      if (process.argv[2] === 'create-rsvp') {
+        const confirmation = { id: 'confirmation', type: 'rsvp', title: 'Confirma tu asistencia', content: 'Nos encantará contar contigo.', detail: '', link: '', imageUrl: '', enabled: true, rsvpMode: 'integrated' };
+        await prisma.event.update({ where: { id: published.id }, data: { sections: [confirmation], customSlug: 'rsvp-fixture' } });
+        await prisma.event.update({ where: { id: draft.id }, data: { sections: [{ ...confirmation, rsvpMode: 'external' }] } });
+      }
       fs.mkdirSync(path.dirname(file), { recursive: true });
-      fs.writeFileSync(file, JSON.stringify({ ownerId, email, password, draftId: draft.id, publishedId: published.id }));
+      fs.writeFileSync(file, JSON.stringify({ ownerId, email, password, draftId: draft.id, publishedId: published.id, publishedSlug: published.slug, publicPath: process.argv[2] === 'create-rsvp' ? `/invitacion/${ownerId}/rsvp-fixture` : `/invitacion/${published.slug}` }));
       console.log('Browser fixture created; temporary credentials stored locally.');
     } else if (process.argv[2] === 'cleanup') {
       const data = JSON.parse(fs.readFileSync(file, 'utf8'));

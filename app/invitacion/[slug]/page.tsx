@@ -36,6 +36,7 @@ async function InvitationData({ params }: InvitationPageProps) {
   const sections = Array.isArray(event.sections) ? event.sections as InviteSection[] : [];
   return <main className="public-invitation-page">
     <InvitationCanvas
+      publicEventId={event.id}
       eventType={event.eventType}
       name={event.name}
       hostNames={event.hostNames ?? ""}

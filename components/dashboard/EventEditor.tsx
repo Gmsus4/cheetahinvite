@@ -10,6 +10,7 @@ import { getInvitationTemplate, templateAccent, sectionDecoration, type Invitati
 import { CustomInvitationLinkField } from "./CustomInvitationLinkField";
 import { invitationPath, normalizeInvitationSlug } from "@/lib/invitation-url";
 import { InvitationLivePreview } from "./InvitationLivePreview";
+import { RsvpForm } from "@/components/invitation/RsvpForm";
 import { useInvitationMotion } from "./useInvitationMotion";
 import { useEditorProtection } from "./useEditorProtection";
 import { EditorSaveFailure, editorFormData, type EditorValues, type InviteSection, type SectionType } from "@/lib/invitation-editor";
@@ -22,7 +23,7 @@ import { FiArrowDown, FiArrowLeft, FiArrowUp, FiCalendar, FiCheck, FiChevronLeft
 import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 import { BrandEmblem } from "@/components/BrandEmblem";
 import { invitationPriceLabel, isInvitationPublished } from "@/lib/invitation-payment";
-import { invitationExternalUrl, invitationLinkLabel, invitationMapUrl } from "@/lib/invitation-links";
+import { invitationSectionUrl, invitationLinkLabel, invitationMapUrl } from "@/lib/invitation-links";
 import { defaultButtonAppearance, eventButtonAppearance, type InvitationButtonAppearance } from "@/lib/invitation-buttons";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { getInvitationFont, invitationFonts, recommendedInvitationFonts, type FontRole } from "@/lib/invitation-fonts";
@@ -50,7 +51,7 @@ const sectionOptions: { type: SectionType; title: string; description: string }[
 
 function makeSection(type: SectionType, id = `default-${type}`): InviteSection {
   const option = sectionOptions.find((item) => item.type === type)!;
-  return { id, type, title: option.title, content: "", detail: "", link: "", imageUrl: "", imageUrls: [], enabled: true };
+  return { id, type, title: option.title, content: "", detail: "", link: "", imageUrl: "", imageUrls: [], enabled: true, ...(type === "rsvp" ? { rsvpMode: "integrated" as const } : {}) };
 }
 
 const dateInputValue = (date: Date | null) => date ? new Date(date).toISOString().slice(0, 10) : "";
@@ -238,6 +239,7 @@ export function EventEditor({ event, saved, error, published, creation = false }
         {!creation && <div className="editor-purchase-access">
           <div><strong>Pago y soporte</strong><p>Consulta el estado de tu compra y la referencia de esta invitación.</p><small>Referencia: {event.id}</small></div>
           <EditorProtectedLink guard={confirmNavigation} className="button" href={`/dashboard/eventos/${event.id}/pago`}>Ver pago y soporte</EditorProtectedLink>
+          <EditorProtectedLink guard={confirmNavigation} className="button" href={`/dashboard/eventos/${event.id}/asistencias`}>Ver respuestas de asistencia</EditorProtectedLink>
         </div>}
         {!dirty && (saved || (published && isPublished) || protection.lastSaved) && <p className="editor-success" role="status"><FiCheck /> {published && isPublished ? "Tu invitación ya está publicada y lista para compartir." : "Cambios guardados correctamente."}</p>}
         {error && <p className="editor-error" role="alert">{error === "imagenes" ? "Una de las fotos ya no está disponible. Recarga el editor y vuelve a subirla." : error === "enlace-ocupado" ? "Ya tienes otra invitación con ese enlace. Elige otro nombre." : error === "enlace" ? "El enlace debe tener entre 2 y 80 caracteres, con letras, números y guiones." : error === "imagen" ? "Usa una URL válida que comience con http:// o https://." : "Revisa los campos e inténtalo de nuevo."}</p>}
@@ -317,10 +319,13 @@ export function EventEditor({ event, saved, error, published, creation = false }
                     <div className="editor-field"><label htmlFor={`${base}-title`}>Título</label><input id={`${base}-title`} value={section.title} maxLength={100} onChange={(e) => updateSection(section.id, { title: e.target.value })} /></div>
                     <div className="editor-field"><label htmlFor={`${base}-content`}>{section.type === "dress_code" ? "Indicaciones" : section.type === "rsvp" ? "Instrucciones" : section.type === "gifts" ? "Mensaje" : section.type === "program" ? "Horario y actividad (un momento por renglón)" : section.type === "parents" ? "Nombres (una pareja o persona por renglón)" : "Descripción"}</label><textarea id={`${base}-content`} rows={section.type === "program" || section.type === "parents" ? 5 : 3} maxLength={2000} value={section.content} onChange={(e) => updateSection(section.id, { content: e.target.value })} placeholder={section.type === "program" ? "5:30 p. m. — Recepción de invitados\n6:00 p. m. — Ceremonia\n7:00 p. m. — Cóctel" : section.type === "parents" ? "Ej. Joaquín Reyes y Patricia Fuentes\nRodrigo Navarro y Lucía Cortés" : "Escribe aquí la información para tus invitados…"} /></div>
                     {(section.type === "ceremony" || section.type === "reception" || section.type === "gallery" || section.type === "parents") && <div className="editor-field"><label htmlFor={`${base}-detail`}>{section.type === "parents" ? "Mensaje de agradecimiento" : section.type === "gallery" ? "Texto de apoyo" : "Fecha u horario"}</label><input id={`${base}-detail`} maxLength={240} value={section.detail} onChange={(e) => updateSection(section.id, { detail: e.target.value })} placeholder={getInvitationEventContent(eventType).sections[section.type].detail || "Agrega un detalle para tus invitados"} /></div>}
-                    {(section.type === "ceremony" || section.type === "reception" || section.type === "gifts") && <div className="editor-field"><label htmlFor={`${base}-link`}>{section.type === "gifts" ? "Enlace a mesa de regalos" : "Enlace a mapa"}</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://…" /></div>}
+                    {(section.type === "ceremony" || section.type === "reception" || section.type === "gifts") && <div className="editor-field"><label htmlFor={`${base}-link`}>{section.type === "gifts" ? "Enlace a mesa de regalos" : "Ubicación o enlace de Google Maps"}</label><input id={`${base}-link`} type={section.type === "gifts" ? "url" : "text"} maxLength={500} value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder={section.type === "gifts" ? "https://…" : "Ej. Jardín Las Rosas, Puebla, o un enlace de Maps"} />{section.type !== "gifts" && <><small>Escribe el lugar y la ciudad o pega el enlace de Google Maps.</small>{invitationSectionUrl(section.type, section.link) && <a href={invitationSectionUrl(section.type, section.link)!} target="_blank" rel="noopener noreferrer">Comprobar ubicación en Google Maps ↗</a>}</>}</div>}
                     {section.type === "gallery" && <div className="editor-field"><label>Fotos de la galería</label><CloudinaryImageUpload ensureEvent={creation ? ensureEvent : undefined} onBusyChange={(busy) => setUploadCount((count) => count + (busy ? 1 : -1))} eventId={event.id} images={section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : []} multiple onChange={(images) => updateSection(section.id, { imageUrls: images, imageUrl: images[0] ?? "" })} /></div>}
                     {(section.type === "ceremony" || section.type === "reception" || section.type === "story" || section.type === "custom") && <div className="editor-field"><label>Imagen de esta sección</label><CloudinaryImageUpload ensureEvent={creation ? ensureEvent : undefined} onBusyChange={(busy) => setUploadCount((count) => count + (busy ? 1 : -1))} eventId={event.id} images={section.imageUrl ? [section.imageUrl] : []} multiple={false} onChange={(images) => updateSection(section.id, { imageUrl: images[0] ?? "" })} /></div>}
-                    {section.type === "rsvp" && <div className="editor-field"><label htmlFor={`${base}-link`}>Enlace de confirmación o WhatsApp</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://wa.me/…" /></div>}
+                    {section.type === "rsvp" && <>
+                      <div className="editor-field"><label htmlFor={`${base}-rsvp-mode`}>Cómo recibir las respuestas</label><select id={`${base}-rsvp-mode`} value={section.rsvpMode ?? "external"} onChange={event => updateSection(section.id, { rsvpMode: event.target.value as "external" | "integrated" })}><option value="integrated">En esta invitación · Sí / No y acompañantes</option><option value="external">Enlace externo o WhatsApp</option></select><small>Es opcional: desactiva la sección Confirmación para ocultarla. El formulario integrado permite hasta 5 acompañantes extra por respuesta.</small></div>
+                      {section.rsvpMode !== "integrated" && <div className="editor-field"><label htmlFor={`${base}-link`}>Enlace de confirmación o WhatsApp</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://wa.me/…" /></div>}
+                    </>}
                     {["ceremony", "reception", "story", "custom"].includes(section.type) && <div className="editor-field"><label htmlFor={`${base}-layout`}>Composición</label><select id={`${base}-layout`} value={section.layout || "auto"} onChange={(e) => updateSection(section.id, { layout: e.target.value as InviteSection["layout"] })}><option value="auto">Automática según el contenido</option><option value="split">Dos columnas</option><option value="centered">Centrada</option><option value="card">Tarjeta</option></select></div>}
                     {section.type === "music" && <div className="editor-field"><label htmlFor={`${base}-link`}>Enlace de canción o playlist</label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://…" /></div>}
                     {section.type === "custom" && <><div className="editor-field"><label htmlFor={`${base}-detail`}>Dato adicional <span>(opcional)</span></label><input id={`${base}-detail`} maxLength={240} value={section.detail} onChange={(e) => updateSection(section.id, { detail: e.target.value })} placeholder="Ej. Salón principal" /></div><div className="editor-field"><label htmlFor={`${base}-link`}>Enlace <span>(opcional)</span></label><input id={`${base}-link`} type="url" value={section.link} onChange={(e) => updateSection(section.id, { link: e.target.value })} placeholder="https://…" /></div></>}
@@ -511,18 +516,18 @@ function parseProgramEntry(line: string, index: number) {
   return { id: `${index}-${cleaned}`, time: "", description: cleaned };
 }
 
-export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, locationImageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", buttonAppearance = defaultButtonAppearance, templateId = "none", texture = "none", sections }: {
-  eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; locationImageUrl?: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; buttonAppearance?: InvitationButtonAppearance; templateId?: string; texture?: string; sections: InviteSection[]; full?: boolean;
+export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, locationImageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", buttonAppearance = defaultButtonAppearance, templateId = "none", texture = "none", sections, publicEventId }: {
+  eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; locationImageUrl?: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; buttonAppearance?: InvitationButtonAppearance; templateId?: string; texture?: string; sections: InviteSection[]; full?: boolean; publicEventId?: string;
 }) {
-  return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} locationImageUrl={locationImageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} heroHorizontal={heroHorizontal} heroVertical={heroVertical} buttonAppearance={buttonAppearance} templateId={templateId} texture={texture} sections={sections} />;
+  return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} locationImageUrl={locationImageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} heroHorizontal={heroHorizontal} heroVertical={heroVertical} buttonAppearance={buttonAppearance} templateId={templateId} texture={texture} sections={sections} publicEventId={publicEventId} />;
 }
 
-function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eventTime, venue, address, message, imageUrl, locationImageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", buttonAppearance = defaultButtonAppearance, templateId = "none", texture = "none", sections }: {
-  eventType: string; name: string; hostNames: string; date: string; eventDateKey: string; eventTime: string; venue: string; address: string; message: string; imageUrl: string; locationImageUrl?: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; buttonAppearance?: InvitationButtonAppearance; templateId?: string; texture?: string; sections: InviteSection[];
+function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eventTime, venue, address, message, imageUrl, locationImageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", buttonAppearance = defaultButtonAppearance, templateId = "none", texture = "none", sections, publicEventId }: {
+  eventType: string; name: string; hostNames: string; date: string; eventDateKey: string; eventTime: string; venue: string; address: string; message: string; imageUrl: string; locationImageUrl?: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; buttonAppearance?: InvitationButtonAppearance; templateId?: string; texture?: string; sections: InviteSection[]; publicEventId?: string;
 }) {
   const motionRef = useInvitationMotion();
   const content = getInvitationEventContent(eventType);
-  const visibleSections = sections.filter((section) => section.enabled && (section.content || section.detail || section.link || section.imageUrl || section.imageUrls?.length));
+  const visibleSections = sections.filter((section) => section.enabled && ((section.type === "rsvp" && section.rsvpMode === "integrated") || section.content || section.detail || section.link || section.imageUrl || section.imageUrls?.length));
   const dressCode = visibleSections.find((section) => section.type === "dress_code");
   const confirmation = visibleSections.find((section) => section.type === "rsvp");
   const pairedSections = dressCode && confirmation && Math.abs(visibleSections.indexOf(dressCode) - visibleSections.indexOf(confirmation)) === 1 ? visibleSections.filter((section) => section.id === dressCode.id || section.id === confirmation.id) : [];
@@ -540,9 +545,9 @@ function InvitationWebsite({ eventType, name, hostNames, date, eventDateKey, eve
     {visibleSections.length > 0 && <section className="invite-extra-sections">{visibleSections.map((section, index) => {
       if (pairedSections.some((paired) => paired.id === section.id)) {
         if (section.id !== pairedSections[0].id) return null;
-        return <div className="invite-practical-details" key={section.id}>{pairedSections.map((paired) => <InviteWebsiteSection eventType={eventType} key={paired.id} section={paired} index={visibleSections.indexOf(paired)} decoration={sectionDecoration(template, paired.type)} />)}</div>;
+        return <div className="invite-practical-details" key={section.id}>{pairedSections.map((paired) => <InviteWebsiteSection eventType={eventType} key={paired.id} section={paired} index={visibleSections.indexOf(paired)} decoration={sectionDecoration(template, paired.type)} publicEventId={publicEventId} />)}</div>;
       }
-      return <InviteWebsiteSection eventType={eventType} key={section.id} section={section} index={index} decoration={sectionDecoration(template, section.type)} template={template} />;
+      return <InviteWebsiteSection eventType={eventType} key={section.id} section={section} index={index} decoration={sectionDecoration(template, section.type)} template={template} publicEventId={publicEventId} />;
     })}</section>}
     <section className="invite-countdown-panel">{template && <InvitationDecoration template={template} bottomOnly />}<span className="invite-section-kicker">RESERVA LA FECHA</span><h2>{dateAndTime}</h2>{eventDateKey && eventTime ? <CountdownTimer date={eventDateKey} time={eventTime} /> : <p>Nos encantará celebrar contigo</p>}<span className="invite-countdown-decoration">✦</span></section>
     <footer className="invite-website-footer"><span className="invite-footer-ornament">✦</span><p>Gracias por ser parte de este momento</p><strong>{title}</strong><small>HECHO CON CARIÑO PARA CELEBRAR</small></footer>
@@ -581,7 +586,7 @@ function CountdownTimer({ date, time }: { date: string; time: string }) {
   </div>;
 }
 
-function InviteWebsiteSection({ section, index = 0, decoration, template, eventType }: { section: InviteSection; index?: number; decoration?: string; template?: InvitationTemplate | null; eventType: string }) {
+function InviteWebsiteSection({ section, index = 0, decoration, template, eventType, publicEventId }: { section: InviteSection; index?: number; decoration?: string; template?: InvitationTemplate | null; eventType: string; publicEventId?: string }) {
   if (section.type === "dress_code" || section.type === "gifts") decoration = undefined;
   if (section.type === "parents") {
     const ornament = decoration || template?.assets.flower || template?.assets.separator || template?.assets.decoration;
@@ -598,7 +603,7 @@ function InviteWebsiteSection({ section, index = 0, decoration, template, eventT
     </section>;
   }
   const isGallery = section.type === "gallery";
-  const sectionUrl = invitationExternalUrl(section.link);
+  const sectionUrl = invitationSectionUrl(section.type, section.link);
   const giftLeft = section.type === "gifts" ? template?.assets.decoration : undefined;
   const giftRight = section.type === "gifts" ? template?.decorations?.[0] : undefined;
   const galleryImages = section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : [];
@@ -606,7 +611,7 @@ function InviteWebsiteSection({ section, index = 0, decoration, template, eventT
     {decoration && section.type !== "story" && <span className="invite-section-decoration" aria-hidden="true"><Image src={decoration} alt="" fill sizes="(max-width: 760px) 48px, 90px" unoptimized /></span>}
     {isGallery && galleryImages.length > 0 ? <div className="invite-content-image invite-gallery-feature"><GalleryBento images={galleryImages} title={section.title} /></div> : section.imageUrl && <div className="invite-content-image" style={{ backgroundImage: `url("${section.imageUrl.replaceAll('"', '')}")` }} role="img" aria-label={section.title} />}
       <div className="invite-content-copy"><span className="invite-content-icon">{sectionIcon(section.type)}</span>{section.type === "story" && decoration && <span className="invite-story-ornament" aria-hidden="true"><Image src={decoration} alt="" fill sizes="94px" unoptimized /></span>}{section.type === "gifts" && (giftLeft || giftRight) ? <div className="invite-gifts-heading">{giftLeft && <span className="invite-gifts-heading-ornament" aria-hidden="true"><Image src={giftLeft} alt="" fill sizes="(max-width: 760px) 44px, 96px" unoptimized /></span>}<h2>{section.title}</h2>{giftRight && <span className="invite-gifts-heading-ornament" aria-hidden="true"><Image src={giftRight} alt="" fill sizes="(max-width: 760px) 44px, 96px" unoptimized /></span>}</div> : <h2>{section.title}</h2>}{section.detail && <p className="invite-content-detail">{section.detail}</p>}{section.type === "program" && <ol className="invite-program-list">{section.content.split("\n").map(parseProgramEntry).filter((entry) => entry.description).map((entry, index) => <li key={entry.id}><span className={entry.time ? "invite-program-time" : "invite-program-index"}>{entry.time || String(index + 1).padStart(2, "0")}</span><div className="invite-program-copy"><i aria-hidden="true" /><p>{entry.description}</p></div></li>)}</ol>}{section.content && section.type !== "program" && <p className="invite-content-body">{section.content}</p>}
-      {sectionUrl && <a className="invite-static-link" href={sectionUrl} target="_blank" rel="noopener noreferrer">{invitationLinkLabel(section.type)} <FiArrowDown /></a>}
+      {section.type === "rsvp" && section.rsvpMode === "integrated" ? <RsvpForm eventId={publicEventId} /> : sectionUrl && <a className="invite-static-link" href={sectionUrl} target="_blank" rel="noopener noreferrer">{invitationLinkLabel(section.type)} <FiArrowDown /></a>}
     </div>
   </section>;
 }

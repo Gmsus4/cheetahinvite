@@ -9,6 +9,7 @@ import "./invitation-sections.css";
 import "./invitation-decorations.css";
 import "./invitation-textures.css";
 import "./invitation-system.css";
+import "./invitation-rsvp.css";
 import "./invitation-motion.css";
 
 export const metadata: Metadata = {

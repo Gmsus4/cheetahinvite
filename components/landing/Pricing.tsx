@@ -5,6 +5,8 @@ const features = [
   "Invitación personalizable",
   "Enlace público para compartir",
   "Fotos, colores y tipografías",
+  "Confirmación de asistencia opcional",
+  "Lista de respuestas y descarga para Excel",
   "Edición durante la vigencia",
 ];
 

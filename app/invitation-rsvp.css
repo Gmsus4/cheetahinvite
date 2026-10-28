@@ -1,0 +1,86 @@
+.invite-rsvp-form {
+  --rsvp-border: color-mix(in srgb, var(--invite-accent, #e9560a) 15%, #e8e5df);
+  --rsvp-tint: color-mix(in srgb, var(--invite-accent, #e9560a) 7%, #fffdf9);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+  width: min(100%, 520px);
+  margin: 28px auto 0;
+  padding: clamp(22px, 4vw, 34px);
+  border: 1px solid var(--rsvp-border);
+  border-radius: 22px;
+  background: var(--invite-paper, #fffdf9);
+  color: var(--invite-ink, #202124);
+  box-shadow: 0 16px 48px #0b132018;
+  text-align: left;
+  font-family: var(--invite-body-font), Arial, sans-serif;
+}
+.invite-rsvp-field { display: flex; flex-direction: column; gap: 10px; }
+.invite-rsvp-field label, .invite-rsvp-attendance legend { color: var(--invite-ink, #202124); font-size: 13px; font-weight: 600; line-height: 1.5; }
+.invite-rsvp-field input {
+  box-sizing: border-box;
+  width: 100%; min-width: 0; min-height: 50px;
+  padding: 13px 15px;
+  border: 1px solid var(--rsvp-border); border-radius: 12px;
+  background: #fff; color: var(--invite-ink, #202124);
+  font: inherit; font-size: 16px; line-height: 1.5;
+  transition: border-color .2s, box-shadow .2s;
+}
+.invite-rsvp-field input::placeholder { color: #858780; font-size: 14px; }
+.invite-rsvp-attendance { min-width: 0; margin: 0; padding: 0; border: 0; }
+.invite-rsvp-attendance legend { margin-bottom: 12px; padding: 0; }
+.invite-rsvp-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.invite-rsvp-form .invite-rsvp-button, .invite-rsvp-counter button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  min-width: 0; min-height: 46px;
+  padding: 12px 16px; border: 1px solid var(--rsvp-border); border-radius: 12px;
+  background: #fff; color: var(--invite-ink, #202124);
+  font: inherit; font-size: 14px; font-weight: 600; line-height: 1.5;
+  text-align: center; cursor: pointer;
+  transition: background-color .2s, border-color .2s, box-shadow .2s;
+}
+.invite-rsvp-form .invite-rsvp-choice { flex-direction: row; gap: 7px; min-height: 44px; padding: 9px 8px; border-radius: 12px; }
+.invite-rsvp-choice-icon { display: grid; place-items: center; flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: #f2f1ed; color: #777c78; }
+.invite-rsvp-form .invite-rsvp-choice[aria-pressed="true"] { border-color: var(--invite-action, #9a491b); background: var(--rsvp-tint); color: var(--invite-action, #9a491b); box-shadow: inset 0 0 0 1px var(--invite-action, #9a491b); }
+.invite-rsvp-choice[aria-pressed="true"] .invite-rsvp-choice-icon { background: var(--invite-action, #9a491b); color: #fff; }
+.invite-rsvp-form .invite-rsvp-button:hover:not(:disabled), .invite-rsvp-counter button:hover:not(:disabled) { border-color: var(--invite-action, #9a491b); background: var(--rsvp-tint); }
+.invite-rsvp-form :is(button, input, a):focus-visible { outline: 2px solid var(--invite-action, #9a491b); outline-offset: 3px; }
+.invite-rsvp-form button:disabled { opacity: .45; cursor: not-allowed; }
+.invite-rsvp-form button svg { flex-shrink: 0; width: 18px; height: 18px; }
+.invite-rsvp-form .invite-rsvp-companions-toggle { min-height: 44px; justify-content: flex-start; gap: 10px; padding: 8px 12px; border-radius: 12px; text-align: left; }
+.invite-rsvp-companions-toggle > svg:first-child { color: var(--invite-action, #9a491b); }
+.invite-rsvp-companions-copy { display: flex; flex: 1; flex-direction: column; min-width: 0; gap: 3px; }
+.invite-rsvp-companions-copy strong { font-size: 13px; font-weight: 600; }
+.invite-rsvp-companions-copy small { color: var(--invite-muted, #656a65); font-size: 11px; font-weight: 400; line-height: 1.5; }
+.invite-rsvp-chevron { margin-left: auto; color: var(--invite-muted, #656a65); transition: transform .2s; }
+.invite-rsvp-companions-toggle[aria-expanded="true"] .invite-rsvp-chevron { transform: rotate(180deg); }
+.invite-rsvp-companions { margin-top: -14px; padding: 18px; border: 1px solid var(--rsvp-border); border-radius: 14px; background: var(--rsvp-tint); }
+.invite-rsvp-companions[hidden] { display: none; }
+.invite-rsvp-companions-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; font-size: 12px; }
+.invite-rsvp-companions-heading small { color: var(--invite-muted, #656a65); font-size: 11px; }
+.invite-rsvp-counter { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 16px; }
+.invite-rsvp-counter button { width: 44px; height: 44px; min-height: 44px; padding: 0; border-radius: 50%; }
+.invite-rsvp-counter output { min-width: 30px; color: var(--invite-ink, #202124); font-size: 25px; font-weight: 500; text-align: center; }
+.invite-rsvp-form .invite-rsvp-total { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin: -8px 0 0; padding-top: 16px; border-top: 1px solid var(--rsvp-border); color: var(--invite-muted, #656a65); font-size: 12px; line-height: 1.5; }
+.invite-rsvp-total span { color: var(--invite-action, #9a491b); font-size: 14px; font-weight: 600; }
+.invite-rsvp-form .invite-rsvp-submit { min-height: 44px; padding: 9px 20px; border-color: var(--invite-action, #9a491b); border-radius: var(--invite-button-radius, 12px); background: var(--invite-action, #9a491b); color: #fff; letter-spacing: .01em; }
+.invite-rsvp-form .invite-rsvp-submit:hover:not(:disabled) { background: color-mix(in srgb, var(--invite-action, #9a491b) 88%, #000); color: #fff; }
+.invite-rsvp-form .invite-rsvp-note { margin: 0; color: var(--invite-muted, #656a65); font-size: 12px; line-height: 1.6; }
+.invite-rsvp-form > small { color: var(--invite-muted, #656a65); font-size: 11px; line-height: 1.7; }
+.invite-rsvp-form > small a { color: var(--invite-action, #9a491b); text-decoration: underline; text-underline-offset: 3px; }
+.invite-rsvp-error, .invite-rsvp-success { margin: 0; padding: 12px 14px; border: 1px solid #e5c9bf; border-radius: 12px; background: #fff4ef; color: #8b3f25; font-size: 12px; line-height: 1.7; }
+.invite-rsvp-success { border-color: var(--rsvp-border); background: var(--rsvp-tint); color: var(--invite-action, #9a491b); }
+.invite-rsvp-honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; pointer-events: none; }
+.invite-website[data-button-filled="false"] .invite-rsvp-form .invite-rsvp-submit { background: transparent; color: var(--invite-action, #9a491b); }
+.invite-website[data-button-filled="false"] .invite-rsvp-form .invite-rsvp-submit:hover:not(:disabled) { background: var(--rsvp-tint); }
+.invite-website[data-button-icons="false"] .invite-rsvp-choice-icon, .invite-website[data-button-icons="false"] .invite-rsvp-companions-toggle > svg:first-child { display: none; }
+.invite-website[data-button-bold="false"] .invite-rsvp-form .invite-rsvp-button { font-weight: 400; }
+@media(max-width: 400px) {
+  .invite-rsvp-form { gap: 21px; padding: 22px 18px; border-radius: 18px; }
+  .invite-rsvp-choices { gap: 10px; }
+  .invite-rsvp-form .invite-rsvp-choice { min-height: 44px; font-size: 13px; }
+  .invite-rsvp-form .invite-rsvp-companions-toggle { padding: 8px 12px; gap: 9px; }
+  .invite-rsvp-companions { padding: 15px 12px; }
+}
+@media(prefers-reduced-motion: reduce) { .invite-rsvp-form :is(button, input, svg) { transition: none; } }

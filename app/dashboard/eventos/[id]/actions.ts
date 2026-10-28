@@ -1,6 +1,7 @@
 "use server";
 
 import type { EditorSaveResult } from "@/lib/invitation-editor";
+import { invitationSectionUrl } from "@/lib/invitation-links";
 import { parseButtonAppearance } from "@/lib/invitation-buttons";
 
 import { auth } from "@/auth";
@@ -195,10 +196,12 @@ function isValidSection(value: unknown): value is {
   const strings = ["id", "type", "title", "content", "detail", "link", "imageUrl"] as const;
   if (!strings.every((key) => typeof section[key] === "string")) return false;
   if (typeof section.enabled !== "boolean" || !types.includes(section.type as string)) return false;
+  if (section.rsvpMode !== undefined && (section.type !== "rsvp" || !["external", "integrated"].includes(section.rsvpMode as string))) return false;
   if ((section.id as string).length > 80 || (section.title as string).length > 100 || (section.content as string).length > 2000 || (section.detail as string).length > 240 || (section.link as string).length > 500 || (section.imageUrl as string).length > 1000) return false;
   if (section.layout !== undefined && !["auto", "split", "centered", "card"].includes(section.layout as string)) return false;
   if (section.imageUrls !== undefined && (!Array.isArray(section.imageUrls) || section.imageUrls.length > ACCOUNT_LIMITS.imagesPerGallery || section.imageUrls.some((url) => typeof url !== "string" || url.length > 1000 || !isHttpUrl(url)))) return false;
-  for (const value of [section.link, section.imageUrl] as string[]) {
+  if (section.link && !invitationSectionUrl(section.type as string, section.link as string)) return false;
+  for (const value of [section.imageUrl] as string[]) {
     if (!value) continue;
     try {
       const url = new URL(value);

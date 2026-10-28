@@ -446,7 +446,7 @@ body,p,a,button,input,textarea,select,li,small,nav,label{font-family:var(--font-
 /* Shared mascot emblem */
 .brand-emblem{width:var(--brand-emblem-size,40px);height:var(--brand-emblem-size,40px);flex:0 0 var(--brand-emblem-size,40px);display:inline-flex;align-items:center;justify-content:center;overflow:hidden;border-radius:50%;background:#E9560A;vertical-align:middle}
 .brand-emblem img{width:86%;height:86%;display:block;object-fit:contain}
-.brand:not(.dashboard-brand):not(.editor-brand)>.brand-emblem{margin-right:6px}
+.brand:not(.dashboard-brand):not(.editor-brand)>.brand-emblem{margin-right:10px}
 .dashboard-brand-mark.brand-emblem,.dashboard-loading-mark.brand-emblem{background:#E9560A;color:inherit;font-size:0;line-height:0}
 @media(max-width:640px){.brand-emblem{width:var(--brand-emblem-size,36px);height:var(--brand-emblem-size,36px);flex-basis:var(--brand-emblem-size,36px)}.brand:not(.dashboard-brand):not(.editor-brand)>.brand-emblem{margin-right:4px}}
 

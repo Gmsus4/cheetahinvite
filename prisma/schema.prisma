@@ -70,6 +70,8 @@ model Event {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   owner        User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  rsvpResponses RsvpResponse[]
+  rsvpBudgets RsvpSubmissionBudget[]
 
   @@index([ownerId, status])
   @@unique([ownerId, customSlug])
@@ -189,4 +191,29 @@ model InvitationPayment {
 
   @@index([ownerId, createdAt])
   @@index([eventId])
+}
+
+model RsvpResponse {
+  id         String @id @default(uuid())
+  eventId    String
+  tokenHash  String
+  name       String @db.VarChar(120)
+  attending  Boolean
+  companions Int @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  event      Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, tokenHash])
+  @@index([eventId, createdAt])
+}
+
+model RsvpSubmissionBudget {
+  key       String @id
+  eventId   String
+  count     Int @default(1)
+  expiresAt DateTime
+  event     Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, expiresAt])
 }

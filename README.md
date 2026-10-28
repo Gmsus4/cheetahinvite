@@ -3,6 +3,9 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 La operación de compras con Stripe, historial independiente, reembolsos y disputas
 se documenta en [docs/stripe.md](docs/stripe.md) y [docs/support-operations.md](docs/support-operations.md).
 
+La confirmación opcional de asistencia con enlace general, hasta cinco acompañantes
+extra y panel privado del organizador se documenta en [docs/rsvp.md](docs/rsvp.md).
+
 ## Getting Started
 
 First, run the development server:

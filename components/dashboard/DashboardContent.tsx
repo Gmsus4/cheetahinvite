@@ -148,6 +148,7 @@ export function DashboardContent({ userName, userEmail, userImage, events, now }
                           </>}
                         </div>
                         <Link className="dashboard-card-payment" href={`/dashboard/eventos/${event.id}/pago`} aria-label={`Ver pago y soporte de ${event.name}`}><FiCreditCard aria-hidden="true" /> Pago y soporte</Link>
+                        <Link className="dashboard-card-payment" href={`/dashboard/eventos/${event.id}/asistencias`} aria-label={`Ver respuestas de asistencia de ${event.name}`}><FiCheckCircle aria-hidden="true" /> Respuestas de asistencia</Link>
                       </div>
                       <div className="dashboard-card-footer"><a href={supportMailto({ email: userEmail, eventId: event.id, eventName: event.name })} aria-label={`Pedir soporte para ${event.name}`}><FiHelpCircle aria-hidden="true" /> Ayuda</a><DeleteInvitationButton eventId={event.id} eventName={event.name} /></div>
                       <small className="dashboard-card-updated">Actualizada el {formatDate(event.updatedAt)}</small>
