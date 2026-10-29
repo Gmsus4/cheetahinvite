@@ -1,30 +1,34 @@
 "use client";
 
-import Image from "next/image";
+import { FiCheck, FiArrowUpRight } from "react-icons/fi";
 import type { CSSProperties } from "react";
-import { FiCheck } from "react-icons/fi";
-import { weddingArtwork, weddingDesigns } from "@/lib/wedding-designs";
+import { getWeddingDesign, weddingArtwork, weddingDesigns } from "@/lib/wedding-designs";
 import { getInvitationFont } from "@/lib/invitation-fonts";
+import styles from "./WeddingDesignPicker.module.css";
 
 export function WeddingDesignPicker({ value, onChange }: { value: string; onChange(id: string): void }) {
-  return <fieldset className="guided-designs">
+  const current = getWeddingDesign(value);
+  return <fieldset className={styles.picker}>
     <legend>¿Cuál se siente más como ustedes?</legend>
-    <p>{weddingDesigns.length} diseños completos. Cambia de estilo conservando tus fotos y los datos de tu boda.</p>
-    <div>{weddingDesigns.map(design => {
-      const art = weddingArtwork(design);
-      const palette = design.palettes[0];
+    <p>Elige el estilo que cuenta su historia. Tus fotos y datos se conservan al cambiar de diseño.</p>
+    {current && !current.edition && <p className="guided-legacy-design">Tu invitación conserva su diseño original. Elegir uno de esta colección aplica su nueva composición.</p>}
+    <div className={styles.grid}>{weddingDesigns.map(design => {
       const selected = value === design.id;
-      return <label key={design.id} className={`guided-design-card${selected ? " is-selected" : ""}`}>
-        <input type="radio" name="wedding-design" value={design.id} aria-label={design.label} checked={selected} onChange={() => onChange(design.id)} />
-        <span className="guided-design-sample" data-design={design.kind} data-artwork={design.artwork} data-paper-texture={design.texture ? "true" : undefined} style={{ "--sample-moon": design.celestial ? `url("${design.celestial.moon}")` : "none", "--sample-sky": design.celestial ? `url("${design.celestial.sky}")` : "none", "--sample-heading": getInvitationFont(design.typography).family, "--sample-foil": design.foil ? `url("${design.foil}")` : "none", "--sample-paper": palette.paper, "--sample-panel": palette.panel, "--sample-ink": palette.ink, "--sample-accent": palette.accent, "--sample-texture": art.texture ? `url("${art.texture}")` : "none" } as CSSProperties}>
-          {art.topLeft && <Image className="guided-sample-art guided-sample-art-top" src={art.topLeft} alt="" width={160} height={160} unoptimized />}
-          {art.bottomRight && <Image className="guided-sample-art guided-sample-art-bottom" src={art.bottomRight} alt="" width={160} height={160} unoptimized />}
-          {design.kind === "love-letter" && art.flower && <Image className="guided-sample-seal" src={art.flower} alt="" width={36} height={38} unoptimized />}
-          <small>NOS CASAMOS</small><span className="guided-sample-title">Nosotros<br /><i>y el mundo.</i></span><small>UN DÍA PARA RECORDAR</small>
-        </span>
-        <span className="guided-design-label"><strong>{design.label}</strong>{selected && <FiCheck aria-hidden="true" />}</span>
-        <span className="guided-design-description">{design.description}</span>
-      </label>;
+      const palette = design.palettes[0];
+      const art = weddingArtwork(design);
+      const style = { "--paper": palette.paper, "--panel": palette.panel, "--ink": palette.ink, "--accent": palette.accent, "--dark": palette.dark, "--heading": getInvitationFont(design.typography).family, "--art-top": art.topLeft ? `url("${art.topLeft}")` : "none", "--art-bottom": art.bottomRight ? `url("${art.bottomRight}")` : "none", "--flower": art.flower ? `url("${art.flower}")` : "none" } as CSSProperties;
+      return <div className={styles.option} key={design.id}>
+        <label className={`${styles.card}${selected ? ` ${styles.selected}` : ""}`} style={style}>
+          <input type="radio" name="wedding-design" value={design.id} aria-label={design.label} checked={selected} onChange={() => onChange(design.id)} />
+          <span className={styles.scene} data-design={design.kind} aria-hidden="true">
+            <span className={styles.paper} /><span className={styles.artTop} /><span className={styles.artBottom} />
+            <span className={styles.motif} /><span className={styles.kicker}>NOS ELEGIMOS PARA SIEMPRE</span>
+            <span className={styles.names}>Sofía <i>y</i> Mateo</span><span className={styles.rule} /><span className={styles.date}>12 · OCTUBRE · 2027</span>
+          </span>
+          <span className={styles.caption}><strong>{design.label}</strong><span className={styles.check} aria-hidden="true">{selected && <FiCheck />}</span></span>
+        </label>
+        <a className={styles.explore} href={`/ejemplo-invitacion/boda-${design.kind}`} target="_blank" rel="noopener noreferrer" aria-label={`Ver invitación completa: ${design.label}`}>Ver invitación <FiArrowUpRight aria-hidden="true" /></a>
+      </div>;
     })}</div>
   </fieldset>;
 }

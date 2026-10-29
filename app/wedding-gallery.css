@@ -1,0 +1,38 @@
+.guided-design-option { min-width: 0; display: flex; flex-direction: column; }
+.guided-design-option .guided-design-card { flex: 1; }
+.guided-design-real-preview { width: 100%; overflow: hidden; border-radius: 6px; pointer-events: none; }
+.guided-design-real-preview .invitation-example-viewport { width: 100%; position: relative; overflow: hidden; background: #f5f0e8; }
+.guided-design-real-preview iframe { position: absolute; top: 0; left: 0; border: 0; transform-origin: top left; }
+.guided-design-explore { display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 10px; min-height: 40px; color: #73563f; text-decoration: underline; text-underline-offset: 3px; }
+.guided-legacy-design { padding: 12px; border: 1px solid #dfe3da; border-radius: 6px; }
+.wedding-gallery-page { min-height: 100dvh; background: #f5f3ed; color: #343a30; font-family: 'DM Sans Variable',Arial,sans-serif; }
+.wedding-gallery-page * { box-sizing: border-box; }
+.wedding-gallery-page > header { display: flex; justify-content: space-between; align-items: center; padding: 22px 4%; border-bottom: 1px solid #deded3; font-size: 13px; }
+.wedding-gallery-page > header a { color: inherit; text-decoration: none; }
+.wedding-gallery-layout { width: min(100%,1520px); margin: auto; display: grid; grid-template-columns: minmax(310px,.8fr) minmax(0,1.2fr); gap: 6%; padding: 44px 4%; }
+.wedding-gallery-layout aside { max-width: 460px; }
+.wedding-gallery-eyebrow { font-size: 10px; letter-spacing: .18em; color: #69705c; }
+.wedding-gallery-layout h1 { margin: 20px 0; font-family: 'Cormorant Garamond Variable',Georgia,serif; font-size: clamp(36px,4vw,56px); line-height: 1.05; font-weight: 400; }
+.wedding-gallery-layout h1 em { font-weight: 400; }
+.wedding-gallery-layout p { font-size: 13px; line-height: 1.8; color: #636959; }
+.wedding-gallery-layout label,.wedding-gallery-layout legend { display: block; font-size: 12px; margin: 22px 0 10px; }
+.wedding-gallery-layout select { width: 100%; padding: 14px; background: #fffef9; border: 1px solid #c7cbbd; color: #343a30; border-radius: 4px; font: inherit; font-size: 14px; }
+.wedding-gallery-layout h2 { font-family: 'Cormorant Garamond Variable',Georgia,serif; font-size: 30px; margin: 26px 0 8px; font-weight: 500; }
+.wedding-gallery-layout fieldset { padding: 0; border: 0; }
+.wedding-gallery-palettes { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.wedding-gallery-palettes button { display: flex; flex-wrap: wrap; padding: 8px; border: 1px solid #dcdfd2; background: #fffdf7; cursor: pointer; border-radius: 5px; color: inherit; }
+.wedding-gallery-palettes button[aria-pressed="true"] { outline: 1px solid #687657; border-color: #687657; }
+.wedding-gallery-palettes button > span { width: 33.33%; height: 22px; }
+.wedding-gallery-palettes small { font: 10px 'DM Sans Variable',sans-serif; padding-top: 7px; text-align: left; }
+.wedding-gallery-layout .wedding-gallery-photo { display: flex; align-items: center; gap: 10px; }
+.wedding-gallery-open { display: inline-block; margin: 20px 0 4px; color: #343a30; font-size: 13px; text-underline-offset: 4px; }
+.wedding-gallery-layout .wedding-gallery-note { font-size: 11px; }
+.wedding-gallery-preview { height: calc(100dvh - 155px); min-height: 650px; position: sticky; top: 24px; }
+.wedding-gallery-preview .editor-live-preview { height: 100%; }
+.wedding-gallery-preview .editor-preview-viewport { height: calc(100% - 50px); padding: 0; }
+.wedding-gallery-page :is(a,button,select,input):focus-visible { outline: 2px solid #5d6d4c; outline-offset: 4px; }
+@media(max-width:760px) {
+  .wedding-gallery-layout { grid-template-columns: 1fr; padding: 32px 22px; gap: 28px; }
+  .wedding-gallery-layout aside { max-width: none; }
+  .wedding-gallery-preview { position: relative; top: 0; min-height: 720px; height: 85dvh; }
+}

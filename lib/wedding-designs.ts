@@ -1,9 +1,12 @@
 import type { EditorValues, InviteSection, SectionType } from "./invitation-editor";
 import type { InvitationButtonAppearance } from "./invitation-buttons";
 import { templateManifest } from "./generated-invitation-templates";
+import { weddingIdentityAssets } from "./wedding-identity-assets";
 
 export type WeddingPalette = { label: string; accent: string; paper: string; panel: string; ink: string; muted: string; dark: string };
 export type WeddingDesign = {
+  edition?: 2;
+  concept?: string;
   id: string; label: string; description: string; kind: "floral" | "editorial" | "minimal" | "garden" | "blossom" | "bougainvillea" | "sunlight" | "olive" | "mediterranean" | "art-deco" | "love-letter" | "starlight";
   artwork?: "plantilla1" | "plantilla2" | "plantilla3" | "plantilla4" | "plantilla5" | "plantilla6" | "plantilla7" | "plantilla8";
   typography: string; bodyTypography: string; buttons: InvitationButtonAppearance; palettes: WeddingPalette[];
@@ -13,7 +16,7 @@ export type WeddingDesign = {
 };
 
 // Versioned identities keep existing invitations independent of future designs.
-export const weddingDesigns: WeddingDesign[] = [
+export const legacyWeddingDesigns: WeddingDesign[] = [
   {
     id: "wedding-floral-v1", label: "Floral romántico", kind: "floral", artwork: "plantilla5",
     texture: "/textures/wedding/cotton.webp",
@@ -337,10 +340,33 @@ export const weddingDesigns: WeddingDesign[] = [
   },
 ];
 
-export function getWeddingDesign(id: string) { return weddingDesigns.find(design => design.id === id) ?? null; }
+// New compositions have separate identities; saved invitations keep their v1 renderer.
+const identities: Record<WeddingDesign["kind"], { concept: string; description: string }> = {
+  floral: { concept: "El jardín de nuestro sí", description: "Un arco botánico, flores blancas y un jardín que acompaña cada capítulo." },
+  editorial: { concept: "Una edición para siempre", description: "Una portada de revista, fotografías amplias y capítulos de una historia irrepetible." },
+  minimal: { concept: "Lo esencial eres tú", description: "Papelería marfil, caligrafía delicada y un hilo que une los momentos del día." },
+  garden: { concept: "Una cita entre flores", description: "Papelería violeta, un calendario y acuarelas que florecen entre sus recuerdos." },
+  blossom: { concept: "Donde florece el amor", description: "Ramas de cerezo, retratos redondos y pétalos sobre una delicada página de primavera." },
+  bougainvillea: { concept: "Amor de hacienda", description: "Un álbum de recuerdos, flores intensas y tarjetas de papel sobre un fondo de vino." },
+  sunlight: { concept: "Un día lleno de luz", description: "Flores doradas, bordes ondulados y recuerdos de una celebración bajo el sol." },
+  olive: { concept: "Raíces de nuestro amor", description: "Lino, ramas de olivo y fotografías impresas entre páginas de papelería natural." },
+  mediterranean: { concept: "Una postal para ustedes", description: "Una postal de la costa, azulejos, limones y detalles de un viaje para celebrar." },
+  "art-deco": { concept: "Una noche extraordinaria", description: "Una invitación de gala con marcos geométricos, papel oscuro y oro discreto." },
+  "love-letter": { concept: "Escrito con el corazón", description: "Un sobre abierto, un sello de cera y una carta que continúa en cada recuerdo." },
+  starlight: { concept: "El universo nos encontró", description: "Luna, órbitas y constelaciones que trazan los momentos de una noche inolvidable." },
+};
+
+export const weddingDesigns: WeddingDesign[] = legacyWeddingDesigns.map(design => ({
+  ...design, id: design.id.replace(/-v1$/, "-v2"), edition: 2, ...identities[design.kind],
+  ...(design.kind === "minimal" ? { typography: "cormorant-garamond", bodyTypography: "lora" } : {}),
+  ...(design.kind === "sunlight" || design.kind === "blossom" ? { bodyTypography: "lora" } : {}),
+  ...(design.kind === "bougainvillea" ? { typography: "eb-garamond", bodyTypography: "libre-baskerville" } : {}),
+}));
+
+export function getWeddingDesign(id: string) { return weddingDesigns.find(design => design.id === id) ?? legacyWeddingDesigns.find(design => design.id === id) ?? null; }
 export function weddingArtwork(design: WeddingDesign): Partial<Record<"topLeft" | "topRight" | "bottomLeft" | "bottomRight" | "flower" | "decoration" | "texture", string>> {
   const assets = templateManifest.find(template => template.eventType === "wedding" && template.id === design.artwork && template.available)?.assets ?? {};
-  return design.texture ? { ...assets, texture: design.texture } : assets;
+  return { ...assets, ...(design.texture ? { texture: design.texture } : {}), ...(design.edition === 2 ? weddingIdentityAssets[design.kind] : {}) };
 }
 export function weddingPalette(design: WeddingDesign, accent: string) {
   return design.palettes.find(palette => palette.accent.toLowerCase() === accent.toLowerCase()) ?? design.palettes[0];

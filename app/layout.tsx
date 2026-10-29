@@ -16,7 +16,12 @@ import "./wedding-mediterranean.css";
 import "./wedding-art-deco.css";
 import "./wedding-love-letter.css";
 import "./wedding-starlight.css";
+import "./wedding-identities.css";
 import "./guided-editor.css";
+import "./wedding-gallery.css";
+import "./wedding-collection.css";
+import "./wedding-collection-covers.css";
+import "./wedding-collection-interiors.css";
 
 export const metadata: Metadata = {
   title: "Cheetah Invite — Invitaciones digitales para celebrar",

@@ -12,14 +12,19 @@ import { RsvpForm } from "./RsvpForm";
 import { StarlightCover, StarlightPortrait } from "./StarlightCover";
 import { ArtDecoCover, ArtDecoPortrait } from "./ArtDecoCover";
 import { LoveLetterCover, LoveLetterMemory, LoveLetterClosing } from "./LoveLetterCover";
+import { WeddingIdentityInvitation } from "./WeddingIdentityInvitation";
 
-type Props = {
+export type WeddingInvitationProps = {
   templateId: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string;
   eventTime?: string; venue: string; address: string; message: string; imageUrl: string;
   sections: InviteSection[]; publicEventId?: string;
 };
 
-export function WeddingInvitation({ templateId, accent, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, sections, publicEventId }: Props) {
+export function WeddingInvitation(props: WeddingInvitationProps) {
+  return getWeddingDesign(props.templateId)?.edition === 2 ? <WeddingIdentityInvitation {...props} /> : <LegacyWeddingInvitation {...props} />;
+}
+
+function LegacyWeddingInvitation({ templateId, accent, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, sections, publicEventId }: WeddingInvitationProps) {
   const motion = useInvitationMotion();
   const design = getWeddingDesign(templateId)!;
   const artwork = weddingArtwork(design);
@@ -120,7 +125,7 @@ function WeddingSection({ section, publicEventId, ornament }: { section: InviteS
   </section>;
 }
 
-function WeddingCountdown({ date, time }: { date: string; time: string }) {
+export function WeddingCountdown({ date, time }: { date: string; time: string }) {
   const [remaining, setRemaining] = useState<number | null>(null);
   useEffect(() => {
     // Wedding dates belong to the event's Mexico City timezone, regardless of the guest's device.

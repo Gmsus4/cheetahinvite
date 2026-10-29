@@ -20,6 +20,30 @@ function contrast(first, second) {
   return (values[0] + .05) / (values[1] + .05);
 }
 
+test('edition 2 offers twelve distinct concepts while stored edition 1 invitations retain their identities', async () => {
+  const { f, weddingDesigns, legacyWeddingDesigns, getWeddingDesign, applyWeddingDesign } = setup();
+  assert.equal(legacyWeddingDesigns.length, 12);
+  assert.equal(new Set(weddingDesigns.map(d => d.concept)).size, 12);
+  for (const original of legacyWeddingDesigns) {
+    const current = weddingDesigns.find(d => d.kind === original.kind);
+    assert.equal(current.edition, 2);
+    assert.equal(current.id, original.id.replace(/-v1$/, '-v2'));
+    assert.equal(getWeddingDesign(original.id), original);
+    assert.equal(getWeddingDesign(current.id), current);
+    assert.equal(original.edition, undefined);
+    const form = f.saveForm();
+    form.set('eventType', 'wedding'); form.set('templateId', original.id);
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+    assert.equal(f.state.events.get('event').templateId, original.id);
+    const input = { ...f.state.events.get('event'), sections: [], hostNames: 'María y José', imageUrl: '/personal.webp' };
+    const switched = applyWeddingDesign(input, current.id);
+    assert.equal(switched.hostNames, input.hostNames);
+    assert.equal(switched.imageUrl, input.imageUrl);
+    assert.equal(switched.templateId, current.id);
+  }
+});
+
 test('expanded wedding catalog uses published artwork from all eight collections and readable approved palettes', () => {
   const { weddingDesigns, weddingArtwork } = setup();
   assert.equal(weddingDesigns.length, 12);
@@ -43,6 +67,18 @@ test('expanded wedding catalog uses published artwork from all eight collections
       else for (const background of ['paper', 'panel']) assert.ok(contrast(palette.accent, palette[background]) >= 4.5, `${design.label} / ${palette.label}: outlined button text`);
     }
   }
+});
+
+test('replacement illustrations apply only to edition 2 without losing other resources or altering legacy invitations', () => {
+  const { f, getWeddingDesign, weddingArtwork } = setup();
+  const overrides = f.load('lib/wedding-identity-assets.ts').weddingIdentityAssets;
+  const original = weddingArtwork(getWeddingDesign('wedding-floral-v1'));
+  overrides.floral = { topLeft: '/wedding-identities/floral/new-arch.png' };
+  const updated = weddingArtwork(getWeddingDesign('wedding-floral-v2'));
+  assert.equal(updated.topLeft, overrides.floral.topLeft);
+  assert.equal(updated.bottomRight, original.bottomRight);
+  assert.equal(updated.texture, original.texture);
+  assert.deepEqual(weddingArtwork(getWeddingDesign('wedding-floral-v1')), original);
 });
 
 test('olive and linen publishes all five supplied assets unchanged, including the linen texture', () => {

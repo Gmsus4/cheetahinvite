@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
   turbopack: {
     rules: {
       "*.css": {
+        // CSS Modules must keep Next's native class-name mapping. Rewriting
+        // them as generic CSS leaves imports such as styles.card undefined.
+        condition: { not: { path: /\.module\.css$/ } },
         loaders: ["@tailwindcss/turbopack"],
         as: "*.css",
       },

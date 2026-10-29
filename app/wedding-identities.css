@@ -1,0 +1,493 @@
+/* Edition 2. Every composition is scoped so published edition 1 invitations stay intact. */
+.wedding-invitation.wedding-identity {
+  --identity-rule: color-mix(in srgb, var(--w-accent) 25%, transparent);
+  --invite-accent: var(--w-accent);
+  --invite-action: var(--w-accent);
+  position: relative;
+}
+.wedding-identity :is(h2,p) { white-space: pre-line; }
+.wedding-identity h1 { overflow-wrap: anywhere; }
+.wedding-identity .wedding-hero { min-height: 0; }
+.wedding-identity:is([data-design="floral"],[data-design="minimal"],[data-design="mediterranean"]) .wedding-hero-photo img { object-position: center 25%; }
+.wedding-identity .wedding-eyebrow { font-size: 10px; line-height: 1.9; letter-spacing: .18em; }
+.wedding-identity .identity-cover-botanicals { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.identity-cover-botanicals img { position: absolute; width: clamp(140px,27%,360px); height: auto; }
+.identity-cover-botanicals img:first-child { top: 0; left: 0; }
+.identity-cover-botanicals img:last-child { bottom: 0; right: 0; }
+.identity-signature { display: block; font-family: var(--w-heading); color: var(--w-accent); font-size: 38px; font-style: italic; line-height: 1.4; }
+.wedding-welcome > .identity-signature { margin: 28px auto 0; }
+.identity-motif { display: flex; justify-content: center; align-items: center; width: 96px; height: 100px; margin: 0 auto 28px; color: var(--w-accent); }
+.identity-motif > img { width: 100%; height: 100%; object-fit: contain; }
+.identity-motif.is-small { width: 46px; height: 50px; margin-bottom: 20px; }
+.identity-motif .deco-fan { width: 90px; height: auto; margin: 0; }
+.identity-motif.is-small .deco-fan { width: 46px; }
+.identity-star-mark { font-family: Georgia,serif; font-size: 80px; }
+.identity-editorial-mark { font-family: var(--w-heading); font-size: 96px; font-style: italic; }
+.wedding-invitation.wedding-identity .wedding-section { position: relative; isolation: isolate; min-width: 0; }
+.wedding-identity .identity-chapter-number { display: none; }
+.wedding-identity .wedding-section-body { position: relative; z-index: 1; width: 100%; }
+.wedding-identity .identity-location-pin { width: 26px; height: 26px; margin-bottom: 20px; color: var(--w-accent); }
+.wedding-invitation.wedding-identity .wedding-timeline li { position: relative; grid-template-columns: 38px 70px minmax(0,1fr); align-items: center; gap: 14px; padding: 22px 0; }
+.wedding-identity .wedding-timeline li:first-child { padding-top: 0; }
+.wedding-identity .wedding-timeline time { font-size: 13px; color: var(--w-accent); }
+.identity-timeline-icon { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--identity-rule); border-radius: 50%; }
+.identity-timeline-icon svg { width: 16px; height: 16px; }
+.wedding-invitation.wedding-identity .wedding-footer { position: relative; overflow: hidden; }
+.wedding-identity .wedding-footer .identity-motif { margin-bottom: 0; }
+.wedding-identity .wedding-footer > p { font-size: 13px; }
+.wedding-identity .wedding-footer .identity-motif:has(svg) { color: inherit; }
+.wedding-identity .invite-rsvp-form { border-radius: 2px; border-color: var(--identity-rule); box-shadow: none; }
+.wedding-identity .invite-rsvp-form :is(input,.invite-rsvp-choice,.invite-rsvp-submit) { border-radius: 2px; }
+.wedding-identity .identity-calendar { position: relative; width: min(calc(100% - 64px),420px); margin: 0 auto 80px; padding: 38px 30px; border-block: 1px solid var(--identity-rule); text-align: center; }
+.identity-calendar h2 { margin: 16px 0 28px; font-size: 32px; text-transform: capitalize; }
+.identity-calendar-grid { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 5px; font-size: 13px; }
+.identity-calendar-grid > * { display: grid; place-items: center; min-height: 34px; font-weight: 400; }
+.identity-calendar-grid > b { color: var(--w-muted); font-size: 10px; }
+.identity-calendar-grid .is-wedding-day { color: var(--w-paper); background: var(--w-accent); border-radius: 50%; }
+.identity-calendar > svg { margin: 22px auto 0; color: var(--w-accent); }
+
+/* 01. A botanical arch opens onto an airy, classical garden invitation. */
+.wedding-identity[data-design="floral"] { background-image: linear-gradient(#ffffff00,#ffffff00),var(--w-texture); background-size: auto,900px; }
+.wedding-identity[data-design="floral"] .wedding-hero { padding: 86px 12% 0; background: var(--w-paper); }
+.wedding-identity[data-design="floral"] .identity-cover-botanicals { inset: 30px 0 0; }
+.wedding-identity[data-design="floral"] .identity-cover-botanicals img { width: clamp(160px,29%,420px); }
+.wedding-identity[data-design="floral"] .identity-floral-arch { width: min(100%,780px); padding: 68px 40px 50px; border: 1px solid var(--identity-rule); border-radius: 48% 48% 0 0 / 200px 200px 0 0; }
+.wedding-identity[data-design="floral"] .identity-signature { margin-bottom: 28px; }
+.wedding-identity[data-design="floral"] .wedding-hero h1 { font-size: clamp(68px,8vw,112px); line-height: 1.25; }
+.wedding-identity[data-design="floral"] .wedding-hero-photo { width: min(78%,700px); aspect-ratio: 16/10; margin: 0; border: 10px solid var(--w-paper); border-radius: 50% 50% 0 0 / 70% 70% 0 0; outline: none; transform: translateY(36px); }
+.wedding-identity[data-design="floral"] .wedding-welcome { padding-top: 110px; }
+.wedding-identity[data-design="floral"] .wedding-section { width: min(100%,1100px); margin: auto; border: 0; padding: 76px 12%; background: transparent; }
+.wedding-identity[data-design="floral"] .wedding-section::after { content: ""; position: absolute; width: 90px; height: 1px; background: var(--identity-rule); bottom: 0; left: calc(50% - 45px); }
+.wedding-identity[data-design="floral"] :is(.wedding-location,.wedding-rsvp) { width: min(calc(100% - 64px),980px); background: var(--w-panel); border-radius: 180px 180px 0 0 / 80px 80px 0 0; }
+.wedding-identity[data-design="floral"] .wedding-gallery a:nth-child(2n+1) { border-radius: 150px 150px 2px 2px; }
+
+/* 02. Magazine: a proper masthead, a clean photographic spread and numbered chapters. */
+.wedding-identity[data-design="editorial"] .wedding-hero { padding: 90px 7% 100px; gap: 6%; background: var(--w-paper); }
+.identity-editorial-masthead,.identity-editorial-bottom { position: absolute; inset: 24px 7% auto; display: flex; justify-content: space-between; gap: 24px; padding-bottom: 14px; border-bottom: 1px solid var(--w-accent); font-size: 9px; letter-spacing: .16em; }
+.identity-editorial-bottom { inset: auto 7% 24px; align-items: center; border: 0; border-top: 1px solid var(--w-accent); padding: 14px 0 0; }
+.identity-editorial-bottom .identity-signature { font-size: 22px; }
+.wedding-identity[data-design="editorial"] .wedding-hero h1 { font-size: clamp(68px,8vw,136px); letter-spacing: -.05em; line-height: .95; }
+.wedding-identity[data-design="editorial"] .wedding-couple-separator { font-size: .5em; margin: 12px 0; }
+.wedding-identity[data-design="editorial"] .wedding-hero-photo { height: 680px; transform: none; box-shadow: none; }
+.identity-editorial-caption { margin-top: 30px!important; font-size: 17px; }
+.identity-editorial-type { font-family: var(--w-heading); color: var(--w-accent); font-size: clamp(80px,10vw,170px); line-height: .9; padding: 50px 0; }
+.wedding-identity[data-design="editorial"] .wedding-section { border-top: 1px solid var(--identity-rule); padding: 80px 7%; }
+.wedding-identity[data-design="editorial"] .identity-chapter-number { display: block; margin-bottom: 24px; font-size: 14px; color: var(--w-accent); }
+.wedding-identity[data-design="editorial"] .wedding-section h2 { letter-spacing: -.035em; }
+.wedding-identity[data-design="editorial"] .wedding-gallery { gap: 22px; align-items: start; }
+.wedding-identity[data-design="editorial"] .wedding-gallery a:nth-child(even) { margin-top: 80px; }
+.wedding-identity[data-design="editorial"] .wedding-gallery a:nth-child(3n) { grid-column: 1/-1; }
+.wedding-identity[data-design="editorial"] .wedding-gallery a:nth-child(3n) img { aspect-ratio: 16/9; }
+.wedding-identity[data-design="editorial"] .wedding-rsvp { background: var(--w-dark); color: var(--w-paper); }
+.wedding-identity[data-design="editorial"] .wedding-rsvp :is(.wedding-eyebrow,.identity-chapter-number) { color: var(--w-paper); }
+
+/* 03. Ivory stationery and a single thread of ink: restrained, intimate, tactile. */
+.wedding-identity[data-design="minimal"] { background-image: linear-gradient(color-mix(in srgb,var(--w-paper) 93%,transparent),color-mix(in srgb,var(--w-paper) 93%,transparent)),var(--w-texture); background-size: auto,1000px; }
+.wedding-identity[data-design="minimal"] .wedding-hero { padding: 64px 8% 48px; min-height: 0; }
+.wedding-identity[data-design="minimal"] .wedding-hero-copy > .identity-signature { border: 1px solid var(--identity-rule); border-radius: 50%; width: 100px; height: 100px; display: grid; place-items: center; margin: 30px auto; font-size: 32px; }
+.wedding-identity[data-design="minimal"] .wedding-hero h1 { margin: 20px auto; font-size: clamp(52px,6vw,88px); }
+.wedding-identity[data-design="minimal"] .wedding-couple-name { display: inline; }
+.wedding-identity[data-design="minimal"] .wedding-couple-separator { display: inline-block; margin: 0 .22em; }
+.identity-heart-thread { display: block; width: min(100%,400px); height: 55px; margin: 24px auto; color: var(--w-accent); stroke: currentColor; stroke-width: 1; }
+.wedding-identity[data-design="minimal"] .wedding-hero-photo { width: min(100%,680px); margin: 12px 0 28px; max-height: none; aspect-ratio: 4/3; }
+.wedding-identity[data-design="minimal"] .wedding-welcome { padding: 76px 28px; }
+.wedding-identity[data-design="minimal"] .wedding-welcome > .identity-motif { width: 200px; height: 40px; }
+.wedding-identity[data-design="minimal"] .wedding-section { width: min(calc(100% - 64px),980px); border-top: 1px solid var(--identity-rule); padding: 64px 4%; }
+.wedding-identity[data-design="minimal"] .wedding-timeline { padding-left: 10px; border-left: 1px solid var(--identity-rule); }
+.wedding-identity[data-design="minimal"] .wedding-timeline li { border-bottom: 0; }
+.wedding-identity[data-design="minimal"] .identity-timeline-icon { border: 0; }
+.wedding-identity[data-design="minimal"] .wedding-rsvp { background: var(--w-dark); color: var(--w-paper); width: 100%; padding-inline: max(32px,10%); border-radius: 50% 50% 0 0 / 30px 30px 0 0; }
+.wedding-identity[data-design="minimal"] .wedding-rsvp .wedding-eyebrow { color: var(--w-paper); }
+.wedding-identity[data-design="minimal"] .wedding-footer { background: var(--w-paper); color: var(--w-ink); }
+
+/* 04. A violet invitation card, a photograph tucked beside it and a calendar appointment. */
+.wedding-identity[data-design="garden"] .wedding-hero { grid-template-columns: 1.1fr .9fr; gap: 7%; padding: 100px 8%; background: var(--w-panel); }
+.wedding-identity[data-design="garden"] .identity-garden-card { position: relative; padding: 58px 32px; background: var(--w-paper); border: 1px solid var(--identity-rule); outline: 1px solid var(--identity-rule); outline-offset: -10px; text-align: center; box-shadow: 8px 12px 0 color-mix(in srgb,var(--w-accent) 9%,transparent); }
+.identity-card-index { display: block; font-size: 8px; letter-spacing: .22em; margin-bottom: 24px; color: var(--w-muted); }
+.wedding-identity[data-design="garden"] .wedding-hero h1 { font-size: clamp(58px,6vw,100px); }
+.wedding-identity[data-design="garden"] .wedding-date { justify-content: center; }
+.identity-garden-memory { position: relative; z-index: 1; margin: 60px 0 0; padding: 12px 12px 20px; background: var(--w-paper); transform: rotate(3deg); box-shadow: 0 14px 40px #38263418; }
+.wedding-identity[data-design="garden"] .identity-garden-memory .wedding-hero-photo { width: 100%; height: auto; aspect-ratio: 3/4; border-radius: 0; outline: none; }
+.identity-garden-memory figcaption { font-family: var(--w-heading); font-size: 32px; color: var(--w-accent); text-align: center; margin-top: 12px; }
+.wedding-identity[data-design="garden"] .wedding-section { width: min(calc(100% - 80px),1100px); margin: 26px auto; padding: 64px 6%; background: var(--w-panel); border: 1px solid var(--identity-rule); }
+.wedding-identity[data-design="garden"] .wedding-section-heading { border: 0; padding: 0; }
+.wedding-identity[data-design="garden"] .identity-chapter-number { display: block; font-family: var(--w-heading); color: var(--w-accent); font-size: 50px; margin-bottom: 18px; }
+.wedding-identity[data-design="garden"] .wedding-program { background: var(--w-dark); color: var(--w-paper); }
+.wedding-identity[data-design="garden"] .wedding-program :is(.wedding-eyebrow,.identity-chapter-number,time,.identity-timeline-icon) { color: var(--w-paper); }
+.wedding-identity[data-design="garden"] .wedding-gallery a { border: 8px solid var(--w-paper); transform: rotate(-2deg); }
+.wedding-identity[data-design="garden"] .wedding-gallery a:nth-child(even) { transform: rotate(2deg); }
+
+/* 05. Hanami: circular portraits, asymmetric branches and quiet rounded chapters. */
+.wedding-identity[data-design="blossom"] .wedding-hero { padding: 100px 8% 70px; background: linear-gradient(150deg,var(--w-panel),var(--w-paper) 75%); }
+.wedding-identity[data-design="blossom"] .wedding-hero h1 { font-size: clamp(66px,7vw,104px); }
+.wedding-identity[data-design="blossom"] .identity-cover-botanicals img { width: clamp(160px,30%,400px); opacity: .85; }
+.identity-blossom-scene { position: relative; width: min(72%,430px); aspect-ratio: 1; margin: 24px 0 40px; display: grid; place-items: center; }
+.wedding-identity[data-design="blossom"] .identity-blossom-scene .wedding-hero-photo { width: 100%; max-width: none; height: 100%; margin: 0; border: 12px solid var(--w-paper); }
+.identity-blossom-flower { position: absolute; width: 32%; height: auto; bottom: -10px; right: -8%; z-index: 2; }
+.identity-orbit { position: absolute; inset: -12px; border: 1px solid var(--identity-rule); border-radius: 50%; }
+.wedding-identity[data-design="blossom"] .wedding-section { width: min(calc(100% - 72px),980px); padding: 64px 9%; margin: 24px auto; border: 0; border-radius: 90px 6px 90px 6px; background: var(--w-panel); }
+.wedding-identity[data-design="blossom"] .wedding-section:nth-of-type(odd) { border: 1px solid var(--identity-rule); border-radius: 6px 90px 6px 90px; background: var(--w-paper); }
+.wedding-identity[data-design="blossom"] .wedding-section h2 { font-size: clamp(42px,5vw,64px); }
+.wedding-identity[data-design="blossom"] .wedding-gallery a { border-radius: 50% 50% 4px 4px; }
+.wedding-identity[data-design="blossom"] .wedding-timeline li { border: 0; }
+.wedding-identity[data-design="blossom"] .wedding-timeline li::before { content: ""; width: 1px; position: absolute; background: var(--identity-rule); left: 17px; top: 36px; bottom: -4px; }
+.wedding-identity[data-design="blossom"] .wedding-timeline li:last-child::before { display: none; }
+
+/* 06. Hacienda: rich bougainvillea ink and cut archways surrounding warm paper cards. */
+.wedding-identity[data-design="bougainvillea"] { background: var(--w-dark); }
+.wedding-identity[data-design="bougainvillea"] .wedding-hero { padding: 80px 8%; gap: 8%; background: var(--w-dark); color: var(--w-paper); }
+.wedding-identity[data-design="bougainvillea"] .wedding-hero :is(.wedding-eyebrow,.wedding-couple-separator,.identity-signature) { color: var(--w-paper); }
+.wedding-identity[data-design="bougainvillea"] .wedding-hero-copy { grid-column: 2; grid-row: 1; }
+.wedding-identity[data-design="bougainvillea"] .wedding-hero:not(.has-photo) { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+.wedding-identity[data-design="bougainvillea"] .wedding-hero:not(.has-photo) .wedding-hero-copy { grid-column: 2; }
+.wedding-identity[data-design="bougainvillea"] .wedding-hero h1 { font-size: clamp(38px,4.8vw,76px); line-height: 1.25; }
+.wedding-identity[data-design="bougainvillea"] .wedding-hero-copy > p { font-size: 14px; line-height: 1.9; }
+.identity-hacienda-door { position: relative; grid-row: 1; grid-column: 1; width: 100%; padding: 50px 24px 26px; border: 1px solid color-mix(in srgb,var(--w-paper) 45%,transparent); border-radius: 240px 240px 0 0; text-align: center; }
+.identity-hacienda-door > .wedding-eyebrow { padding: 0 24px; font-size: 8px; margin: 24px 0; }
+.wedding-identity[data-design="bougainvillea"] .identity-hacienda-door .wedding-hero-photo { width: 100%; height: auto; aspect-ratio: 3/4; border-radius: 200px 200px 0 0; outline: 0; }
+.identity-hacienda-door > .identity-signature { margin-top: 22px; font-size: 28px; }
+.wedding-identity[data-design="bougainvillea"] .wedding-hero .wedding-button { background: var(--w-paper); border-color: var(--w-paper); color: var(--w-dark)!important; }
+.wedding-identity[data-design="bougainvillea"] .wedding-welcome { color: var(--w-paper); }
+.wedding-identity[data-design="bougainvillea"] .wedding-welcome :is(p,.wedding-eyebrow,.identity-signature) { color: var(--w-paper); }
+.wedding-identity[data-design="bougainvillea"] .wedding-section { width: min(calc(100% - 96px),1080px); margin: 32px auto; padding: 64px 6%; background: var(--w-paper); border: 6px double var(--identity-rule); gap: 40px; }
+.wedding-identity[data-design="bougainvillea"] .wedding-section-heading h2 { color: var(--w-accent); }
+.wedding-identity[data-design="bougainvillea"] .wedding-location { border-radius: 160px 160px 0 0 / 50px 50px 0 0; padding-top: 80px; }
+.wedding-identity[data-design="bougainvillea"] .wedding-gallery a:first-child { border-radius: 160px 160px 0 0; }
+.wedding-identity[data-design="bougainvillea"] .wedding-finale { background: var(--w-panel); margin-top: 70px; }
+
+/* 07. Sunshine: deckled keepsakes, a sun medallion and a cheerful pressed-flower program. */
+.wedding-identity[data-design="sunlight"] { background: var(--w-paper); }
+.wedding-identity[data-design="sunlight"] .wedding-hero { padding: 76px 8% 70px; background: linear-gradient(var(--w-panel),var(--w-paper)); }
+.identity-sun { display: grid; place-items: center; width: 84px; height: 84px; border-radius: 50%; border: 1px solid var(--identity-rule); margin: 0 auto 30px; color: var(--w-accent); }
+.identity-sun svg { width: 46px; height: 46px; stroke-width: 1; }
+.wedding-identity[data-design="sunlight"] .wedding-hero h1 { font-size: clamp(60px,7vw,100px); }
+.identity-sunlight-print { position: relative; z-index: 1; width: min(92%,840px); padding: 16px 16px 24px; margin: 50px 0 0; background: var(--w-paper); border: 1px solid var(--identity-rule); box-shadow: 0 12px 36px #493b2110; transform: rotate(-1deg); }
+.wedding-identity[data-design="sunlight"] .identity-sunlight-print .wedding-hero-photo { width: 100%; aspect-ratio: 16/10; border: 0; border-radius: 0; margin: 0; }
+.identity-sunlight-print figcaption { margin-top: 18px; font-family: var(--w-heading); font-size: 25px; font-style: italic; text-align: center; }
+.wedding-identity[data-design="sunlight"] .wedding-section { width: min(calc(100% - 80px),1100px); padding: 70px 6%; margin: 28px auto; border: 1px solid var(--identity-rule); border-radius: 0; background: var(--w-panel); }
+.wedding-identity[data-design="sunlight"] .wedding-section:nth-of-type(even) { background: var(--w-paper); }
+.wedding-identity[data-design="sunlight"] .wedding-program { display: block; text-align: center; border: 0; border-block: 1px dashed var(--w-accent); }
+.wedding-identity[data-design="sunlight"] .wedding-timeline { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); margin-top: 40px; }
+.wedding-identity[data-design="sunlight"] .wedding-timeline li { display: flex; flex-direction: column; gap: 14px; padding: 24px 12px; border: 0; }
+.wedding-identity[data-design="sunlight"] .identity-timeline-icon { width: 56px; height: 56px; background: var(--w-paper); }
+.wedding-identity[data-design="sunlight"] .wedding-gallery a { padding: 8px; background: var(--w-paper); box-shadow: 0 3px 15px #493b2115; }
+.wedding-identity[data-design="sunlight"] .wedding-finale { border-block: 1px dashed var(--identity-rule); }
+
+/* 08. Keep the linen invitation and olive photographs; carry its materials into the interiors. */
+.wedding-identity[data-design="olive"] .wedding-section { border-top-style: solid; }
+.wedding-identity[data-design="olive"] .wedding-section-heading > .identity-motif { margin-left: 0; width: 48px; height: 80px; }
+.wedding-identity[data-design="olive"] .wedding-welcome > .identity-motif { width: 88px; height: 145px; }
+.wedding-identity[data-design="olive"] .identity-cover-botanicals img { width: clamp(140px,23%,290px); }
+.wedding-identity[data-design="olive"] .wedding-timeline li { border-bottom: 0; }
+.wedding-identity[data-design="olive"] .wedding-timeline { border-left: 1px solid var(--identity-rule); padding-left: 22px; }
+.wedding-identity[data-design="olive"] .wedding-gallery a:nth-child(even) { transform: rotate(2deg); }
+.wedding-identity[data-design="olive"] .wedding-rsvp { padding: 54px 5%; background: color-mix(in srgb,var(--w-panel) 80%,transparent); }
+
+/* 09. A Mediterranean postcard: ceramic blue, a postage mark and destination tickets. */
+.wedding-identity[data-design="mediterranean"] .wedding-hero { display: flex; padding: 34px 7% 64px; background: var(--w-paper); }
+.identity-postcard-heading { display: flex; align-items: center; justify-content: space-between; width: 100%; border-block: 1px solid var(--identity-rule); padding: 14px 0; margin-bottom: 44px; gap: 24px; font-size: 9px; letter-spacing: .14em; }
+.identity-postcard-heading .identity-signature { border: 1px solid var(--w-accent); border-radius: 50%; padding: 10px; font-size: 23px; transform: rotate(-12deg); }
+.wedding-identity[data-design="mediterranean"] .wedding-hero-copy { width: 100%; }
+.wedding-identity[data-design="mediterranean"] .wedding-hero .wedding-date { justify-content: center; margin: 24px 0; }
+.wedding-identity[data-design="mediterranean"] .wedding-welcome > .identity-motif { grid-column: 1/-1; margin: 0 0 24px; }
+.wedding-identity[data-design="mediterranean"] .wedding-hero h1 { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0 .18em; font-size: clamp(60px,7.5vw,118px); margin: 22px auto; line-height: 1.1; }
+.wedding-identity[data-design="mediterranean"] .wedding-couple-separator { display: inline-block; margin: 0; font-size: .65em; }
+.identity-postcard-scene { position: relative; width: 100%; padding: 24px 6% 24px 0; margin-top: 18px; }
+.identity-ceramic { position: absolute; inset: 0 0 0 20%; background-image: var(--w-texture); background-size: 360px; opacity: .85; }
+.wedding-identity[data-design="mediterranean"] .identity-postcard-scene .wedding-hero-photo { position: relative; width: 100%; aspect-ratio: 16/9; margin: 0; height: auto; transform: rotate(-1deg); border: 10px solid var(--w-paper); box-shadow: 0 4px 20px #193f5918; }
+.identity-postcard-lemons { position: absolute; z-index: 2; bottom: -25px; right: -2%; width: 23%; height: auto; }
+.identity-postcard-empty { position: relative; padding: 80px 40px; min-height: 320px; background: var(--w-panel); font-family: var(--w-heading); color: var(--w-accent); font-size: 70px; line-height: 1.1; text-align: left; }
+.identity-postcard-address { align-self: flex-start; margin-top: 44px; text-align: left; }
+.identity-postcard-address > span { font-size: 9px; letter-spacing: .12em; }
+.identity-postcard-address > p { margin: 12px 0 18px; font-family: var(--w-heading); font-size: 27px; }
+.wedding-identity[data-design="mediterranean"] .wedding-section { width: min(calc(100% - 96px),1100px); margin: 24px auto; padding: 68px 6%; border: 1px solid var(--identity-rule); background: var(--w-paper); text-align: left; grid-template-columns: 1fr 1.2fr; gap: 50px; }
+.wedding-identity[data-design="mediterranean"] .wedding-location { border-block: 2px dashed var(--w-accent); background: var(--w-panel); }
+.wedding-identity[data-design="mediterranean"] .wedding-section-heading { text-align: left; }
+.wedding-identity[data-design="mediterranean"] .wedding-section-heading > .identity-motif { margin-left: 0; }
+.wedding-identity[data-design="mediterranean"] .wedding-section-body > p { margin-left: 0; }
+.wedding-identity[data-design="mediterranean"] .wedding-program { display: block; }
+.wedding-identity[data-design="mediterranean"] .wedding-timeline { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); margin-top: 40px; }
+.wedding-identity[data-design="mediterranean"] .wedding-timeline li { display: flex; flex-direction: column; padding: 24px; border-bottom: 0; border-top: 1px solid var(--identity-rule); text-align: center; }
+.wedding-identity[data-design="mediterranean"] .wedding-footer { border-top: 10px double var(--identity-rule); }
+
+/* 10. Gala stationery: stepped borders, fan dividers and a numbered running order. */
+.wedding-identity[data-design="art-deco"] .wedding-section { width: min(calc(100% - 96px),1100px); margin: 24px auto; padding: 64px 5%; border: 1px solid var(--identity-rule); outline: 1px solid var(--identity-rule); outline-offset: -8px; }
+.wedding-identity[data-design="art-deco"] .identity-chapter-number { display: block; width: 42px; height: 42px; margin-bottom: 30px; padding-top: 6px; text-align: center; border: 1px solid var(--w-accent); color: var(--w-accent); font-size: 15px; }
+.wedding-identity[data-design="art-deco"] .wedding-section-heading > .identity-motif { margin-left: 0; }
+.wedding-identity[data-design="art-deco"] .wedding-timeline li { border-bottom: 1px solid var(--identity-rule); }
+.wedding-identity[data-design="art-deco"] .identity-timeline-icon { border-radius: 0; }
+.wedding-identity[data-design="art-deco"] .wedding-gallery a { clip-path: polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px); }
+
+/* 11. The letter continues: marginal notes, stationery rules and printed memories. */
+.wedding-identity[data-design="love-letter"] .wedding-section { width: min(calc(100% - 96px),1050px); margin: 36px auto; padding: 64px 7%; background-image: var(--love-stock); background-size: cover; border: 0; box-shadow: 0 4px 24px #49342d0b; }
+.wedding-identity[data-design="love-letter"] .identity-chapter-number { display: block; font-family: var(--w-heading); color: var(--w-accent); font-size: 35px; margin-bottom: 15px; }
+.wedding-identity[data-design="love-letter"] .wedding-section-heading > .identity-motif { margin-left: 0; width: 48px; }
+.wedding-identity[data-design="love-letter"] .wedding-timeline li { border-bottom: 1px solid var(--identity-rule); }
+.wedding-identity[data-design="love-letter"] .wedding-timeline time { font-family: var(--w-heading); font-size: 28px; line-height: 1.5; }
+.wedding-identity[data-design="love-letter"] .identity-timeline-icon { border: 0; }
+.wedding-identity[data-design="love-letter"] .wedding-gallery a { padding: 8px 8px 24px; background: var(--w-paper); box-shadow: 0 4px 18px #49342d20; transform: rotate(-2deg); }
+.wedding-identity[data-design="love-letter"] .wedding-gallery a:nth-child(even) { transform: rotate(2deg); }
+
+/* 12. Celestial atlas: an orbit through the program and constellation-like photo arrangements. */
+.wedding-identity[data-design="starlight"] .wedding-section { width: min(calc(100% - 96px),1120px); margin: auto; padding: 80px 6%; border-top: 1px solid var(--identity-rule); }
+.wedding-identity[data-design="starlight"] .identity-chapter-number { display: block; font-family: var(--w-heading); font-size: 22px; color: var(--w-accent); letter-spacing: .1em; margin-bottom: 20px; }
+.wedding-identity[data-design="starlight"] .identity-chapter-number::before { content: "✧ "; }
+.wedding-identity[data-design="starlight"] .wedding-section-heading > .identity-motif { display: none; }
+.wedding-identity[data-design="starlight"] .wedding-timeline { border-left: 1px solid var(--identity-rule); padding-left: 26px; }
+.wedding-identity[data-design="starlight"] .wedding-timeline li { border: 0; }
+.wedding-identity[data-design="starlight"] .wedding-timeline li::before { content: "✧"; position: absolute; left: -35px; width: 16px; color: var(--w-accent); background: var(--w-paper); }
+.wedding-identity[data-design="starlight"] .wedding-gallery { gap: 24px; }
+.wedding-identity[data-design="starlight"] .wedding-gallery a { border: 1px solid var(--identity-rule); padding: 8px; border-radius: 160px 160px 0 0; }
+.wedding-identity[data-design="starlight"] .wedding-gallery a:nth-child(even) { margin-top: 70px; }
+.wedding-identity[data-design="starlight"] .wedding-location { border: 1px solid var(--identity-rule); border-radius: 50% 50% 0 0 / 35px 35px 0 0; }
+
+@media (max-width:760px) {
+  .wedding-invitation.wedding-identity .wedding-section { grid-template-columns: minmax(0,1fr); gap: 28px; }
+  .wedding-identity .wedding-eyebrow { font-size: 9px; letter-spacing: .14em; }
+  .wedding-identity .wedding-date { font-size: 12px; }
+  .wedding-invitation.wedding-identity .wedding-timeline li { grid-template-columns: 32px 58px minmax(0,1fr); gap: 10px; }
+  .wedding-identity .wedding-timeline p { font-size: 14px; }
+  .wedding-identity .wedding-timeline time { font-size: 12px; }
+  .wedding-identity .identity-timeline-icon { width: 30px; height: 30px; }
+  .wedding-identity[data-design="floral"] .wedding-hero { padding: 60px 24px 0; }
+  .wedding-identity[data-design="floral"] .identity-floral-arch { padding: 60px 20px 38px; }
+  .wedding-identity[data-design="floral"] .wedding-hero h1 { font-size: 68px; }
+  .wedding-identity[data-design="floral"] .wedding-hero-photo { width: 94%; aspect-ratio: 4/3; border-width: 6px; }
+  .wedding-identity[data-design="floral"] .wedding-section { width: calc(100% - 40px); padding: 52px 22px; }
+  .wedding-identity[data-design="floral"] :is(.wedding-location,.wedding-rsvp) { padding-top: 68px; }
+  .wedding-identity[data-design="editorial"] .wedding-hero { display: flex; padding: 88px 26px 90px; gap: 32px; }
+  .identity-editorial-masthead { inset: 24px 26px auto; font-size: 7px; gap: 12px; }
+  .identity-editorial-bottom { inset-inline: 26px; font-size: 8px; }
+  .wedding-identity[data-design="editorial"] .wedding-hero h1 { font-size: 84px; }
+  .wedding-identity[data-design="editorial"] .wedding-hero-photo { height: auto; aspect-ratio: 4/5; width: 100%; }
+  .wedding-identity[data-design="editorial"] .wedding-welcome { display: block; padding: 64px 26px; }
+  .wedding-identity[data-design="editorial"] .wedding-welcome h2 { margin: 24px 0; }
+  .wedding-identity[data-design="editorial"] .wedding-section { padding: 54px 26px; }
+  .wedding-identity[data-design="editorial"] .wedding-section:nth-of-type(odd) :is(.wedding-section-heading,.wedding-section-body) { grid-column: auto; grid-row: auto; }
+  .wedding-identity[data-design="editorial"] .wedding-gallery { gap: 10px; }
+  .wedding-identity[data-design="editorial"] .wedding-gallery a:nth-child(even) { margin-top: 40px; }
+  .wedding-identity[data-design="minimal"] .wedding-hero { padding: 54px 26px 44px; }
+  .wedding-identity[data-design="minimal"] .wedding-hero h1 { font-size: 54px; }
+  .wedding-identity[data-design="minimal"] .wedding-hero-photo { aspect-ratio: 4/5; }
+  .wedding-identity[data-design="minimal"] .wedding-section { width: calc(100% - 48px); padding: 52px 0; }
+  .wedding-identity[data-design="minimal"] .wedding-rsvp { width: 100%; padding: 54px 26px; }
+  .wedding-identity[data-design="garden"] .wedding-hero { display: flex; padding: 74px 26px; gap: 34px; }
+  .wedding-identity[data-design="garden"] .identity-garden-card { padding: 42px 20px; }
+  .wedding-identity[data-design="garden"] .wedding-hero h1 { font-size: 64px; }
+  .identity-garden-memory { margin: 0; width: 87%; transform: rotate(2deg); }
+  .wedding-identity[data-design="garden"] .wedding-section { width: calc(100% - 40px); padding: 48px 24px; }
+  .wedding-identity[data-design="blossom"] .wedding-hero { padding: 88px 28px 60px; }
+  .wedding-identity[data-design="blossom"] .identity-cover-botanicals img:last-child { width: 110px; bottom: 140px; }
+  .identity-blossom-scene { width: 85%; }
+  .wedding-identity[data-design="blossom"] .wedding-section { width: calc(100% - 40px); padding: 50px 24px; border-radius: 64px 4px; }
+  .wedding-identity[data-design="blossom"] .wedding-section:nth-of-type(odd) { border-radius: 4px 64px; }
+  .wedding-identity[data-design="bougainvillea"] .wedding-hero { display: flex; flex-direction: column-reverse; padding: 84px 32px 60px; gap: 40px; }
+  .wedding-identity[data-design="bougainvillea"] .wedding-hero-copy { grid-row: auto; }
+  .wedding-identity[data-design="bougainvillea"] .wedding-hero h1 { font-size: 43px; }
+  .identity-hacienda-door { padding: 34px 16px 24px; width: 100%; }
+  .wedding-identity[data-design="bougainvillea"] .wedding-section { width: calc(100% - 40px); padding: 48px 24px; }
+  .wedding-identity[data-design="bougainvillea"] .wedding-location { padding-top: 64px; }
+  .wedding-identity[data-design="sunlight"] .wedding-hero { padding: 64px 28px; }
+  .wedding-identity[data-design="sunlight"] .wedding-hero h1 { font-size: 62px; }
+  .identity-sunlight-print { width: 100%; padding: 9px 9px 18px; }
+  .wedding-identity[data-design="sunlight"] .identity-sunlight-print .wedding-hero-photo { aspect-ratio: 4/5; }
+  .identity-sunlight-print figcaption { font-size: 21px; }
+  .wedding-identity[data-design="sunlight"] .wedding-section { width: calc(100% - 40px); padding: 48px 24px; }
+  .wedding-identity[data-design="sunlight"] .wedding-timeline { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .wedding-identity[data-design="olive"] .wedding-section-heading > .identity-motif { margin-left: 0; }
+  .wedding-identity[data-design="mediterranean"] .wedding-hero { padding: 24px 26px 60px; }
+  .identity-postcard-heading { margin-bottom: 30px; font-size: 8px; gap: 16px; }
+  .wedding-identity[data-design="mediterranean"] .wedding-hero h1 { font-size: 58px; }
+  .identity-postcard-scene { padding: 16px 8% 16px 0; }
+  .wedding-identity[data-design="mediterranean"] .identity-postcard-scene .wedding-hero-photo { aspect-ratio: 4/5; border-width: 6px; }
+  .identity-postcard-lemons { width: 35%; right: -4%; }
+  .identity-postcard-empty { min-height: 330px; padding: 70px 22px; font-size: 54px; }
+  .identity-postcard-address { margin-top: 38px; }
+  .wedding-identity[data-design="mediterranean"] .wedding-welcome { display: block; padding: 64px 28px; text-align: center; }
+  .wedding-identity[data-design="mediterranean"] .wedding-welcome h2 { margin: 24px 0; }
+  .wedding-identity[data-design="mediterranean"] .wedding-section { width: calc(100% - 40px); padding: 48px 24px; }
+  .wedding-identity[data-design="mediterranean"] .wedding-timeline { grid-template-columns: 1fr; }
+  .wedding-identity[data-design="mediterranean"] .wedding-timeline li { display: grid; grid-template-columns: 32px 58px 1fr; text-align: left; padding: 20px 0; }
+  .wedding-identity[data-design="art-deco"] .wedding-section { width: calc(100% - 40px); padding: 48px 24px; }
+  .wedding-identity[data-design="love-letter"] .wedding-section { width: calc(100% - 40px); padding: 44px 24px; margin: 24px auto; }
+  .wedding-identity[data-design="love-letter"] .wedding-timeline li { grid-template-columns: 24px 78px minmax(0,1fr); gap: 10px; }
+  .wedding-identity[data-design="love-letter"] .wedding-timeline time { font-size: 23px; }
+  .wedding-identity[data-design="starlight"] .wedding-section { width: calc(100% - 40px); padding: 54px 18px; }
+  .wedding-identity[data-design="starlight"] .wedding-gallery { gap: 12px; }
+  .wedding-identity[data-design="starlight"] .wedding-gallery a:nth-child(even) { margin-top: 36px; }
+}
+@media (max-width:760px) {
+  .wedding-identity[data-long-names] .wedding-hero h1 { font-size: 46px; line-height: 1.2; }
+  .wedding-identity[data-design="bougainvillea"][data-long-names] .wedding-hero h1 { font-size: 32px; }
+  .wedding-identity[data-design="minimal"][data-long-names] .wedding-hero h1 { font-size: 40px; }
+  .wedding-identity[data-design="mediterranean"][data-long-names] .wedding-hero h1 { font-size: 44px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .wedding-identity *, .wedding-identity *::before, .wedding-identity *::after { scroll-behavior: auto; }
+}
+
+/* Stationery refinements. The paper is continuous underneath the layout;
+   local material accents fade at their edges instead of ending at a section seam. */
+.wedding-identity:is([data-design="floral"],[data-design="editorial"],[data-design="minimal"],[data-design="garden"],[data-design="blossom"],[data-design="bougainvillea"],[data-design="sunlight"],[data-design="art-deco"]) {
+  --identity-grain: url('/textures/wedding/stationery-grain.svg');
+  --identity-stock: url('/textures/wedding/cotton.webp');
+  --identity-stock-size: 1100px auto;
+  background-color: var(--w-paper);
+  background-image: var(--identity-grain),linear-gradient(color-mix(in srgb,var(--w-paper) 88%,transparent),color-mix(in srgb,var(--w-paper) 88%,transparent)),var(--identity-stock);
+  background-size: 180px 180px,auto,var(--identity-stock-size);
+}
+.wedding-identity[data-design="garden"] { --identity-stock: url('/textures/wedding/paper.webp'); --identity-stock-size: 750px auto; }
+.wedding-identity[data-design="blossom"] { --identity-stock: url('/textures/wedding/paper.webp'); --identity-stock-size: 1000px auto; }
+.wedding-identity[data-design="sunlight"] { --identity-stock: url('/textures/wedding/linen.webp'); --identity-stock-size: 1200px auto; }
+.wedding-identity[data-design="bougainvillea"] { --identity-stock: url('/textures/wedding/paper.webp'); --identity-stock-size: 850px auto; background-color: var(--w-dark); background-image: var(--identity-grain),linear-gradient(color-mix(in srgb,var(--w-dark) 96%,transparent),color-mix(in srgb,var(--w-dark) 96%,transparent)),var(--identity-stock); background-blend-mode: soft-light,normal,normal; }
+.wedding-identity[data-design="art-deco"] { --identity-stock: url('/textures/wedding/paper.webp'); background-image: var(--identity-grain),linear-gradient(color-mix(in srgb,var(--w-paper) 97%,transparent),color-mix(in srgb,var(--w-paper) 97%,transparent)),var(--identity-stock); background-blend-mode: soft-light,normal,normal; }
+.wedding-identity:is([data-design="floral"],[data-design="editorial"],[data-design="minimal"],[data-design="garden"],[data-design="sunlight"]) .wedding-hero { background: transparent; }
+.wedding-identity:is([data-design="garden"],[data-design="blossom"],[data-design="bougainvillea"],[data-design="sunlight"],[data-design="art-deco"]) .wedding-section { background-image: var(--identity-grain); background-size: 180px 180px; }
+.wedding-identity:is([data-design="floral"],[data-design="editorial"],[data-design="minimal"],[data-design="garden"],[data-design="sunlight"]) .wedding-welcome { background: transparent; }
+.identity-script-note { display: block; margin: 0 auto 24px; font-family: 'Alex Brush',cursive; font-size: clamp(27px,3vw,40px); line-height: 1.25; color: var(--w-accent); }
+
+/* Floral: a botanical stationery card paired with an arched portrait. */
+.wedding-identity[data-design="floral"] .wedding-hero { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,.95fr); align-items: center; gap: 6%; padding: 74px 8%; }
+.wedding-identity[data-design="floral"] .wedding-hero:not(.has-photo) { grid-template-columns: minmax(0,1fr); }
+.wedding-identity[data-design="floral"] .identity-floral-arch { width: 100%; padding: 52px 28px 40px; border-radius: 180px 180px 6px 6px; outline: 1px solid var(--identity-rule); outline-offset: -9px; background: color-mix(in srgb,var(--w-paper) 65%,transparent); }
+.wedding-identity[data-design="floral"] .wedding-hero:not(.has-photo) .identity-floral-arch { max-width: 660px; margin: auto; }
+.wedding-identity[data-design="floral"] .wedding-hero h1 { margin: 24px 0; font-size: clamp(68px,7vw,104px); line-height: 1.1; }
+.wedding-identity[data-design="floral"] .identity-cover-botanicals img { width: clamp(140px,23%,310px); }
+.identity-floral-portrait { position: relative; z-index: 1; margin: 0; padding: 12px; border: 1px solid var(--identity-rule); border-radius: 230px 230px 0 0; }
+.wedding-identity[data-design="floral"] .identity-floral-portrait .wedding-hero-photo { width: 100%; height: 540px; aspect-ratio: auto; margin: 0; transform: none; border: 0; border-radius: 220px 220px 0 0; }
+.identity-floral-portrait figcaption { padding: 18px 8px 6px; text-align: center; font: 30px/1.3 'Alex Brush',cursive; color: var(--w-accent); }
+.identity-floral-bloom { position: absolute; bottom: 35px; left: -40px; width: 115px; height: auto; }
+.wedding-identity[data-design="floral"] .wedding-welcome { padding-top: 62px; }
+.wedding-identity[data-design="floral"] .wedding-section::after { content: none; }
+.wedding-identity[data-design="floral"] :is(.wedding-location,.wedding-rsvp) { background: color-mix(in srgb,var(--w-panel) 72%,transparent); border-radius: 8px; border: 1px solid var(--identity-rule); }
+.wedding-identity[data-design="floral"] .wedding-finale { background: transparent; }
+
+/* Editorial: a compact magazine cover with a photograph, not a repeated ampersand. */
+.wedding-identity[data-design="editorial"] .wedding-hero { min-height: 0; padding: 78px 7% 78px; gap: 6%; }
+.wedding-identity[data-design="editorial"] .wedding-hero h1 { font-size: clamp(60px,7vw,104px); margin: 22px 0; }
+.wedding-identity[data-design="editorial"] .wedding-couple-separator { font-family: 'Alex Brush',cursive; font-size: .46em; line-height: .8; margin: 10px 0; }
+.identity-editorial-visual { position: relative; min-width: 0; margin: 0; padding: 0 16px 22px 0; }
+.identity-editorial-visual::before { content: ""; position: absolute; inset: 24px 0 0 24px; border: 1px solid var(--identity-rule); background: var(--w-panel) var(--identity-grain); }
+.wedding-identity[data-design="editorial"] .identity-editorial-visual .wedding-hero-photo { height: 510px; width: 100%; }
+.wedding-identity[data-design="editorial"] .identity-editorial-visual .wedding-hero-photo img { object-position: center 25%; }
+.identity-editorial-visual figcaption { position: absolute; bottom: 8px; left: -26px; padding: 6px 22px; background: var(--w-paper) var(--identity-grain); color: var(--w-accent); font: 54px/1.15 'Alex Brush',cursive; transform: rotate(-4deg); }
+.wedding-identity[data-design="editorial"] .identity-editorial-caption { font-family: var(--w-heading); margin-top: 16px!important; font-size: 23px; line-height: 1.4; }
+.wedding-identity[data-design="editorial"] .wedding-date { margin: 22px 0; }
+.wedding-identity[data-design="editorial"] .wedding-welcome { display: block; text-align: center; max-width: 1000px; margin: auto; padding: 80px 8%; }
+.wedding-identity[data-design="editorial"] .wedding-welcome h2 { margin: 24px 0; }
+.wedding-identity[data-design="editorial"] .wedding-welcome > p { margin: auto; }
+
+/* Minimal: centered stationery chapters and a single aligned RSVP composition. */
+.wedding-identity[data-design="minimal"] .wedding-hero { padding-top: 54px; }
+.wedding-identity[data-design="minimal"] .wedding-hero h1 { font-size: clamp(58px,7vw,96px); letter-spacing: -.025em; }
+.wedding-identity[data-design="minimal"] .wedding-section { display: block; width: min(calc(100% - 64px),940px); padding: 64px 7%; text-align: center; }
+.wedding-identity[data-design="minimal"] .wedding-section-heading { width: min(100%,650px); margin: 0 auto 30px; }
+.wedding-identity[data-design="minimal"] .wedding-section-heading h2 { margin: 14px 0 0; font-size: clamp(38px,4.5vw,58px); }
+.wedding-identity[data-design="minimal"] .wedding-section-heading > .identity-motif { display: none; }
+.wedding-identity[data-design="minimal"] .wedding-section-body { width: min(100%,650px); margin: auto; }
+.wedding-identity[data-design="minimal"] .wedding-section-body > p { margin-inline: auto; }
+.wedding-identity[data-design="minimal"] .wedding-timeline { text-align: left; width: min(100%,540px); margin: auto; }
+.wedding-identity[data-design="minimal"] .wedding-parents { border: 1px solid var(--identity-rule); background: color-mix(in srgb,var(--w-panel) 70%,transparent); margin: 24px auto; }
+.wedding-identity[data-design="minimal"] .wedding-rsvp { width: min(calc(100% - 64px),940px); margin: 40px auto; padding: 58px 7%; border: 1px solid var(--identity-rule); outline: 1px solid var(--identity-rule); outline-offset: -9px; border-radius: 2px; background: var(--w-panel) var(--identity-grain); color: var(--w-ink); }
+.wedding-identity[data-design="minimal"] .wedding-rsvp .wedding-eyebrow { color: var(--w-accent); }
+.wedding-identity[data-design="minimal"] .wedding-rsvp .invite-rsvp-form { max-width: 100%; margin: 24px auto 0; background: color-mix(in srgb,var(--w-paper) 90%,transparent); }
+
+/* Garden: the two cover pieces stretch together, including their paper borders. */
+@media (min-width:761px) {
+  .wedding-identity[data-design="garden"] .wedding-hero { align-items: stretch; min-height: 0; gap: 5%; padding: 76px 8%; }
+  .wedding-identity[data-design="garden"] .identity-garden-card { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 590px; padding: 42px 28px; }
+  .wedding-identity[data-design="garden"] .identity-garden-memory { display: flex; flex-direction: column; margin: 0; transform: none; padding: 12px; }
+  .wedding-identity[data-design="garden"] .identity-garden-memory .wedding-hero-photo { flex: 1; min-height: 420px; aspect-ratio: auto; }
+  .identity-garden-memory figcaption { padding: 12px 0 4px; margin: 0; }
+}
+.wedding-identity[data-design="garden"] .identity-garden-card { background-image: var(--identity-grain); }
+
+/* Bougainvillea: a framed album, rectangular prints and repeated, quiet floral corners. */
+.identity-hacienda-album { position: relative; z-index: 1; grid-column: 1; grid-row: 1; min-width: 0; margin: 0; padding: 14px 14px 26px; background: var(--w-paper); color: var(--w-accent); box-shadow: 0 14px 38px #0002; transform: rotate(-2deg); }
+.wedding-identity[data-design="bougainvillea"] .identity-hacienda-album .wedding-hero-photo { width: 100%; height: 500px; aspect-ratio: auto; border-radius: 2px; outline: none; }
+.identity-hacienda-album figcaption { position: relative; z-index: 1; padding: 20px 22px 0; font: 30px/1.2 'Alex Brush',cursive; text-align: center; }
+.identity-album-flower { position: absolute; right: -35px; bottom: 45px; width: 110px; height: auto; }
+.wedding-identity[data-design="bougainvillea"] .wedding-hero { background: transparent; }
+.wedding-identity[data-design="bougainvillea"] .wedding-section { overflow: hidden; }
+.wedding-identity[data-design="bougainvillea"] .wedding-section::before,.wedding-identity[data-design="bougainvillea"] .wedding-section::after { content: ""; position: absolute; z-index: 0; width: 170px; height: 200px; pointer-events: none; background: var(--w-botanical) top left/contain no-repeat; opacity: .17; mask-image: radial-gradient(ellipse at top left,#000 10%,transparent 75%); }
+.wedding-identity[data-design="bougainvillea"] .wedding-section::before { top: 0; left: 0; }
+.wedding-identity[data-design="bougainvillea"] .wedding-section::after { bottom: 0; right: 0; transform: rotate(180deg); }
+.wedding-identity[data-design="bougainvillea"] .wedding-section-heading { position: relative; z-index: 1; }
+.wedding-identity[data-design="bougainvillea"] .wedding-gallery { gap: 22px; align-items: start; }
+.wedding-identity[data-design="bougainvillea"] .wedding-gallery a { padding: 8px 8px 20px; border: 1px solid var(--identity-rule); border-radius: 0; background: var(--w-paper); box-shadow: 0 5px 18px #43213714; }
+.wedding-identity[data-design="bougainvillea"] .wedding-gallery a:first-child { grid-column: 1/-1; border-radius: 0; }
+.wedding-identity[data-design="bougainvillea"] .wedding-gallery a:first-child img { aspect-ratio: 16/10; object-position: center 25%; }
+.wedding-identity[data-design="bougainvillea"] .wedding-gallery a:nth-child(2n) { transform: rotate(2deg); }
+
+/* Sunshine: a shorter two-piece cover, still warm and botanical. */
+.wedding-identity[data-design="sunlight"] .wedding-hero { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: center; gap: 7%; padding: 72px 8%; }
+.wedding-identity[data-design="sunlight"] .wedding-hero:not(.has-photo) { grid-template-columns: 1fr; }
+.wedding-identity[data-design="sunlight"] .wedding-hero h1 { margin: 24px auto; font-size: clamp(60px,6.6vw,92px); }
+.wedding-identity[data-design="sunlight"] .identity-sun { width: 58px; height: 58px; margin-bottom: 22px; }
+.wedding-identity[data-design="sunlight"] .identity-sun svg { width: 32px; height: 32px; }
+.wedding-identity[data-design="sunlight"] .identity-sunlight-print { width: 100%; margin: 0; padding: 12px 12px 20px; }
+.wedding-identity[data-design="sunlight"] .identity-sunlight-print .wedding-hero-photo { height: 470px; aspect-ratio: auto; }
+.wedding-identity[data-design="sunlight"] .identity-cover-botanicals img { width: clamp(130px,20%,260px); }
+.wedding-identity[data-design="sunlight"] .wedding-date { margin: 22px 0; }
+
+/* Destination program: centered medallions in both horizontal and vertical layouts. */
+.wedding-identity[data-design="mediterranean"] .wedding-program .wedding-section-heading { text-align: center; }
+.wedding-identity[data-design="mediterranean"] .wedding-program .wedding-section-body > p { margin-inline: auto; text-align: center; }
+.wedding-identity[data-design="mediterranean"] .wedding-timeline li { align-items: center; }
+.wedding-identity[data-design="mediterranean"] .wedding-timeline li > .identity-timeline-icon { display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px; margin: 0 auto; line-height: 1; }
+.wedding-identity[data-design="mediterranean"] .identity-timeline-icon svg { display: block; width: 17px; height: 17px; }
+
+/* Gala and celestial chapters carry no ordinal labels. The fan stays only on the gala cover. */
+.wedding-identity[data-design="art-deco"] .wedding-section { counter-increment: none; }
+.wedding-identity[data-design="art-deco"] .wedding-section::before { content: none; }
+.wedding-identity[data-design="starlight"] .wedding-gallery { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; align-items: start; }
+.wedding-identity[data-design="starlight"] .wedding-gallery a { padding: 10px; border: 1px solid var(--identity-rule); border-radius: 0; background: color-mix(in srgb,var(--w-panel) 65%,transparent); }
+.wedding-identity[data-design="starlight"] .wedding-gallery a:first-child { grid-column: 1/-1; }
+.wedding-identity[data-design="starlight"] .wedding-gallery a:first-child img { aspect-ratio: 16/10; object-position: center 25%; }
+.wedding-identity[data-design="starlight"] .wedding-gallery a:nth-child(even) { margin-top: 0; }
+
+@media (max-width:760px) {
+  .wedding-identity[data-design="floral"] .wedding-hero { grid-template-columns: minmax(0,1fr); padding: 58px 28px 38px; gap: 30px; }
+  .wedding-identity[data-design="floral"] .identity-floral-arch { padding: 48px 20px 32px; }
+  .wedding-identity[data-design="floral"] .wedding-hero h1 { font-size: 68px; }
+  .wedding-identity[data-design="floral"] .identity-floral-portrait .wedding-hero-photo { height: 350px; }
+  .identity-floral-bloom { width: 84px; left: -20px; }
+  .wedding-identity[data-design="floral"] .identity-script-note { max-width: 200px; font-size: 29px; }
+  .wedding-identity[data-design="floral"] .wedding-welcome { padding-top: 44px; }
+  .wedding-identity[data-design="editorial"] .wedding-hero { display: flex; flex-direction: column; align-items: center; padding: 64px 24px 65px; gap: 0; text-align: center; }
+  .wedding-identity[data-design="editorial"] .identity-editorial-visual { order: 0; width: 100%; padding: 0; }
+  .wedding-identity[data-design="editorial"] .identity-editorial-visual .wedding-hero-photo { height: 290px; }
+  .wedding-identity[data-design="editorial"] .identity-editorial-visual::before { content: none; }
+  .wedding-identity[data-design="editorial"] .identity-editorial-visual figcaption { font-size: 37px; left: -6px; bottom: 32px; padding: 4px 12px; }
+  .wedding-identity[data-design="editorial"] .wedding-hero-copy { order: 1; width: calc(100% - 24px); margin-top: -20px; padding: 26px 16px 20px; background: var(--w-paper) var(--identity-grain); border: 1px solid var(--identity-rule); }
+  .wedding-identity[data-design="editorial"] .wedding-hero h1 { font-size: 54px; margin: 14px 0; line-height: 1.03; }
+  .wedding-identity[data-design="editorial"] .wedding-couple-name { display: inline; }
+  .wedding-identity[data-design="editorial"] .wedding-couple-separator { display: inline-block; margin: 0 .15em; }
+  .wedding-identity[data-design="editorial"] .identity-editorial-caption { font-size: 18px; margin-top: 12px!important; }
+  .wedding-identity[data-design="editorial"] .wedding-date { justify-content: center; margin: 16px 0; font-size: 11px; gap: 6px 10px; }
+  .wedding-identity[data-design="editorial"] .wedding-date > span + span { padding-left: 10px; }
+  .identity-editorial-bottom { font-size: 7px; gap: 12px; }
+  .wedding-identity[data-design="editorial"] .identity-editorial-type { order: 0; font-size: 70px; line-height: .9; padding: 0 0 36px; }
+  .wedding-identity[data-design="minimal"] .wedding-section { width: calc(100% - 40px); padding: 48px 22px; }
+  .wedding-identity[data-design="minimal"] .wedding-rsvp { padding: 48px 20px; }
+  .wedding-identity[data-design="minimal"] .wedding-section-heading { margin-bottom: 24px; }
+  .wedding-identity[data-design="minimal"] .wedding-rsvp .invite-rsvp-form { padding: 24px 16px; }
+  .wedding-identity[data-design="minimal"] .wedding-hero h1 { font-size: 58px; }
+  .wedding-identity[data-design="garden"] .identity-garden-memory { width: 100%; }
+  .identity-hacienda-album { width: calc(100% - 8px); padding: 10px 10px 22px; transform: rotate(-1deg); }
+  .wedding-identity[data-design="bougainvillea"] .identity-hacienda-album .wedding-hero-photo { height: 350px; }
+  .identity-hacienda-album figcaption { font-size: 27px; padding-inline: 12px; }
+  .identity-album-flower { width: 85px; right: -23px; bottom: 56px; }
+  .wedding-identity[data-design="bougainvillea"] .wedding-section::before,.wedding-identity[data-design="bougainvillea"] .wedding-section::after { width: 130px; height: 150px; }
+  .wedding-identity[data-design="sunlight"] .wedding-hero { grid-template-columns: minmax(0,1fr); padding: 46px 28px; gap: 30px; }
+  .wedding-identity[data-design="sunlight"] .wedding-hero h1 { font-size: 57px; margin: 18px 0; }
+  .wedding-identity[data-design="sunlight"] .wedding-couple-name { display: inline; }
+  .wedding-identity[data-design="sunlight"] .wedding-couple-separator { display: inline-block; margin: 0 .2em; }
+  .wedding-identity[data-design="sunlight"] .identity-sun { width: 48px; height: 48px; margin-bottom: 18px; }
+  .wedding-identity[data-design="sunlight"] .identity-sunlight-print .wedding-hero-photo { height: 310px; }
+  .wedding-identity[data-design="mediterranean"] .wedding-timeline li { display: flex; flex-direction: column; padding: 24px 16px; text-align: center; }
+  .wedding-identity[data-design="mediterranean"] .wedding-timeline { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 12px; }
+  .wedding-identity[data-design="starlight"] .wedding-gallery { gap: 12px; }
+  .wedding-identity[data-design="starlight"] .wedding-gallery a { padding: 6px; }
+  .wedding-identity:is([data-design="editorial"],[data-design="sunlight"],[data-design="minimal"])[data-long-names] .wedding-hero h1 { font-size: 42px; line-height: 1.15; }
+}
