@@ -83,9 +83,6 @@ export function LoginForm() {
       <p className="login-notice" role="status" aria-live="polite">
         {message || ""}
       </p>
-      <p className="login-security">
-        <FiLock aria-hidden="true" /> Tu información se mantiene privada y segura.
-      </p>
     </form>
   );
 }

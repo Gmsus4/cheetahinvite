@@ -39,7 +39,7 @@
 .landing-home .hero-free-note { margin-top: 18px; color: var(--muted); font-size: 11px; line-height: 1.8; }
 .landing-home .hero-free-note span { margin-right: 8px; padding: 3px 7px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: var(--ink); font-weight: 600; }
 .landing-home .hero-product-stage { isolation: isolate; position: relative; display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; height: auto; min-height: 0; margin: 0; padding: 12px 0; overflow: visible; transform: none; }
-.landing-home .hero-example-phone { position: relative; z-index: 2; order: 0; width: 234px; max-width: 100%; aspect-ratio: 541 / 1114; transform: rotate(5deg); filter: drop-shadow(14px 22px 0 #0b132009); }
+.landing-home .hero-example-phone { position: relative; z-index: 2; order: 0; width: 234px; max-width: 100%; aspect-ratio: 541 / 1114; border-radius: 16% / 8%; box-shadow: 14px 22px 0 #0b132009; }
 .landing-home .hero-example-phone-screen { position: absolute; z-index: 1; inset: .808% 2.403% .898%; overflow: hidden; border-radius: 15.54% / 7.3%; }
 .landing-home .hero-phone-frame { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
 .landing-home .hero-example-caption { position: relative; z-index: 3; order: 1; width: 100%; text-align: center; }
@@ -168,4 +168,20 @@
   .landing-home .catalog-card > [data-design], .landing-home .catalog-event-preview { aspect-ratio: 1.2; }
   .landing-home .catalog-caption { gap: 5px; padding-inline: 3px; font-size: 10px; }
   .landing-home .catalog-open-icon { flex-basis: 15px; width: 15px; height: 15px; }
+}
+
+/* Keep the floating labels on the pixel grid for crisp text. */
+.landing-home .hero-product-stage .floating-note { transform: none; color: var(--ink); font-size: 12px; line-height: 1.5; }
+.landing-home .hero-product-stage .floating-note b { font-size: 12px; }
+.landing-home .hero-product-stage .floating-note small { font-size: 11px; }
+.landing-home .hero-product-stage .note-bottom { top: 350px; bottom: auto; }
+.landing-home .hero-design-switcher { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 0 auto 16px; }
+.landing-home .hero-design-switcher > button { display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: #fff; color: var(--ink); font-size: 18px; cursor: pointer; }
+.landing-home .hero-design-switcher > button:hover { border-color: var(--orange); color: var(--orange); }
+.landing-home .hero-design-switcher > span { min-width: 155px; text-align: center; }
+.landing-home .hero-design-switcher strong { display: block; color: var(--ink); font-size: 12px; font-weight: 600; }
+.landing-home .hero-design-switcher small { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+@media (max-width: 520px) {
+  .landing-home .hero-product-stage .floating-note { padding: 10px; font-size: 11px; }
+  .landing-home .hero-design-switcher > button { flex-basis: 44px; width: 44px; height: 44px; }
 }

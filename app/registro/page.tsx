@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FiArrowLeft } from "react-icons/fi";
+import { AuthAccountSwitch } from "@/components/login/AuthAccountSwitch";
 import { BrandEmblem } from "@/components/BrandEmblem";
 import { RegisterForm } from "@/components/login/RegisterForm";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import "../login/login.css";
 
 export const metadata: Metadata = {
   title: "Crear cuenta | Cheetah Invite",
@@ -12,13 +13,13 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <main className="login-page">
+    <main className="login-page login-home-style">
       <header className="login-topbar">
         <Link className="brand" href="/" aria-label="Cheetah Invite, inicio">
           <BrandEmblem size={40} priority />
           <span className="brand-name">Cheetah<span>Invite</span></span>
         </Link>
-        <Link className="login-back" href="/"><FiArrowLeft aria-hidden="true" /> Volver al inicio</Link>
+        <AuthAccountSwitch mode="register" />
       </header>
 
       <div className="login-layout register-layout">
@@ -47,7 +48,6 @@ export default function RegisterPage() {
             <GoogleSignInButton />
             <div className="auth-divider"><span>o regístrate con tu correo</span></div>
             <RegisterForm />
-            <p className="login-help">¿Ya tienes cuenta? <Link href="/login">Inicia sesión</Link></p>
           </div>
           <small className="login-legal">Al continuar, aceptas nuestros <Link href="/terminos">Términos y condiciones</Link> y <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>.</small>
         </section>

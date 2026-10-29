@@ -48,3 +48,79 @@
     margin: 20px auto 36px;
   }
 }
+
+/* Match the homepage's floating navigation and softly outlined surfaces. */
+.login-home-style { background: #F2F4F7; }
+.login-home-style .login-topbar {
+  width: min(1080px, calc(100% - 40px));
+  height: auto;
+  min-height: 66px;
+  margin: 16px auto 28px;
+  padding: 10px 22px 10px 16px;
+  gap: 20px;
+  border: 1px solid #fff;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 10px 36px #0b13200b;
+}
+.login-home-style .login-back { min-height: 40px; color: #1E2A3A; font-weight: 500; }
+.login-home-style .login-back:hover { color: #E9560A; }
+.login-home-style .login-layout {
+  width: min(1080px, calc(100% - 40px));
+  flex: 1;
+  min-height: 660px;
+  margin: 0 auto 40px;
+  overflow: hidden;
+  border: 1px solid #d9dee5;
+  border-radius: 26px;
+  background: #fff;
+}
+.login-home-style .login-visual { padding: 54px 44px 90px; background: #0B1320; }
+.login-home-style .login-visual h1 { margin-top: 23px; font-size: clamp(36px, 4vw, 52px); line-height: 1.15; }
+.login-home-style .login-visual h1 em { color: #F47B42; }
+.login-home-style .login-visual > p { max-width: 350px; color: #c9d0d9; font-size: 14px; line-height: 1.85; }
+.login-home-style .login-visual-footer { left: 44px; bottom: 32px; }
+.login-home-style .login-form-panel { padding: 48px 44px 90px; }
+.login-home-style .login-form-panel h2 { font-size: 36px; }
+.login-home-style .login-description { line-height: 1.8; }
+.login-home-style .login-input-wrap { height: 51px; border-color: #d9dee5; border-radius: 12px; }
+.login-home-style .login-input-wrap:focus-within { border-color: #E9560A; box-shadow: 0 0 0 3px #e9560a15; }
+.login-home-style :is(.login-submit, .google-signin-button) { min-height: 50px; border-radius: 999px; font-size: 12px; }
+.login-home-style .login-submit { background: #E9560A; color: #fff; }
+.login-home-style .login-submit:hover:not(:disabled) { background: #c74606; }
+.login-home-style .google-signin-button { border-color: #d9dee5; background: #fff; color: #0B1320; }
+.login-home-style .google-signin-button:hover:not(:disabled) { background: #F2F4F7; border-color: #c3cad4; }
+.login-home-style :is(.login-submit, .google-signin-button):disabled { cursor: wait; opacity: .65; }
+.login-home-style .login-legal { right: 44px; bottom: 25px; left: 44px; color: #667080; font-size: 10px; line-height: 1.7; text-align: center; }
+.login-home-style .login-legal a { text-decoration: underline; text-underline-offset: 3px; }
+.login-home-style :is(a, button):focus-visible { outline: 2px solid #E9560A; outline-offset: 4px; }
+@media (max-width: 760px) {
+  .login-home-style .login-layout { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .login-home-style .login-form-panel { order: -1; padding: 38px 28px 92px; }
+  .login-home-style .login-visual { min-height: 350px; padding: 36px 28px 75px; }
+  .login-home-style .login-visual h1 { font-size: 37px; }
+  .login-home-style .login-visual-footer { left: 28px; bottom: 26px; }
+  .login-home-style .login-legal { right: 28px; left: 28px; }
+}
+@media (max-width: 440px) {
+  .login-home-style .login-topbar { width: calc(100% - 28px); margin: 12px auto 20px; padding: 8px 14px 8px 10px; gap: 10px; }
+  .login-home-style .login-topbar .brand-name { font-size: 16px; }
+  .login-home-style .login-back { gap: 5px; font-size: 10px; }
+  .login-home-style .login-back svg { width: 13px; }
+  .login-home-style .login-layout { width: calc(100% - 28px); margin-bottom: 24px; border-radius: 22px; }
+  .login-home-style .login-form-panel { padding: 32px 22px 92px; }
+  .login-home-style .login-form-panel h2 { font-size: 32px; }
+  .login-home-style .login-legal { right: 22px; left: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-home-style :is(a, button) { transition: none; transform: none; }
+}
+
+.login-home-style .auth-account-switch { display: flex; align-items: center; gap: 13px; margin-left: auto; color: #1E2A3A; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.login-home-style .auth-account-switch a { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 8px 15px; border: 1px solid #d9dee5; border-radius: 12px; background: #fff; color: #0B1320; font-size: 12px; font-weight: 600; transition: border-color .18s, background .18s, color .18s; }
+.login-home-style .auth-account-switch a:hover { border-color: #E9560A; background: #fff5ef; color: #c74606; }
+.login-home-style .login-notice:empty { display: none; }
+@media (max-width: 520px) {
+  .login-home-style .auth-account-switch > span { display: none; }
+  .login-home-style .auth-account-switch a { padding-inline: 12px; font-size: 11px; }
+}

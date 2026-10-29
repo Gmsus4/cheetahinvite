@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 // import Image from "next/image";
 import Link from "next/link";
-import { FiArrowLeft } from "react-icons/fi";
+import { AuthAccountSwitch } from "@/components/login/AuthAccountSwitch";
 import { BrandEmblem } from "@/components/BrandEmblem";
 import { LoginForm } from "@/components/login/LoginForm";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <main className="login-page">
+    <main className="login-page login-home-style">
       <header className="login-topbar">
         <Link className="brand" href="/" aria-label="Cheetah Invite, inicio">
           <BrandEmblem size={40} priority />
@@ -23,9 +23,7 @@ export default function LoginPage() {
             Cheetah<span>Invite</span>
           </span>
         </Link>
-        <Link className="login-back" href="/">
-          <FiArrowLeft aria-hidden="true" /> Volver al inicio
-        </Link>
+        <AuthAccountSwitch mode="login" />
       </header>
 
       <div className="login-layout">
@@ -62,9 +60,6 @@ export default function LoginPage() {
             <GoogleSignInButton />
             <div className="auth-divider"><span>o inicia con tu correo</span></div>
             <LoginForm />
-            <p className="login-help">
-              ¿Aún no tienes cuenta? <Link href="/registro">Regístrate con tu correo</Link>
-            </p>
           </div>
           <small className="login-legal">
             Al continuar, aceptas nuestros <Link href="/terminos">Términos y condiciones</Link> y <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>.

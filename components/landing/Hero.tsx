@@ -6,6 +6,7 @@ import {
 } from "react-icons/fi";
 import { HeroInvitationExamples } from "./HeroInvitationExamples";
 import { landingEventExamples } from "@/lib/landing-invitation-example";
+import { weddingDesigns } from "@/lib/wedding-designs";
 
 export function Hero() {
   return (
@@ -31,7 +32,6 @@ export function Hero() {
             Explorar estilos <span><FiChevronDown aria-hidden="true" /></span>
           </a>
         </div>
-        <p className="hero-free-note"><span>Gratis para empezar</span> Paga solo al publicar.</p>
       </div>
 
       <div className="hero-art hero-product-stage" aria-label="Ejemplo de una invitación creada con el editor">
@@ -39,7 +39,10 @@ export function Hero() {
         <div className="floating-note note-top">
           <span><FiStar aria-hidden="true" /></span> Tu historia, tu estilo
         </div>
-        <HeroInvitationExamples examples={landingEventExamples.map(({ slug, label }) => ({ slug, label }))} />
+        <HeroInvitationExamples
+          examples={landingEventExamples.map(({ slug, label }) => ({ slug, label }))}
+          weddingDesigns={weddingDesigns.map(({ kind, label }) => ({ slug: `boda-${kind}`, label }))}
+        />
         <div className="floating-note note-bottom">
           <span className="note-check"><FiEdit3 aria-hidden="true" /></span>
           <span>
