@@ -45,12 +45,14 @@ export function HowItWorks() {
       <div className="steps">
         {steps.map((step) => (
           <article key={step.number}>
-            <span className="step-no">{step.number}</span>
+            <div className={`step-illustration step-illustration-${step.number}`} aria-hidden="true">
+              <span className="step-no">{step.number}</span>
+              <div className="step-paper"><step.symbol /><span>{step.number === "01" ? "Tu gran día" : step.number === "02" ? "Muy a tu estilo" : "¡Estás invitado!"}</span><i /><i /></div>
+            </div>
             <div>
               <h3>{step.title}</h3>
               <p>{step.description}</p>
             </div>
-            <span className="step-symbol"><step.symbol aria-hidden="true" /></span>
           </article>
         ))}
       </div>

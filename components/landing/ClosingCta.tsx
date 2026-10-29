@@ -1,4 +1,4 @@
-import { FiHeart } from "react-icons/fi";
+import { FiArrowUpRight, FiHeart } from "react-icons/fi";
 
 export function ClosingCta() {
   return (
@@ -12,6 +12,7 @@ export function ClosingCta() {
           empieza con una <em>invitación.</em>
         </h2>
       </div>
+      <div className="closing-action"><a className="button" href="/crear">Crea tu invitación <FiArrowUpRight aria-hidden="true" /></a><p>Personaliza y previsualiza gratis.</p></div>
     </section>
   );
 }

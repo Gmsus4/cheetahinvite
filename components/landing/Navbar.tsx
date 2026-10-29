@@ -5,8 +5,8 @@ import { FiArrowUpRight, FiMenu, FiX } from "react-icons/fi";
 import { BrandEmblem } from "@/components/BrandEmblem";
 
 const navigation = [
-  { id: "personalizacion", label: "Personalización" },
   { id: "como-funciona", label: "Cómo funciona" },
+  { id: "personalizacion", label: "Diseños" },
   { id: "precios", label: "Precios" },
 ];
 
@@ -102,12 +102,14 @@ export function Navbar() {
             onClick={() => setMenuOpen(false)}
           >{label}</a>)}
           <a className="home-mobile-login" href="/login">Iniciar sesión <FiArrowUpRight aria-hidden="true" /></a>
+          <a className="home-mobile-create" href="/crear">Crear invitación <FiArrowUpRight aria-hidden="true" /></a>
         </nav>
 
         <div className="header-actions">
           <a className="login-link" href="/login">
             Iniciar sesión <FiArrowUpRight aria-hidden="true" />
           </a>
+          <a className="button button-small" href="/crear">Crear invitación <FiArrowUpRight aria-hidden="true" /></a>
         </div>
       </div>
     </header>

@@ -6,6 +6,7 @@ import { Navbar } from "@/components/landing/Navbar";
 import { Pricing } from "@/components/landing/Pricing";
 import { TemplateGallery } from "@/components/landing/TemplateGallery";
 import { TrustStrip } from "@/components/landing/TrustStrip";
+import { Benefits } from "@/components/landing/Benefits";
 import "./landing-home.css";
 
 export default function Home() {
@@ -30,8 +31,9 @@ function LandingContent() {
       <Navbar />
       <Hero />
       <TrustStrip />
-      <TemplateGallery />
       <HowItWorks />
+      <TemplateGallery />
+      <Benefits />
       <Pricing />
       <ClosingCta />
       <Footer />

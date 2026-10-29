@@ -1,6 +1,5 @@
-import { FiArrowUpRight } from "react-icons/fi";
-import { landingInvitationStyles } from "@/lib/landing-invitation-example";
-import { InvitationExampleFrame } from "./InvitationExampleFrame";
+import { landingEventExamples } from "@/lib/landing-invitation-example";
+import { DesignCatalog } from "./DesignCatalog";
 
 export function TemplateGallery() {
   return (
@@ -20,26 +19,9 @@ export function TemplateGallery() {
         </p>
       </div>
 
-      <p className="personalization-note">La misma invitación, con diferentes decoraciones disponibles en el editor.</p>
-      <div className="personalization-grid">
-        {landingInvitationStyles.map(({ slug, template }) => (
-          <article className="personalization-example" key={slug}>
-            <div className="personalization-example-preview">
-              <InvitationExampleFrame styleSlug={slug} label={template.label} decorationOnly />
-            </div>
-            <div className="personalization-example-meta">
-              <h3>{template.label}</h3>
-              <span>Decoración para boda</span>
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <div className="center-link">
-        <a className="text-link" href="#como-funciona">
-          Conoce cómo funciona <span><FiArrowUpRight aria-hidden="true" /></span>
-        </a>
-      </div>
+      <DesignCatalog events={landingEventExamples.map(({ slug, label, invitation }) => ({
+        slug, label, eventType: invitation.eventType,
+      }))} />
     </section>
   );
 }

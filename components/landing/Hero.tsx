@@ -14,7 +14,7 @@ export function Hero() {
         <div className="eyebrow">
           <span className="eyebrow-dot" /> TUS MOMENTOS, EN UN SOLO LUGAR
         </div>
-        <h1 className="text-black!">
+        <h1>
           Hay días que
           <br />
           merecen <em>compartirse.</em>
@@ -31,10 +31,11 @@ export function Hero() {
             Explorar estilos <span><FiChevronDown aria-hidden="true" /></span>
           </a>
         </div>
+        <p className="hero-free-note"><span>Gratis para empezar</span> Paga solo al publicar.</p>
       </div>
 
       <div className="hero-art hero-product-stage" aria-label="Ejemplo de una invitación creada con el editor">
-        <div className="art-sun sun-one" />
+        <div className="art-sun sun-one" aria-hidden="true" />
         <div className="floating-note note-top">
           <span><FiStar aria-hidden="true" /></span> Tu historia, tu estilo
         </div>
