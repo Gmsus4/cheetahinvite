@@ -1,9 +1,10 @@
 "use server";
+import { eventPublicationIssues } from "@/lib/guided-invitation";
 
 import type { EditorSaveResult } from "@/lib/invitation-editor";
 import { invitationSectionUrl } from "@/lib/invitation-links";
 import { parseButtonAppearance } from "@/lib/invitation-buttons";
-import { getWeddingDesign, orderedWeddingSections, weddingPalette, weddingEventPublicationIssues } from "@/lib/wedding-designs";
+import { getWeddingDesign, orderedWeddingSections, weddingPalette } from "@/lib/wedding-designs";
 import type { InviteSection } from "@/lib/invitation-editor";
 
 import { auth } from "@/auth";
@@ -78,7 +79,7 @@ export async function publishEvent(eventId: string, version: number): Promise<Ed
   const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
   if (!event) return failure("not-found", "No encontramos esta invitación. Tu copia local sigue disponible.");
   if (event.contentVersion !== version) return { ...failure("conflict", "La invitación cambió en otra pestaña. Revisa tus cambios antes de continuar."), version: event.contentVersion };
-  const issues = weddingEventPublicationIssues(event);
+  const issues = eventPublicationIssues(event);
   if (issues.length) return failure("validation", issues[0].message);
   if (!event.paidAt) {
     const changed = await prisma.event.updateMany({ where: { id: event.id, ownerId: session.user.id, paidAt: null, contentVersion: version }, data: { status: "PENDING_PAYMENT" } });

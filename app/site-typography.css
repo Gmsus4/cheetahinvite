@@ -1,0 +1,10 @@
+/* Shared body typography; invitation designs keep their own chosen fonts. */
+html { font-size: 16px; }
+body { font-family: var(--font-body), Arial, sans-serif; font-size: 16px; }
+:is(.landing-home, .login-page, .dashboard-page) { font-family: var(--font-body), Arial, sans-serif; font-size: 16px; }
+.landing-home.landing-home :is(.hero-lead, .how-summary p, .section-heading > p, .benefits-heading > p, .pricing-copy > p, .steps p, .benefit-card > p, .footer-brand-block > p) { font-size: 16px; line-height: 1.75; }
+.landing-home.landing-home :is(.hero-actions .button, .hero-actions .text-link, .price-action .button) { font-family: var(--font-body), Arial, sans-serif; font-size: 16px; }
+.login-page.login-home-style :is(.login-visual > p, .login-description, .login-input-wrap input, .login-submit, .google-signin-button) { font-family: var(--font-body), Arial, sans-serif; font-size: 16px; }
+.dashboard-page.dashboard-home-style :is(.dashboard-subtitle, .dashboard-invitation-slot > p, .dashboard-slot-explanation) { font-size: 16px; line-height: 1.75; }
+.dashboard-page.dashboard-home-style .dashboard-account-panel :is(a,button) { font-family: var(--font-body), Arial, sans-serif; }
+

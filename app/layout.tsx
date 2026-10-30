@@ -22,6 +22,11 @@ import "./wedding-gallery.css";
 import "./wedding-collection.css";
 import "./wedding-collection-covers.css";
 import "./wedding-collection-interiors.css";
+import "./site-typography.css";
+import "./birthday-confetti.css";
+import "./birthday-pastel.css";
+import "./birthday-neon.css";
+import "./birthday-disco.css";
 
 export const metadata: Metadata = {
   title: "Cheetah Invite — Invitaciones digitales para celebrar",
@@ -36,3 +41,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     </html>
   );
 }
+
+import "./birthday-space.css";
+import "./birthday-dinosaur.css";
+
+import "./birthday-gamer.css";
+
+import "./birthday-cowboy.css";
+
+import "./birthday-elegant.css";
+
+import "./birthday-cinema.css";

@@ -1,0 +1,185 @@
+.birthday-elegant {
+  --elegant-accent: #d4b77a;
+  --elegant-highlight: #d4b77a;
+  --elegant-action-ink: #000000;
+  --elegant-paper: #0b0c0e;
+  --elegant-ink: #f5efe4;
+  --elegant-muted: #b9b2a6;
+  background: var(--elegant-paper);
+  color: var(--elegant-ink);
+  font: 16px/1.85 'DM Sans Variable', sans-serif;
+  overflow: hidden;
+  isolation: isolate;
+}
+.birthday-elegant * { box-sizing: border-box; }
+.birthday-elegant :is(h1,h2,h3,p,figure) { margin: 0; }
+.birthday-elegant :is(h1,h2,h3) { font-family: 'Cormorant Garamond Variable', Georgia, serif; font-weight: 300; line-height: 1.05; letter-spacing: -.035em; text-wrap: balance; overflow-wrap: anywhere; }
+.birthday-elegant h2 { font-size: clamp(42px, 5.5vw, 72px); }
+.birthday-elegant h2 em { font-style: italic; color: var(--elegant-highlight); }
+.birthday-elegant p { white-space: pre-line; overflow-wrap: anywhere; }
+.elegant-eyebrow { display: block; color: var(--elegant-highlight); font-size: 16px; font-weight: 400; letter-spacing: .13em; line-height: 1.65; margin-bottom: 25px; }
+.elegant-art { display: block; width: 100%; height: auto; object-fit: contain; pointer-events: none; }
+.elegant-link { display: inline-flex; align-items: center; justify-content: space-between; gap: 30px; margin-top: 28px; padding: 10px 0; border-bottom: 1px solid var(--elegant-accent); color: inherit; font: 400 16px/1.5 'DM Sans Variable', sans-serif; text-decoration: none; }
+.elegant-link > span { color: var(--elegant-highlight); font-size: 22px; }
+.elegant-link:focus-visible,.elegant-discover:focus-visible { outline: 2px solid var(--elegant-accent); outline-offset: 7px; }
+.elegant-link:hover { border-bottom-color: currentColor; }
+/* Cover: a typographic invitation beside a tall, cut-marble composition. */
+.elegant-hero { display: grid; grid-template-columns: 1.2fr 1fr; min-height: 860px; max-width: 1600px; margin: auto; }
+.elegant-hero-copy { position: relative; isolation: isolate; display: flex; flex-direction: column; justify-content: space-between; padding: 65px 55px 50px clamp(36px,6vw,100px); min-width: 0; }
+.elegant-hero-copy::before { content: ''; position: absolute; z-index: -1; inset: 0; background: linear-gradient(#0b0c0ed9,#0b0c0ee8), url('/birthday/elegant/silk.webp') center / cover no-repeat; }
+.elegant-hero-title { margin: 45px 0; }
+.elegant-occasion { color: #d6cebf; font: italic 300 28px/1.35 'Cormorant Garamond Variable', serif; margin-bottom: 10px !important; }
+.elegant-hero h1 { font-size: clamp(76px, 10.5vw, 148px); line-height: 1; margin-bottom: 28px; }
+.elegant-hero-line { color: #d3c9b7; font: 300 clamp(28px, 3vw, 40px)/1.2 'Cormorant Garamond Variable', serif; }
+.elegant-hero-line em { color: var(--elegant-highlight); font-weight: 300; }
+.elegant-save-date { display: flex; flex-wrap: wrap; gap: 20px 28px; align-items: start; padding-top: 25px; border-top: 1px solid #a88b544d; }
+.elegant-save-date > div { max-width: 300px; }
+.elegant-save-date span { display: block; color: var(--elegant-highlight); font-size: 16px; letter-spacing: .06em; margin-bottom: 8px; }
+.elegant-save-date strong { font-size: 16px; font-weight: 400; }
+.elegant-discover { display: inline-flex; gap: 30px; align-items: center; width: fit-content; margin-top: 38px; color: #c7bda9; font-size: 16px; text-decoration: none; }
+.elegant-discover > span { color: var(--elegant-highlight); }
+.elegant-hero-visual { position: relative; min-width: 0; margin: 35px 35px 35px 0; min-height: 730px; isolation: isolate; }
+.elegant-marble { position: absolute; z-index: -2; inset: 0; background: linear-gradient(#08090a22,#08090a44), url('/birthday/elegant/marble.webp') center / cover no-repeat; }
+.elegant-hero-outline { position: absolute; z-index: -1; inset: 22px; border: 1px solid #ddc59170; }
+.elegant-hero-visual > .elegant-hero-balloons { position: absolute; width: 70%; height: 560px; max-height: 78%; right: 2%; bottom: 80px; transform: rotate(-6deg); filter: drop-shadow(0 15px 22px #0008); }
+.elegant-visual-note { position: absolute; left: 42px; right: 42px; bottom: 22px; padding-top: 20px; border-top: 1px solid #ddc59170; text-align: center; font-size: 16px; color: #f3dec0; letter-spacing: .1em; }
+.elegant-hero-portrait { position: absolute; z-index: -2; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.has-portrait::before { content: ''; position: absolute; z-index: -1; inset: 0; background: linear-gradient(transparent 50%,#060709cc); }
+.has-portrait > .elegant-hero-balloons { width: 31%; height: 250px; right: -15px; bottom: 50px; }
+/* The opening message reads like a toast, with one small, deliberate illustration. */
+.elegant-toast { padding: 100px 28px 80px; text-align: center; border-top: 1px solid #c6a96b33; }
+.elegant-toast h2 { font-size: clamp(50px, 7vw, 88px); }
+.elegant-toast-message { position: relative; max-width: 680px; margin: 40px auto 0; padding-top: 28px; }
+.elegant-toast-message > span { display: block; color: #a58d5d; font: 300 90px/.5 'Cormorant Garamond Variable', serif; }
+.elegant-toast-message > p { color: var(--elegant-muted); }
+.elegant-toast > .elegant-art { width: 160px; height: 165px; margin: 38px auto 25px; }
+.elegant-toast-signature { color: #c1b49c; }
+.elegant-toast-signature strong { font: italic 400 30px/1.3 'Cormorant Garamond Variable', serif; color: var(--elegant-ink); margin-left: 8px; }
+.elegant-location { position: relative; isolation: isolate; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; padding: 85px max(32px,calc((100% - 1100px)/2)); border-block: 1px solid #b795552f; background: #121315; }
+.elegant-location-heading { position: relative; min-width: 0; padding-bottom: 65px; }
+.elegant-location-heading h2 { font-size: clamp(42px,4.6vw,60px); }
+.elegant-location-heading > .elegant-art { position: absolute; width: 140px; height: 110px; bottom: -5px; left: -28px; transform: rotate(-20deg); opacity: .75; }
+.elegant-location-details { min-width: 0; align-self: center; padding: 15px 0 15px 45px; border-left: 1px solid #b7955555; }
+.elegant-location-details h3 { font-size: 40px; line-height: 1.2; }
+.elegant-location-details > p { margin-top: 18px; color: var(--elegant-muted); }
+.elegant-location-date { display: flex; flex-direction: column; gap: 8px; margin-top: 25px; font-size: 16px; }
+.elegant-location-date strong { font-weight: 400; color: var(--elegant-highlight); }
+.elegant-section { position: relative; padding: 85px 28px; }
+.elegant-section-heading { max-width: 800px; margin: 0 auto 30px; }
+.elegant-content { min-width: 0; }
+.elegant-content > p { max-width: 650px; color: var(--elegant-muted); margin-inline: auto; }
+.elegant-content > p + p { margin-top: 20px; }
+.elegant-content .elegant-detail { margin-top: 24px; color: #e1d7c3; }
+.elegant-section-photo { display: block; width: 100%; height: auto; max-width: 750px; margin: 30px auto 0; }
+/* Four moments become a dinner programme, set as a quiet editorial grid. */
+.elegant-evening { max-width: 1100px; margin: auto; }
+.elegant-evening > .elegant-section-heading { margin: 0 0 45px; }
+.elegant-program { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); list-style: none; padding: 0; margin: 0; gap: 0 70px; }
+.elegant-program li { display: grid; grid-template-columns: 75px minmax(0,1fr); gap: 24px; align-items: start; padding: 30px 0; border-top: 1px solid #a88b544d; }
+.elegant-program-index { font: 300 64px/1 'Cormorant Garamond Variable', serif; color: #b99c64; }
+.elegant-program strong { display: block; font-size: 16px; font-weight: 400; letter-spacing: .08em; color: var(--elegant-highlight); margin-bottom: 8px; }
+.elegant-program p { font: 300 30px/1.2 'Cormorant Garamond Variable', serif; color: #e9dfcb; }
+.elegant-section-dress_code { background: linear-gradient(#0b0c0ed9,#0b0c0ed9), url('/birthday/elegant/silk.webp') center / cover no-repeat; border-block: 1px solid #b795552f; }
+.elegant-atelier { position: relative; max-width: 1000px; margin: auto; text-align: center; padding: 0 65px 45px; }
+.elegant-atelier .elegant-section-heading { max-width: 700px; }
+.elegant-atelier .elegant-content > p { max-width: 560px; }
+.elegant-atelier > .elegant-art { position: absolute; right: -12px; bottom: -50px; width: 150px; height: 150px; transform: rotate(20deg); }
+.elegant-section-gifts { background: #0e0f11; }
+.elegant-gift-note { position: relative; isolation: isolate; max-width: 860px; min-height: 445px; margin: auto; padding: 90px 95px 75px; text-align: center; }
+.elegant-gift-frame { position: absolute; z-index: -1; inset: 0; width: 100%; height: 100%; object-fit: fill; opacity: .7; }
+.elegant-gift-note h2 { font-size: clamp(42px,4.8vw,60px); }
+.elegant-gift-signature { display: block; margin-top: 30px; color: #c4ad80; font: italic 400 27px/1.3 'Cormorant Garamond Variable', serif; }
+.elegant-section-music { background: linear-gradient(#0b0c0ee6,#0b0c0ee6), url('/birthday/elegant/onyx-pattern.webp') center / 736px auto repeat; border-block: 1px solid #b795552f; }
+.elegant-listening { max-width: 1000px; margin: auto; }
+.elegant-listening .elegant-section-heading { margin: 0 0 30px; max-width: 750px; }
+.elegant-listening .elegant-content > p { max-width: 630px; margin-left: 0; }
+.elegant-listening-rule { display: flex; gap: 9px; height: 45px; align-items: center; margin-top: 35px; }
+.elegant-listening-rule > span { display: block; width: 2px; height: 25%; background: #b79d6c; }
+.elegant-listening-rule > span:nth-child(2n) { height: 70%; }
+.elegant-listening-rule > span:nth-child(3n) { height: 100%; }
+/* The reply is a dark reservation form beside a personal invitation. */
+.elegant-reservation { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 1.1fr; gap: 75px; align-items: start; }
+.elegant-reservation-copy { padding-top: 35px; min-width: 0; }
+.elegant-reservation-copy .elegant-section-heading { margin-left: 0; }
+.elegant-reservation-copy > p { color: var(--elegant-muted); max-width: 430px; }
+.elegant-reservation-copy .elegant-detail { margin-top: 20px; }
+.elegant-reservation-rule { display: block; width: 70px; border-bottom: 1px solid var(--elegant-accent); margin-top: 35px; }
+.elegant-reservation-form { min-width: 0; }
+.elegant-rsvp { --invite-paper: #131416; --invite-ink: #f5efe4; --invite-muted: #b9b2a6; --invite-accent: var(--elegant-accent); --invite-action: var(--elegant-accent); --invite-body-font: 'DM Sans Variable', sans-serif; }
+.elegant-rsvp .invite-rsvp-form { --rsvp-border: #675b43; --rsvp-tint: #25241f; border: 1px solid #675b43; border-radius: 0; box-shadow: none; margin-top: 0; }
+.birthday-elegant .elegant-rsvp .invite-rsvp-form :is(input,label,button,select,textarea,legend,p,small,span,strong) { font-size: 16px; }
+.elegant-rsvp .invite-rsvp-field input { border-radius: 0; background: #0b0c0e; color: #f5efe4; }
+.elegant-rsvp .invite-rsvp-field input::placeholder { font-size: 16px; color: #aaa397; }
+.elegant-rsvp .invite-rsvp-form .invite-rsvp-button,.elegant-rsvp .invite-rsvp-counter button { border-radius: 0; background: #191a1d; color: #f5efe4; }
+.elegant-rsvp .invite-rsvp-form .invite-rsvp-choice { border-radius: 0; }
+.elegant-rsvp .invite-rsvp-choice-icon { background: #34332d; color: #d6c9b1; }
+.elegant-rsvp .invite-rsvp-form .invite-rsvp-choice[aria-pressed="true"] { color: #f5efe4; }
+.elegant-rsvp .invite-rsvp-choice[aria-pressed="true"] .invite-rsvp-choice-icon { color: var(--elegant-action-ink); }
+.elegant-rsvp .invite-rsvp-form .invite-rsvp-button:hover:not(:disabled),.elegant-rsvp .invite-rsvp-counter button:hover:not(:disabled) { color: #f5efe4; }
+.elegant-rsvp .invite-rsvp-companions { border-radius: 0; }
+.elegant-rsvp .invite-rsvp-total span,.elegant-rsvp .invite-rsvp-form > small a { color: #eee1c6; }
+.elegant-rsvp .invite-rsvp-form .invite-rsvp-submit,.elegant-rsvp .invite-rsvp-form .invite-rsvp-submit:hover:not(:disabled) { background: var(--elegant-accent); color: var(--elegant-action-ink); border-radius: 0; }
+.elegant-rsvp .invite-rsvp-error { background: #331c18; border-color: #946652; color: #ffd4bd; border-radius: 0; }
+.elegant-rsvp .invite-rsvp-success { background: #25241f; color: #e1d1ad; border-radius: 0; }
+.elegant-letter { max-width: 760px; margin: auto; text-align: center; }
+.elegant-gallery-content { max-width: 1100px; margin: auto; text-align: center; }
+.elegant-gallery { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; margin-top: 35px; }
+.elegant-gallery img { display: block; width: 100%; height: auto; }
+.elegant-countdown { position: relative; isolation: isolate; padding: 90px 28px; border-top: 1px solid #b795552f; text-align: center; }
+.elegant-countdown-confetti { position: absolute; z-index: -1; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .16; mask-image: linear-gradient(90deg,#000,transparent 25%,transparent 75%,#000); }
+.elegant-countdown .invite-countdown-clock { display: flex; justify-content: center; max-width: 800px; margin: 45px auto 0; }
+.elegant-countdown .invite-countdown-unit { display: flex; flex: 1; min-width: 0; flex-direction: column; padding: 0 20px; border-right: 1px solid #b7955555; }
+.elegant-countdown .invite-countdown-unit:last-child { border-right: 0; }
+.elegant-countdown .invite-countdown-unit strong { font: 300 clamp(52px,7vw,88px)/1.1 'Cormorant Garamond Variable', serif; color: #e3cd9c; }
+.elegant-countdown .invite-countdown-unit span { margin-top: 12px; font-size: 16px; color: #bcb09a; letter-spacing: .07em; }
+.elegant-countdown .invite-countdown-started { margin-top: 35px; }
+.elegant-footer { position: relative; isolation: isolate; overflow: hidden; padding: 90px 28px 80px; text-align: center; border-top: 1px solid #b795552f; }
+.elegant-footer > :not(.elegant-art) { position: relative; }
+.elegant-footer-waves { position: absolute; z-index: -1; inset: auto 0 -55px; height: 350px; width: 100%; object-fit: cover; opacity: .35; mask-image: linear-gradient(transparent,#000); }
+.elegant-footer strong { display: block; font: italic 300 clamp(58px,8vw,100px)/1.1 'Cormorant Garamond Variable', serif; margin: 25px auto; color: #e4c88f; overflow-wrap: anywhere; }
+.elegant-footer p,.elegant-footer > span:last-child { color: var(--elegant-muted); }
+.elegant-footer-rule { display: block; width: 50px; margin: 30px auto; border-bottom: 1px solid #a88b54; }
+@media (max-width: 800px) {
+  .elegant-hero { grid-template-columns: 1fr; min-height: 0; }
+  .elegant-hero-copy { padding: 40px 26px 45px; }
+  .elegant-hero-title { margin: 35px 0; }
+  .elegant-hero h1 { font-size: clamp(68px,18vw,105px); }
+  .elegant-hero-line { font-size: 34px; }
+  .elegant-save-date { gap: 18px 25px; }
+  .elegant-discover { margin-top: 28px; }
+  .elegant-hero-visual { min-height: 430px; margin: 0 24px 35px; }
+  .elegant-marble { background-position: center 45%; }
+  .elegant-hero-visual > .elegant-hero-balloons { width: 65%; height: 340px; max-height: none; bottom: 65px; right: 4%; }
+  .elegant-hero-outline { inset: 18px; }
+  .elegant-visual-note { left: 34px; right: 34px; bottom: 20px; padding-top: 16px; letter-spacing: .04em; }
+  .has-portrait > .elegant-hero-balloons { width: 35%; height: 190px; right: -10px; }
+  .elegant-toast { padding: 65px 26px 55px; }
+  .elegant-toast-message { margin-top: 28px; }
+  .elegant-toast > .elegant-art { width: 135px; height: 145px; margin-block: 28px 20px; }
+  .elegant-location { grid-template-columns: 1fr; gap: 35px; padding: 55px 28px; }
+  .elegant-location-heading { padding-bottom: 70px; }
+  .elegant-location-heading > .elegant-art { width: 110px; height: 90px; left: auto; right: 0; bottom: -10px; }
+  .elegant-location-details { border-left: 0; border-top: 1px solid #b7955555; padding: 30px 0 0; }
+  .elegant-section { padding: 60px 26px; }
+  .elegant-program { grid-template-columns: 1fr; }
+  .elegant-program li { grid-template-columns: 60px minmax(0,1fr); gap: 20px; padding-block: 25px; }
+  .elegant-program-index { font-size: 56px; }
+  .elegant-atelier { padding: 0 0 65px; }
+  .elegant-atelier > .elegant-art { width: 100px; height: 100px; bottom: -65px; right: -10px; }
+  .elegant-gift-note { min-height: 0; padding: 60px 32px 55px; }
+  .elegant-gift-note h2 { font-size: 42px; }
+  .elegant-gift-signature { font-size: 25px; }
+  .elegant-reservation { grid-template-columns: 1fr; gap: 35px; }
+  .elegant-reservation-copy { padding-top: 0; }
+  .elegant-gallery { gap: 12px; }
+  .elegant-countdown { padding: 60px 26px; }
+  .elegant-countdown .invite-countdown-unit { padding-inline: 10px; }
+  .elegant-countdown .invite-countdown-unit strong { font-size: 58px; }
+  .elegant-countdown .invite-countdown-unit span { letter-spacing: 0; }
+  .elegant-footer { padding: 60px 26px; }
+}
+@media (max-width: 480px) {
+  .elegant-rsvp .invite-rsvp-choices { grid-template-columns: 1fr; }
+  .elegant-countdown .invite-countdown-clock { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 0; }
+  .elegant-countdown .invite-countdown-unit:nth-child(2) { border-right: 0; }
+}

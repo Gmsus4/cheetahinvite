@@ -128,6 +128,11 @@ export const invitationFonts = [
     "id": "raleway",
     "label": "Raleway",
     "family": "'Raleway Variable', Arial, sans-serif"
+  },
+  {
+    "id": "rye",
+    "label": "Rye · Vaquero",
+    "family": "'Rye', Georgia, serif"
   }
 ] as const;
 

@@ -1,5 +1,5 @@
 import { BrandEmblem } from "@/components/BrandEmblem";
-import { FiArrowUp, FiArrowUpRight } from "react-icons/fi";
+import { FiArrowUp } from "react-icons/fi";
 
 export function Footer() {
   return (
@@ -26,7 +26,6 @@ export function Footer() {
       <div className="footer-start">
         <span className="footer-group-label">TU PRÓXIMA CELEBRACIÓN</span>
         <p>Hazla tuya.<br />Compártela con todos.</p>
-        <a className="button" href="/crear">Crea tu invitación <FiArrowUpRight aria-hidden="true" /></a>
       </div>
       </div>
       <div className="home-footer-bottom">

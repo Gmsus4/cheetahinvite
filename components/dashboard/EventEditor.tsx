@@ -1,11 +1,34 @@
 "use client";
+import { BirthdayCinemaInvitation } from '@/components/invitation/BirthdayCinemaInvitation';
+import { birthdayCinemaId } from '@/lib/birthday-cinema';
+import { BirthdayElegantInvitation } from '@/components/invitation/BirthdayElegantInvitation';
+import { birthdayElegantId } from '@/lib/birthday-elegant';
+import { BirthdayCowboyInvitation } from '@/components/invitation/BirthdayCowboyInvitation';
+import { birthdayCowboyId } from '@/lib/birthday-cowboy';
+import { BirthdayGamerInvitation } from '@/components/invitation/BirthdayGamerInvitation';
+import { birthdayGamerId } from '@/lib/birthday-gamer';
 
+
+import { birthdayDinosaurId } from '@/lib/birthday-dinosaur';
+import { BirthdayDinosaurInvitation } from '@/components/invitation/BirthdayDinosaurInvitation';
+
+import { birthdaySpaceId } from '@/lib/birthday-space';
+import { BirthdaySpaceInvitation } from '@/components/invitation/BirthdaySpaceInvitation';
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { prepareEvent } from "@/app/crear/actions";
 import { WeddingInvitation } from "@/components/invitation/WeddingInvitation";
 import { getWeddingDesign } from "@/lib/wedding-designs";
 import { InvitationTexturePicker } from "./InvitationTexturePicker";
+import { BirthdayDiscoInvitation } from "@/components/invitation/BirthdayDiscoInvitation";
+import { birthdayDiscoId } from "@/lib/birthday-disco";
+import { BirthdayNeonInvitation } from "@/components/invitation/BirthdayNeonInvitation";
+import { birthdayNeonId } from "@/lib/birthday-neon";
+import { BirthdayPastelInvitation } from "@/components/invitation/BirthdayPastelInvitation";
+import { birthdayPastelId } from "@/lib/birthday-pastel";
+import { BirthdayConfettiInvitation } from "@/components/invitation/BirthdayConfettiInvitation";
+import { birthdayConfettiId } from "@/lib/birthday-designs";
+import { CountdownTimer } from "@/components/invitation/CountdownTimer";
 import { InvitationTemplatePicker } from "./InvitationTemplatePicker";
 import { InvitationDecoration } from "./InvitationDecoration";
 import { getInvitationTemplate, templateAccent, sectionDecoration, type InvitationTemplate } from "@/lib/invitation-templates";
@@ -521,6 +544,16 @@ function parseProgramEntry(line: string, index: number) {
 export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, locationImageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", buttonAppearance = defaultButtonAppearance, templateId = "none", texture = "none", sections, publicEventId }: {
   eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; locationImageUrl?: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; buttonAppearance?: InvitationButtonAppearance; templateId?: string; texture?: string; sections: InviteSection[]; full?: boolean; publicEventId?: string;
 }) {
+  if (eventType === "birthday" && templateId === birthdayCinemaId) return <BirthdayCinemaInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
+  if (eventType === "birthday" && templateId === birthdayElegantId) return <BirthdayElegantInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
+  if (eventType === "birthday" && templateId === birthdayCowboyId) return <BirthdayCowboyInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
+  if (eventType === "birthday" && templateId === birthdayGamerId) return <BirthdayGamerInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
+  if (eventType === "birthday" && templateId === birthdayDinosaurId) return <BirthdayDinosaurInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
+  if (eventType === "birthday" && templateId === birthdaySpaceId) return <BirthdaySpaceInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
+  if (eventType === "birthday" && templateId === birthdayDiscoId) return <BirthdayDiscoInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
+  if (eventType === "birthday" && templateId === birthdayNeonId) return <BirthdayNeonInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
+  if (eventType === "birthday" && templateId === birthdayPastelId) return <BirthdayPastelInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
+  if (eventType === "birthday" && templateId === birthdayConfettiId) return <BirthdayConfettiInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
   if (eventType === "wedding" && getWeddingDesign(templateId)) return <WeddingInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
   return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} locationImageUrl={locationImageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} heroHorizontal={heroHorizontal} heroVertical={heroVertical} buttonAppearance={buttonAppearance} templateId={templateId} texture={texture} sections={sections} publicEventId={publicEventId} />;
 }
@@ -562,35 +595,9 @@ function formatEventTime(time: string) {
   return new Intl.DateTimeFormat("es-MX", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "UTC" }).format(new Date(`1970-01-01T${time}:00Z`));
 }
 
-function CountdownTimer({ date, time }: { date: string; time: string }) {
-  const [now, setNow] = useState<number | null>(null);
-  const target = Date.parse(`${date}T${time}:00-06:00`);
-
-  useEffect(() => {
-    const update = () => setNow(Date.now());
-    update();
-    const interval = window.setInterval(update, 1000);
-    return () => window.clearInterval(interval);
-  }, []);
-
-  if (!Number.isFinite(target)) return null;
-  if (now !== null && now >= target) return <p className="invite-countdown-started">¡Llegó el gran día! Que empiece la celebración.</p>;
-
-  const totalSeconds = now === null ? 0 : Math.floor((target - now) / 1000);
-  const values = [
-    { value: now === null ? "--" : String(Math.floor(totalSeconds / 86400)), label: "días" },
-    { value: now === null ? "--" : String(Math.floor((totalSeconds % 86400) / 3600)).padStart(2, "0"), label: "horas" },
-    { value: now === null ? "--" : String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0"), label: "minutos" },
-    { value: now === null ? "--" : String(totalSeconds % 60).padStart(2, "0"), label: "segundos" },
-  ];
-
-  return <div className="invite-countdown-clock" aria-label="Cuenta regresiva para el evento">
-    {values.map((item) => <div className="invite-countdown-unit" key={item.label}><strong>{item.value}</strong><span>{item.label}</span></div>)}
-  </div>;
-}
 
 function InviteWebsiteSection({ section, index = 0, decoration, template, eventType, publicEventId }: { section: InviteSection; index?: number; decoration?: string; template?: InvitationTemplate | null; eventType: string; publicEventId?: string }) {
-  if (section.type === "dress_code" || section.type === "gifts") decoration = undefined;
+  if (section.type === "dress_code" || section.type === "gifts" || (eventType === "birthday" && section.type === "gallery")) decoration = undefined;
   if (section.type === "parents") {
     const ornament = decoration || template?.assets.flower || template?.assets.separator || template?.assets.decoration;
     const families = section.content.split("\n").map((line) => line.trim()).filter(Boolean);
@@ -613,7 +620,7 @@ function InviteWebsiteSection({ section, index = 0, decoration, template, eventT
   return <section data-layout={section.layout === "auto" || !section.layout ? (section.imageUrl ? "split" : "centered") : section.layout} data-has-section-decoration={decoration ? "true" : undefined} className={`invite-content-block invite-content-${section.type}${index % 2 ? " invite-content-offset" : ""}${section.imageUrl || galleryImages.length ? " has-section-image" : ""}`}>
     {decoration && section.type !== "story" && <span className="invite-section-decoration" aria-hidden="true"><Image src={decoration} alt="" fill sizes="(max-width: 760px) 48px, 90px" unoptimized /></span>}
     {isGallery && galleryImages.length > 0 ? <div className="invite-content-image invite-gallery-feature"><GalleryBento images={galleryImages} title={section.title} /></div> : section.imageUrl && <div className="invite-content-image" style={{ backgroundImage: `url("${section.imageUrl.replaceAll('"', '')}")` }} role="img" aria-label={section.title} />}
-      <div className="invite-content-copy"><span className="invite-content-icon">{sectionIcon(section.type)}</span>{section.type === "story" && decoration && <span className="invite-story-ornament" aria-hidden="true"><Image src={decoration} alt="" fill sizes="94px" unoptimized /></span>}{section.type === "gifts" && (giftLeft || giftRight) ? <div className="invite-gifts-heading">{giftLeft && <span className="invite-gifts-heading-ornament" aria-hidden="true"><Image src={giftLeft} alt="" fill sizes="(max-width: 760px) 44px, 96px" unoptimized /></span>}<h2>{section.title}</h2>{giftRight && <span className="invite-gifts-heading-ornament" aria-hidden="true"><Image src={giftRight} alt="" fill sizes="(max-width: 760px) 44px, 96px" unoptimized /></span>}</div> : <h2>{section.title}</h2>}{section.detail && <p className="invite-content-detail">{section.detail}</p>}{section.type === "program" && <ol className="invite-program-list">{section.content.split("\n").map(parseProgramEntry).filter((entry) => entry.description).map((entry, index) => <li key={entry.id}><span className={entry.time ? "invite-program-time" : "invite-program-index"}>{entry.time || String(index + 1).padStart(2, "0")}</span><div className="invite-program-copy"><i aria-hidden="true" /><p>{entry.description}</p></div></li>)}</ol>}{section.content && section.type !== "program" && <p className="invite-content-body">{section.content}</p>}
+      <div className="invite-content-copy">{!(eventType === "birthday" && isGallery) && <span className="invite-content-icon">{sectionIcon(section.type)}</span>}{section.type === "story" && decoration && <span className="invite-story-ornament" aria-hidden="true"><Image src={decoration} alt="" fill sizes="94px" unoptimized /></span>}{section.type === "gifts" && (giftLeft || giftRight) ? <div className="invite-gifts-heading">{giftLeft && <span className="invite-gifts-heading-ornament" aria-hidden="true"><Image src={giftLeft} alt="" fill sizes="(max-width: 760px) 44px, 96px" unoptimized /></span>}<h2>{section.title}</h2>{giftRight && <span className="invite-gifts-heading-ornament" aria-hidden="true"><Image src={giftRight} alt="" fill sizes="(max-width: 760px) 44px, 96px" unoptimized /></span>}</div> : <h2>{section.title}</h2>}{section.detail && <p className="invite-content-detail">{section.detail}</p>}{section.type === "program" && <ol className="invite-program-list">{section.content.split("\n").map(parseProgramEntry).filter((entry) => entry.description).map((entry, index) => <li key={entry.id}><span className={entry.time ? "invite-program-time" : "invite-program-index"}>{entry.time || String(index + 1).padStart(2, "0")}</span><div className="invite-program-copy"><i aria-hidden="true" /><p>{entry.description}</p></div></li>)}</ol>}{section.content && section.type !== "program" && <p className="invite-content-body">{section.content}</p>}
       {section.type === "rsvp" && section.rsvpMode === "integrated" ? <RsvpForm eventId={publicEventId} /> : sectionUrl && <a className="invite-static-link" href={sectionUrl} target="_blank" rel="noopener noreferrer">{invitationLinkLabel(section.type)} <FiArrowDown /></a>}
     </div>
   </section>;

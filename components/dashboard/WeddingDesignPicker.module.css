@@ -68,3 +68,46 @@
 @media(max-width:600px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 10px}.caption{font-size:10px;padding:9px 3px 6px}.scene{padding:16px 8px}.explore{font-size:9px}}
 @container(max-width:140px){.kicker{display:none}.names{font-size:20px;margin:8px 0 6px}.rule{margin:3px 0 6px}.date{font-size:5px}.scene[data-design="minimal"] .motif{top:9%;width:20px;height:8px}.scene[data-design="minimal"] .motif::after{left:14px;top:6px;width:20px;height:8px}.scene[data-design="editorial"] .names{font-size:24px}.scene[data-design="art-deco"] .names{font-size:18px}}
 @media(prefers-reduced-motion:reduce){.card{transition:none}.card:hover{transform:none}}
+/* Occasion previews share the exact card dimensions and controls above. */
+.scene[data-design="event-essential"] .paper{inset:12px;border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+.scene[data-design="event-essential"] .names{color:var(--accent);font-size:clamp(23px,15cqi,39px)}
+.scene[data-design="birthday-confetti"]{justify-content:flex-start;padding:23px 8px 10px;background:#fffaf0 url('/textures/wedding/cotton.webp') center/250px;color:#387d81}
+.miniBunting{position:absolute;top:0;left:0;right:0;height:16px;background:repeating-linear-gradient(90deg,#b8cdb0 0 18%,#e6b38a 18% 36%,#a6ccd0 36% 54%);clip-path:polygon(0 0,100% 0,100% 20%,90% 100%,80% 20%,70% 100%,60% 20%,50% 100%,40% 20%,30% 100%,20% 20%,10% 100%,0 20%)}
+.miniBirthdayTitle{font-family:'Fredoka Variable',sans-serif;font-size:clamp(12px,9cqi,23px);line-height:1.2;margin-top:5px}
+.miniBirthdayArt{flex:1;min-height:0;width:100%;margin:6px 0;background:url('/birthday/confetti/bear.webp') center/contain no-repeat;mix-blend-mode:multiply}
+@media(max-width:600px){.scene[data-design="birthday-confetti"]{padding-top:22px}}
+.scene[data-design="birthday-pastel"]{justify-content:flex-start;padding:20px 8px 10px;background:#f5e9d5 url('/birthday/pastel/sky.webp') center/cover no-repeat;color:#526f87}
+.scene[data-design="birthday-pastel"] .miniBirthdayTitle{font-family:'Comfortaa Variable',sans-serif;font-size:clamp(12px,8cqi,21px);margin-top:7px}
+.miniPastelArt{flex:1;width:90%;min-height:0;margin:7px 0;background:url('/birthday/pastel/cake.webp') center/contain no-repeat;mix-blend-mode:multiply}
+.scene[data-design="birthday-neon"]{justify-content:flex-start;padding:20px 8px 10px;background:#000;color:#70f3ee}
+.miniNeonTitle{font:400 clamp(24px,20cqi,45px)/1.2 'Comfortaa Variable',sans-serif;color:#fff2fc;text-shadow:0 0 5px #f46bde,0 0 15px #f46bde;margin-top:8px}
+.miniNeonArt{flex:1;width:100%;min-height:0;background:url('/birthday/neon/astronaut.webp') center/contain no-repeat;mix-blend-mode:screen}
+.scene[data-design="birthday-disco"]{justify-content:flex-start;padding:14px 8px 10px;background:linear-gradient(145deg,#e2e6e6,#f1e3f5,#e4e0ed);color:#7154a1}
+.miniDiscoArt{flex:1;min-height:0;width:100%;background:url('/birthday/disco/hanging-ball.webp') center/contain no-repeat;mix-blend-mode:multiply}
+.miniDiscoTitle{font:600 clamp(20px,15cqi,36px)/1.1 'Outfit Variable',sans-serif;letter-spacing:-.05em;color:#494359;margin:5px 0 8px}
+
+.scene[data-design="birthday-space"]{background:radial-gradient(ellipse at top,#34216c,#080e25);color:#e8ddff}.miniSpaceArt{flex:1;min-height:0;width:100%;background:url('/birthday/space/astronaut-saturn.webp') center/contain no-repeat}
+
+.scene[data-design="birthday-dinosaur"]{background:radial-gradient(ellipse at top,#3e6544,#102d25);color:#fff3c6}.miniDinosaurArt{flex:1;min-height:0;width:100%;background:url('/birthday/dinosaur/trex.webp') center/contain no-repeat;border-radius:40%;margin:6px auto}
+
+.scene[data-design="birthday-gamer"]{background:#d7c7f2;color:#29213d;justify-content:flex-start;padding:18px 10px 14px;border:5px solid #29213d;border-radius:9px}
+.scene[data-design="birthday-gamer"] .kicker{font-family:'Nunito Variable',sans-serif;font-weight:900}
+.miniGamerTitle{font:800 clamp(24px,17cqi,48px)/1 'Outfit Variable',sans-serif;color:#fff9e9;text-shadow:2px 3px 0 #39235c;margin:10px 0 0}
+.miniGamerArt{flex:1;min-height:0;width:100%;background:url('/birthday/gamer/mario-kart.webp') center/contain no-repeat;margin:8px 0}
+.scene[data-design="birthday-gamer"] .date{background:#ffda58;color:#29213d;padding:5px 8px;border:1px solid #29213d;border-radius:4px;font-weight:900}
+
+.scene[data-design="birthday-cowboy"]{justify-content:center;background:#efd5ae url('/birthday/cowboy/desert-hero.webp') center/cover no-repeat;color:#62301c;padding:22px 10px 34px}
+.miniCowboyArt{width:85%;height:30%;min-height:0;background:url('/birthday/cowboy/hat.webp') center/contain no-repeat;margin:5px auto}
+.miniCowboyTitle{font:400 clamp(17px,12cqi,36px)/1.2 'Rye',Georgia,serif;text-transform:uppercase;letter-spacing:-.02em;margin:5px 0 10px}
+.scene[data-design="birthday-cowboy"] .date{font-weight:800;color:#62301c}
+
+.scene[data-design="birthday-elegant"]{background:linear-gradient(90deg,#0b0c0ef2,#0b0c0e88),url('/birthday/elegant/marble.webp') center/cover no-repeat;color:#d4b77a;justify-content:flex-start;padding:25px 12px 20px}
+.miniElegantTitle{font:300 clamp(25px,20cqi,52px)/1.1 'Cormorant Garamond Variable',Georgia,serif;color:#f5efe4;position:relative;z-index:1;margin:12px 0 5px;align-self:flex-start}
+.miniElegantArt{flex:1;min-height:0;width:100%;background:url('/birthday/elegant/balloons.webp') right center/contain no-repeat;margin:5px 0}
+.scene[data-design="birthday-elegant"] .date{color:#d4b77a;letter-spacing:.07em}
+
+.scene[data-design="birthday-cinema"] { background:linear-gradient(#29030555,#29030555),url('/birthday/cinema/curtain.webp') center/cover; color:#f3e5ca; }
+.scene[data-design="birthday-cinema"] .kicker { top:13%; color:#dfc38e; }
+.miniCinemaTitle { position:absolute; top:24%; left:7%; right:7%; font:500 46px/1.2 'Cinzel Variable',serif; text-transform:uppercase; }
+.miniCinemaArt { position:absolute; width:32%; height:28%; bottom:18%; right:34%; background:url('/birthday/cinema/clapper.webp') center/contain no-repeat; transform:rotate(-8deg); }
+.scene[data-design="birthday-cinema"] .date { color:#e3c892; bottom:9%; letter-spacing:.15em; }

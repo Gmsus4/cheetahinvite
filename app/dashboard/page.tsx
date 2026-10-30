@@ -6,6 +6,7 @@ import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { BrandLoader } from "@/components/BrandLoader";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
+import "./dashboard-home.css";
 
 export const metadata: Metadata = {
   title: "Mi panel | Cheetah Invite",

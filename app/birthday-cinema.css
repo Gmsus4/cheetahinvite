@@ -1,0 +1,244 @@
+.birthday-cinema { --cinema-gold:#d6bb80; --cinema-paper:#f1e9d8; --cinema-black:#151512; color:var(--cinema-black); background:var(--cinema-paper); font:400 16px/1.85 'DM Sans Variable',sans-serif; overflow:clip; }
+.birthday-cinema * { box-sizing:border-box; }
+.birthday-cinema :is(h1,h2,h3,p) { margin:0; }
+.birthday-cinema :is(h1,h2,h3) { text-wrap:balance; overflow-wrap:anywhere; }
+.birthday-cinema h2 { font:500 clamp(32px,4vw,51px)/1.2 'Cinzel Variable',serif; letter-spacing:-.035em; }
+.birthday-cinema h2 em { font:italic 500 1.2em/1 'Cormorant Garamond Variable',serif; }
+.birthday-cinema p { white-space:pre-line; }
+.birthday-cinema a { text-underline-offset:5px; }
+.cinema-art { display:block; object-fit:contain; pointer-events:none; }
+.cinema-overline { display:block; font-size:16px; font-weight:500; letter-spacing:.12em; line-height:1.65; }
+.cinema-premiere { position:relative; color:#f7ebd4; background:linear-gradient(#16020444,#13020288),url('/birthday/cinema/curtain.webp') center/cover; padding:28px clamp(24px,5vw,80px) 0; text-align:center; }
+.cinema-topline { display:flex; justify-content:space-between; gap:20px; border-bottom:1px solid #e2c68d55; padding-bottom:22px; color:#e2c68d; font-size:16px; letter-spacing:.08em; }
+.cinema-poster { max-width:1050px; margin:auto; padding:85px 20px 65px; }
+.cinema-poster > .cinema-overline { color:#dfc999; }
+.cinema-poster h1 { font:500 clamp(64px,11vw,152px)/1.06 'Cinzel Variable',serif; text-transform:uppercase; letter-spacing:-.055em; margin:24px 0 15px; text-shadow:0 4px 25px #0007; }
+.cinema-poster-subtitle { font:italic 400 clamp(27px,3.3vw,44px)/1.3 'Cormorant Garamond Variable',serif; }
+.cinema-stars { color:var(--cinema-gold); letter-spacing:12px; margin:30px 0; font-size:20px; }
+.cinema-poster-credit { font-size:16px; letter-spacing:.08em; color:#d7c8b2; }
+.cinema-poster-credit strong { display:block; font-weight:500; color:#f7ebd4; margin-top:5px; }
+.cinema-portrait { width:min(100%,340px); height:auto; max-height:420px; object-fit:cover; margin:0 auto 30px; border:8px solid #f3e9d3; }
+.cinema-premiere-date { display:flex; text-align:left; align-items:center; justify-content:center; gap:45px; padding:26px 20px; border-top:1px solid #e2c68d66; background:#14070477; }
+.cinema-premiere-date span,.cinema-ticket-data span { display:block; font-size:16px; color:#dfc999; letter-spacing:.06em; }
+.cinema-premiere-date strong { display:block; font-size:20px; font-weight:400; }
+.cinema-premiere-date a { color:#f7ebd4; display:flex; gap:18px; align-items:center; text-decoration:none; border-bottom:1px solid #bba67a; padding:10px 0; }
+.cinema-invitation { display:grid; grid-template-columns:.8fr 1.2fr; align-items:center; gap:70px; max-width:1200px; margin:auto; padding:95px 45px; }
+.cinema-invitation-art { position:relative; padding-top:60px; }
+.cinema-invitation-art > .cinema-art { width:100%; height:auto; transform:rotate(-5deg); }
+.cinema-stamp { position:absolute; right:8%; top:0; z-index:1; width:135px; height:135px; display:grid; place-content:center; border:2px solid #9d2135; border-radius:50%; color:#9d2135; text-align:center; font-size:16px; line-height:1.6; letter-spacing:.06em; transform:rotate(12deg); outline:1px solid #9d2135; outline-offset:-7px; }
+.cinema-invitation h2 { margin:18px 0 25px; }
+.cinema-signature { display:block; font:italic 500 29px/1.3 'Cormorant Garamond Variable',serif; color:#8e2434; margin-top:25px; }
+.cinema-location { padding:70px clamp(24px,6vw,100px) 85px; background:linear-gradient(#17140ef0,#17140ef0),url('/birthday/cinema/deco-pattern.webp') center/600px auto repeat; color:#f5ecdc; }
+.cinema-location-heading { position:relative; max-width:1050px; margin:0 auto 35px; padding-left:105px; }
+.cinema-location-heading > .cinema-art { position:absolute; left:0; top:8px; width:75px; height:75px; }
+.cinema-location-heading .cinema-overline { color:var(--cinema-gold); margin-bottom:12px; }
+.cinema-ticket { display:grid; grid-template-columns:minmax(0,1fr) 180px; max-width:1050px; margin:auto; color:#231c18; background:#f1e9d8; border:1px solid #d8c9ac; }
+.cinema-ticket-main { padding:35px 40px; }
+.cinema-ticket-main > .cinema-overline { color:#8e2434; }
+.cinema-ticket h3 { font:500 clamp(27px,3vw,38px)/1.3 'Cinzel Variable',serif; margin:16px 0 12px; }
+.cinema-ticket-data { display:flex; gap:35px; flex-wrap:wrap; margin:25px 0; }
+.cinema-ticket-data span { color:#75644d; }
+.cinema-ticket-data strong { display:block; font-weight:500; font-size:18px; }
+.cinema-ticket-stub { border-left:2px dashed #988974; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px 18px; gap:20px; text-align:center; }
+.cinema-ticket-stub :is(span,strong) { font-size:16px; line-height:1.5; letter-spacing:.08em; }
+.cinema-barcode { width:95px; height:100px; background:repeating-linear-gradient(90deg,#272018 0 2px,transparent 2px 5px,#272018 5px 6px,transparent 6px 9px,#272018 9px 13px,transparent 13px 16px); }
+.cinema-button { display:inline-flex; align-items:center; justify-content:center; gap:20px; padding:12px 23px; background:var(--cinema-accent); color:var(--cinema-action-ink); border:1px solid transparent; text-decoration:none; font-size:16px; font-weight:600; transition:transform .2s; }
+.cinema-button:hover { transform:translateY(-2px); }
+.cinema-button:focus-visible { outline:2px solid currentColor; outline-offset:5px; }
+.cinema-section { padding:80px clamp(24px,6vw,100px); }
+.cinema-heading { margin-bottom:28px; }
+.cinema-heading > .cinema-overline { margin-bottom:15px; }
+.cinema-content { min-width:0; }
+.cinema-content > p + p { margin-top:18px; }
+.cinema-content > .cinema-button { margin-top:25px; }
+.cinema-detail { opacity:.8; }
+.cinema-section-photo { display:block; max-width:100%; width:100%; height:auto; max-height:650px; object-fit:cover; margin-top:25px; }
+.cinema-section-program { background:#dcd3c0; }
+.cinema-callsheet { position:relative; max-width:1050px; margin:auto; border:1px solid #ada18b; padding:30px 45px 40px; background:#f5eddd; box-shadow:8px 9px 0 #bdb09a55; }
+.cinema-callsheet-top { display:flex; justify-content:space-between; gap:20px; font-size:16px; letter-spacing:.04em; border-bottom:2px solid #28251f; padding-bottom:15px; margin-bottom:30px; }
+.cinema-callsheet > .cinema-heading { max-width:75%; }
+.cinema-callsheet > .cinema-art { position:absolute; right:25px; top:82px; width:120px; height:125px; transform:rotate(9deg); }
+.cinema-program { list-style:none; margin:35px 0 0; padding:0; border-top:1px solid #b9ac93; }
+.cinema-program li { display:grid; grid-template-columns:65px minmax(0,1fr) 80px; gap:20px; padding:22px 0; border-bottom:1px solid #b9ac93; align-items:center; }
+.cinema-scene-number { font:400 40px/1.2 'Cinzel Variable',serif; color:#9d2135; }
+.cinema-program strong { font-size:18px; font-weight:600; }
+.cinema-scene-word { font-size:16px; letter-spacing:.09em; color:#807059; text-align:right; }
+.cinema-section-dress_code { padding:0; background:#0d1513; color:#eee6d5; }
+.cinema-dress { display:grid; grid-template-columns:.9fr 1.1fr; max-width:1500px; margin:auto; }
+.cinema-dress-photo { position:relative; min-height:620px; }
+.cinema-dress-photo > .cinema-art { width:100%; height:100%; position:absolute; object-fit:cover; object-position:50% 30%; }
+.cinema-dress-photo > span { position:absolute; bottom:28px; left:30px; right:30px; font-size:16px; letter-spacing:.1em; }
+.cinema-dress-copy { padding:85px clamp(30px,6vw,100px); align-self:center; }
+.cinema-dress-copy .cinema-overline { color:var(--cinema-gold); }
+.cinema-dress-copy > .cinema-art { width:100px; height:105px; margin:30px 0 0 auto; transform:rotate(12deg); }
+.cinema-gifts { display:grid; grid-template-columns:200px minmax(0,1fr); gap:65px; max-width:1000px; margin:auto; align-items:center; }
+.cinema-gifts > .cinema-art { width:180px; height:270px; transform:rotate(-8deg); }
+.cinema-section-music { background:linear-gradient(#390409a6,#390409a6),url('/birthday/cinema/red-fabric.webp') center/350px auto repeat; color:#f7ead5; }
+.cinema-soundtrack { max-width:1000px; margin:auto; display:grid; grid-template-columns:200px minmax(0,1fr); gap:65px; align-items:center; }
+.cinema-record { width:200px; height:auto; object-fit:contain; }
+.cinema-soundtrack .cinema-button { background:#e5cca0; color:#281b15; }
+.cinema-section-rsvp { background:#e3d7c0; }
+.cinema-admission { display:grid; grid-template-columns:1fr 1fr; max-width:1100px; margin:auto; border:1px solid #ae9f85; background:#f5eddd; }
+.cinema-admission-copy { padding:45px 40px; border-right:2px dashed #ad9c7e; }
+.cinema-admission-copy h2 { margin:20px 0 25px; }
+.cinema-admission-copy > .cinema-overline { color:#8e2434; }
+.cinema-admission-copy > p + p { margin-top:20px; }
+.cinema-admission-art { display:flex; justify-content:center; gap:10px; margin:35px 0 20px; }
+.cinema-admission-art > .cinema-art { width:45%; height:140px; transform:rotate(-10deg); }
+.cinema-admission-art > .cinema-art:last-child { transform:rotate(10deg); margin-top:45px; }
+.cinema-admission-caption { display:block; text-align:center; font-size:16px; letter-spacing:.05em; }
+.cinema-admission-form { padding:30px; min-width:0; }
+.cinema-rsvp { --invite-paper:#f5eddd; --invite-ink:#231c18; --invite-muted:#716450; --invite-accent:var(--cinema-accent); --invite-action:var(--cinema-accent); --invite-body-font:'DM Sans Variable',sans-serif; }
+.cinema-rsvp .invite-rsvp-form { --rsvp-border:#bbae98; --rsvp-tint:#eae0cd; margin:0; padding:0; border:0; border-radius:0; box-shadow:none; background:transparent; }
+.birthday-cinema .cinema-rsvp .invite-rsvp-form :is(input,label,button,select,textarea,legend,p,small,span,strong) { font-size:16px; }
+.cinema-rsvp .invite-rsvp-field input { background:#fffaf1; color:#231c18; border-radius:0; }
+.cinema-rsvp .invite-rsvp-field input::placeholder { color:#766955; font-size:16px; }
+.cinema-rsvp .invite-rsvp-form .invite-rsvp-button,.cinema-rsvp .invite-rsvp-counter button,.cinema-rsvp .invite-rsvp-choice,.cinema-rsvp .invite-rsvp-companions { border-radius:0; }
+.cinema-rsvp .invite-rsvp-form .invite-rsvp-choice[aria-pressed="true"] { color:#231c18; }
+.cinema-rsvp .invite-rsvp-choice[aria-pressed="true"] .invite-rsvp-choice-icon { color:var(--cinema-action-ink); }
+.cinema-rsvp .invite-rsvp-form .invite-rsvp-submit,.cinema-rsvp .invite-rsvp-form .invite-rsvp-submit:hover:not(:disabled) { background:var(--cinema-accent); color:var(--cinema-action-ink); border-radius:0; }
+.cinema-section-story { background:#e4dac7; }
+.cinema-letter { display:grid; grid-template-columns:70px minmax(0,1fr); max-width:1000px; margin:auto; background:#faf3e5; border:1px solid #beae93; box-shadow:7px 8px 0 #b8a88e55; }
+.cinema-letter-margin { display:flex; align-items:center; justify-content:space-between; flex-direction:column; border-right:1px solid #b99588; padding:35px 15px; color:#8e2434; }
+.cinema-letter-margin > span:first-child { writing-mode:vertical-rl; font-size:16px; letter-spacing:.18em; }
+.cinema-letter-body { position:relative; padding:45px clamp(25px,5vw,70px); }
+.cinema-letter-body > .cinema-overline { color:#8e2434; margin-bottom:20px; }
+.cinema-letter-body .cinema-heading { margin-bottom:45px; }
+.cinema-letter-quote { position:absolute; font:italic 400 100px/1 'Cormorant Garamond Variable',serif; color:#ab3747; margin-top:-30px; pointer-events:none; }
+.cinema-letter-body .cinema-content > p:first-child { position:relative; padding-top:30px; }
+.cinema-letter-end { display:flex; align-items:center; gap:20px; color:#9d2135; margin-top:35px; font-size:16px; }
+.cinema-letter-end span { width:50px; height:1px; background:#b7a58a; }
+.cinema-section-ceremony { padding:0; background:#34070e; color:#f7ead5; }
+.cinema-special-scene { position:relative; isolation:isolate; overflow:hidden; text-align:center; padding:65px 26px 80px; background:linear-gradient(#2a030baa,#260309dd),url('/birthday/cinema/curtain.webp') center/cover; }
+.cinema-scene-cue { display:block; position:relative; color:#e2c68d; font-size:16px; letter-spacing:.16em; margin-bottom:45px; }
+.cinema-scene-cue::before,.cinema-scene-cue::after { content:'★'; margin:0 18px; }
+.cinema-special-scene-copy { max-width:760px; position:relative; margin:auto; }
+.cinema-special-scene h2 { font-size:clamp(34px,4.5vw,60px); }
+.cinema-special-scene .cinema-overline { color:#e2c68d; }
+.cinema-special-scene .cinema-detail { display:inline-block; margin-top:28px; border-top:1px solid #b6976277; border-bottom:1px solid #b6976277; padding:15px 12px; color:#f5dfb8; opacity:1; }
+.cinema-special-scene .cinema-button { background:#ead4a7; color:#311a17; }
+.cinema-special-scene .cinema-section-photo { width:min(100%,520px); margin:30px auto 0; }
+.cinema-scene-lights { position:absolute; z-index:-1; inset:0; pointer-events:none; }
+.cinema-scene-lights span { position:absolute; top:-70px; width:45%; height:150%; background:linear-gradient(#f1d89835,transparent 85%); clip-path:polygon(48% 0,52% 0,100% 100%,0 100%); transform-origin:top; }
+.cinema-scene-lights span:first-child { left:0; transform:rotate(-22deg); }
+.cinema-scene-lights span:last-child { right:0; transform:rotate(22deg); }
+.cinema-stage-edge { position:absolute; bottom:15px; left:5%; right:5%; height:1px; background:#cba66b55; }
+.cinema-stage-edge::after { content:''; position:absolute; left:10%; right:10%; top:7px; height:1px; background:#cba66b33; }
+.cinema-section-reception { background:#22201b; color:#efe4cf; }
+.cinema-next-location { max-width:1050px; margin:auto; border:1px solid #b69a62; padding:10px; }
+.cinema-next-location-label { display:flex; gap:20px; align-items:center; border:1px solid #9b824655; border-bottom:0; padding:22px 30px; color:#dfc68d; background:linear-gradient(#22201bf5,#22201bf5),url('/birthday/cinema/deco-pattern.webp') center/500px auto repeat; }
+.cinema-next-location-label > .cinema-art { width:55px; height:55px; }
+.cinema-location-arrow { margin-left:auto; font-size:40px; line-height:1; }
+.cinema-next-location-body { border-inline:1px solid #9b824655; padding:15px 35px 35px; }
+.cinema-next-location-body .cinema-heading { max-width:800px; }
+.cinema-next-location-body .cinema-detail { border-left:2px solid #c5a568; padding-left:18px; opacity:1; color:#dac69f; }
+.cinema-next-location-body .cinema-button { background:#e6cea0; color:#271f18; }
+.cinema-location-footer { display:flex; justify-content:center; gap:18px; align-items:center; text-align:center; font-size:16px; color:#c9af7a; border:1px solid #9b824655; border-top:0; padding:10px 20px 25px; letter-spacing:.06em; }
+.cinema-location-footer span { height:1px; width:50px; background:#9b8246; }
+.cinema-section-parents { color:#efe6d6; background:#111310; border-block:1px solid #bc9b5844; }
+.cinema-cast { max-width:850px; margin:auto; text-align:center; padding:5px 0; }
+.cinema-cast-stars { display:block; color:#d3b77e; font-size:20px; letter-spacing:10px; margin-bottom:30px; }
+.cinema-cast .cinema-overline { color:#cbb484; }
+.cinema-cast .cinema-heading { margin-bottom:35px; }
+.cinema-cast .cinema-content > p:first-child { font:400 clamp(28px,3.8vw,43px)/1.8 'Cormorant Garamond Variable',serif; color:#f8edda; }
+.cinema-cast .cinema-detail { max-width:620px; margin:25px auto 0; color:#c5baa6; opacity:1; }
+.cinema-cast .cinema-button { background:#d8bf8a; color:#211d15; }
+.cinema-cast .cinema-section-photo { width:min(100%,550px); margin:30px auto 0; }
+.cinema-cast-line { display:block; width:85px; height:1px; background:#b29a67; margin:40px auto 0; }
+.cinema-section-custom { background:#dfd3bd; }
+.cinema-production-note { max-width:950px; margin:auto; background:#fbf3e4; border:1px solid #c1b095; }
+.cinema-production-tab { display:flex; align-items:center; gap:18px; padding:17px 30px; background:#852335; color:#fff0db; font-size:16px; letter-spacing:.1em; }
+.cinema-production-tab > span:first-child { font-size:30px; line-height:1; }
+.cinema-production-body { padding:35px 40px; }
+.cinema-production-body .cinema-heading { padding-bottom:25px; border-bottom:1px solid #c5b69a; }
+.cinema-production-body .cinema-detail { background:#eae0cd; padding:16px 20px; border-left:3px solid #9d2135; opacity:1; }
+.cinema-production-bottom { display:flex; justify-content:space-between; gap:15px; border-top:1px dashed #bba88b; padding:15px 30px; color:#7a6047; font-size:16px; letter-spacing:.07em; }
+.cinema-gallery-content,.cinema-note { max-width:1050px; margin:auto; }
+.cinema-gallery-content { text-align:center; }
+.cinema-gallery { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; margin-top:30px; }
+.cinema-gallery img { width:100%; height:auto; display:block; }
+.cinema-countdown { text-align:center; padding:75px 25px; color:#e7d8b9; background:#171612; border-bottom:1px solid #ac93613d; }
+.cinema-countdown h2 { margin-top:18px; }
+.cinema-countdown .invite-countdown-clock { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); max-width:750px; gap:12px; margin:40px auto 0; }
+.cinema-countdown .invite-countdown-unit { display:flex; flex-direction:column; border:1px solid #7c6a48; padding:20px 8px; background:#201e18; }
+.cinema-countdown .invite-countdown-unit strong { font:500 clamp(40px,5vw,64px)/1.1 'Cinzel Variable',serif; color:#f1e9d8; }
+.cinema-countdown .invite-countdown-unit span { font-size:16px; margin-top:8px; }
+.cinema-countdown .invite-countdown-started { margin-top:30px; }
+.cinema-credits { color:#e7d8b9; text-align:center; padding:65px 25px; background:#171612; }
+.cinema-credits > .cinema-art { width:100px; height:100px; margin:0 auto 25px; }
+.cinema-credits p { font:400 clamp(28px,4vw,44px)/1.25 'Cinzel Variable',serif; margin:25px auto; }
+.cinema-credits strong { display:block; font:italic 400 38px/1.2 'Cormorant Garamond Variable',serif; margin-bottom:20px; overflow-wrap:anywhere; }
+.cinema-credits > span:last-child { font-size:16px; color:#b7aa91; }
+@media (max-width:800px) {
+  .cinema-topline { justify-content:center; }
+  .cinema-topline > span:last-child { display:none; }
+  .cinema-poster { padding:65px 0 45px; }
+  .cinema-poster h1 { font-size:clamp(56px,15vw,100px); }
+  .cinema-premiere-date { flex-wrap:wrap; gap:20px 35px; padding-inline:0; }
+  .cinema-premiere-date > a { flex-basis:100%; justify-content:center; border:0; }
+  .cinema-invitation { grid-template-columns:1fr; gap:35px; padding:55px 26px; }
+  .cinema-invitation-art { max-width:300px; width:100%; margin:auto; padding-top:65px; }
+  .cinema-stamp { width:115px; height:115px; right:0; }
+  .cinema-location { padding:55px 24px; }
+  .cinema-location-heading { padding-left:0; padding-right:60px; }
+  .cinema-location-heading > .cinema-art { left:auto; right:0; width:50px; height:50px; }
+  .cinema-ticket { grid-template-columns:1fr; }
+  .cinema-ticket-main { padding:25px; }
+  .cinema-ticket-stub { border-left:0; border-top:2px dashed #988974; flex-direction:row; gap:15px; padding:20px; }
+  .cinema-ticket-stub > span { flex:1; }
+  .cinema-ticket-stub strong { flex:1; }
+  .cinema-barcode { width:70px; height:50px; }
+  .cinema-ticket-data { gap:20px; }
+  .cinema-section { padding:55px 24px; }
+  .cinema-letter { grid-template-columns:30px minmax(0,1fr); box-shadow:4px 5px 0 #b8a88e55; }
+  .cinema-letter-margin { padding:25px 5px; }
+  .cinema-letter-margin > span:first-child { font-size:16px; letter-spacing:.08em; }
+  .cinema-letter-body { padding:30px 22px; }
+  .cinema-section-ceremony { padding:0; }
+  .cinema-special-scene { padding:45px 24px 60px; }
+  .cinema-scene-cue { letter-spacing:.05em; margin-bottom:30px; }
+  .cinema-scene-cue::before,.cinema-scene-cue::after { display:none; }
+  .cinema-next-location-label { padding:18px 16px; gap:12px; }
+  .cinema-next-location-label > .cinema-art { width:40px; height:40px; }
+  .cinema-next-location-label .cinema-overline { letter-spacing:.05em; }
+  .cinema-location-arrow { font-size:28px; }
+  .cinema-next-location-body { padding:10px 20px 25px; }
+  .cinema-location-footer { gap:10px; letter-spacing:0; padding:5px 15px 20px; }
+  .cinema-location-footer span { width:20px; flex-shrink:0; }
+  .cinema-production-tab { padding:17px 20px; gap:12px; letter-spacing:.04em; }
+  .cinema-production-body { padding:28px 22px; }
+  .cinema-production-bottom { padding:15px 20px; flex-wrap:wrap; }
+  .cinema-callsheet { padding:22px; }
+  .cinema-callsheet-top { flex-direction:column; gap:6px; }
+  .cinema-callsheet > .cinema-heading { max-width:100%; padding-right:0; }
+  .cinema-callsheet > .cinema-art { position:static; width:85px; height:90px; margin:25px 0 0 auto; }
+  .cinema-program { margin-top:25px; }
+  .cinema-program li { grid-template-columns:45px minmax(0,1fr); gap:15px; }
+  .cinema-scene-number { font-size:30px; }
+  .cinema-scene-word { display:none; }
+  .cinema-section-dress_code { padding:0; }
+  .cinema-dress { grid-template-columns:1fr; }
+  .cinema-dress-photo { min-height:420px; }
+  .cinema-dress-photo > .cinema-art { object-position:50% 32%; }
+  .cinema-dress-copy { padding:45px 26px; }
+  .cinema-gifts { grid-template-columns:1fr; gap:30px; }
+  .cinema-gifts > .cinema-art { width:110px; height:170px; margin:auto; }
+  .cinema-soundtrack { grid-template-columns:1fr; gap:30px; }
+  .cinema-record { width:160px; height:auto; }
+  .cinema-admission { grid-template-columns:1fr; }
+  .cinema-admission-copy { padding:30px 24px; border-right:0; border-bottom:2px dashed #ad9c7e; }
+  .cinema-admission-form { padding:25px 20px; }
+  .cinema-admission-art { margin-top:25px; }
+  .cinema-admission-art > .cinema-art { height:105px; }
+  .cinema-rsvp .invite-rsvp-choices { grid-template-columns:1fr; }
+  .cinema-gallery { gap:12px; }
+  .cinema-countdown { padding:55px 24px; }
+}
+@media (max-width:480px) {
+  .cinema-ticket-stub { flex-wrap:wrap; }
+  .cinema-ticket-stub > span { flex-basis:100%; }
+  .cinema-countdown .invite-countdown-clock { grid-template-columns:1fr 1fr; }
+  .cinema-premiere-date { text-align:center; }
+  .cinema-premiere-date > div { width:100%; }
+}
+@media (prefers-reduced-motion:reduce) { .cinema-button { transition:none; } }

@@ -11,7 +11,7 @@ const { invitationTemplates, getInvitationTemplate, isInvitationTemplate, sectio
 
 test('event types retain their numbered slots and wedding includes eight artwork collections', () => {
   for (const eventType of ['wedding', 'birthday', 'graduation', 'baby_shower', 'anniversary']) {
-    assert.deepEqual(invitationTemplates.filter((t) => t.eventType === eventType).map((t) => t.id), eventType === 'wedding' ? ['plantilla1', 'plantilla2', 'plantilla3', 'plantilla4', 'plantilla5', 'plantilla6', 'plantilla7', 'plantilla8'] : ['plantilla1', 'plantilla2', 'plantilla3']);
+    assert.deepEqual(invitationTemplates.filter((t) => t.eventType === eventType && /^plantilla/.test(t.id)).map((t) => t.id), eventType === 'wedding' ? ['plantilla1', 'plantilla2', 'plantilla3', 'plantilla4', 'plantilla5', 'plantilla6', 'plantilla7', 'plantilla8'] : ['plantilla1', 'plantilla2', 'plantilla3']);
     assert.equal(isInvitationTemplate(eventType, 'none'), true);
   }
 });
@@ -74,4 +74,12 @@ test('white flowers template includes its corners, flower and five ornaments', (
   }
   assert.equal(template.decorations.length, 5);
   for (const resource of template.decorations) assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', resource)));
+});
+
+test('birthday identity can be saved only for birthdays and has usable example sections', () => {
+  const { birthdayConfettiId, birthdayConfettiExample } = require('../lib/birthday-designs.ts');
+  assert.equal(isInvitationTemplate('birthday', birthdayConfettiId), true);
+  assert.equal(isInvitationTemplate('wedding', birthdayConfettiId), false);
+  assert.equal(getInvitationTemplate('birthday', birthdayConfettiId).available, true);
+  assert.ok(birthdayConfettiExample.sections.some(s => s.type === 'rsvp' && s.rsvpMode === 'integrated'));
 });

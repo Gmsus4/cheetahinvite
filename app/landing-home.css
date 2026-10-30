@@ -73,6 +73,8 @@
 .landing-home :is(.how-section,.templates-section,.home-benefits,.pricing-section) { padding: 100px var(--home-inset); }
 .landing-home :is(.how-intro,.section-heading,.benefits-heading,.pricing-copy) { display: block; max-width: 750px; margin: 0 auto 42px; text-align: center; }
 .landing-home :is(.how-intro,.section-heading,.benefits-heading,.pricing-copy) h2 { margin: 13px 0 18px; font-size: clamp(32px,3.5vw,46px); line-height: 1.2; }
+.landing-home .how-intro h2 { color: var(--ink); }
+.landing-home .how-intro h2 em { color: var(--orange); }
 .landing-home :is(.how-summary,.section-heading,.benefits-heading,.pricing-copy) p { max-width: 520px; margin: 0 auto; color: var(--muted); font-size: 14px; line-height: 1.8; }
 .landing-home .how-section { display: block; background: var(--paper); color: var(--ink); }
 .landing-home .how-intro .eyebrow { color: var(--muted); }

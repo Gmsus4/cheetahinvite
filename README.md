@@ -1,3 +1,7 @@
+## Contexto de los diseños de invitaciones
+
+La colección de bodas y cumpleaños, los recursos entregados, las decisiones visuales y la guía para continuar están en [README-DISENOS.md](README-DISENOS.md).
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 La operación de compras con Stripe, historial independiente, reembolsos y disputas

@@ -4,7 +4,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { getStripe } from "@/lib/stripe";
 import { INVITATION_PRICE } from "@/lib/invitation-payment";
 import { stripeLiveMode } from "@/lib/payment-fulfillment";
-import { weddingEventPublicationIssues } from "@/lib/wedding-designs";
+import { eventPublicationIssues } from "@/lib/guided-invitation";
 
 export async function prepareInvitationCheckout(eventId: string, ownerId: string): Promise<string | null> {
   // Reserve a durable attempt before contacting Stripe. Concurrent tabs reuse
@@ -13,7 +13,7 @@ export async function prepareInvitationCheckout(eventId: string, ownerId: string
     await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${eventId} AND "ownerId" = ${ownerId} FOR UPDATE`);
     const event = await tx.event.findFirst({ where: { id: eventId, ownerId } });
     if (!event || event.paidAt) return null;
-    if (weddingEventPublicationIssues(event).length) throw new Error("Complete the invitation before checkout");
+    if (eventPublicationIssues(event).length) throw new Error("Complete the invitation before checkout");
     const pending = await tx.invitationPayment.findFirst({ where: { eventId, ownerId, status: "PENDING" }, orderBy: { createdAt: "desc" } });
     if (pending) return pending;
     return tx.invitationPayment.create({ data: { eventId, ownerId, eventName: event.name, amount: INVITATION_PRICE.amount, currency: INVITATION_PRICE.currency,

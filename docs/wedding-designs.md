@@ -2,7 +2,7 @@
 
 La segunda edición conserva los doce nombres con identificadores `-v2`. El catálogo `legacyWeddingDesigns` y el renderizador original mantienen las invitaciones `-v1`. Las composiciones de la nueva edición se implementan en `WeddingIdentityInvitation` y `app/wedding-identities.css`. La galería `/disenos-boda` permite comparar las invitaciones completas y sus paletas sin iniciar sesión. Ver [dirección artística y recursos reemplazables](wedding-identities-resources.md).
 
-Las bodas nuevas usan el asistente de cuatro pasos: celebración y diseño, datos principales, personalización y revisión. Los demás tipos de evento y las bodas anteriores conservan su editor.
+Todos los tipos de evento usan ahora el asistente compartido de cuatro pasos: celebración y diseño, datos principales, personalización y revisión. Las identidades de boda y sus renderizadores versionados se conservan. Ver el [contexto actualizado de la colección](../README-DISENOS.md).
 
 ## Diseños y compatibilidad
 

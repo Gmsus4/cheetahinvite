@@ -1,4 +1,3 @@
-import { ClosingCta } from "@/components/landing/ClosingCta";
 import { Footer } from "@/components/landing/Footer";
 import { Hero } from "@/components/landing/Hero";
 import { HowItWorks } from "@/components/landing/HowItWorks";
@@ -35,7 +34,6 @@ function LandingContent() {
       <TemplateGallery />
       <Benefits />
       <Pricing />
-      <ClosingCta />
       <Footer />
     </main>
   );

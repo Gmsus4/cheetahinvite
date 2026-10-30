@@ -1,9 +1,19 @@
+import { birthdayCinemaTemplate } from './birthday-cinema';
+import { birthdayElegantTemplate } from './birthday-elegant';
+import { birthdayCowboyTemplate } from './birthday-cowboy';
+import { birthdayGamerTemplate } from './birthday-gamer';
+import { birthdayDinosaurTemplate } from './birthday-dinosaur';
+import { birthdaySpaceTemplate } from './birthday-space';
 import { templateManifest } from './generated-invitation-templates';
 import { getWeddingDesign } from './wedding-designs';
+import { birthdayDiscoTemplate } from './birthday-disco';
+import { birthdayNeonTemplate } from './birthday-neon';
+import { birthdayPastelTemplate } from './birthday-pastel';
+import { birthdayConfettiTemplate } from './birthday-designs';
 
 export type DecorationSlot = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'separator' | 'flower' | 'decoration' | 'texture';
 export type InvitationTemplate = { id: string; eventType: string; label: string; available: boolean; accent?: string | null; assets: Partial<Record<DecorationSlot, string>>; decorations?: string[] };
-export const invitationTemplates: InvitationTemplate[] = templateManifest;
+export const invitationTemplates: InvitationTemplate[] = [...templateManifest, birthdaySpaceTemplate, birthdayConfettiTemplate, birthdayPastelTemplate, birthdayNeonTemplate, birthdayDiscoTemplate, birthdayDinosaurTemplate, birthdayGamerTemplate, birthdayCowboyTemplate, birthdayElegantTemplate, birthdayCinemaTemplate];
 export function getInvitationTemplate(eventType: string, id: string) {
   return invitationTemplates.find((template) => template.eventType === eventType && template.id === id && template.available) ?? null;
 }

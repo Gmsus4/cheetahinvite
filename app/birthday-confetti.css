@@ -1,0 +1,131 @@
+.birthday-confetti{--birthday-accent:#387d81;--birthday-ink:#354f50;--birthday-coral:#cc755e;color:var(--birthday-ink);background:#fffaf0;font-family:'Nunito Variable',sans-serif;overflow:hidden;width:100%;isolation:isolate;font-size:17px;line-height:1.8;text-align:center}
+
+/* Each complete section owns one texture surface. Never tile across its content. */
+.birthday-confetti > :where(header, section, footer){
+  background-image:url('/textures/wedding/cotton.webp');
+  background-position:center;
+  background-size:cover;
+  background-repeat:no-repeat;
+}
+
+
+.birthday-confetti *{box-sizing:border-box}
+.birthday-confetti h1,.birthday-confetti h2,.birthday-confetti h3,.birthday-confetti p{margin:0}
+.birthday-confetti h2{font-family:'Fredoka Variable',sans-serif;font-weight:500;font-size:clamp(30px,4vw,47px);line-height:1.18;letter-spacing:-.025em;color:var(--birthday-accent)}
+.birthday-confetti p{white-space:pre-line}
+.birthday-confetti a:focus-visible,.birthday-confetti button:focus-visible{outline:3px solid var(--birthday-coral);outline-offset:5px}
+.birthday-eyebrow{display:block;font-size:10px;letter-spacing:.22em;font-weight:800;line-height:1.7;margin-bottom:22px}
+.birthday-art{object-fit:contain;width:auto;height:auto;display:block;pointer-events:none}
+.birthday-cover{position:relative;isolation:isolate;padding:110px 25px 45px;min-height:850px;background-image:radial-gradient(ellipse at 50% 42%,#fae5bb75,transparent 62%),url('/textures/wedding/cotton.webp')}
+.birthday-cover:after{content:'';position:absolute;inset:50px 0 auto;height:510px;background:url('/birthday/confetti/confetti.webp') center/cover;opacity:.1;pointer-events:none;z-index:-1;mask-image:linear-gradient(#000,transparent)}
+.birthday-bunting{position:absolute;top:-23px;left:50%;transform:translateX(-50%) rotate(-4deg);width:min(900px,120%);height:83px;border-bottom:2px solid #b9a78b;border-radius:0 0 50% 50%;display:flex;justify-content:space-around;align-items:flex-end;padding:0 15px}
+.birthday-bunting i{display:block;width:48px;height:65px;clip-path:polygon(0 0,100% 0,50% 100%);background:#bdcdb3;transform:translateY(58px) rotate(8deg)}
+.birthday-bunting i:nth-child(3n+2){background:#edbb8d}
+.birthday-bunting i:nth-child(3n){background:#a6ccd0}
+.birthday-bunting i:nth-child(even){height:54px;transform:translateY(48px) rotate(-6deg)}
+.birthday-script{font-family:'Caveat Variable',cursive;font-size:clamp(28px,4vw,41px);color:var(--birthday-coral);line-height:1.2}
+.birthday-cover h1{font-family:'Fredoka Variable',sans-serif;font-weight:500;font-size:clamp(48px,8.5vw,94px);line-height:1.12;letter-spacing:-.045em;color:var(--birthday-accent)}
+.birthday-cover h1>span{color:var(--birthday-coral)}
+.birthday-cover-scene{height:350px;position:relative;max-width:500px;margin:14px auto 4px}
+.birthday-cover-scene>.birthday-art{height:100%;max-width:100%;margin:auto;object-fit:contain;mix-blend-mode:multiply}
+.birthday-spark{position:absolute;font-size:55px;color:#d9ad54;top:45%}
+.birthday-spark-one{left:8%;transform:rotate(-15deg)}
+.birthday-spark-two{right:8%;color:#cb8a73;font-size:35px;top:66%}
+.birthday-confetti .birthday-name{font-size:clamp(42px,6vw,66px);margin-top:15px}
+.birthday-date{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;max-width:600px;margin:18px auto 0;font-size:14px}
+.birthday-date strong{border-left:1px solid #acbdb3;padding-left:12px}
+.birthday-scroll{display:inline-flex;flex-direction:column;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--birthday-ink);margin-top:30px;text-decoration:none;gap:4px}
+.birthday-scroll span{font-size:22px}
+.birthday-welcome{padding:80px 25px 60px;scroll-margin-top:20px;position:relative}
+.birthday-welcome>p{max-width:520px;margin:25px auto;color:#60716b}
+.birthday-friends{display:flex;justify-content:center;align-items:center;gap:30px;max-width:650px;margin:35px auto 0}
+.birthday-friends .birthday-art{height:180px;width:135px;mix-blend-mode:multiply}
+.birthday-friends>span{font-family:'Caveat Variable',cursive;color:var(--birthday-coral);font-size:30px;line-height:1.15;transform:rotate(-5deg)}
+.birthday-place{display:grid;grid-template-columns:230px minmax(0,450px);justify-content:center;align-items:center;gap:55px;padding:80px 35px;background-color:#dce9e166;background-blend-mode:multiply;margin-top:0}
+.birthday-place>.birthday-art{width:210px;mix-blend-mode:multiply}
+.birthday-place h3{font-family:'Fredoka Variable',sans-serif;font-weight:400;font-size:25px;margin:22px 0 4px}
+.birthday-place p{font-size:15px}
+.birthday-button{display:inline-flex;justify-content:center;gap:25px;align-items:center;border-radius:100px;background:var(--birthday-accent);color:white;text-decoration:none;padding:13px 27px;font-weight:800;font-size:13px;margin-top:25px;box-shadow:0 5px 0 #354f5010;transition:transform .2s}
+.birthday-button:hover{transform:translateY(-2px)}
+.birthday-section{width:100%;margin:0;padding:80px max(45px, calc((100% - 840px) / 2));display:grid;grid-template-columns:190px minmax(0,1fr);gap:55px;align-items:center;text-align:left;position:relative}
+.birthday-section:nth-child(even){grid-template-columns:minmax(0,1fr) 190px}
+.birthday-section:nth-child(even) .birthday-section-art{order:2}
+.birthday-section-art .birthday-art{max-height:245px;max-width:100%;margin:auto;mix-blend-mode:multiply}
+.birthday-section-copy>p{margin-top:20px;color:#60716b}
+.birthday-detail{font-size:14px}
+.birthday-program{list-style:none;padding:0;margin:27px 0 0}
+.birthday-program li{display:flex;gap:20px;padding:13px 0;font-size:15px}
+.birthday-program strong{color:var(--birthday-coral);font-size:16px;flex-shrink:0}
+.birthday-section-rsvp{display:block;text-align:center;border:0}
+.birthday-section-rsvp .birthday-section-art .birthday-art{height:160px;margin-bottom:25px}
+.birthday-section-rsvp .birthday-section-copy>p{max-width:460px;margin:20px auto}
+.birthday-rsvp{--invite-action:var(--birthday-accent);--invite-ink:var(--birthday-ink);--invite-body-font:'Nunito Variable',sans-serif;--invite-accent:var(--birthday-accent);--wi-accent:var(--birthday-accent);text-align:left;margin:30px auto 0;max-width:520px}
+.birthday-countdown{padding:65px 25px 75px;background-color:#f1e1c550;background-image:url('/textures/wedding/paper.webp');background-blend-mode:multiply}
+.birthday-countdown .invite-countdown-clock{justify-content:center;gap:25px;margin-top:35px}
+.birthday-countdown .invite-countdown-unit{background:transparent;border:0;min-width:65px}
+.birthday-countdown .invite-countdown-unit strong{font-family:'Fredoka Variable',sans-serif;font-weight:400;color:var(--birthday-accent);font-size:42px}
+.birthday-countdown .invite-countdown-unit span{font-family:'Nunito Variable',sans-serif;font-size:11px;color:var(--birthday-ink)}
+.birthday-closing{padding:60px 25px 35px}
+.birthday-closing>.birthday-art{height:220px;margin:0 auto 25px;mix-blend-mode:multiply}
+.birthday-closing h2{margin:10px 0 20px}
+.birthday-closing>strong{display:block;font-family:'Fredoka Variable',sans-serif;font-size:30px;color:var(--birthday-coral);font-weight:400}
+.birthday-closing>span{display:block;font-size:9px;letter-spacing:.17em;margin-top:55px}
+.birthday-portrait{max-width:300px;margin:30px auto 0;padding:10px 10px 35px;background:#fff;box-shadow:0 5px 25px #354f5015;transform:rotate(-3deg)}
+.birthday-portrait img{width:100%;height:auto;max-height:360px;object-fit:cover}
+.birthday-section-photo{width:100%;height:auto;max-height:400px;object-fit:cover;border-radius:12px;margin-top:25px}
+.birthday-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:25px}
+.birthday-gallery img{width:100%;height:auto;border:7px solid white;box-shadow:0 4px 18px #354f5010}
+
+@media(max-width:600px){.birthday-confetti{font-size:16px}
+.birthday-cover{min-height:0;padding:105px 20px 35px}
+.birthday-cover>.birthday-eyebrow{font-size:8px;letter-spacing:.16em}
+.birthday-cover-scene{height:300px;margin-top:20px;max-width:330px}
+.birthday-spark-one{left:2%}
+.birthday-spark-two{right:2%}
+.birthday-date{font-size:12px;gap:9px}
+.birthday-welcome{padding:60px 24px 40px}
+.birthday-friends{gap:10px;margin-top:30px}
+.birthday-friends .birthday-art{height:135px;width:90px}
+.birthday-friends>span{font-size:24px}
+.birthday-place{grid-template-columns:1fr;gap:25px;padding:45px 25px;margin-top:0}
+.birthday-place>.birthday-art{height:205px;width:auto;margin:auto}
+.birthday-place .birthday-eyebrow{font-size:9px}
+.birthday-section,.birthday-section:nth-child(even){padding:50px 25px;grid-template-columns:1fr;gap:25px;text-align:center}
+.birthday-section:nth-child(even) .birthday-section-art{order:0}
+.birthday-section-art .birthday-art{height:155px}
+.birthday-section .birthday-eyebrow{font-size:9px}
+.birthday-program{text-align:left}
+.birthday-program li{gap:15px;font-size:14px}
+.birthday-countdown{padding:55px 15px}
+.birthday-countdown .invite-countdown-clock{gap:8px}
+.birthday-countdown .invite-countdown-unit{min-width:56px}
+.birthday-countdown .invite-countdown-unit strong{font-size:34px}
+.birthday-rsvp{max-width:100%}
+}
+
+@media(prefers-reduced-motion:reduce){.birthday-button{transition:none}
+}
+
+
+/* Dividers belong to the space between complete content blocks. */
+.birthday-welcome::before,
+.birthday-section + .birthday-section::before,
+.birthday-welcome + .birthday-section::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(840px, calc(100% - 90px));
+  border-top:1px dashed #bfc7b4;
+  pointer-events:none;
+}
+.birthday-program li + li{border-top:1px solid #c5cab64d}
+@media(max-width:600px){
+  .birthday-welcome::before,
+  .birthday-section + .birthday-section::before,
+  .birthday-welcome + .birthday-section::before{width:calc(100% - 50px)}
+}
+
+/* Galleries give the photographs the full content width, without illustration columns. */
+.birthday-confetti .birthday-section-gallery { display: block; text-align: center; }

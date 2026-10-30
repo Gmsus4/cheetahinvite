@@ -91,7 +91,7 @@ export function DashboardContent({ userName, userEmail, userImage, events, now }
   ).length;
 
   return (
-    <div className="dashboard-page">
+    <div className="dashboard-page dashboard-home-style">
       <a className="dashboard-skip-link" href="#mis-invitaciones">Ir a mis invitaciones</a>
       <header className="dashboard-header">
         <div className="dashboard-header-shell">
@@ -99,6 +99,11 @@ export function DashboardContent({ userName, userEmail, userImage, events, now }
             <BrandEmblem size={40} priority />
             <span className="brand-name">Cheetah<span>Invite</span></span>
           </Link>
+          <nav className="dashboard-home-nav" aria-label="Navegación de mi espacio">
+            <a href="#mis-invitaciones" aria-current="location">Mis invitaciones</a>
+            <Link href="/dashboard/compras">Mis compras</Link>
+            <Link href="/ayuda">Ayuda</Link>
+          </nav>
           <DashboardAccountMenu name={userName} email={userEmail} image={userImage} />
         </div>
       </header>
@@ -115,9 +120,6 @@ export function DashboardContent({ userName, userEmail, userImage, events, now }
               Nueva invitación <FiArrowUpRight aria-hidden="true" />
             </Link> : <span className="dashboard-capacity-full">Tus {ACCOUNT_LIMITS.invitations} espacios están ocupados</span>}
           </div>
-
-
-
           <section className="dashboard-events-section" id="mis-invitaciones" aria-labelledby="dashboard-events-title" tabIndex={-1}>
             <div className="dashboard-section-heading">
               <div>
