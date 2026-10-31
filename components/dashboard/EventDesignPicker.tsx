@@ -19,13 +19,11 @@ import { birthdayConfettiId } from '@/lib/birthday-designs';
 import styles from './WeddingDesignPicker.module.css';
 
 export function EventDesignPicker({ eventType, value, onChange }: { eventType: string; value: string; onChange(id: string): void }) {
-  const content = getInvitationEventContent(eventType);
   const templates = invitationTemplates.filter(template => template.eventType === eventType && template.available);
   return <InvitationDesignGrid value={value} onChange={onChange}
     legend="¿Cuál se siente más como tu celebración?"
     description="Elige tu estilo favorito. Tus fotos y datos se conservan al cambiar de diseño."
     options={[
-      { id: 'none', label: 'Esencial', preview: <EventPreview eventType={eventType} />, href: `/ejemplo-invitacion/${content.slug}` },
       ...templates.map(template => ({ id: template.id, label: template.label, preview: <EventPreview eventType={eventType} template={template} />, href: template.id === birthdayCinemaId ? '/ejemplo-invitacion/cumpleanos-cine' : template.id === birthdayElegantId ? '/ejemplo-invitacion/cumpleanos-elegante' : template.id === birthdayCowboyId ? '/ejemplo-invitacion/cumpleanos-vaquero' : template.id === birthdayGamerId ? '/ejemplo-invitacion/cumpleanos-gamer' : template.id === birthdayDinosaurId ? '/ejemplo-invitacion/cumpleanos-dinosaurios' : template.id === birthdaySpaceId ? '/ejemplo-invitacion/cumpleanos-espacial' : template.id === birthdayConfettiId ? '/ejemplo-invitacion/cumpleanos-confeti' : template.id === birthdayPastelId ? '/ejemplo-invitacion/cumpleanos-globos-pastel' : template.id === birthdayNeonId ? '/ejemplo-invitacion/cumpleanos-neon' : template.id === birthdayDiscoId ? '/ejemplo-invitacion/cumpleanos-disco' : undefined })),
     ]} />;
 }

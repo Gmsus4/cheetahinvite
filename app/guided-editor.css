@@ -160,7 +160,10 @@
 .guided-payment{display:flex;align-items:flex-start;gap:10px;margin:0;font-size:11px;line-height:1.8;color:#7a8470}
 .guided-payment svg{flex:none;margin-top:4px}
 .guided-final-actions{display:flex;flex-direction:column;gap:12px}
-.guided-final-actions>.button:first-child{background:#fff;border-color:#d8dfcf;color:#526247}
+.guided-footer-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:0}
+.guided-editor .button.guided-save-compact{flex:none;width:50px;padding:0;border-color:#d9dee5;background:#fff;color:#1e2a3a}
+.guided-save-compact .guided-bottom-label{display:none}
+.guided-steps-toggle,.guided-mobile-payment-label{display:none}
 .guided-management{display:flex;flex-wrap:wrap;gap:12px 22px;font-size:11px;color:#9a532d;text-decoration:underline;text-underline-offset:4px}
 .guided-alert{padding:18px;margin-bottom:24px;border:1px solid #eccabc;border-radius:10px;background:#fff3ed;font-size:12px;line-height:1.8;color:#984527}
 .guided-alert p{margin:0}

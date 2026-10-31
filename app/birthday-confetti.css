@@ -129,3 +129,4 @@
 
 /* Galleries give the photographs the full content width, without illustration columns. */
 .birthday-confetti .birthday-section-gallery { display: block; text-align: center; }
+.birthday-countdown > .birthday-countdown-cloud { width: 110px; height: auto; margin: 0 auto 22px; mix-blend-mode: multiply; }

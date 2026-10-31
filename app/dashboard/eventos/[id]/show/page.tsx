@@ -6,7 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { BrandLoader } from "@/components/BrandLoader";
-import { FiArrowLeft, FiEdit2, FiLock } from "react-icons/fi";
+import { FiEdit2, FiLock } from "react-icons/fi";
 import { isInvitationPublished } from "@/lib/invitation-payment";
 import { auth } from "@/auth";
 import { InvitationCanvas, type InviteSection } from "@/components/dashboard/EventEditor";
@@ -38,8 +38,7 @@ async function ShowInvitationData({ params }: ShowPageProps) {
   const isPublished = isInvitationPublished(event);
 
   return <main className="show-preview-page">
-    <header className="show-preview-toolbar">
-      <Link href={`/dashboard/eventos/${event.id}`} className="show-preview-back"><FiArrowLeft /> Volver al editor</Link>
+    <header className="show-preview-toolbar" style={{ gridTemplateColumns: "1fr auto" }}>
       <div className="show-preview-private">{isPublished ? "INVITACIÓN PUBLICADA" : <><FiLock /> VISTA PRIVADA · BORRADOR</>}</div>
       <Link href={`/dashboard/eventos/${event.id}`} className="show-preview-edit"><FiEdit2 /> Editar</Link>
     </header>

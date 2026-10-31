@@ -18,8 +18,7 @@ import {
   FiExternalLink,
   FiCopy,
 } from "react-icons/fi";
-import { DashboardAccountMenu } from "@/components/dashboard/DashboardAccountMenu";
-import { BrandEmblem } from "@/components/BrandEmblem";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { CopyInvitationLink } from "@/components/dashboard/CopyInvitationLink";
 import { DeleteInvitationButton } from "@/components/dashboard/DeleteInvitationButton";
 
@@ -93,20 +92,7 @@ export function DashboardContent({ userName, userEmail, userImage, events, now }
   return (
     <div className="dashboard-page dashboard-home-style">
       <a className="dashboard-skip-link" href="#mis-invitaciones">Ir a mis invitaciones</a>
-      <header className="dashboard-header">
-        <div className="dashboard-header-shell">
-          <Link className="brand" href="/dashboard" aria-label="Cheetah Invite, mi espacio">
-            <BrandEmblem size={40} priority />
-            <span className="brand-name">Cheetah<span>Invite</span></span>
-          </Link>
-          <nav className="dashboard-home-nav" aria-label="Navegación de mi espacio">
-            <a href="#mis-invitaciones" aria-current="location">Mis invitaciones</a>
-            <Link href="/dashboard/compras">Mis compras</Link>
-            <Link href="/ayuda">Ayuda</Link>
-          </nav>
-          <DashboardAccountMenu name={userName} email={userEmail} image={userImage} />
-        </div>
-      </header>
+      <DashboardHeader name={userName} email={userEmail} image={userImage} onDashboard />
 
       <main className="dashboard-main">
         <div className="dashboard-content">

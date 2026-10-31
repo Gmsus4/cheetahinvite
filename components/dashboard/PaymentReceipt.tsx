@@ -6,8 +6,10 @@ type Receipt = PaymentSummary & {
 const date = (value: Date) => new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeZone: "America/Mexico_City" }).format(value);
 
 export function PaymentReceipt({ payment }: { payment: Receipt }) {
+  const label = isPreviousPriceAttempt(payment) ? "Intento pendiente · precio anterior" : paymentStatusLabel(payment);
+  const tone = payment.status === "EXPIRED" || payment.status === "FAILED" ? "negative" : payment.status === "PENDING" ? "warning" : label === "Pago confirmado" ? "positive" : "neutral";
   return <section className="payment-receipt" aria-label="Detalle de la compra">
-    <p className="payment-receipt-state">{isPreviousPriceAttempt(payment) ? "Intento pendiente · precio anterior" : paymentStatusLabel(payment)}{!payment.livemode && (!payment.id.startsWith("legacy:") || payment.lastSyncedAt) && <small> · Modo de prueba</small>}</p>
+    <p className="payment-receipt-state" data-tone={tone}>{label}{!payment.livemode && (!payment.id.startsWith("legacy:") || payment.lastSyncedAt) && <small> · Modo de prueba</small>}</p>
     <dl>
       <div><dt>{payment.status === "PENDING" ? "Importe del intento" : "Importe"}</dt><dd>{paymentMoney(payment.amount, payment.currency)} {payment.currency.toUpperCase()}</dd></div>
       {payment.paidAt && <div><dt>Pago confirmado</dt><dd>{date(payment.paidAt)}</dd></div>}

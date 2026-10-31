@@ -128,3 +128,9 @@
 
 /* Galleries give the photographs the full content width, without illustration columns. */
 .neon-section.neon-section-gallery .neon-section-inner { display: block; text-align: center; }
+
+/* Dark layers keep the new textures behind readable text. */
+.neon-hero { background: linear-gradient(180deg,#030207fa,#030207fd 75%,#030207),url('/birthday/neon/iridescent-space.webp') center/cover no-repeat; }
+.neon-art-pixel-dinosaur img { transform: scale(1.65); }
+.neon-art-koi img { transform: scale(1.7); }
+.neon-art-butterfly img { transform: scale(1.12); }

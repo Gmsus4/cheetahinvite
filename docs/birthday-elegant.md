@@ -4,7 +4,7 @@ Noveno diseño de cumpleaños. Identidad `birthday-elegant-v1`; ejemplo `/ejempl
 
 Dirección editorial de cena formal: negro profundo, dorado champán, Cormorant Garamond de peso ligero y DM Sans para lectura. El nombre protagoniza la portada junto a un panel vertical de mármol y globos. El mensaje de bienvenida se presenta como un brindis; la ubicación se ordena en dos columnas, el programa se compone como un menú, la vestimenta sobre seda, regalos con un marco ornamental, música con textura tenue y RSVP con formulario oscuro. La cuenta regresiva usa grandes números y separadores finos, sin tarjetas.
 
-La lectura, las etiquetas y los controles conservan 16 px; los títulos y elementos tipográficos de exhibición tienen su propia jerarquía. Las decoraciones son estáticas, sin parpadeos. La galería no contiene ilustraciones, marcos ni etiquetas decorativas.
+La lectura, las etiquetas y los controles conservan 16 px; los títulos y elementos tipográficos de exhibición tienen su propia jerarquía. Las decoraciones son estáticas, sin parpadeos. La galería bento muestra las fotos sin adornos ni etiquetas decorativas.
 
 ## Recursos
 
@@ -37,3 +37,5 @@ Registrado en el selector, catálogo y ejemplo. Seleccionarlo configura `cormora
 TypeScript y ESLint sin errores, CSS analizado y 44 pruebas de regresión aprobadas. Cubren registro, conservación de datos, preparación/guardado con tipografía, recursos disponibles, galería sin adornos, enlaces, confirmaciones y personalización sin edades ficticias.
 
 Revisión visual en escritorio de 1280 px y móviles de 390 y 320 px: sin desbordamientos horizontales ni imágenes fallidas. Se comprobó el formulario en modo demostración, su confirmación y el panel de acompañantes; los controles y etiquetas mantienen 16 px. Los acentos oscuros reciben una variante clara para las etiquetas, manteniendo el color seleccionado en los botones y bordes.
+
+La alternancia dinámica de fondos, la galería bento sin adornos y el visor siguen [el comportamiento compartido de cumpleaños](birthday-shared.md).

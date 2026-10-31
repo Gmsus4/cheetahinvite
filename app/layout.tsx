@@ -52,3 +52,5 @@ import "./birthday-cowboy.css";
 import "./birthday-elegant.css";
 
 import "./birthday-cinema.css";
+
+import "./birthday-shared.css";

@@ -25,5 +25,5 @@ async function EditorData({ params, searchParams }: PageProps<"/dashboard/evento
   const event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id } });
   if (!event) notFound();
 
-  return <EventEditor key={`${event.ownerId}:${event.id}`} event={event} saved={query.saved === "1"} published={query.published === "1"} error={typeof query.error === "string" ? query.error : ""} />;
+  return <EventEditor key={`${event.ownerId}:${event.id}`} event={event} account={{ name: session.user.name || "Usuario", email: session.user.email || "", image: session.user.image }} saved={query.saved === "1"} published={query.published === "1"} error={typeof query.error === "string" ? query.error : ""} />;
 }

@@ -1,0 +1,251 @@
+/* The event workspace follows the homepage and dashboard brand system.
+   Scope every rule to the editor shell; invitation artwork keeps its palette. */
+.workspace {
+  --workspace-gap: 28px;
+  --dashboard-header-width: 1232px;
+  --dashboard-header-inset: 24px;
+  min-height: 100dvh;
+  background: #f2f4f7;
+  color: #0b1320;
+  font-family: var(--font-body), Arial, sans-serif;
+  padding-top: 0;
+}
+.workspace > header { position: static; padding-bottom: 0; }
+.saveStatus { display: flex; align-items: center; justify-content: flex-end; gap: 8px; width: min(1232px,calc(100% - 48px)); margin: 8px auto 0; color: #596575; font-size: 12px; line-height: 1.6; }
+.saveStatus svg { flex: none; color: #e9560a; }
+
+.workspace :global(.guided-header) {
+  width: min(1080px, calc(100% - 40px));
+  min-height: 66px;
+  margin: 0 auto;
+  padding: 12px 22px 12px 18px;
+  gap: 24px;
+  border: 1px solid #fff;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 10px 36px #0b13200b;
+}
+
+.workspace :global(.guided-header .brand-name) { font-size: 19px; }
+.workspace :global(.guided-save-status) { color: #596575; font-size: 12px; }
+.workspace :global(.guided-save-status svg) { color: #e9560a; }
+.workspace :global(.guided-exit) { min-height: 40px; color: #1e2a3a; font-weight: 600; }
+.workspace :global(.guided-exit:hover) { color: #c74606; }
+
+.workspace :global(.guided-layout) {
+  width: min(1280px, 100%);
+  grid-template-columns: minmax(0, 1fr) clamp(360px, 34vw, 440px);
+  gap: var(--workspace-gap);
+  padding: var(--workspace-gap) 24px 136px;
+}
+
+.workspace :global(.guided-workspace) {
+  padding: 30px;
+  border: 1px solid #d9dee5;
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: 0 8px 24px #0b132005;
+}
+
+.workspace :global(.guided-progress ol) { gap: 8px; padding-bottom: 24px; border-color: #e3e7ec; }
+.workspace :global(.guided-progress button) { gap: 8px; color: #596575; }
+.workspace :global(.guided-progress button > span) { width: 28px; height: 28px; border-color: #d9dee5; background: #f2f4f7; }
+.workspace :global(.guided-progress strong) { font-size: 11px; font-weight: 600; }
+.workspace :global(.guided-progress [aria-current="step"]) { color: #c74606; }
+.workspace :global(.guided-progress [aria-current="step"] > span) { border-color: #e9560a; background: #e9560a; color: #fff; }
+.workspace :global(.guided-progress button:hover:not(:disabled)) { color: #c74606; }
+.workspace :global(.guided-heading) { margin: 0 0 32px; }
+.workspace :global(.guided-eyebrow) { color: #c74606; font-size: 10px; letter-spacing: .12em; }
+.workspace :global(.guided-heading h1) { color: #0b1320; font-size: clamp(30px, 3vw, 42px); letter-spacing: -.055em; }
+.workspace :global(.guided-heading p) { max-width: 100%; color: #596575; font-size: 16px; line-height: 1.75; }
+.workspace :global(.guided-fields) { gap: 26px; }
+.workspace :global(.invitation-design-picker > legend) { font-family: var(--font-poppins), Arial, sans-serif; font-size: 18px; color: #0b1320; }
+.workspace :global(.invitation-design-picker > p) { color: #596575; font-size: 14px; line-height: 1.75; }
+.workspace :global(.invitation-design-picker label) { border-color: #d9dee5; border-radius: 18px; padding: 8px; }
+.workspace :global(.invitation-design-picker label:hover) { border-color: #e9560a; box-shadow: 0 6px 18px #0b13200c; }
+.workspace :global(.invitation-design-picker label:has(input:checked)) { border-color: #e9560a; box-shadow: 0 0 0 1px #e9560a; }
+.workspace :global(.invitation-design-picker label > span:last-child) { color: #1e2a3a; font-size: 13px; }
+.workspace :global(.invitation-design-picker label:has(input:checked) > span:last-child > span) { border-color: #e9560a; background: #e9560a; color: #fff; }
+.workspace :global(.invitation-design-picker a) { min-height: 40px; color: #c74606; font-size: 12px; }
+
+.workspace :global(.guided-occasion),
+.workspace :global(.guided-review-design) { padding: 20px; border-color: #f0d8c9; border-radius: 18px; background: #fff2eb; }
+.workspace :global(.guided-occasion > svg),
+.workspace :global(.guided-review-design > svg) { color: #e9560a; }
+.workspace :global(.guided-occasion strong),
+.workspace :global(.guided-review-design strong) { color: #0b1320; font-size: 15px; }
+.workspace :global(.guided-occasion p),
+.workspace :global(.guided-review-design span) { color: #596575; font-size: 13px; line-height: 1.7; }
+
+.workspace :global(.guided-field > label) { font-size: 14px; color: #1e2a3a; }
+.workspace :global(.guided-field :is(input, textarea, select)),
+.workspace :global(.editor-custom-link input) {
+  min-height: 51px;
+  padding: 12px 14px;
+  border: 1px solid #d9dee5;
+  border-radius: 12px;
+  background: #fff;
+  color: #0b1320;
+  font-size: 16px;
+  accent-color: #e9560a;
+}
+.workspace :global(.guided-field :is(input, textarea)::placeholder) { color: #667080; font-size: 14px; }
+.workspace :global(.guided-field :is(input, textarea, select):focus),
+.workspace :global(.editor-custom-link input:focus) { border-color: #e9560a; box-shadow: 0 0 0 3px #e9560a15; }
+.workspace :global(.guided-field :is(input, select):disabled) { background: #f2f4f7; color: #667080; }
+.workspace :global(.guided-field small),
+.workspace :global(.guided-help),
+.workspace :global(.guided-toggle small),
+.workspace :global(.guided-payment) { color: #596575; font-size: 13px; line-height: 1.75; }
+.workspace :global(.guided-palettes > p),
+.workspace :global(.guided-photo-field > p),
+.workspace :global(.guided-details-heading > p),
+.workspace :global(.guided-checklist p) { color: #596575; font-size: 14px; line-height: 1.75; }
+.workspace :global(.guided-palettes legend),
+.workspace :global(.guided-photo-field h2),
+.workspace :global(.guided-details-heading h2),
+.workspace :global(.guided-checklist h2) { font-family: var(--font-poppins), Arial, sans-serif; font-size: 18px; font-weight: 600; color: #0b1320; }
+.workspace :global(.guided-palettes label) { border-color: #d9dee5; border-radius: 14px; }
+.workspace :global(.guided-palettes label:has(input:checked)) { border-color: #e9560a; background: #fff8f4; }
+.workspace :global(.guided-palettes input) { accent-color: #e9560a; }
+.workspace :global(.guided-palettes svg) { color: #e9560a; }
+.workspace :global(.guided-palettes strong) { font-size: 13px; }
+
+.workspace :global(.guided-photo-field) { padding: 24px; border-color: #cbd2dc; border-radius: 20px; background: #f8f9fb; }
+.workspace :global(.image-upload-button) { border-color: #d9dee5; border-radius: 999px; background: #fff; color: #1e2a3a; font-size: 14px; }
+.workspace :global(.image-upload-button:hover) { border-color: #e9560a; background: #fff8f4; }
+.workspace :global(.image-upload-help) { color: #596575; font-size: 12px; }
+.workspace :global(.guided-detail) { border-color: #d9dee5; border-radius: 18px; }
+.workspace :global(.guided-detail.is-enabled) { border-color: #f0b897; }
+.workspace :global(.guided-toggle strong) { color: #0b1320; font-size: 14px; }
+.workspace :global(.guided-switch) { background: #cbd2dc; }
+.workspace :global(.guided-toggle input:checked + .guided-switch) { background: #e9560a; }
+.workspace :global(.guided-detail-fields) { border-color: #e3e7ec; }
+
+.workspace :global(.guided-bottom-bar) {
+  display: grid;
+  grid-template-columns: minmax(80px, 1fr) auto minmax(max-content, 1fr);
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: min(1232px, calc(100% - 48px));
+  min-height: 76px;
+  margin: 0;
+  padding: 12px 24px;
+  border: 1px solid #d9dee5;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 8px 36px #0b132018;
+}
+.workspace :global(.guided-bottom-bar > .button) { justify-self: end; }
+.workspace :global(.guided-footer-actions) { justify-self: end; }
+.workspace :global(.guided-footer-actions .button) { flex-shrink: 0; white-space: nowrap; }
+.workspace :global(.guided-bottom-bar > .guided-back) { justify-self: start; }
+.workspace :global(.guided-bottom-bar .guided-progress ol) { gap: 10px; padding: 0; border: 0; }
+.workspace :global(.guided-bottom-bar .guided-progress button) { display: grid; place-items: center; width: 44px; min-height: 44px; padding: 0; border-radius: 50%; }
+.workspace :global(.guided-bottom-bar .guided-progress .guided-steps-toggle) { display: none; }
+.workspace :global(.guided-bottom-bar .guided-progress button > span) { width: 38px; height: 38px; }
+.workspace :global(.guided-bottom-bar .guided-progress svg) { width: 18px; height: 18px; }
+.workspace :global(.guided-bottom-bar .guided-progress strong) { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.workspace :global(.guided-bottom-bar .guided-progress button:hover:not(:disabled) > span) { border-color: #e9560a; }
+.workspace :global(.guided-back),
+.workspace :global(.guided-bottom-bar > span) { color: #596575; font-size: 13px; }
+.workspace :global(.button) { min-height: 50px; padding: 12px 23px; border-radius: 999px; font-size: 14px; background: #e9560a; border-color: #e9560a; }
+.workspace :global(.button:hover:not(:disabled)) { background: #c74606; border-color: #c74606; color: #fff; }
+.workspace :global(.guided-bottom-bar .button[data-save-state="saved"]:disabled) { opacity: 1; border-color: #f0d8c9; background: #fff2eb; color: #a63e0b; }
+.workspace :global(.guided-review > div) { border-color: #e3e7ec; }
+.workspace :global(.guided-review dt) { color: #596575; font-size: 13px; }
+.workspace :global(.guided-review dd) { font-size: 14px; }
+.workspace :global(.guided-review button),
+.workspace :global(.guided-review-design button),
+.workspace :global(.guided-management),
+.workspace :global(.guided-checklist button) { color: #c74606; font-size: 13px; }
+.workspace :global(.guided-checklist) { border-color: #d9dee5; border-radius: 20px; background: #f8f9fb; }
+.workspace :global(.editor-custom-link) { font-size: 14px; }
+.workspace :global(.editor-custom-link-path) { background: #f2f4f7; color: #596575; border-radius: 12px; font-size: 13px; }
+.workspace :global(.editor-link-suggestion) { border-color: #f0d8c9; border-radius: 12px; background: #fff8f4; color: #c74606; }
+.workspace :global(.guided-alert),
+.workspace :global(.guided-notice) { border-radius: 16px; font-size: 14px; }
+
+.workspace :global(.guided-preview) { top: 24px; padding: 18px; border-color: #d9dee5; border-radius: 26px; background: #fff; box-shadow: 0 8px 24px #0b132005; }
+.workspace :global(.guided-preview-heading) { gap: 4px; margin-bottom: 14px; }
+.workspace :global(.guided-preview .editor-live-preview:not(.is-expanded) .editor-preview-viewport) { height: clamp(320px, calc(100dvh - 360px), 800px); }
+.workspace :global(.guided-preview-heading > span) { color: #1e2a3a; font-size: 10px; letter-spacing: .12em; }
+.workspace :global(.guided-preview-heading > small) { color: #596575; font-size: 13px; }
+.workspace :global(.guided-preview .editor-preview-devices) { background: #f2f4f7; }
+.workspace :global(.guided-mobile-preview) { bottom: calc(110px + env(safe-area-inset-bottom, 0px)); border-color: #0b1320; background: #0b1320; color: #fff; box-shadow: 0 6px 28px #0b132024; }
+
+@media (min-width: 1024px) {
+  .workspace :global(.guided-header),
+  .workspace :global(.guided-bottom-bar) {
+    width: min(1080px, calc(100% - 40px));
+    height: 66px;
+    min-height: 66px;
+    border-radius: 999px;
+  }
+  .workspace :global(.guided-bottom-bar) { padding: 7px 22px 7px 18px; }
+}
+
+@media (max-width: 1100px) {
+  .workspace { --workspace-gap: 20px; }
+  .workspace :global(.guided-workspace) { padding: 24px; }
+  .workspace :global(.guided-progress button) { flex-direction: column; text-align: center; }
+  .workspace :global(.guided-preview) { padding: 18px; }
+}
+@media (max-width: 1023px) {
+  .workspace { --dashboard-header-width: 760px; }
+  .workspace :global(.guided-layout) { display: block; max-width: 808px; padding-bottom: 190px; }
+  .workspace :global(.guided-preview.is-open) { padding: 0; border: 0; }
+}
+@media (max-width: 760px) {
+  .workspace :global(.guided-bottom-bar) { grid-template-columns: auto minmax(68px, 1fr) auto; }
+  .workspace :global(.guided-bottom-bar .guided-progress) { position: relative; justify-self: center; }
+  .workspace :global(.guided-bottom-bar .guided-progress[data-grouped="true"]) { width: 68px; }
+  .workspace :global(.guided-bottom-bar .guided-progress .guided-steps-toggle) { display: flex; align-items: center; width: 68px; height: 44px; padding: 0; border: 0; background: transparent; }
+  .workspace :global(.guided-step-stack) { display: block; position: relative; width: 68px; height: 38px; font-style: normal; }
+  .workspace :global(.guided-step-stack > i) { position: absolute; display: grid; place-items: center; width: 38px; height: 38px; top: 0; border: 2px solid #fff; border-radius: 50%; font-style: normal; box-shadow: 0 1px 4px #0b13200b; }
+  .workspace :global(.guided-step-layer) { background: #edf0f4; color: #667080; }
+  .workspace :global(.guided-step-layer-0) { left: 8px; z-index: 3; }
+  .workspace :global(.guided-step-layer-1) { left: 16px; z-index: 2; }
+  .workspace :global(.guided-step-layer-2) { left: 24px; z-index: 1; }
+  .workspace :global(.guided-step-front) { left: 0; z-index: 4; background: #e9560a; color: #fff; }
+  .workspace :global(.guided-step-stack svg) { width: 17px; height: 17px; }
+  .workspace :global(.guided-bottom-bar .guided-progress[data-grouped="true"] ol) { display: none; }
+  .workspace :global(.guided-bottom-bar .guided-progress[data-grouped="true"][data-expanded="true"] ol) { display: flex; position: absolute; bottom: calc(100% + 18px); left: 50%; transform: translateX(-50%); gap: 6px; padding: 10px; border: 1px solid #d9dee5; border-radius: 999px; background: #fff; box-shadow: 0 8px 28px #0b132018; }
+  .workspace :global(.guided-footer-actions .guided-bottom-label) { display: none; }
+  .workspace :global(.guided-footer-actions .button) { width: 44px; min-height: 44px; padding: 12px; }
+  .workspace :global(.guided-footer-actions .guided-publish) { width: 44px; height: 44px; padding: 12px; }
+}
+@media (max-width: 600px) {
+  .workspace { --dashboard-header-inset: 14px; padding-top: 0; }
+  .workspace :global(.guided-header) { width: calc(100% - 28px); padding: 12px 14px; gap: 10px; border-radius: 24px; }
+  .workspace :global(.guided-header .brand-name) { font-size: 17px; }
+  .workspace :global(.guided-save-status) { max-width: 128px; font-size: 10px; }
+  .workspace :global(.guided-layout) { padding: var(--workspace-gap) 14px 190px; }
+  .workspace :global(.guided-bottom-bar) { bottom: 0; width: 100%; min-height: 78px; padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px)); border-radius: 20px 20px 0 0; }
+  .workspace :global(.guided-bottom-bar) { gap: 6px; }
+  .workspace :global(.guided-bottom-label) { display: none; }
+  .workspace :global(.guided-bottom-bar > .guided-back) { justify-content: center; min-width: 40px; }
+  .workspace :global(.guided-footer-actions) { gap: 6px; }
+  .workspace :global(.guided-footer-actions .button) { width: 40px; min-width: 40px; min-height: 40px; padding: 10px; }
+  .workspace :global(.guided-bottom-bar > .button),
+  .workspace :global(.guided-footer-actions .guided-publish) { width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 12px; }
+  .workspace :global(.guided-bottom-bar .guided-progress button) { width: 36px; min-height: 40px; }
+  .workspace :global(.guided-bottom-bar .guided-progress button > span) { width: 32px; height: 32px; }
+  .workspace :global(.guided-bottom-bar .guided-progress ol) { gap: 2px; }
+  .workspace :global(.guided-workspace) { padding: 24px 18px; border-radius: 22px; }
+  .workspace :global(.guided-progress ol) { gap: 4px; }
+  .workspace :global(.guided-progress strong) { font-size: 10px; }
+  .workspace :global(.guided-heading h1) { font-size: 30px; }
+  .workspace :global(.guided-data-grid) { grid-template-columns: minmax(0, 1fr); }
+  .workspace :global(.guided-photo-field) { padding: 18px; }
+  .workspace :global(.guided-palettes > div) { grid-template-columns: minmax(0, 1fr); }
+  .workspace :global(.guided-toggle small) { font-size: 12px; }
+  .workspace :global(.guided-review > div) { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .workspace :global(.guided-review dt) { padding-top: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace :global(*) { scroll-behavior: auto !important; transition: none !important; }
+}

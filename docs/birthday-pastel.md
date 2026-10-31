@@ -9,3 +9,5 @@ Las superficies son de ancho completo, sin repetición de texturas ni márgenes 
 Admite foto opcional, color principal, fecha, hora, dirección y mapa, mensajes, programa, galería, enlaces validados, confirmación integrada o externa y cuenta regresiva. El ejemplo utiliza exclusivamente datos ficticios. Cambiar de diseño conserva los datos y las secciones del usuario. Confeti sigue disponible con su identidad original.
 
 La portada actual dice «¡ESTÁS INVITADO A MI CUMPLEAÑOS!» y utiliza el nombre como título principal. A petición del propietario se retiraron «Hoy el cielo está de fiesta» y «Un cumpleaños en las nubes»; no reintroducirlas.
+
+La alternancia dinámica de fondos, la galería bento sin adornos y el visor siguen [el comportamiento compartido de cumpleaños](birthday-shared.md).

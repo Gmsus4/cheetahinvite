@@ -172,6 +172,27 @@ test('creation resumes the same prepared event and a successful completion leave
   assert.equal(first.storage.length, 0);
 });
 
+test('the paid-event editor can recover creation backups for that same event including playlist links', async t => {
+  const first = setup(t, { eventId: '', creation: true });
+  const draft = JSON.parse(values('Con playlist'));
+  draft.sections = [{ id: 'birthday-music', type: 'music', title: 'Playlist', content: '', detail: '', link: 'https://example.com/playlist', imageUrl: '', enabled: true }];
+  first.controller.setEventId('prepared-event');
+  first.controller.update(JSON.stringify(draft), false, { step: 2, activeExtra: null }, false);
+  first.controller.stop();
+
+  const next = setup(t, { storage: first.storage, eventId: 'prepared-event', manualOnly: true, version: 3 });
+  const record = next.controller.getSnapshot().recovery;
+  assert.ok(record, 'editing must discover the matching backup from creation');
+  assert.equal(JSON.parse(record.snapshot).sections[0].link, 'https://example.com/playlist');
+  next.controller.recover();
+  assert.equal(next.controller.getSnapshot().code, 'conflict', 'an older backup must not overwrite published changes automatically');
+  assert.equal(next.calls.length, 0);
+  const unrelated = setup(t, { storage: first.storage, eventId: 'different-event', manualOnly: true });
+  assert.equal(unrelated.controller.getSnapshot().recovery, null);
+  const foreign = setup(t, { storage: first.storage, ownerId: 'another-owner', eventId: 'prepared-event', manualOnly: true });
+  assert.equal(foreign.controller.getSnapshot().recovery, null);
+});
+
 test('consecutive creation sessions start empty and save distinct events without changing the previous one', async t => {
   const storage = new MemoryStorage();
   const saved = new Map();

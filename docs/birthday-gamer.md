@@ -18,8 +18,10 @@ Los doce recursos entregados se sirven como WebP desde `public/birthday/gamer/`;
 | `crewmate` | Confirmación de asistencia |
 | `minecraft-world` | Terreno de la cuenta regresiva |
 
-El componente `BirthdayGamerInvitation.tsx` usa las propiedades existentes de `InvitationCanvas`, enlaces seguros, el formulario compartido de confirmación y la cuenta regresiva común. Las secciones opcionales están enmarcadas; la galería muestra exclusivamente sus fotos y textos, sin ilustraciones ni barra decorativa. La foto personal de portada es opcional. El formulario admite tanto confirmación integrada con `publicEventId` como enlace externo.
+El componente `BirthdayGamerInvitation.tsx` usa las propiedades existentes de `InvitationCanvas`, enlaces seguros, el formulario compartido de confirmación y la cuenta regresiva común. Las secciones opcionales están enmarcadas; la galería usa un bento con fotos ampliables, sin adornos ni barra decorativa. La foto personal de portada es opcional. El formulario admite tanto confirmación integrada con `publicEventId` como enlace externo.
 
 Registrado en el catálogo, el selector compartido, el modelo guiado y las rutas de ejemplo. Cambiar de diseño conserva los datos personales y seleccionar Gamer configura Outfit y Nunito.
 
 Comprobaciones: TypeScript, ESLint y pruebas de registro, persistencia de borradores, recursos, renderizado, galería, enlaces y confirmación. La revisión visual en navegador debe comprobarse por separado cuando el control del navegador esté disponible.
+
+La alternancia dinámica de fondos, la galería bento sin adornos y el visor siguen [el comportamiento compartido de cumpleaños](birthday-shared.md).

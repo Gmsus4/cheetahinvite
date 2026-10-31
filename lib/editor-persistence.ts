@@ -56,13 +56,17 @@ export class EditorPersistence {
       this.initialized = true;
       this.creationKey = browser.uuid();
       const prefix = editorDraftPrefix(this.options.ownerId, this.options.creation ? "" : this.options.eventId);
+      const creationPrefix = editorDraftPrefix(this.options.ownerId, "");
       this.recordKey = prefix + browser.uuid();
       const records: EditorDraftRecord[] = [];
       try {
         if (!browser.storage) throw new Error("Storage unavailable");
         for (let index = 0; index < browser.storage.length; index++) {
           const key = browser.storage.key(index);
-          if (!key?.startsWith(prefix)) continue;
+          // After checkout the route changes from creation to editing, but an
+          // unsaved creation backup still lives under the original prefix.
+          // parseEditorDraft below enforces the exact owner and event match.
+          if (!key || (!key.startsWith(prefix) && (this.options.creation || !key.startsWith(creationPrefix)))) continue;
           const record = parseEditorDraft(browser.storage.getItem(key), this.options.ownerId, this.options.creation ? "" : this.options.eventId, browser.now());
           if (record && (!this.options.creation || !this.options.eventId || (record.eventId || record.creationKey) === this.options.eventId)) records.push({ ...record, key });
         }

@@ -52,7 +52,7 @@
 .pastel-program li>span{color:#c79d52;font-size:24px}
 .pastel-program strong{font-size:14px;color:var(--pastel-accent)}
 .pastel-program p{font-size:15px}
-.pastel-section-rsvp{background:#e8eff0!important;padding:60px 25px 75px}
+.pastel-section-rsvp{background:#e8eff0;padding:60px 25px 75px}
 .pastel-section-rsvp .pastel-section-inner{display:block;text-align:center;max-width:700px}
 .pastel-section-rsvp .pastel-section-inner>.pastel-art{width:180px;height:105px;margin:0 auto 25px}
 .pastel-section-rsvp .pastel-section-copy>p{max-width:460px;margin:22px auto}

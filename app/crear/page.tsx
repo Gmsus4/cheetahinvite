@@ -32,6 +32,7 @@ async function CreateEventData({
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=%2Fcrear");
 
+  const account = { name: session.user.name || "Usuario", email: session.user.email || "", image: session.user.image };
   const params = await searchParams;
   const initialType = typeof params.tipo === "string" ? params.tipo : "";
   const hasError = typeof params.error === "string";
@@ -39,9 +40,9 @@ async function CreateEventData({
   const invitationLimitReached = (user?.invitationCount ?? 0) >= ACCOUNT_LIMITS.invitations;
   const resumeId = typeof params.resume === "string" && /^[a-zA-Z0-9_-]{1,80}$/.test(params.resume) ? params.resume : "";
   const resumed = resumeId ? await prisma.event.findFirst({ where: { id: resumeId, ownerId: session.user.id, paidAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] } } }) : null;
-  if (resumed) return <EventEditor key={`${session.user.id}:new`} creation event={resumed} saved={false} published={false} error="" />;
+  if (resumed) return <EventEditor key={`${session.user.id}:new`} creation account={account} event={resumed} saved={false} published={false} error="" />;
 
-  if (!invitationLimitReached) return <EventEditor key={`${session.user.id}:new`} creation event={{
+  if (!invitationLimitReached) return <EventEditor key={`${session.user.id}:new`} creation account={account} event={{
     id: "", ownerId: session.user.id, name: "", eventType: ["wedding", "birthday", "graduation", "baby_shower", "anniversary", "other"].includes(initialType) ? initialType : "wedding",
     contentVersion: 0, customSlug: null, templateId: "none", texture: "none", eventDate: null, eventTime: null, hostNames: null,
     paidAt: null, expiresAt: null, status: "DRAFT", slug: null, venue: null, address: null, message: null,

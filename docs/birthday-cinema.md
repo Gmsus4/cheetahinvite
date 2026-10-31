@@ -6,7 +6,7 @@ Décimo diseño de cumpleaños, `birthday-cinema-v1`. Ejemplo local: `/ejemplo-i
 
 Una premiere personal: portada tipográfica sobre telón rojo, créditos del reparto, sinopsis en papel crema, ubicación como boleto con talón, programa como cartelera de rodaje y vestimenta junto a la fotografía de un foco de estudio. La música usa tela roja repetida y un disco; la confirmación ocupa una entrada con separación perforada. La cuenta regresiva recuerda los paneles de una sala de cine y el cierre usa créditos y claqueta.
 
-Cinzel para títulos, Cormorant Garamond para notas cursivas y DM Sans para cuerpo y controles de 16 px. Negro, crema, rojo vino y dorado. El acento seleccionado se mantiene en botones, con texto negro o blanco según su luminancia. Las imágenes y texturas conservan sus colores originales. Galería limpia, sin recursos decorativos.
+Cinzel para títulos, Cormorant Garamond para notas cursivas y DM Sans para cuerpo y controles de 16 px. Negro, crema, rojo vino y dorado. El acento seleccionado se mantiene en botones, con texto negro o blanco según su luminancia. Las imágenes y texturas conservan sus colores originales. Galería bento sin decoraciones; las fotos se amplían en un visor compartido.
 
 ## Recursos
 
@@ -41,6 +41,8 @@ En esta ampliación pasaron 10 pruebas dirigidas, incluyendo las 32 combinacione
 
 ## Validación
 
-TypeScript, ESLint y análisis de CSS sin errores. 49 pruebas de regresión aprobadas: registro y guardado, conservación de datos, recursos, enlaces, galería sin decoración, personalización y confirmaciones.
+TypeScript, ESLint y análisis de CSS sin errores. 49 pruebas de regresión aprobadas: registro y guardado, conservación de datos, recursos, enlaces, galería sin decoraciones, personalización y confirmaciones.
 
 Revisión visual en escritorio de 1280 px y móviles de 390 y 320 px. Sin desbordamientos horizontales ni imágenes fallidas; controles del formulario verificados a 16 px. Portada, boleto, cartelera, vestimenta y formulario comprobados en navegador. Se reutiliza el formulario compartido en modo demostración en el ejemplo.
+
+La alternancia dinámica de fondos, la galería bento sin adornos y el visor siguen [el comportamiento compartido de cumpleaños](birthday-shared.md).

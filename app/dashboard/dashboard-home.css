@@ -1,5 +1,6 @@
 /* Dashboard presentation shares the homepage's palette, type and rounded surfaces. */
 .dashboard-home-style {
+  --dashboard-header-inset: 24px;
   --dashboard-inset: max(24px, calc((100% - 1180px) / 2));
   background: #F2F4F7;
   color: #0B1320;

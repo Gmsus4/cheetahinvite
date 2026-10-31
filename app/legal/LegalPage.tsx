@@ -1,9 +1,18 @@
 import Link from "next/link";
-import { BrandEmblem } from "@/components/BrandEmblem";
-import { FiArrowLeft, FiArrowUp, FiArrowUpRight, FiClock, FiFileText } from "react-icons/fi";
+import { FiArrowUp, FiArrowUpRight, FiClock, FiFileText } from "react-icons/fi";
+import { Suspense } from "react";
+import { connection } from "next/server";
+import { auth } from "@/auth";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import "./legal.css";
 
 type Section = { title: string; body: React.ReactNode };
+
+async function LegalNavigation() {
+  await connection();
+  const session = await auth();
+  return <DashboardHeader name={session?.user?.name || "Usuario"} email={session?.user?.email || ""} image={session?.user?.image} guest={!session?.user} />;
+}
 
 export function LegalPage({
   eyebrow,
@@ -20,10 +29,7 @@ export function LegalPage({
 }) {
   return (
     <main className="legal-page legal-modern" id="documento">
-      <header className="legal-header">
-        <Link className="brand" href="/" aria-label="Cheetah Invite, inicio"><BrandEmblem size={40} /><span className="brand-name">Cheetah<span>Invite</span></span></Link>
-        <Link className="legal-home" href="/"><FiArrowLeft aria-hidden="true" /> Volver al inicio</Link>
-      </header>
+      <Suspense fallback={<DashboardHeader name="" email="" guest />}><LegalNavigation /></Suspense>
       <div className="legal-shell">
       <div className="legal-hero">
         <span className="legal-hero-icon" aria-hidden="true"><FiFileText /></span>

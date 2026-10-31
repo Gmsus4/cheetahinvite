@@ -1,0 +1,23 @@
+.header { position: sticky; top: 0; z-index: 30; padding: 16px max(var(--dashboard-header-inset,20px),calc((100% - var(--dashboard-header-width,1180px))/2)); font-family: var(--font-body),Arial,sans-serif; }
+.shell { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; min-height: 64px; gap: 28px; padding: 9px 12px 9px 19px; border: 1px solid #fff; border-radius: 999px; background: rgb(255 255 255 / 96%); box-shadow: 0 10px 36px #0b13200b; }
+.header :global(.brand-name) { font-size: 19px; }
+.nav { display: flex; align-items: center; justify-content: flex-end; gap: 24px; min-width: 0; }
+.nav a { display: inline-flex; align-items: center; min-height: 38px; color: #1e2a3a; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.nav a:hover,.nav a[aria-current] { color: #e9560a; }
+.guestAction { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px; border-radius: 999px; background: #e9560a; color: #fff; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.guestAction:hover { background: #c74606; color: #fff; }
+.header :global(.dashboard-account-trigger) { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid #e3e7ec; border-radius: 50%; background: #fff2e9; color: #a63e0b; font: 600 14px Arial,sans-serif; cursor: pointer; overflow: hidden; }
+.header :global(.dashboard-account-panel) { border-color: #d9dee5; border-radius: 20px; box-shadow: 0 12px 36px #0b132014; }
+.header :global(.dashboard-account-panel :is(a,button)) { font-family: var(--font-body),Arial,sans-serif; }
+.header :is(a,button):focus-visible { outline: 2px solid #e9560a; outline-offset: 4px; }
+@media (max-width: 1050px) { .shell { gap: 20px; } .nav { gap: 18px; } }
+@media (max-width: 760px) {
+  .header { padding: 12px max(var(--dashboard-header-inset,20px),calc((100% - var(--dashboard-header-width,1180px))/2)); }
+  .shell { grid-template-columns: minmax(0,1fr) auto; gap: 8px 16px; padding: 10px 14px; border-radius: 24px; }
+  .header :global(.brand-name) { font-size: 18px; }
+  .shell :global(.dashboard-account-menu) { grid-column: 2; grid-row: 1; }
+  .guestAction { grid-column: 2; grid-row: 1; }
+  .nav { grid-column: 1 / -1; grid-row: 2; justify-content: center; gap: 28px; border-top: 1px solid #edf0f4; }
+  .nav a { min-height: 40px; font-size: 11px; }
+}
+@media (max-width: 440px) { .header { padding-inline: var(--dashboard-header-inset,14px); } }

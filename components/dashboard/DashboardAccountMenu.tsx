@@ -6,7 +6,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { FiCreditCard, FiHelpCircle, FiSettings } from "react-icons/fi";
 import { DashboardSignOut } from "./DashboardSignOut";
 
-export function DashboardAccountMenu({ name, email, image }: { name: string; email: string; image?: string | null }) {
+export function DashboardAccountMenu({ name, email, image, guard }: { name: string; email: string; image?: string | null; guard?: (event: { preventDefault(): void }, href: string) => void }) {
   const [open, setOpen] = useState(false);
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -44,9 +44,9 @@ export function DashboardAccountMenu({ name, email, image }: { name: string; ema
     </button>
     {open && <nav id={id} ref={panel} className="dashboard-account-panel" aria-label="Opciones de mi cuenta">
       <div className="dashboard-account-identity"><strong>{name}</strong><small>{email}</small></div>
-      <Link href="/dashboard/compras" onClick={() => setOpen(false)}><FiCreditCard aria-hidden="true" /> Mis compras</Link>
-      <Link href="/dashboard/ajustes" onClick={() => setOpen(false)}><FiSettings aria-hidden="true" /> Ajustes de cuenta</Link>
-      <Link href="/ayuda" onClick={() => setOpen(false)}><FiHelpCircle aria-hidden="true" /> Ayuda y soporte</Link>
+      <Link href="/dashboard/compras" onNavigate={event => guard?.(event, "/dashboard/compras")} onClick={() => setOpen(false)}><FiCreditCard aria-hidden="true" /> Mis compras</Link>
+      <Link href="/dashboard/ajustes" onNavigate={event => guard?.(event, "/dashboard/ajustes")} onClick={() => setOpen(false)}><FiSettings aria-hidden="true" /> Ajustes de cuenta</Link>
+      <Link href="/ayuda" onNavigate={event => guard?.(event, "/ayuda")} onClick={() => setOpen(false)}><FiHelpCircle aria-hidden="true" /> Ayuda y soporte</Link>
       <DashboardSignOut className="dashboard-account-signout" />
     </nav>}
   </div>;

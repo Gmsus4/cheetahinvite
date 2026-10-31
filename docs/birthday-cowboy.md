@@ -26,8 +26,10 @@ Los quince recursos vigentes se optimizaron en `public/birthday/cowboy/`, conser
 
 El renderizador `BirthdayCowboyInvitation.tsx` se selecciona desde `InvitationCanvas` y usa los datos reales del editor. La fotografía personal es opcional y se muestra como recuerdo enmarcado después de la bienvenida. Programa, secciones opcionales, fotos, enlaces, confirmación y cuenta regresiva reutilizan el modelo común. No introduce datos ficticios al crear un borrador ni al seleccionar el diseño. El ejemplo público es independiente y usa datos ficticios.
 
-Las galerías muestran sus fotos, título y textos sin ilustraciones, sellos, costuras ni marcos decorativos. Las confirmaciones integradas reciben `publicEventId`; el modo externo conserva el enlace configurado. Los botones y los datos adicionales tienen separación propia. El identificador `birthday-cowboy-v1` se conserva al rediseñar las escenas y los datos personales no se reemplazan.
+Las galerías muestran sus fotos, título y textos en un bento sin decoraciones. Las confirmaciones integradas reciben `publicEventId`; el modo externo conserva el enlace configurado. Los botones y los datos adicionales tienen separación propia. El identificador `birthday-cowboy-v1` se conserva al rediseñar las escenas y los datos personales no se reemplazan.
 
 Disponible en el selector compartido, catálogo público y ruta de ejemplo. Elegirlo configura Rye/Nunito y el acento terracota, conservando el contenido personal. El acento afecta a títulos destacados y formulario; la paleta secundaria de cuero y papel permanece fija.
 
 Verificación: TypeScript, ESLint, análisis de CSS y 39 pruebas combinadas de Vaquero, Gamer, modelo guiado, plantillas, enlaces y RSVP. Revisión visual a 1280, 390 y 320 px; sin desbordamiento horizontal ni imágenes fallidas. Se probó el formulario público en demostración, sin enviar respuestas reales.
+
+La alternancia dinámica de fondos, la galería bento sin adornos y el visor siguen [el comportamiento compartido de cumpleaños](birthday-shared.md).

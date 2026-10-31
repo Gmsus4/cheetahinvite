@@ -17,3 +17,5 @@ Se añadieron dos recursos para reducir repeticiones: `estrellas3discopng.png` �
 La bola con estrellas azules (`ball-navy.webp`) se reserva exclusivamente para la bienvenida. En el cierre la sustituyen las estrellas plateadas. Las demás secciones conservan ilustraciones asignadas según el contenido: destello cromado en galería, bola morada en historia, perrito en personas especiales, bola colgante en ceremonia/recepción y estrella tornasol en información adicional. No dejar vacíos los espacios al sustituir un recurso repetido.
 
 `casco2png.png` se incorpora como `helmet-silver.webp` en la sección opcional de música, sustituyendo el casco dorado repetido. El casco dorado permanece en la franja musical inicial. Se conservan once recursos en total.
+
+La alternancia dinámica de fondos, la galería bento sin adornos y el visor siguen [el comportamiento compartido de cumpleaños](birthday-shared.md).

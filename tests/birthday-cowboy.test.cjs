@@ -21,6 +21,7 @@ function renderer(fixture) {
       delete imageProps.unoptimized;
       return React.createElement('img', imageProps);
     } };
+    if (name === './BirthdayGallery') return require('./helpers/birthday-renderer.cjs').loadBirthdayComponent('BirthdayGallery', fixture);
     if (name === '@/lib/invitation-links') return fixture.load('lib/invitation-links.ts');
     if (name === './RsvpForm') return { RsvpForm: ({ eventId }) => React.createElement('form', { 'data-event-id': eventId }) };
     if (name === './CountdownTimer') return { CountdownTimer: ({ date, time }) => React.createElement('time', { dateTime: `${date}T${time}` }) };
@@ -68,17 +69,17 @@ test('Cowboy distributes all supplied resources and connects the shared RSVP for
   assert.match(html, /https:\/\/open.spotify.com\//);
 });
 
-test('Cowboy gallery preserves unique photographs and personal text without decorative characters', () => {
+test('Cowboy gallery preserves unique photographs and personal text with a themed interactive gallery', () => {
   const f = createFixture();
   const { birthdayCowboyExample } = f.load('lib/birthday-cowboy.ts');
   const gallery = { id: 'gallery', type: 'gallery', title: 'Mis recuerdos', content: 'Fotos de mi familia', detail: 'Un texto propio', link: '', imageUrl: 'https://example.com/a.jpg', imageUrls: ['https://example.com/a.jpg', 'https://example.com/b.jpg'], enabled: true };
   const html = renderer(f)({ ...birthdayCowboyExample, sections: [gallery] });
-  const section = html.match(/<section class="cowboy-section cowboy-section-gallery">([\s\S]*?)<\/section>/)[1];
+  const section = html.match(/<section class="cowboy-section cowboy-section-gallery"[^>]*>([\s\S]*?)<\/section>/)[1];
   assert.equal((section.match(/<img /g) || []).length, 2);
   assert.match(section, /Mis recuerdos/);
   assert.match(section, /Fotos de mi familia/);
   assert.match(section, /Un texto propio/);
-  assert.doesNotMatch(section, /cowboy-art|cowboy-kicker|\/birthday\/cowboy\//);
+  assert.doesNotMatch(section, /cowboy-art|cowboy-kicker/);
 });
 
 test('Cowboy respects disabled sections, external confirmations and unsafe links', () => {

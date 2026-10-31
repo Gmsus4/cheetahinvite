@@ -11,7 +11,7 @@ export function InvitationDesignGrid({ legend, description, notice, options, val
   legend: string; description: string; notice?: ReactNode; options: InvitationDesignOption[];
   value: string; onChange(id: string): void;
 }) {
-  return <fieldset className={styles.picker}>
+  return <fieldset className={`${styles.picker} invitation-design-picker`}>
     <legend>{legend}</legend><p>{description}</p>{notice}
     <div className={styles.grid}>{options.map(option => {
       const selected = value === option.id;

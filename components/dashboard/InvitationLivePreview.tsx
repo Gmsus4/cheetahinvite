@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { FiEye } from "react-icons/fi";
 
 const previewDocument = '<!doctype html><html lang="es"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head><body style="margin:0"><div id="invitation-preview-root"></div></body></html>';
 
-export function InvitationLivePreview({ children, expanded = false, onClose, initialDevice = "desktop", fitViewport = false }: { children: ReactNode; expanded?: boolean; onClose?: () => void; initialDevice?: "desktop" | "mobile"; fitViewport?: boolean }) {
+export function InvitationLivePreview({ children, expanded = false, onClose, onExpand, initialDevice = "desktop", fitViewport = false }: { children: ReactNode; expanded?: boolean; onClose?: () => void; onExpand?: () => void; initialDevice?: "desktop" | "mobile"; fitViewport?: boolean }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const container = useRef<HTMLDivElement>(null);
   const [root, setRoot] = useState<HTMLElement | null>(null);
@@ -105,6 +106,7 @@ export function InvitationLivePreview({ children, expanded = false, onClose, ini
     <div className="editor-preview-devices" role="group" aria-label="Dispositivo de vista previa">
       <button type="button" aria-pressed={device === "desktop"} onClick={() => setDevice("desktop")}>Escritorio</button>
       <button type="button" aria-pressed={device === "mobile"} onClick={() => setDevice("mobile")}>Móvil</button>
+      {onExpand && !expanded && <button className="editor-preview-expand" type="button" onClick={onExpand} aria-label="Ver invitación completa" title="Ver invitación completa"><FiEye aria-hidden="true" /></button>}
     </div>
     <div className="editor-preview-viewport" ref={container}>
       <div className="editor-preview-frame-space" style={{ width: width * scale, height: height * scale }}>

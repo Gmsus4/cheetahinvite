@@ -1,6 +1,7 @@
 "use client";
 
 import Image from 'next/image';
+import { BirthdayGallery } from './BirthdayGallery';
 import type { CSSProperties } from 'react';
 import type { WeddingInvitationProps } from './WeddingInvitation';
 import type { InviteSection } from '@/lib/invitation-editor';
@@ -25,6 +26,7 @@ function accentColors(color: string) {
 
 export function BirthdayElegantInvitation({ name, hostNames, date, eventDateKey, eventTime, venue, address, message, imageUrl, sections, publicEventId, accent }: WeddingInvitationProps) {
   const title = hostNames || name || 'Tu celebración';
+  const sectionOffset = (venue || address ? 2 : 1);
   const color = /^#[0-9a-f]{6}$/i.test(accent) ? accent : '#D4B77A';
   const palette = accentColors(color);
   const time = eventTime && /^([01]\d|2[0-3]):[0-5]\d$/.test(eventTime) ? new Intl.DateTimeFormat('es-MX', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'UTC' }).format(new Date(`1970-01-01T${eventTime}:00Z`)) : eventTime;
@@ -34,13 +36,13 @@ export function BirthdayElegantInvitation({ name, hostNames, date, eventDateKey,
       <div className={`elegant-hero-visual${imageUrl ? ' has-portrait' : ''}`}>{imageUrl ? <Image className="elegant-hero-portrait" src={imageUrl} alt={title} width={900} height={1300} unoptimized loading="eager" /> : <div className="elegant-marble" aria-hidden="true" />}<div className="elegant-hero-outline" aria-hidden="true" /><GoldArt name="balloons" className="elegant-hero-balloons" eager /><span className="elegant-visual-note">EL ARTE DE CELEBRAR</span></div>
     </header>
 
-    <section className="elegant-toast" id="elegant-toast"><span className="elegant-eyebrow">LOS BUENOS MOMENTOS SE COMPARTEN</span><h2>Hay mucho<br />por <em>celebrar.</em></h2><div className="elegant-toast-message"><span aria-hidden="true">“</span><p>{message || 'Me encantará celebrar este día contigo. Una noche para brindar, conversar y compartir buenos recuerdos.'}</p></div><GoldArt name="champagne" /><p className="elegant-toast-signature">Con cariño, <strong>{title}</strong></p></section>
+    <section className="elegant-toast" data-birthday-band="base" id="elegant-toast"><span className="elegant-eyebrow">LOS BUENOS MOMENTOS SE COMPARTEN</span><h2>Hay mucho<br />por <em>celebrar.</em></h2><div className="elegant-toast-message"><span aria-hidden="true">“</span><p>{message || 'Me encantará celebrar este día contigo. Una noche para brindar, conversar y compartir buenos recuerdos.'}</p></div><GoldArt name="champagne" /><p className="elegant-toast-signature">Con cariño, <strong>{title}</strong></p></section>
 
-    {(venue || address) && <section className="elegant-location"><div className="elegant-location-heading"><span className="elegant-eyebrow">EL ENCUENTRO</span><h2>Una noche.<br /><em>Un lugar especial.</em></h2><GoldArt name="monstera" /></div><div className="elegant-location-details"><h3>{venue || 'El lugar de nuestra celebración'}</h3><p>{address}</p><div className="elegant-location-date"><span>{date}</span>{time && <strong>{time}</strong>}</div><a className="elegant-link" href={invitationMapUrl(venue, address)} target="_blank" rel="noopener noreferrer">Ver ubicación <span aria-hidden="true">↗</span></a></div></section>}
+    {(venue || address) && <section className="elegant-location" data-birthday-band="tinted"><div className="elegant-location-heading"><span className="elegant-eyebrow">EL ENCUENTRO</span><h2>Una noche.<br /><em>Un lugar especial.</em></h2><GoldArt name="monstera" /></div><div className="elegant-location-details"><h3>{venue || 'El lugar de nuestra celebración'}</h3><p>{address}</p><div className="elegant-location-date"><span>{date}</span>{time && <strong>{time}</strong>}</div><a className="elegant-link" href={invitationMapUrl(venue, address)} target="_blank" rel="noopener noreferrer">Ver ubicación <span aria-hidden="true">↗</span></a></div></section>}
 
-    {sections.filter(section => section.enabled).map(section => <ElegantSection key={section.id} section={section} publicEventId={publicEventId} />)}
+    {sections.filter(section => section.enabled).map((section,index) => <ElegantSection key={section.id} section={section} bandIndex={index + sectionOffset} publicEventId={publicEventId} />)}
 
-    {eventDateKey && eventTime && <section className="elegant-countdown"><GoldArt name="confetti" className="elegant-countdown-confetti" /><span className="elegant-eyebrow">LA FECHA SE ACERCA</span><h2>Nos vemos <em>pronto.</em></h2><CountdownTimer date={eventDateKey} time={eventTime} /></section>}
+    {eventDateKey && eventTime && <section className="elegant-countdown" data-birthday-band={(sections.filter(section => section.enabled).length + sectionOffset) % 2 === 0 ? "base" : "tinted"}><GoldArt name="confetti" className="elegant-countdown-confetti" /><span className="elegant-eyebrow">LA FECHA SE ACERCA</span><h2>Nos vemos <em>pronto.</em></h2><CountdownTimer date={eventDateKey} time={eventTime} /></section>}
 
     <footer className="elegant-footer"><GoldArt name="gold-waves" className="elegant-footer-waves" /><span className="elegant-eyebrow">QUE ESTA NOCHE SEA UN GRAN RECUERDO</span><p>Será un placer celebrar contigo.</p><strong>{title}</strong><span className="elegant-footer-rule" aria-hidden="true" /><span>Una celebración para recordar.</span></footer>
   </article>;
@@ -50,7 +52,7 @@ function ElegantHeading({ section, eyebrow }: { section: InviteSection; eyebrow?
   return <div className="elegant-section-heading">{eyebrow && <span className="elegant-eyebrow">{eyebrow}</span>}<h2>{section.title}</h2></div>;
 }
 
-function ElegantSection({ section, publicEventId }: { section: InviteSection; publicEventId?: string }) {
+function ElegantSection({ section, bandIndex, publicEventId }: { section: InviteSection; bandIndex: number; publicEventId?: string }) {
   const heading = (eyebrow?: string) => <ElegantHeading section={section} eyebrow={eyebrow} />;
   const content = <ElegantContent section={section} publicEventId={publicEventId} />;
   let scene;
@@ -63,7 +65,7 @@ function ElegantSection({ section, publicEventId }: { section: InviteSection; pu
     case 'rsvp': scene = <div className="elegant-reservation"><div className="elegant-reservation-copy">{heading('CONFIRMACIÓN DE ASISTENCIA')}<p>{section.content}</p>{section.detail && <p className="elegant-detail">{section.detail}</p>}<span className="elegant-reservation-rule" aria-hidden="true" /></div><div className="elegant-reservation-form">{content}</div></div>; break;
     default: scene = <div className="elegant-letter">{heading(section.type === 'parents' ? 'A QUIENES HACEN ESPECIAL MI VIDA' : 'UN DETALLE PARA TI')}{content}</div>;
   }
-  return <section className={`elegant-section elegant-section-${section.type}`}>{scene}</section>;
+  return <section className={`elegant-section elegant-section-${section.type}`} data-birthday-band={bandIndex % 2 === 0 ? "base" : "tinted"}>{scene}</section>;
 }
 
 function ElegantContent({ section, publicEventId }: { section: InviteSection; publicEventId?: string }) {
@@ -77,7 +79,7 @@ function ElegantContent({ section, publicEventId }: { section: InviteSection; pu
     })}</ol> : section.type !== 'rsvp' && section.content && <p>{section.content}</p>}
     {section.type !== 'rsvp' && section.detail && <p className="elegant-detail">{section.detail}</p>}
     {!gallery && section.imageUrl && <Image className="elegant-section-photo" src={section.imageUrl} alt={section.title} width={800} height={600} unoptimized />}
-    {images.length > 0 && <div className="elegant-gallery">{images.map((url, i) => <Image key={url} src={url} alt={`${section.title}, foto ${i + 1}`} width={700} height={800} unoptimized />)}</div>}
+    {images.length > 0 && <BirthdayGallery images={images} title={section.title} theme="elegant" />}
     {section.type === 'rsvp' && section.rsvpMode !== 'external' ? <div className="elegant-rsvp"><RsvpForm eventId={publicEventId} /></div> : link && <a className="elegant-link" href={link} target="_blank" rel="noopener noreferrer">{invitationLinkLabel(section.type)} <span aria-hidden="true">↗</span></a>}
   </div>;
 }
