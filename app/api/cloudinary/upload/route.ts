@@ -1,18 +1,22 @@
-import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { prisma } from "@/prisma";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
-import { cloudinaryConfig, ownedCloudinaryPublicId, signedCloudinaryForm } from "@/lib/cloudinary";
+import { cloudinaryConfig, CLOUDINARY_FORMATS, CLOUDINARY_IMAGE_VALIDATION, CLOUDINARY_UPLOAD_LEASE_MS, getCloudinaryImage, ownedCloudinaryPublicId, signedCloudinaryFields, validCloudinaryUploadResponse, verifyCloudinaryUploadPreset } from "@/lib/cloudinary";
 import { failCloudinaryImage, finishCloudinaryImage, ImageStorageError, reserveCloudinaryImage, scheduleCloudinaryCleanup } from "@/lib/cloudinary-storage";
 
-export const maxDuration = 60;
+export const maxDuration = 30;
 const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
+const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
-// Content-Length may be absent or forged. Bound the stream before parsing multipart.
-async function readUploadForm(request: Request) {
-  const maximum = ACCOUNT_LIMITS.imageSizeBytes + 128 * 1024;
-  if (Number(request.headers.get("content-length")) > maximum) throw new ImageStorageError("Cada imagen debe pesar 5 MB o menos.", 413);
+// These endpoints accept only small metadata, never the image or a data URL.
+async function readPayload(request: Request) {
+  const origin = request.headers.get("origin");
+  const origins = [new URL(request.url).origin];
+  if (process.env.APP_URL) origins.push(new URL(process.env.APP_URL).origin);
+  if (!origin || !origins.includes(origin)) throw new ImageStorageError("Solicitud no permitida.", 403);
+  if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) throw new ImageStorageError("Formato no válido.", 415);
   const reader = request.body?.getReader();
-  if (!reader) throw new ImageStorageError("Selecciona una imagen válida.", 400);
+  if (!reader) throw new ImageStorageError("Revisa los datos de la imagen.", 400);
   const chunks: Uint8Array<ArrayBuffer>[] = [];
   let size = 0;
   try {
@@ -20,67 +24,91 @@ async function readUploadForm(request: Request) {
       const { done, value } = await reader.read();
       if (done) break;
       size += value.byteLength;
-      if (size > maximum) {
-        await reader.cancel();
-        throw new ImageStorageError("Cada imagen debe pesar 5 MB o menos.", 413);
-      }
+      if (size > 4096) { await reader.cancel(); throw new ImageStorageError("Solicitud demasiado grande.", 413); }
       chunks.push(new Uint8Array(value));
     }
   } finally { reader.releaseLock(); }
   try {
-    return await new Response(new Blob(chunks), { headers: { "content-type": request.headers.get("content-type") ?? "" } }).formData();
-  } catch { throw new ImageStorageError("Selecciona una imagen válida.", 400); }
+    const payload = JSON.parse(await new Blob(chunks).text());
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new Error();
+    return payload;
+  } catch { throw new ImageStorageError("Revisa los datos de la imagen.", 400); }
 }
 
+function validEventId(id: unknown): id is string {
+  return typeof id === "string" && /^[a-zA-Z0-9_-]{1,80}$/.test(id);
+}
+
+function failure(error: unknown) {
+  if (error instanceof ImageStorageError) return json({ error: error.message }, error.status);
+  console.error("Direct image upload could not complete");
+  return json({ error: "No pudimos verificar la imagen. Intenta de nuevo más tarde." }, 503);
+}
+
+// Reserve storage and sign exactly one public ID in this owner's event namespace.
 export async function POST(request: Request) {
   const session = await auth();
   const ownerId = session?.user?.id;
-  if (!ownerId) return NextResponse.json({ error: "Inicia sesión para subir imágenes." }, { status: 401 });
+  if (!ownerId) return json({ error: "Inicia sesión para subir imágenes." }, 401);
   let reservation: Awaited<ReturnType<typeof reserveCloudinaryImage>> | undefined;
-  let uncertain = true;
   try {
-    const body = await readUploadForm(request);
-    const eventId = body.get("eventId");
-    const file = body.get("file");
-    if (typeof eventId !== "string" || !/^[a-zA-Z0-9_-]{1,80}$/.test(eventId) || !(file instanceof File) || !file.size) {
-      throw new ImageStorageError("Selecciona una imagen válida.", 400);
-    }
-    if (!acceptedTypes.has(file.type)) throw new ImageStorageError("Usa una imagen JPG, PNG, WebP o AVIF.", 400);
-    if (file.size > ACCOUNT_LIMITS.imageSizeBytes) throw new ImageStorageError("Cada imagen debe pesar 5 MB o menos.", 413);
+    const payload = await readPayload(request);
+    if (!validEventId(payload.eventId) || !Number.isInteger(payload.size) || payload.size <= 0) throw new ImageStorageError("Selecciona una imagen válida.", 400);
+    if (!acceptedTypes.has(payload.contentType)) throw new ImageStorageError("Usa una imagen JPG, PNG, WebP o AVIF.", 400);
+    if (payload.size > ACCOUNT_LIMITS.imageSizeBytes) throw new ImageStorageError("Cada imagen debe pesar 5 MB o menos.", 413);
     let config: ReturnType<typeof cloudinaryConfig>;
     try { config = cloudinaryConfig(); }
     catch { throw new ImageStorageError("La carga de imágenes todavía no está configurada.", 503); }
-    reservation = await reserveCloudinaryImage(ownerId, eventId);
-    const form = signedCloudinaryForm({
+    reservation = await reserveCloudinaryImage(ownerId, payload.eventId, new Date(Date.now() + CLOUDINARY_UPLOAD_LEASE_MS));
+    try { await verifyCloudinaryUploadPreset(); }
+    catch { throw new ImageStorageError("La carga de imágenes no está disponible. Revisa la configuración de Cloudinary.", 503); }
+    const fields = signedCloudinaryFields({
       public_id: reservation.publicId, timestamp: String(Math.floor(Date.now() / 1000)),
-      upload_preset: config.uploadPreset, overwrite: "false", allowed_formats: "jpg,png,webp,avif",
+      upload_preset: config.uploadPreset, overwrite: "false", allowed_formats: "jpg,png,webp,avif", type: "upload",
+      eval: CLOUDINARY_IMAGE_VALIDATION,
     });
-    form.set("file", file, file.name);
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(config.cloudName)}/image/upload`, {
-      method: "POST", body: form, signal: AbortSignal.timeout(40_000),
-    });
-    const uploaded = await response.json().catch(() => null);
-    if (!response.ok) {
-      uncertain = false;
-      throw new ImageStorageError("Cloudinary no pudo subir esta imagen. Intenta de nuevo.", 502);
-    }
-    if (uploaded?.public_id !== reservation.publicId || uploaded?.resource_type !== "image" || uploaded?.type !== "upload"
-      || !Number.isInteger(uploaded?.bytes) || uploaded.bytes <= 0 || uploaded.bytes > ACCOUNT_LIMITS.imageSizeBytes
-      || typeof uploaded?.secure_url !== "string" || ownedCloudinaryPublicId(uploaded.secure_url, ownerId, eventId) !== reservation.publicId) {
-      throw new ImageStorageError("No pudimos verificar la imagen subida. Intenta de nuevo.", 502);
-    }
-    const secureUrl = uploaded.secure_url.replace("/image/upload/", "/image/upload/f_auto,q_auto/");
-    await finishCloudinaryImage(ownerId, eventId, reservation.publicId, secureUrl, uploaded.bytes);
-    scheduleCloudinaryCleanup(ownerId);
-    return NextResponse.json({ secureUrl }, { headers: { "Cache-Control": "no-store" } });
+    return json({ publicId: reservation.publicId, uploadUrl: `https://api.cloudinary.com/v1_1/${encodeURIComponent(config.cloudName)}/image/upload`, fields });
   } catch (error) {
     if (reservation) {
-      try { await failCloudinaryImage(ownerId, reservation.publicId, uncertain); }
-      catch { console.error("Image upload recovery deferred to scheduled cleanup"); }
+      // No signature was returned, so an unsuccessful authorization is safe to clean.
+      try {
+        await prisma.cloudinaryAsset.updateMany({ where: { publicId: reservation.publicId, ownerId, state: "UPLOADING" },
+          data: { state: "DELETE_PENDING", nextAttemptAt: new Date() } });
+      } catch { console.error("Image authorization cleanup deferred"); }
       scheduleCloudinaryCleanup(ownerId);
     }
-    if (error instanceof ImageStorageError) return NextResponse.json({ error: error.message }, { status: error.status });
-    console.error("Image upload could not complete");
-    return NextResponse.json({ error: "No pudimos completar la carga. Intenta de nuevo más tarde." }, { status: 502 });
+    return failure(error);
   }
+}
+
+// Confirm with Cloudinary itself: the browser's URL, size and format are untrusted.
+export async function PUT(request: Request) {
+  const session = await auth();
+  const ownerId = session?.user?.id;
+  if (!ownerId) return json({ error: "Inicia sesión para confirmar la imagen." }, 401);
+  try {
+    const payload = await readPayload(request);
+    const { eventId, publicId, version, signature } = payload;
+    if (!validEventId(eventId) || typeof publicId !== "string" || !publicId.startsWith(`cheetahinvite/${ownerId}/${eventId}/`)
+      || !/^[a-f0-9-]{36}$/.test(publicId.split("/").at(-1) ?? "")
+      || !Number.isSafeInteger(version) || version <= 0 || typeof signature !== "string") throw new ImageStorageError("Revisa los datos de la imagen.", 400);
+    const asset = await prisma.cloudinaryAsset.findFirst({ where: { publicId, ownerId, eventId } });
+    const event = await prisma.event.findFirst({ where: { id: eventId, ownerId }, select: { id: true } });
+    if (!asset || !event) throw new ImageStorageError("No encontramos esta carga.", 404);
+    if (!validCloudinaryUploadResponse(publicId, version, signature)) throw new ImageStorageError("No pudimos verificar la respuesta de Cloudinary.", 400);
+    if (asset.state === "READY" && asset.url) return json({ secureUrl: asset.url });
+    if (asset.state !== "UPLOADING" || !asset.expiresAt || asset.expiresAt <= new Date()) throw new ImageStorageError("La carga venció. Vuelve a subir la imagen.", 409);
+    const uploaded = await getCloudinaryImage(publicId);
+    if (uploaded?.public_id !== publicId || uploaded?.version !== version || uploaded?.resource_type !== "image" || uploaded?.type !== "upload"
+      || !CLOUDINARY_FORMATS.includes(uploaded?.format) || !Number.isInteger(uploaded?.bytes) || uploaded.bytes <= 0 || uploaded.bytes > ACCOUNT_LIMITS.imageSizeBytes
+      || typeof uploaded?.secure_url !== "string" || ownedCloudinaryPublicId(uploaded.secure_url, ownerId, eventId) !== publicId) {
+      await failCloudinaryImage(ownerId, publicId, true, uploaded?.public_id === publicId && uploaded?.resource_type === "image" && uploaded?.type === "upload" ? uploaded.bytes : undefined);
+      scheduleCloudinaryCleanup(ownerId);
+      throw new ImageStorageError("La imagen no cumple los formatos permitidos o el límite de 5 MB.", 400);
+    }
+    const secureUrl = uploaded.secure_url.replace("/image/upload/", "/image/upload/f_auto,q_auto/");
+    await finishCloudinaryImage(ownerId, eventId, publicId, secureUrl, uploaded.bytes);
+    scheduleCloudinaryCleanup(ownerId);
+    return json({ secureUrl });
+  } catch (error) { return failure(error); }
 }

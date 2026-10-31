@@ -21,7 +21,7 @@ Module._load = function(name, parent, isMain) {
   if (name === 'next/server') return { after() {} };
   if (name.startsWith('@/')) {
     const result = load.call(this, path.resolve(__dirname, '..', name.slice(2)), parent, isMain);
-    if (name === '@/lib/cloudinary') return { ...result, destroyCloudinaryImage: async () => { destroys++; } };
+    if (name === '@/lib/cloudinary') return { ...result, destroyCloudinaryImage: async () => { destroys++; }, destroyCloudinaryUploadVariants: async () => {} };
     return result;
   }
   return load.call(this, name, parent, isMain);

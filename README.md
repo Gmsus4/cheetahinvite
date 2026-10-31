@@ -28,7 +28,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Image uploads
 
-Event cover photos, section photos, and gallery images upload through an authenticated server route to Cloudinary. Add these values to `.env`:
+Event cover photos, section photos, and gallery images upload directly from the browser to Cloudinary. The server authorizes a reserved upload and verifies it with Cloudinary before accepting its URL; image bytes never pass through a Vercel Function. Add these values to `.env`:
 
 ```env
 CLOUDINARY_CLOUD_NAME="..."
@@ -37,7 +37,7 @@ CLOUDINARY_API_SECRET="..."
 CLOUDINARY_UPLOAD_PRESET="..."
 ```
 
-Create a **signed** upload preset in the Cloudinary console and restrict it to JPG, PNG, WebP, and AVIF images with a **5 MB** maximum file size. Disable unsigned upload presets for this application. Keep the API secret server-side; never add it to a `NEXT_PUBLIC_` variable. Each gallery supports up to 12 photos. Uploaded images are delivered with automatic format and quality selection.
+Create a **signed** upload preset in the Cloudinary console and restrict it to JPG, PNG, WebP, and AVIF images. Disable unsigned upload presets for this application. The **5 MB** limit is checked in the browser, enforced by a signed image-validation rule in Cloudinary (`eval`), and checked again through the Admin API before confirmation. Cloudinary presets do not support a per-preset file-size limit. Keep the API secret server-side; never add it to a `NEXT_PUBLIC_` variable. Each gallery supports up to 12 photos. Uploaded images are delivered with automatic format and quality selection.
 
 Server-enforced budgets, asset tracking, and retryable cleanup require the database migration and scheduler described in [Cloudinary storage](docs/cloudinary-storage.md). Limits are centralized in `lib/limits.ts`: 20 upload attempts/hour and 60/day per account, with 40 retained files and 100 MB per event. Pending uploads and deletions count toward storage until cleanup succeeds.
 

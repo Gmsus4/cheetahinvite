@@ -15,6 +15,7 @@ import { BirthdayDinosaurInvitation } from '@/components/invitation/BirthdayDino
 import { birthdaySpaceId } from '@/lib/birthday-space';
 import { BirthdaySpaceInvitation } from '@/components/invitation/BirthdaySpaceInvitation';
 import Image from "next/image";
+import { uploadInvitationImage } from "@/lib/cloudinary-upload";
 import { useRouter } from "next/navigation";
 import { prepareEvent } from "@/app/crear/actions";
 import { WeddingInvitation } from "@/components/invitation/WeddingInvitation";
@@ -430,13 +431,8 @@ export function CloudinaryImageUpload({ eventId, images, multiple, onChange, ens
           throw new Error("Usa imágenes JPG, PNG, WebP o AVIF.");
         }
         if (file.size > ACCOUNT_LIMITS.imageSizeBytes) throw new Error(`Cada imagen debe pesar ${ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB o menos.`);
-        const uploadForm = new FormData();
-        uploadForm.set("file", file);
-        uploadForm.set("eventId", ensureEvent ? await ensureEvent() : eventId);
-        const uploadResponse = await fetch("/api/cloudinary/upload", { method: "POST", body: uploadForm });
-        const uploaded = await uploadResponse.json() as { secureUrl?: string; error?: string };
-        if (!uploadResponse.ok || !uploaded.secureUrl) throw new Error(uploaded.error || "No pudimos subir esta imagen.");
-        nextImages.push(uploaded.secureUrl);
+        const secureUrl = await uploadInvitationImage(file, ensureEvent ? await ensureEvent() : eventId);
+        nextImages.push(secureUrl);
         onChange(nextImages.slice(0, ACCOUNT_LIMITS.imagesPerGallery));
       }
     } catch (uploadError) {

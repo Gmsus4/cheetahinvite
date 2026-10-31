@@ -4,7 +4,7 @@ import { after } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/prisma";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
-import { destroyCloudinaryImage, isOwnCloudinaryUrl, ownedCloudinaryPublicId } from "@/lib/cloudinary";
+import { destroyCloudinaryImage, destroyCloudinaryUploadVariants, isOwnCloudinaryUrl, ownedCloudinaryPublicId } from "@/lib/cloudinary";
 import { invitationImageUrls } from "@/lib/invitation-images";
 
 type Transaction = Prisma.TransactionClient;
@@ -36,7 +36,7 @@ async function adoptSavedImages(tx: Transaction, ownerId: string, eventId: strin
   if (images.length) await tx.cloudinaryAsset.createMany({ data: images, skipDuplicates: true });
 }
 
-export async function reserveCloudinaryImage(ownerId: string, eventId: string) {
+export async function reserveCloudinaryImage(ownerId: string, eventId: string, signedUntil?: Date) {
   return withImageLock(ownerId, async tx => {
     const event = await tx.event.findFirst({ where: { id: eventId, ownerId }, select: { imageUrl: true, sections: true } });
     if (!event) throw new ImageStorageError("No encontramos este evento.", 404);
@@ -67,7 +67,9 @@ export async function reserveCloudinaryImage(ownerId: string, eventId: string) {
     }
     return tx.cloudinaryAsset.create({ data: {
       publicId: `cheetahinvite/${ownerId}/${eventId}/${randomUUID()}`, ownerId, eventId,
-      bytes: ACCOUNT_LIMITS.imageSizeBytes, expiresAt: new Date(now.getTime() + UPLOAD_LEASE),
+      bytes: ACCOUNT_LIMITS.imageSizeBytes, expiresAt: signedUntil ?? new Date(now.getTime() + UPLOAD_LEASE),
+      // Do not delete a direct upload while its signature can still be replayed.
+      ...(signedUntil ? { nextAttemptAt: signedUntil } : {}),
     } });
   });
 }
@@ -76,22 +78,28 @@ export async function finishCloudinaryImage(ownerId: string, eventId: string, pu
   const accepted = await withImageLock(ownerId, async tx => {
     const event = await tx.event.findFirst({ where: { id: eventId, ownerId }, select: { id: true } });
     if (!event) {
-      await tx.cloudinaryAsset.updateMany({ where: { publicId, ownerId }, data: { state: "DELETE_PENDING", nextAttemptAt: new Date() } });
+      const asset = await tx.cloudinaryAsset.findFirst({ where: { publicId, ownerId } });
+      if (asset) await tx.cloudinaryAsset.updateMany({ where: { publicId, ownerId }, data: { state: "DELETE_PENDING",
+        nextAttemptAt: new Date(Math.max(Date.now(), asset.nextAttemptAt?.getTime() ?? 0, asset.state === "UPLOADING" ? asset.expiresAt?.getTime() ?? 0 : 0)) } });
       return false;
     }
-    const changed = await tx.cloudinaryAsset.updateMany({ where: { publicId, ownerId, state: "UPLOADING" }, data: {
+    const changed = await tx.cloudinaryAsset.updateMany({ where: { publicId, ownerId, state: "UPLOADING", expiresAt: { gt: new Date() } }, data: {
       state: "READY", url, bytes, expiresAt: new Date(Date.now() + ACCOUNT_LIMITS.temporaryImageHours * HOUR),
     } });
-    return changed.count === 1;
+    if (changed.count === 1) return true;
+    const existing = await tx.cloudinaryAsset.findUnique({ where: { publicId } });
+    return existing?.ownerId === ownerId && existing.eventId === eventId && existing.state === "READY"
+      && existing.url === url && existing.bytes === bytes;
   });
   if (!accepted) throw new ImageStorageError("La invitación cambió durante la carga. Recarga el editor antes de continuar.");
 }
 
-export async function failCloudinaryImage(ownerId: string, publicId: string, uncertain: boolean) {
+export async function failCloudinaryImage(ownerId: string, publicId: string, uncertain: boolean, providerBytes?: number) {
   await withImageLock(ownerId, async tx => {
     const asset = await tx.cloudinaryAsset.findUnique({ where: { publicId } });
     if (asset?.state === "UPLOADING") await tx.cloudinaryAsset.update({ where: { publicId }, data: {
-      state: "DELETE_PENDING", nextAttemptAt: uncertain ? asset.expiresAt : new Date(),
+      state: "DELETE_PENDING", nextAttemptAt: new Date(Math.max(Date.now(), asset.nextAttemptAt?.getTime() ?? 0, uncertain ? asset.expiresAt?.getTime() ?? 0 : 0)),
+      ...(providerBytes && providerBytes > 0 && Number.isSafeInteger(providerBytes) && providerBytes <= 2147483647 ? { bytes: providerBytes } : {}),
     } });
   }, true);
 }
@@ -117,14 +125,20 @@ export async function syncCloudinaryImages(tx: Transaction, ownerId: string, eve
     }
   }
   if (ids.length) await tx.cloudinaryAsset.updateMany({ where: { publicId: { in: ids }, ownerId, eventId, state: "READY" }, data: { expiresAt: null } });
-  await tx.cloudinaryAsset.updateMany({ where: { ownerId, eventId, state: "READY", expiresAt: null, publicId: { notIn: ids } }, data: {
-    state: "DELETE_PENDING", nextAttemptAt: new Date(),
-  } });
+  await queueReadyImages(tx, { ownerId, eventId, expiresAt: null, publicId: { notIn: ids } });
+}
+
+async function queueReadyImages(tx: Transaction, where: Prisma.CloudinaryAssetWhereInput) {
+  const now = new Date();
+  await tx.cloudinaryAsset.updateMany({ where: { ...where, state: "READY", OR: [{ nextAttemptAt: null }, { nextAttemptAt: { lte: now } }] },
+    data: { state: "DELETE_PENDING", nextAttemptAt: now } });
+  // Preserve the signed-upload deadline even when the owner removes the photo.
+  await tx.cloudinaryAsset.updateMany({ where: { ...where, state: "READY", nextAttemptAt: { gt: now } }, data: { state: "DELETE_PENDING" } });
 }
 
 export async function queueEventImages(tx: Transaction, ownerId: string, eventId: string, event: Images) {
   await adoptSavedImages(tx, ownerId, eventId, event);
-  await tx.cloudinaryAsset.updateMany({ where: { ownerId, eventId, state: "READY" }, data: { state: "DELETE_PENDING", nextAttemptAt: new Date() } });
+  await queueReadyImages(tx, { ownerId, eventId });
   const assets = await tx.cloudinaryAsset.findMany({ where: { ownerId, eventId, state: "UPLOADING" } });
   for (const asset of assets) await tx.cloudinaryAsset.update({ where: { publicId: asset.publicId }, data: {
     state: "DELETE_PENDING",
@@ -139,12 +153,18 @@ export async function runCloudinaryCleanup(ownerId?: string, limit = 5) {
     where: { ...(ownerId ? { ownerId } : {}), OR: [
       { state: "DELETE_PENDING", nextAttemptAt: { lte: now } },
       { state: { in: ["READY", "UPLOADING"] }, expiresAt: { lte: now } },
+      { state: "READY", nextAttemptAt: { lte: now } },
     ] }, orderBy: { updatedAt: "asc" }, take: limit,
   });
   const result = { deleted: 0, retained: 0, failed: 0 };
   for (const candidate of candidates) {
     const claim = await withImageLock(candidate.ownerId, async tx => {
       const asset = await tx.cloudinaryAsset.findUnique({ where: { publicId: candidate.publicId } });
+      if (asset?.state === "READY" && asset.nextAttemptAt && asset.nextAttemptAt <= now && (!asset.expiresAt || asset.expiresAt > now)) {
+        const lease = new Date(now.getTime() + 2 * 60 * 1000);
+        await tx.cloudinaryAsset.update({ where: { publicId: asset.publicId }, data: { nextAttemptAt: lease, attempts: { increment: 1 } } });
+        return { ...asset, lease, variantsOnly: true };
+      }
       if (!asset || (asset.state === "DELETE_PENDING" ? !asset.nextAttemptAt || asset.nextAttemptAt > now : !asset.expiresAt || asset.expiresAt > now)) return null;
       // Includes legacy sharing across events/accounts. A matching reference anywhere
       // prevents destruction, including references in disabled sections.
@@ -162,15 +182,21 @@ export async function runCloudinaryCleanup(ownerId?: string, limit = 5) {
       }
       const lease = new Date(now.getTime() + 2 * 60 * 1000);
       await tx.cloudinaryAsset.update({ where: { publicId: asset.publicId }, data: { state: "DELETE_PENDING", nextAttemptAt: lease, attempts: { increment: 1 } } });
-      return { ...asset, lease };
+      return { ...asset, lease, variantsOnly: false };
     }, true);
     if (!claim) continue;
     try {
-      await destroyCloudinaryImage(claim.publicId);
+      if (claim.variantsOnly) {
+        await destroyCloudinaryUploadVariants(claim.publicId);
+        await prisma.cloudinaryAsset.updateMany({ where: { publicId: claim.publicId, state: "READY", nextAttemptAt: claim.lease }, data: { nextAttemptAt: null } });
+        result.retained++;
+        continue;
+      }
+      await Promise.all([destroyCloudinaryImage(claim.publicId), destroyCloudinaryUploadVariants(claim.publicId)]);
       await prisma.cloudinaryAsset.deleteMany({ where: { publicId: claim.publicId, state: "DELETE_PENDING", nextAttemptAt: claim.lease } });
       result.deleted++;
     } catch {
-      await prisma.cloudinaryAsset.updateMany({ where: { publicId: claim.publicId, state: "DELETE_PENDING", nextAttemptAt: claim.lease }, data: {
+      await prisma.cloudinaryAsset.updateMany({ where: { publicId: claim.publicId, state: claim.variantsOnly ? "READY" : "DELETE_PENDING", nextAttemptAt: claim.lease }, data: {
         nextAttemptAt: new Date(Date.now() + Math.min(24 * HOUR, 5 * 60 * 1000 * 2 ** Math.min(claim.attempts, 8))),
       } });
       result.failed++;

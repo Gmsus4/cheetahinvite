@@ -4,7 +4,7 @@
 
 1. Aplicar `npx prisma migrate deploy` y generar el cliente con `npx prisma generate`.
 2. Mantener las cuatro variables `CLOUDINARY_*` del ejemplo en el servidor.
-3. Usar un preset **firmado**, sin cargas unsigned para esta aplicación, con formatos JPG, PNG, WebP y AVIF y máximo 5 MB. No configurar add-ons costosos o transformaciones eager en ese preset.
+3. Usar un preset **firmado**, sin cargas unsigned para esta aplicación, con `allowed_formats` limitado a JPG, PNG, WebP y AVIF. No configurar add-ons costosos o transformaciones eager en ese preset. Los presets de Cloudinary no admiten un límite de bytes propio: el máximo de 5 MB se comprueba en el navegador, se impone para imágenes mediante una regla `eval` firmada y se vuelve a comprobar en el servidor consultando el archivo real antes de aceptarlo. Se verifica la configuración del preset antes de entregar firmas, con una caché de cinco minutos; la API key debe poder consultar presets y recursos en la Admin API.
 4. Crear un `CRON_SECRET` aleatorio, privado y de al menos 32 bytes.
 5. Programar cada cinco minutos una petición GET a `/api/internal/cloudinary/cleanup` con `Authorization: Bearer <CRON_SECRET>`. El alojamiento no está elegido en este repositorio: este endpoint no programa una tarea por sí solo. Un 503 significa que falta el secreto; un 401, autorización incorrecta. Ante 500, reintentar y revisar los registros. La respuesta da conteos `deleted`, `retained` y `failed`; los fallos individuales quedan en cola y pueden devolver 200 con `failed > 0`.
 
@@ -28,7 +28,7 @@ El Worker está preparado, **no desplegado**. Los secretos de producción, el do
 
 Se ajustan en `lib/limits.ts`:
 
-- Archivo y cuerpo multipart: 5 MB por imagen, con 128 KB adicionales para el formulario. Se limita el flujo real aunque falte `Content-Length`.
+- Archivo aceptado: 5 MB por imagen. El archivo viaja directamente del navegador a Cloudinary; las rutas de la aplicación solo aceptan JSON de hasta 4 KB, limitado sobre el flujo real aunque falte `Content-Length`. Un archivo que exceda el límite real nunca se acepta para guardarlo en la invitación, aunque el navegador declare un tamaño falso.
 - Cuenta: 20 intentos de carga por hora y 60 por día, en ventanas fijas UTC. Los intentos aceptados para enviar a Cloudinary cuentan aunque falle el proveedor. Borrar eventos o recargar la página no reinicia estos contadores.
 - Invitación: 40 archivos y 100 MB. Incluye temporales, reservas y archivos con borrado pendiente. Se reservan 5 MB antes de enviar cada archivo y se reemplaza esa cifra por los bytes confirmados por Cloudinary.
 - Cuenta: hasta 120 archivos y 300 MB, derivados de los tres espacios de invitación. La deuda de limpieza de eventos eliminados también cuenta: eliminar y recrear un evento no permite acumular archivos si Cloudinary falla al borrarlos.
@@ -39,11 +39,13 @@ Las reservas, los guardados y las eliminaciones toman un bloqueo PostgreSQL de l
 ## Ciclo de vida
 
 - Antes de subir se registra un `publicId` UUID en el espacio de la cuenta y el evento. Solo se acepta la respuesta que confirma ese ID, tipo de recurso, URL y tamaño.
-- Una imagen subida y todavía sin guardar es temporal durante 24 horas. Una carga interrumpida conserva su reserva durante diez minutos antes de intentar borrarla, para contemplar respuestas perdidas o subidas aún en vuelo.
+- Una imagen confirmada y todavía sin guardar es temporal durante 24 horas. Las autorizaciones de carga directa reservan espacio durante 70 minutos: una hora de validez de la firma de Cloudinary más diez minutos de margen para cargas en vuelo. Las reservas antiguas sin firma pública mantienen su margen de diez minutos.
 - Guardar la invitación confirma las fotos referenciadas, incluso en secciones deshabilitadas. Solo después del guardado se encolan las imágenes previamente guardadas que ya no aparecen. Otras fotos temporales de otra pestaña conservan su margen de 24 horas.
 - Eliminar un evento encola sus imágenes en la misma transacción que elimina la fila. El registro de archivos no tiene borrado en cascada: la cola sobrevive al evento.
 - La limpieza comprueba referencias en todas las invitaciones antes de destruir un archivo, también para enlaces compartidos antiguos. Se usa `destroy` firmado con invalidación de CDN, nunca borrado por prefijo. El proveedor puede tardar en invalidar copias cacheadas.
 - Solo una ejecución reclama cada archivo. Los fallos conservan su registro y cupo con reintentos espaciados; no se considera liberado hasta confirmar `ok` o `not found`.
+- Incluso al quitar una imagen o eliminar el evento, el borrado de cargas directas espera a que venza el plazo de 70 minutos. Así una firma todavía válida no puede volver a crear un archivo que ya se hubiera limpiado. Los errores de confirmación del proveedor conservan la reserva para permitir reintentos; una respuesta inválida queda en cola de borrado y los bytes conocidos se contabilizan hasta completar la limpieza.
+- Cloudinary excluye `resource_type` de la firma y no ejecuta la regla de imágenes para cargas raw. Al vencer la autorización también se eliminan posibles variantes raw/video del mismo ID reservado, conservando la imagen guardada o todavía temporal. El borrado definitivo de un registro limpia los tres tipos del ID exacto, sin barridos por prefijo.
 - Si una pestaña intenta volver a guardar una imagen ya retirada, se rechaza el guardado antes de cambiar el evento. No se resucitan archivos en proceso de eliminación.
 
 ## Imágenes anteriores y alcance
@@ -56,8 +58,19 @@ Estos controles acotan nuevas cargas por cuenta y almacenamiento por evento. No 
 
 ## Verificación
 
+### Carga directa firmada
+
+1. El navegador envía `POST /api/cloudinary/upload` con `eventId`, `size` y `contentType`. Se exige sesión, mismo origen, propiedad del evento y reserva atómica de cupo. La respuesta contiene una URL fija de Cloudinary y campos firmados para un único ID aleatorio, con `overwrite=false`; nunca contiene el secreto de API.
+2. El navegador envía el `FormData` con el archivo directamente a `https://api.cloudinary.com/.../image/upload`. Los campos firmados incluyen una regla `eval` constante que rechaza imágenes mayores de 5 MB o sin dimensiones válidas; el navegador no puede modificarla ni quitarla sin invalidar la firma. No se acepta multipart ni base64 en las rutas de la aplicación.
+3. Envía `PUT /api/cloudinary/upload` con el ID reservado, la versión y la firma de respuesta de Cloudinary. El servidor verifica esa firma y consulta el recurso por su ID en la Admin API. Valida ID, versión, tipo, formato, tamaño real y URL del espacio de la cuenta/evento. La URL de entrega se construye a partir de esa respuesta verificada, nunca de una URL declarada por el navegador.
+4. Solo entonces el editor recibe la URL utilizable. La confirmación es idempotente: un reintento no consume otro cupo ni renueva la vigencia temporal. Las cuentas y eventos anteriores no necesitan migraciones.
+
+El límite de 5 MB corresponde a las imágenes que Cloudinary y la aplicación aceptan mediante este flujo. Los límites generales de la cuenta de Cloudinary siguen aplicando; un cliente manipulado puede intentar cargas contra otros tipos de recurso con el mismo ID, que se rechazan al confirmar y se limpian al vencer la firma. Las verificaciones y la limpieza no sustituyen la protección contra abuso ni las alertas de consumo del proveedor.
+
 `node --test tests/*.test.cjs` prueba cupos, concurrencia, permisos, reservas fallidas, reemplazos, borrado de eventos, referencias compartidas y reintentos sin peticiones reales a Cloudinary. En un entorno de pruebas conectado al proveedor, comprobar además una carga real, su reemplazo y la eliminación tras guardar; revisar que una foto todavía usada permanece accesible.
 
 La integración opcional `node tests/cloudinary-storage.postgres.cjs` usa PostgreSQL real para comprobar los bloqueos y las consultas de referencias. Crea una cuenta de prueba con ID aleatorio y la retira al terminar; Cloudinary permanece simulado. Requiere la migración aplicada y conectividad a la base configurada.
 
-Referencias oficiales: [Upload API](https://cloudinary.com/documentation/image_upload_api_reference), [eliminación](https://cloudinary.com/documentation/delete_assets).
+Referencias oficiales: [Upload API](https://cloudinary.com/documentation/image_upload_api_reference), [firmas](https://cloudinary.com/documentation/authentication_signatures), [validación con eval](https://cloudinary.com/documentation/upload_parameters#eval_modify_upload_options_before_upload), [eliminación](https://cloudinary.com/documentation/delete_assets).
+
+Prueba opcional con PostgreSQL y Cloudinary reales: `node tests/cloudinary-direct.integration.cjs`. Crea una cuenta y evento desechables, genera una imagen sintética de más de 4.5 MB y menos de 5 MB, verifica el flujo directo y el rechazo de un archivo real mayor al límite y elimina únicamente sus propios archivos y registros al terminar. No utiliza fotografías personales. Requiere conectividad y las credenciales del entorno local.
