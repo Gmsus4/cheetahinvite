@@ -77,7 +77,7 @@ test('all twelve alternate wedding designs preserve real invitation content and 
     assert.match(html, /wa-backdrop/);
     assert.match(html, /wa-column/);
     assert.match(html, /aria-roledescription="carrusel"/);
-    if (design.artwork) assert.ok(html.includes(`/plantillas/boda/${design.artwork}/`), `${design.label} uses the supplied template illustrations`);
+    assert.doesNotMatch(html, /wa-botanical-accent|wa-backdrop-botanicals|wa-footer-flower|wa-small-motif/);
     assert.doesNotMatch(html, /\/wedding-collection\/art\//);
   }
 });

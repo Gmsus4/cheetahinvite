@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { InviteSection } from "./invitation-editor";
 import { getInvitationFont } from "./invitation-fonts";
-import { orderedWeddingSections, weddingArtwork, weddingPalette, type WeddingDesign } from "./wedding-designs";
+import { orderedWeddingSections, weddingPalette, type WeddingDesign } from "./wedding-designs";
 import { invitationSectionUrl } from "./invitation-links";
 
 export function atmospherePanelStyle(section: Pick<InviteSection, "panelStyle"> | undefined, index: number) {
@@ -18,13 +18,10 @@ export function atmosphereSections(sections: InviteSection[]) {
 
 export function atmosphereStyle(design: WeddingDesign, accent: string): CSSProperties {
   const palette = weddingPalette(design, accent);
-  const art = weddingArtwork(design);
   return {
     "--wa-base": palette.dark, "--wa-tint": palette.accent,
     "--wa-heading": getInvitationFont(design.typography).family,
     "--wa-body": getInvitationFont(design.bodyTypography).family,
-    "--wa-art-top": art.topLeft ? `url("${art.topLeft}")` : "none",
-    "--wa-art-bottom": art.bottomRight ? `url("${art.bottomRight}")` : "none",
     "--wa-texture": design.celestial ? `url("${design.celestial.sky}")` : design.foil ? `url("${design.foil}")` : "url('/textures/wedding/stationery-grain.svg')",
   } as CSSProperties;
 }
