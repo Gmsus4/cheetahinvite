@@ -19,6 +19,7 @@ import { EditorProtectedLink } from "./EditorProtectedLink";
 import { EditorLeaveDialog } from "./EditorLeaveDialog";
 import { EditorRecoveryDialog } from "./EditorRecoveryDialog";
 import { InvitationLivePreview } from "./InvitationLivePreview";
+import { InvitationPublicLink } from "./InvitationPublicLink";
 import { CustomInvitationLinkField } from "./CustomInvitationLinkField";
 import { WeddingDesignPicker } from "./WeddingDesignPicker";
 import styles from "./EventWorkspace.module.css";
@@ -185,7 +186,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
           </div>
         </form>
       </div>
-      <aside className={`guided-preview${previewExpanded ? " is-open" : ""}`}><div className="guided-preview-heading"><span>ASÍ VA QUEDANDO</span><small>Se actualiza mientras editas</small></div><InvitationLivePreview initialDevice="mobile" fitViewport expanded={previewExpanded} onClose={closePreview} onExpand={() => setPreviewExpanded(true)}><InvitationCanvas {...values} date={date} eventDateKey={values.eventDate} /></InvitationLivePreview></aside>
+      <aside className={`guided-preview${previewExpanded ? " is-open" : ""}`}><div className="guided-preview-heading"><span>ASÍ VA QUEDANDO</span><small>Se actualiza mientras editas</small></div><InvitationLivePreview initialDevice="mobile" fitViewport expanded={previewExpanded} onClose={closePreview} onExpand={() => setPreviewExpanded(true)} publicLink={<InvitationPublicLink event={event} dirty={dirty} />}><InvitationCanvas {...values} date={date} eventDateKey={values.eventDate} /></InvitationLivePreview></aside>
     </div>
     <button className="guided-mobile-preview" type="button" onClick={() => setPreviewExpanded(true)}><FiEye /> Ver invitación</button>
   </main>;

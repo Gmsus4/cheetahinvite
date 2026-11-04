@@ -46,3 +46,12 @@ TypeScript, ESLint y análisis de CSS sin errores. 49 pruebas de regresión apro
 Revisión visual en escritorio de 1280 px y móviles de 390 y 320 px. Sin desbordamientos horizontales ni imágenes fallidas; controles del formulario verificados a 16 px. Portada, boleto, cartelera, vestimenta y formulario comprobados en navegador. Se reutiliza el formulario compartido en modo demostración en el ejemplo.
 
 La alternancia dinámica de fondos, la galería bento sin adornos y el visor siguen [el comportamiento compartido de cumpleaños](birthday-shared.md).
+
+## Rediseño de gala
+
+La portada se convierte en una composición de dos columnas: nombre protagonista, nota de invitación y acceso al contenido a la izquierda; cámara de cine o foto personal a la derecha, dentro de un arco con sello de estreno. La alfombra roja se construye con CSS sobre el telón oscuro. La cámara sostenida se usa en portada y la cámara individual permanece en confirmación.
+
+La identidad usa negro cálido, vino y champaña. Las secciones exteriores alternan dos tonos oscuros de ancho completo, mientras que guion, programa, boleto y confirmación conservan superficies claras para dar contraste editorial. La cuenta regresiva usa cifras separadas por líneas y el cierre recupera el vino de la portada. La miniatura del catálogo utiliza la misma dirección visual.
+
+Se conservan todos los apartados editables, sus datos, los enlaces seguros, RSVP, galería, cuenta regresiva y personalización de acento. La portada se apila en móvil y admite nombres largos y fotografía opcional.
+Contraste: ubicación y cuenta regresiva conservan títulos claros y etiquetas champaña sobre las bandas oscuras. Se retiraron las reglas compartidas de la versión clara que sobrescribían esos colores; los títulos de guion, boleto, programa y confirmación siguen oscuros sobre crema.

@@ -19,8 +19,8 @@ export function TemplateGallery() {
         </p>
       </div>
 
-      <DesignCatalog events={landingEventExamples.map(({ slug, label, invitation }) => ({
-        slug, label, eventType: invitation.eventType,
+      <DesignCatalog events={landingEventExamples.map(({ slug, label, invitation, available }) => ({
+        slug, label, eventType: invitation.eventType, available,
       }))} />
     </section>
   );

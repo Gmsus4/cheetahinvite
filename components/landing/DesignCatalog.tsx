@@ -1,38 +1,13 @@
 "use client";
-import { birthdayCinemaTemplate } from '@/lib/birthday-cinema';
-import { birthdayElegantTemplate } from '@/lib/birthday-elegant';
-import { birthdayCowboyTemplate } from '@/lib/birthday-cowboy';
-import { birthdayGamerTemplate } from '@/lib/birthday-gamer';
-
-
-import { birthdayDinosaurTemplate } from '@/lib/birthday-dinosaur';
-
-import { birthdaySpaceTemplate } from '@/lib/birthday-space';
 import { useState } from "react";
-import { FiArrowUpRight } from "react-icons/fi";
+import { FiArrowUpRight, FiClock } from "react-icons/fi";
 import { weddingDesigns } from "@/lib/wedding-designs";
 import { WeddingDesignPreview } from "@/components/invitation/WeddingDesignPreview";
 import { EventPreview } from "@/components/dashboard/EventDesignPicker";
-import { birthdayConfettiTemplate } from "@/lib/birthday-designs";
-import { birthdayPastelTemplate } from "@/lib/birthday-pastel";
-import { birthdayNeonTemplate } from "@/lib/birthday-neon";
-import { birthdayDiscoTemplate } from "@/lib/birthday-disco";
+import { birthdayDesigns } from "@/lib/birthday-design-catalog";
 import { InvitationExampleFrame } from "./InvitationExampleFrame";
 
-type CatalogEvent = { slug: string; label: string; eventType: string };
-
-const birthdayDesigns = [
-  { template: birthdayCinemaTemplate, slug: "cumpleanos-cine" },
-  { template: birthdayElegantTemplate, slug: "cumpleanos-elegante" },
-  { template: birthdayCowboyTemplate, slug: "cumpleanos-vaquero" },
-  { template: birthdayGamerTemplate, slug: "cumpleanos-gamer" },
-  { template: birthdayDinosaurTemplate, slug: "cumpleanos-dinosaurios" },
-  { template: birthdayConfettiTemplate, slug: "cumpleanos-confeti" },
-  { template: birthdayPastelTemplate, slug: "cumpleanos-globos-pastel" },
-  { template: birthdayNeonTemplate, slug: "cumpleanos-neon" },
-  { template: birthdayDiscoTemplate, slug: "cumpleanos-disco" },
-  { template: birthdaySpaceTemplate, slug: "cumpleanos-espacial" },
-].filter(({ template }) => template.available);
+type CatalogEvent = { slug: string; label: string; eventType: string; available: boolean };
 
 export function DesignCatalog({ events }: { events: CatalogEvent[] }) {
   const [eventType, setEventType] = useState("wedding");
@@ -43,14 +18,20 @@ export function DesignCatalog({ events }: { events: CatalogEvent[] }) {
 
   return <>
     <div className="catalog-toolbar">
-      <div className="hero-example-selector catalog-filters" role="group" aria-label="Filtrar diseños por tipo de evento">
-        {events.map((item) => <button
-          key={item.eventType}
-          type="button"
-          aria-pressed={eventType === item.eventType}
-          aria-controls="home-design-catalog"
-          onClick={() => setEventType(item.eventType)}
-        >{item.label}</button>)}
+      <div className="catalog-filter-block">
+        <div className="hero-example-selector catalog-filters" role="group" aria-label="Filtrar diseños por tipo de evento">
+          {events.map((item) => <button
+            key={item.eventType}
+            type="button"
+            disabled={!item.available}
+            title={!item.available ? `${item.label} · Próximamente` : undefined}
+            aria-label={!item.available ? `${item.label} · Próximamente` : undefined}
+            aria-pressed={eventType === item.eventType}
+            aria-controls="home-design-catalog"
+            onClick={() => setEventType(item.eventType)}
+          >{item.label}</button>)}
+        </div>
+        <span className="event-availability-note"><FiClock aria-hidden="true" /> Más celebraciones, próximamente</span>
       </div>
       <p className="catalog-count" role="status" aria-live="polite">{wedding ? `${count} diseños para tu boda` : birthday ? `${count} diseños para tu cumpleaños` : `1 ejemplo de ${event.label.toLocaleLowerCase("es")}`}</p>
     </div>

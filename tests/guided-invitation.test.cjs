@@ -49,14 +49,14 @@ test('legacy external RSVP remains external when opened in the shared editor',()
  assert.equal(values.sections[0].link,'https://example.com/confirmar');
 });
 
-test('Globos pastel retains personal data, publishes its eleven assets and survives draft preparation', async()=>{
+test('Globos pastel retains personal data, publishes its nineteen assets and survives draft preparation', async()=>{
  const {f,applyGuidedDesign}=setup();
  const {birthdayPastelId,birthdayPastelAssets}=f.load('lib/birthday-pastel.ts');
  const {isInvitationTemplate}=f.load('lib/invitation-templates.ts');
  const fs=require('node:fs'),path=require('node:path');
  assert.equal(isInvitationTemplate('birthday',birthdayPastelId),true);
  assert.equal(isInvitationTemplate('wedding',birthdayPastelId),false);
- assert.equal(birthdayPastelAssets.length,11);
+ assert.equal(birthdayPastelAssets.length,19);
  for(const asset of birthdayPastelAssets) assert.ok(fs.existsSync(path.join(__dirname,'../public/birthday/pastel',asset+'.webp')));
  const before={eventType:'birthday',name:'Mi fiesta',hostNames:'Alex',imageUrl:'https://example.com/photo.jpg',message:'Un mensaje propio',sections:[],templateId:'birthday-confetti-v1'};
  const after=applyGuidedDesign(before,birthdayPastelId);
@@ -89,13 +89,13 @@ test('Neón keeps its identity through saving and preserves personal content whe
  assert.equal(f.state.events.get('event').templateId,birthdayNeonId);
 });
 
-test('Disco registers eleven assets, preserves personal content and survives preparation and saving',async()=>{
+test('Disco registers thirteen assets, preserves personal content and survives preparation and saving',async()=>{
  const {f,applyGuidedDesign}=setup();
  const {birthdayDiscoId,birthdayDiscoAssets}=f.load('lib/birthday-disco.ts');
  const {isInvitationTemplate}=f.load('lib/invitation-templates.ts');
  const fs=require('node:fs'),path=require('node:path');
  assert.equal(isInvitationTemplate('birthday',birthdayDiscoId),true);assert.equal(isInvitationTemplate('wedding',birthdayDiscoId),false);
- assert.equal(birthdayDiscoAssets.length,11);
+ assert.equal(birthdayDiscoAssets.length,13);
  for(const asset of birthdayDiscoAssets)assert.ok(fs.existsSync(path.join(__dirname,'../public/birthday/disco',asset+'.webp')));
  const input={eventType:'birthday',name:'Fiesta propia',hostNames:'Alex',eventDate:'2027-08-12',message:'Mi mensaje',imageUrl:'https://example.com/photo.jpg',sections:[{id:'my-section',type:'custom',title:'Mi sección',content:'Información propia',enabled:true}]};
  const selected=applyGuidedDesign(input,birthdayDiscoId);

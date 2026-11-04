@@ -3,7 +3,7 @@ import type { InviteSection } from './invitation-editor';
 import { birthdayConfettiExample } from './birthday-designs';
 
 export const birthdayGamerId = 'birthday-gamer-v1';
-export const birthdayGamerAssets = ['crewmate', 'fall-guy', 'llama', 'lucky-block', 'mario-kart', 'isabelle', 'pixel-dog', 'poco', 'peach-kart', 'minecraft-world', 'spike', 'chicken-rider'] as const;
+export const birthdayGamerAssets = ['crewmate', 'fall-guy', 'llama', 'lucky-block', 'mario-kart', 'isabelle', 'pixel-dog', 'poco', 'peach-kart', 'minecraft-world', 'spike', 'chicken-rider', 'abejaminecraft', 'caballoajedrez', 'clashroyale1', 'clashroyale2', 'pelotabeisbol', 'peonajedrez'] as const;
 export type GamerAsset = typeof birthdayGamerAssets[number];
 
 export const birthdayGamerTemplate: InvitationTemplate = {

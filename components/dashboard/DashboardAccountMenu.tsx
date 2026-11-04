@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
-import { FiCreditCard, FiHelpCircle, FiSettings } from "react-icons/fi";
+import { FiCreditCard, FiHelpCircle, FiMail, FiSettings } from "react-icons/fi";
 import { DashboardSignOut } from "./DashboardSignOut";
 
-export function DashboardAccountMenu({ name, email, image, guard }: { name: string; email: string; image?: string | null; guard?: (event: { preventDefault(): void }, href: string) => void }) {
+export function DashboardAccountMenu({ name, email, image, onDashboard = false, active, guard }: { name: string; email: string; image?: string | null; onDashboard?: boolean; active?: "purchases" | "help"; guard?: (event: { preventDefault(): void }, href: string) => void }) {
   const [open, setOpen] = useState(false);
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -44,9 +44,10 @@ export function DashboardAccountMenu({ name, email, image, guard }: { name: stri
     </button>
     {open && <nav id={id} ref={panel} className="dashboard-account-panel" aria-label="Opciones de mi cuenta">
       <div className="dashboard-account-identity"><strong>{name}</strong><small>{email}</small></div>
-      <Link href="/dashboard/compras" onNavigate={event => guard?.(event, "/dashboard/compras")} onClick={() => setOpen(false)}><FiCreditCard aria-hidden="true" /> Mis compras</Link>
+      <Link href={onDashboard ? "#mis-invitaciones" : "/dashboard#mis-invitaciones"} onNavigate={event => guard?.(event, onDashboard ? "#mis-invitaciones" : "/dashboard#mis-invitaciones")} onClick={() => setOpen(false)} aria-current={onDashboard ? "location" : undefined}><FiMail aria-hidden="true" /> Mis invitaciones</Link>
+      <Link aria-current={active === "purchases" ? "page" : undefined} href="/dashboard/compras" onNavigate={event => guard?.(event, "/dashboard/compras")} onClick={() => setOpen(false)}><FiCreditCard aria-hidden="true" /> Mis compras</Link>
       <Link href="/dashboard/ajustes" onNavigate={event => guard?.(event, "/dashboard/ajustes")} onClick={() => setOpen(false)}><FiSettings aria-hidden="true" /> Ajustes de cuenta</Link>
-      <Link href="/ayuda" onNavigate={event => guard?.(event, "/ayuda")} onClick={() => setOpen(false)}><FiHelpCircle aria-hidden="true" /> Ayuda y soporte</Link>
+      <Link aria-current={active === "help" ? "page" : undefined} href="/ayuda" onNavigate={event => guard?.(event, "/ayuda")} onClick={() => setOpen(false)}><FiHelpCircle aria-hidden="true" /> Ayuda y soporte</Link>
       <DashboardSignOut className="dashboard-account-signout" />
     </nav>}
   </div>;

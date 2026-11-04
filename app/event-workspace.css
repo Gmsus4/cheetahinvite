@@ -35,10 +35,12 @@
 .editor-preview-devices{display:flex;gap:6px;margin:0 0 14px;padding:4px;background:#f2f4f7;border-radius:9px}
 .editor-preview-devices button{flex:1;min-height:36px;border:0;border-radius:6px;background:transparent;color:#667182;font:500 12px var(--font-inter),Arial,sans-serif;cursor:pointer}
 .editor-preview-devices button[aria-pressed="true"]{background:#fff;color:#a94b20;box-shadow:0 2px 6px #18243512}
-.editor-preview-devices button:focus-visible{outline:2px solid #e9560a;outline-offset:2px}
-.editor-preview-devices .editor-preview-expand{flex:0 0 40px;display:grid;place-items:center;color:#1e2a3a;border-left:1px solid #d9dee5;border-radius:0 6px 6px 0}
-.editor-preview-devices .editor-preview-expand svg{width:18px;height:18px}
-.editor-preview-devices .editor-preview-expand:hover{background:#fff;color:#e9560a}
+.editor-preview-devices :is(button,a):focus-visible{outline:2px solid #e9560a;outline-offset:2px}
+.editor-preview-devices :is(.editor-preview-expand,.editor-preview-public){flex:0 0 40px;display:grid;place-items:center;align-self:center;width:40px;height:36px;min-height:36px;padding:0;border:0;color:#1e2a3a;line-height:1;border-radius:0 6px 6px 0;box-shadow:inset 1px 0 0 #d9dee5}
+.editor-preview-devices .editor-preview-expand:not(:last-child){margin-right:-6px;border-radius:0}
+.editor-preview-devices :is(.editor-preview-expand,.editor-preview-public) svg{display:block;width:18px;height:18px;margin:0}
+.editor-preview-devices .editor-preview-expand:hover,.editor-preview-devices .editor-preview-public[href]:hover{background:#fff;color:#e9560a}
+.editor-preview-devices .editor-preview-public:disabled{color:#98a1ae;cursor:not-allowed}
 .editor-preview-viewport{width:100%;overflow:hidden;border:1px solid #e5e0d7;border-radius:10px;background:#eceef1}
 .editor-preview-frame-space{position:relative;margin:0 auto}
 .editor-preview-loading{position:absolute;z-index:1;inset:0;display:grid;place-items:center;margin:0;color:#667182;font-size:13px}

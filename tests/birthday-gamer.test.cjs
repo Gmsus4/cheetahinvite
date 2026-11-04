@@ -23,6 +23,7 @@ function renderer(fixture) {
     } };
     if (name === './BirthdayGallery') return require('./helpers/birthday-renderer.cjs').loadBirthdayComponent('BirthdayGallery', fixture);
     if (name === '@/lib/invitation-links') return fixture.load('lib/invitation-links.ts');
+    if (name === '@/lib/birthday-gamer') return fixture.load('lib/birthday-gamer.ts');
     if (name === './RsvpForm') return { RsvpForm: ({ eventId }) => React.createElement('form', { 'data-event-id': eventId }) };
     if (name === './CountdownTimer') return { CountdownTimer: ({ date, time }) => React.createElement('time', { dateTime: `${date}T${time}` }) };
     return require(name);
@@ -38,7 +39,7 @@ test('Gamer remains a birthday design through selection, preparation and saving'
   const { applyGuidedDesign } = f.load('lib/guided-invitation.ts');
   assert.equal(isInvitationTemplate('birthday', birthdayGamerId), true);
   assert.equal(isInvitationTemplate('wedding', birthdayGamerId), false);
-  assert.equal(birthdayGamerAssets.length, 12);
+  assert.equal(birthdayGamerAssets.length, 18);
   for (const asset of birthdayGamerAssets) assert.ok(fs.existsSync(path.join('public/birthday/gamer', `${asset}.webp`)));
   const original = { eventType: 'birthday', name: 'Mi fiesta', hostNames: 'Nombre propio', eventDate: '2027-04-12', imageUrl: 'https://example.com/my-photo.jpg', message: 'Mensaje propio', sections: [{ id: 'mine', type: 'custom', title: 'Mi título', content: 'Mis datos', enabled: true }] };
   const selected = applyGuidedDesign(original, birthdayGamerId);
@@ -64,6 +65,28 @@ test('Gamer distributes all supplied resources and connects the shared RSVP form
   assert.match(html, /data-event-id="public-event-id"/);
   assert.match(html, /16:30/);
   assert.match(html, /https:\/\/open.spotify.com\//);
+});
+
+test('Gamer uses distinct artwork until the collection is exhausted and keeps every section illustrated', () => {
+  const f = createFixture();
+  const { birthdayGamerExample, birthdayGamerAssets } = f.load('lib/birthday-gamer.ts');
+  const render = renderer(f);
+  const types = ['story','ceremony','reception','program','parents','dress_code','gifts','music','rsvp','custom'];
+  const sections = types.map(type => ({ id:type, type, title:type, content:'Contenido', detail:'', link:'', imageUrl:'', enabled:true }));
+  for (const enabled of [[], sections, [...sections].reverse(), [...sections, ...sections.map(s => ({...s,id:s.id+'2'}))]]) {
+    const html = render({...birthdayGamerExample, sections:enabled});
+    const artwork = [...html.matchAll(/<img[^>]+src="\/birthday\/gamer\/([^"\s]+)\.webp"/g)].map(m => m[1]);
+    assert.deepEqual([...new Set(artwork)].sort(), birthdayGamerAssets.filter(a=>a!=='minecraft-world').slice().sort());
+    const seen = new Set();
+    for (const art of artwork) {
+      if (seen.has(art)) assert.equal(seen.size, 17);
+      seen.add(art);
+    }
+    assert.doesNotMatch(html, /balonbasquet|subsurf/);
+    for (const block of html.matchAll(/<section class="gamer-section gamer-section-([^"\s]+)"[^>]*>([\s\S]*?)<\/section>/g)) {
+      assert.match(block[2], /gamer-section-art/);
+    }
+  }
 });
 
 test('Gamer gallery preserves unique photographs and personal text with a themed interactive gallery', () => {

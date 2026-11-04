@@ -18,6 +18,7 @@ function loadBirthdayComponent(name, fixture, hooks) {
       return React.createElement('img', clean);
     } };
     if (dependency === '@/lib/invitation-links') return fixture.load('lib/invitation-links.ts');
+    if (dependency === '@/lib/birthday-gamer') return fixture.load('lib/birthday-gamer.ts');
     if (dependency === './BirthdayGallery') return loadBirthdayComponent('BirthdayGallery', fixture);
     if (dependency === './RsvpForm') return { RsvpForm: ({ eventId }) => React.createElement('form', { 'data-event-id': eventId }) };
     if (dependency === './CountdownTimer') return { CountdownTimer: () => React.createElement('time') };
