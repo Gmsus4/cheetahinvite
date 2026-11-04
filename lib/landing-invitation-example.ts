@@ -75,6 +75,7 @@ export const landingEventExamples = invitationEventTypes.map((eventType) => {
   return {
     slug: content.slug,
     label: content.label,
+    available: wedding || birthday,
     invitation: {
       ...content.demo,
       eventType,
