@@ -1,4 +1,4 @@
-.birthday-cinema { --cinema-gold:#d6bb80; --cinema-paper:#f1e9d8; --cinema-black:#151512; color:var(--cinema-black); background:var(--cinema-paper); font:400 16px/1.85 'DM Sans Variable',sans-serif; overflow:clip; }
+article.birthday-cinema { --cinema-gold:#d7b77b; --cinema-paper:#f3ecde; --cinema-black:#171316; --birthday-band-base:#131013; --birthday-band-tinted:#21171d; color:#eee5d7; background:#131013; font:400 16px/1.85 'DM Sans Variable',sans-serif; overflow:clip; }
 .birthday-cinema * { box-sizing:border-box; }
 .birthday-cinema :is(h1,h2,h3,p) { margin:0; }
 .birthday-cinema :is(h1,h2,h3) { text-wrap:balance; overflow-wrap:anywhere; }
@@ -7,42 +7,47 @@
 .birthday-cinema p { white-space:pre-line; }
 .birthday-cinema a { text-underline-offset:5px; }
 .cinema-art { display:block; object-fit:contain; pointer-events:none; }
-.cinema-overline { display:block; font-size:16px; font-weight:500; letter-spacing:.12em; line-height:1.65; }
-.cinema-premiere { position:relative; color:#f7ebd4; background:linear-gradient(#16020444,#13020288),url('/birthday/cinema/curtain.webp') center/cover; padding:28px clamp(24px,5vw,80px) 0; text-align:center; }
-.cinema-topline { display:flex; justify-content:space-between; gap:20px; border-bottom:1px solid #e2c68d55; padding-bottom:22px; color:#e2c68d; font-size:16px; letter-spacing:.08em; }
-.cinema-poster { max-width:1050px; margin:auto; padding:85px 20px 65px; }
+.cinema-overline { display:block; font-size:12px; font-weight:600; letter-spacing:.18em; line-height:1.7; color:var(--cinema-gold); }
+.cinema-premiere { position:relative; isolation:isolate; color:#f7ebd4; background:linear-gradient(90deg,#100d11f5,#210d17df),url('/birthday/cinema/curtain.webp') center/cover; padding:28px clamp(24px,5vw,80px) 0; text-align:left; }
+.cinema-premiere:before { content:''; position:absolute; inset:40% 0 0; z-index:-1; background:linear-gradient(#8d183738,#531525); clip-path:polygon(47% 0,57% 0,100% 100%,4% 100%); pointer-events:none; }
+.cinema-topline { display:flex; justify-content:space-between; gap:20px; max-width:1200px; margin:auto; border-bottom:1px solid #e2c68d33; padding-bottom:22px; color:#e2c68d; font-size:11px; letter-spacing:.2em; }
+.cinema-topline i { font-style:normal; color:#b14860; margin:0 12px; }
+.cinema-poster { display:grid; grid-template-columns:1.15fr .85fr; align-items:center; gap:50px; max-width:1200px; margin:auto; padding:85px 0 75px; }
 .cinema-poster > .cinema-overline { color:#dfc999; }
-.cinema-poster h1 { font:500 clamp(64px,11vw,152px)/1.06 'Cinzel Variable',serif; text-transform:uppercase; letter-spacing:-.055em; margin:24px 0 15px; text-shadow:0 4px 25px #0007; }
-.cinema-poster-subtitle { font:italic 400 clamp(27px,3.3vw,44px)/1.3 'Cormorant Garamond Variable',serif; }
+.cinema-poster h1 { font:400 clamp(64px,8vw,120px)/1.04 'Cinzel Variable',serif; text-transform:uppercase; letter-spacing:-.055em; margin:22px 0; text-shadow:0 4px 25px #0007; }
+.cinema-poster-subtitle { font:italic 400 clamp(25px,2.6vw,36px)/1.3 'Cormorant Garamond Variable',serif; color:#d5c5bb; max-width:480px; }
 .cinema-stars { color:var(--cinema-gold); letter-spacing:12px; margin:30px 0; font-size:20px; }
-.cinema-poster-credit { font-size:16px; letter-spacing:.08em; color:#d7c8b2; }
-.cinema-poster-credit strong { display:block; font-weight:500; color:#f7ebd4; margin-top:5px; }
-.cinema-portrait { width:min(100%,340px); height:auto; max-height:420px; object-fit:cover; margin:0 auto 30px; border:8px solid #f3e9d3; }
-.cinema-premiere-date { display:flex; text-align:left; align-items:center; justify-content:center; gap:45px; padding:26px 20px; border-top:1px solid #e2c68d66; background:#14070477; }
+.cinema-poster-credit { font-size:10px; letter-spacing:.15em; color:#d7c8b2; }
+.cinema-poster-credit strong { display:block; font:italic 400 32px/1.3 'Cormorant Garamond Variable',serif; letter-spacing:0; color:#f7ebd4; margin-top:7px; }
+.cinema-portrait { width:100%; height:460px; object-fit:cover; object-position:center; border:1px solid #d6bb8055; }
+.cinema-premiere-date { display:flex; position:relative; text-align:left; align-items:center; justify-content:space-between; gap:30px; padding:28px 0; border-top:1px solid #e2c68d55; max-width:1200px; margin:auto; }
 .cinema-premiere-date span,.cinema-ticket-data span { display:block; font-size:16px; color:#dfc999; letter-spacing:.06em; }
-.cinema-premiere-date strong { display:block; font-size:20px; font-weight:400; }
+.cinema-premiere-date strong { display:block; font-size:17px; font-weight:400; }
+.cinema-premiere-date .cinema-premiere-number { font:400 38px/1 'Cinzel Variable',serif; color:#d7b77b; }
+.cinema-premiere-date .cinema-premiere-access { font-size:10px; letter-spacing:.17em; text-align:right; }
+.cinema-premiere-date>div>span { font-size:10px; letter-spacing:.15em; margin-bottom:5px; }
 .cinema-premiere-date a { color:#f7ebd4; display:flex; gap:18px; align-items:center; text-decoration:none; border-bottom:1px solid #bba67a; padding:10px 0; }
-.cinema-invitation { display:grid; grid-template-columns:.8fr 1.2fr; align-items:center; gap:70px; max-width:1200px; margin:auto; padding:95px 45px; }
+.cinema-invitation { display:grid; grid-template-columns:.8fr 1.2fr; align-items:center; gap:85px; width:100%; margin:auto; padding:100px max(30px,calc((100% - 1080px)/2)); }
 .cinema-invitation-art { position:relative; padding-top:60px; }
 .cinema-invitation-art > .cinema-art { width:100%; height:auto; transform:rotate(-5deg); }
-.cinema-stamp { position:absolute; right:8%; top:0; z-index:1; width:135px; height:135px; display:grid; place-content:center; border:2px solid #9d2135; border-radius:50%; color:#9d2135; text-align:center; font-size:16px; line-height:1.6; letter-spacing:.06em; transform:rotate(12deg); outline:1px solid #9d2135; outline-offset:-7px; }
+.cinema-stamp { position:absolute; right:8%; top:0; z-index:1; width:135px; height:135px; display:grid; place-content:center; border:1px solid #d7b77b; border-radius:50%; color:#d7b77b; text-align:center; font-size:12px; line-height:1.6; letter-spacing:.12em; transform:rotate(12deg); outline:1px solid #d7b77b66; outline-offset:-7px; }
 .cinema-invitation h2 { margin:18px 0 25px; }
-.cinema-signature { display:block; font:italic 500 29px/1.3 'Cormorant Garamond Variable',serif; color:#8e2434; margin-top:25px; }
+.cinema-signature { display:block; font:italic 500 29px/1.3 'Cormorant Garamond Variable',serif; color:var(--cinema-gold); margin-top:25px; }
 .cinema-location { padding:70px clamp(24px,6vw,100px) 85px; background:linear-gradient(#17140ef0,#17140ef0),url('/birthday/cinema/deco-pattern.webp') center/600px auto repeat; color:#f5ecdc; }
 .cinema-location-heading { position:relative; max-width:1050px; margin:0 auto 35px; padding-left:105px; }
 .cinema-location-heading > .cinema-art { position:absolute; left:0; top:8px; width:75px; height:75px; }
 .cinema-location-heading .cinema-overline { color:var(--cinema-gold); margin-bottom:12px; }
-.cinema-ticket { display:grid; grid-template-columns:minmax(0,1fr) 180px; max-width:1050px; margin:auto; color:#231c18; background:#f1e9d8; border:1px solid #d8c9ac; }
+.cinema-ticket { display:grid; grid-template-columns:minmax(0,1fr) 180px; max-width:1050px; margin:auto; color:#231c18; background:#f1e9d8; border:1px solid #d8c9ac; border-radius:4px; box-shadow:0 25px 65px #0004; transform:rotate(-1deg); }
 .cinema-ticket-main { padding:35px 40px; }
 .cinema-ticket-main > .cinema-overline { color:#8e2434; }
 .cinema-ticket h3 { font:500 clamp(27px,3vw,38px)/1.3 'Cinzel Variable',serif; margin:16px 0 12px; }
 .cinema-ticket-data { display:flex; gap:35px; flex-wrap:wrap; margin:25px 0; }
 .cinema-ticket-data span { color:#75644d; }
 .cinema-ticket-data strong { display:block; font-weight:500; font-size:18px; }
-.cinema-ticket-stub { border-left:2px dashed #988974; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px 18px; gap:20px; text-align:center; }
+.cinema-ticket-stub { border-left:2px dashed #988974; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px 18px; gap:20px; text-align:center; background:linear-gradient(#f1e9d8eb,#f1e9d8eb),url('/birthday/cinema/deco-pattern.webp') center/cover; }
 .cinema-ticket-stub :is(span,strong) { font-size:16px; line-height:1.5; letter-spacing:.08em; }
 .cinema-barcode { width:95px; height:100px; background:repeating-linear-gradient(90deg,#272018 0 2px,transparent 2px 5px,#272018 5px 6px,transparent 6px 9px,#272018 9px 13px,transparent 13px 16px); }
-.cinema-button { display:inline-flex; align-items:center; justify-content:center; gap:20px; padding:12px 23px; background:var(--cinema-accent); color:var(--cinema-action-ink); border:1px solid transparent; text-decoration:none; font-size:16px; font-weight:600; transition:transform .2s; }
+.cinema-button { display:inline-flex; align-items:center; justify-content:center; gap:28px; padding:15px 26px; background:var(--cinema-accent); color:var(--cinema-action-ink); border:1px solid transparent; text-decoration:none; font-size:14px; font-weight:600; transition:transform .2s; }
 .cinema-button:hover { transform:translateY(-2px); }
 .cinema-button:focus-visible { outline:2px solid currentColor; outline-offset:5px; }
 .cinema-section { padding:80px clamp(24px,6vw,100px); }
@@ -74,7 +79,7 @@
 .cinema-gifts { display:grid; grid-template-columns:200px minmax(0,1fr); gap:65px; max-width:1000px; margin:auto; align-items:center; }
 .cinema-gifts > .cinema-art { width:180px; height:270px; transform:rotate(-8deg); }
 .cinema-section-music { background:linear-gradient(#390409a6,#390409a6),url('/birthday/cinema/red-fabric.webp') center/350px auto repeat; color:#f7ead5; }
-.cinema-soundtrack { max-width:1000px; margin:auto; display:grid; grid-template-columns:200px minmax(0,1fr); gap:65px; align-items:center; }
+.cinema-soundtrack { max-width:1000px; margin:auto; display:grid; grid-template-columns:200px minmax(0,1fr); gap:55px; align-items:center; padding:45px; border:1px solid #d7b77b44; background:linear-gradient(#2a0c17df,#2a0c17e8),url('/birthday/cinema/red-fabric.webp') center/cover; }
 .cinema-record { width:200px; height:auto; object-fit:contain; }
 .cinema-soundtrack .cinema-button { background:#e5cca0; color:#281b15; }
 .cinema-section-rsvp { background:#e3d7c0; }
@@ -98,7 +103,7 @@
 .cinema-rsvp .invite-rsvp-choice[aria-pressed="true"] .invite-rsvp-choice-icon { color:var(--cinema-action-ink); }
 .cinema-rsvp .invite-rsvp-form .invite-rsvp-submit,.cinema-rsvp .invite-rsvp-form .invite-rsvp-submit:hover:not(:disabled) { background:var(--cinema-accent); color:var(--cinema-action-ink); border-radius:0; }
 .cinema-section-story { background:#e4dac7; }
-.cinema-letter { display:grid; grid-template-columns:70px minmax(0,1fr); max-width:1000px; margin:auto; background:#faf3e5; border:1px solid #beae93; box-shadow:7px 8px 0 #b8a88e55; }
+.cinema-letter { display:grid; grid-template-columns:70px minmax(0,1fr); max-width:1000px; margin:auto; color:#231c18; background:#faf3e5; border:1px solid #beae93; box-shadow:0 20px 60px #0003; }
 .cinema-letter-margin { display:flex; align-items:center; justify-content:space-between; flex-direction:column; border-right:1px solid #b99588; padding:35px 15px; color:#8e2434; }
 .cinema-letter-margin > span:first-child { writing-mode:vertical-rl; font-size:16px; letter-spacing:.18em; }
 .cinema-letter-body { position:relative; padding:45px clamp(25px,5vw,70px); }
@@ -146,7 +151,7 @@
 .cinema-cast .cinema-section-photo { width:min(100%,550px); margin:30px auto 0; }
 .cinema-cast-line { display:block; width:85px; height:1px; background:#b29a67; margin:40px auto 0; }
 .cinema-section-custom { background:#dfd3bd; }
-.cinema-production-note { max-width:950px; margin:auto; background:#fbf3e4; border:1px solid #c1b095; }
+.cinema-production-note { max-width:950px; margin:auto; color:#231c18; background:#fbf3e4; border:1px solid #c1b095; }
 .cinema-production-tab { display:flex; align-items:center; gap:18px; padding:17px 30px; background:#852335; color:#fff0db; font-size:16px; letter-spacing:.1em; }
 .cinema-production-tab > span:first-child { font-size:30px; line-height:1; }
 .cinema-production-body { padding:35px 40px; }
@@ -160,20 +165,42 @@
 .cinema-countdown { text-align:center; padding:75px 25px; color:#e7d8b9; background:#171612; border-bottom:1px solid #ac93613d; }
 .cinema-countdown h2 { margin-top:18px; }
 .cinema-countdown .invite-countdown-clock { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); max-width:750px; gap:12px; margin:40px auto 0; }
-.cinema-countdown .invite-countdown-unit { display:flex; flex-direction:column; border:1px solid #7c6a48; padding:20px 8px; background:#201e18; }
+.cinema-countdown .invite-countdown-unit { display:flex; flex-direction:column; border:0; border-right:1px solid #7c6a4866; padding:20px 8px; background:transparent; }
 .cinema-countdown .invite-countdown-unit strong { font:500 clamp(40px,5vw,64px)/1.1 'Cinzel Variable',serif; color:#f1e9d8; }
 .cinema-countdown .invite-countdown-unit span { font-size:16px; margin-top:8px; }
 .cinema-countdown .invite-countdown-started { margin-top:30px; }
-.cinema-credits { color:#e7d8b9; text-align:center; padding:65px 25px; background:#171612; }
+.cinema-credits { color:#e7d8b9; text-align:center; padding:85px 25px; background:radial-gradient(ellipse at top,#421323,transparent 70%),#100d11; border-top:1px solid #d7b77b33; }
 .cinema-credits > .cinema-art { width:100px; height:100px; margin:0 auto 25px; }
 .cinema-credits p { font:400 clamp(28px,4vw,44px)/1.25 'Cinzel Variable',serif; margin:25px auto; }
 .cinema-credits strong { display:block; font:italic 400 38px/1.2 'Cormorant Garamond Variable',serif; margin-bottom:20px; overflow-wrap:anywhere; }
 .cinema-credits > span:last-child { font-size:16px; color:#b7aa91; }
+.cinema-poster-copy { min-width:0; }
+.cinema-poster-rule { display:flex; align-items:center; gap:15px; color:var(--cinema-gold); margin:28px 0; max-width:210px; font-size:12px; }
+.cinema-poster-rule span { flex:1; height:1px; background:#d7b77b66; }
+.cinema-hero-button { margin-top:28px; background:transparent; border-color:#d7b77b80; color:#f7ebd4; }
+.cinema-poster-visual { position:relative; isolation:isolate; min-height:440px; display:grid; place-items:center; padding:35px 20px 90px; }
+.cinema-visual-orbit { position:absolute; inset:20px 0 55px; z-index:-1; border-radius:50% 50% 4px 4px; border:1px solid #d7b77b55; background:radial-gradient(ellipse at center,#8e283f66,transparent 75%); }
+.cinema-poster-visual>.cinema-art { width:100%; height:300px; transform:rotate(-9deg); filter:drop-shadow(0 22px 18px #0008); }
+.cinema-visual-label { position:absolute; bottom:25px; left:25px; font-size:10px; letter-spacing:.25em; color:#d7b77b; }
+.cinema-visual-label strong { display:block; font:400 clamp(20px,2.8vw,35px)/1.6 'Cinzel Variable',serif; letter-spacing:.02em; color:#f7ebd4; }
+.cinema-premiere-seal { position:absolute; right:-12px; bottom:10px; display:grid; place-content:center; width:108px; height:108px; border:1px solid #d7b77b; border-radius:50%; background:#26151b; color:#d7b77b; outline:1px solid #d7b77b55; outline-offset:-7px; text-align:center; font-size:10px; letter-spacing:.12em; transform:rotate(12deg); }
+.cinema-premiere-seal b { font-weight:500; }
+.cinema-premiere-seal>span { font-size:20px; }
+.cinema-callsheet,.cinema-admission { color:#231c18; }
+.cinema-callsheet .cinema-overline,.cinema-production-note .cinema-overline,.cinema-admission .cinema-overline { color:#8e2434; }
+.cinema-countdown .invite-countdown-unit:last-child { border-right:0; }
+.cinema-section-gallery .cinema-content>p { max-width:640px; margin:20px auto; }
+.birthday-cinema a:focus-visible,.birthday-cinema button:focus-visible { outline:2px solid var(--cinema-gold); outline-offset:5px; }
 @media (max-width:800px) {
   .cinema-topline { justify-content:center; }
   .cinema-topline > span:last-child { display:none; }
-  .cinema-poster { padding:65px 0 45px; }
-  .cinema-poster h1 { font-size:clamp(56px,15vw,100px); }
+  .cinema-poster { grid-template-columns:1fr; gap:25px; padding:55px 0 40px; }
+  .cinema-poster h1 { font-size:clamp(54px,14vw,100px); }
+  .cinema-poster-visual { width:100%; max-width:400px; min-height:340px; margin:auto; }
+  .cinema-poster-visual>.cinema-art { height:240px; }
+  .cinema-premiere-seal { right:0; width:88px; height:88px; font-size:9px; }
+  .cinema-portrait { height:360px; }
+  .cinema-premiere-date .cinema-premiere-number,.cinema-premiere-date .cinema-premiere-access { display:none; }
   .cinema-premiere-date { flex-wrap:wrap; gap:20px 35px; padding-inline:0; }
   .cinema-premiere-date > a { flex-basis:100%; justify-content:center; border:0; }
   .cinema-invitation { grid-template-columns:1fr; gap:35px; padding:55px 26px; }
@@ -223,7 +250,7 @@
   .cinema-dress-copy { padding:45px 26px; }
   .cinema-gifts { grid-template-columns:1fr; gap:30px; }
   .cinema-gifts > .cinema-art { width:110px; height:170px; margin:auto; }
-  .cinema-soundtrack { grid-template-columns:1fr; gap:30px; }
+  .cinema-soundtrack { grid-template-columns:1fr; gap:30px; padding:28px 22px; }
   .cinema-record { width:160px; height:auto; }
   .cinema-admission { grid-template-columns:1fr; }
   .cinema-admission-copy { padding:30px 24px; border-right:0; border-bottom:2px dashed #ad9c7e; }
@@ -238,7 +265,7 @@
   .cinema-ticket-stub { flex-wrap:wrap; }
   .cinema-ticket-stub > span { flex-basis:100%; }
   .cinema-countdown .invite-countdown-clock { grid-template-columns:1fr 1fr; }
-  .cinema-premiere-date { text-align:center; }
+  .cinema-premiere-date { text-align:left; }
   .cinema-premiere-date > div { width:100%; }
 }
 @media (prefers-reduced-motion:reduce) { .cinema-button { transition:none; } }

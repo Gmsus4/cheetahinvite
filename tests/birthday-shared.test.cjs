@@ -38,6 +38,71 @@ for (const design of designs) {
   });
 }
 
+test('Pastel retains nineteen resources and illustrates every content section, reusing artwork when needed', () => {
+  const fixture = createFixture();
+  const { BirthdayPastelInvitation } = loadBirthdayComponent('BirthdayPastelInvitation', fixture);
+  const { birthdayPastelAssets } = fixture.load('lib/birthday-pastel.ts');
+  const expected = birthdayPastelAssets.filter(name => !['sky', 'balloons'].includes(name))
+    .map(name => `/birthday/pastel/${name}.webp`).sort();
+  const allSections = ['story','ceremony','reception','program','parents','dress_code','gifts','gallery','music','rsvp','custom'].map(section);
+  const variants = [[], allSections, [...allSections].reverse(),
+    allSections.map((item, index) => ({ ...item, enabled: index % 2 === 0 })),
+    [section('rsvp'), { ...section('rsvp'), id: 'another-rsvp' }, section('ceremony')],
+    Array.from({ length: 8 }, (_, index) => ({ ...section('custom'), id: `custom-${index}` }))];
+  for (const sections of variants) {
+    for (const venue of ['', 'Salón']) {
+      for (const eventTime of ['', '18:00']) {
+        const html = renderToStaticMarkup(React.createElement(BirthdayPastelInvitation, { ...props, sections, venue, eventTime }));
+        const artwork = [...html.matchAll(/<img[^>]+src="(\/birthday\/pastel\/[^"\s]+)"/g)].map(match => match[1]);
+        assert.deepEqual([...new Set(artwork)].sort(), expected);
+        for (const block of html.matchAll(/<section class="pastel-section pastel-section-([^"\s]+)"[^>]*>([\s\S]*?)<\/section>/g)) {
+          if (block[1] !== 'gallery') assert.match(block[2], /<img[^>]+class="pastel-art /, block[1]);
+        }
+        assert.match(html, /<footer class="pastel-footer">[\s\S]*?<img[^>]+class="pastel-art /);
+        const gallery = html.match(/<section class="pastel-section pastel-section-gallery"[^>]*>([\s\S]*?)<\/section>/);
+        if (gallery) assert.doesNotMatch(gallery[1], /\/birthday\/pastel\//);
+      }
+    }
+  }
+  const css = fs.readFileSync('app/birthday-pastel.css', 'utf8');
+  for (const background of ['sky', 'balloons']) {
+    assert.equal(css.split(`/birthday/pastel/${background}.webp`).length - 1, 1);
+  }
+});
+
+test('Disco replaces subsequent artwork occurrences with the holographic star', () => {
+  const fixture = createFixture();
+  const { BirthdayDiscoInvitation } = loadBirthdayComponent('BirthdayDiscoInvitation', fixture);
+  const types = ['story','ceremony','reception','program','parents','dress_code','gifts','music','rsvp','custom'];
+  for (const sections of [types.map(section), types.reverse().map(section), []]) {
+    const html = renderToStaticMarkup(React.createElement(BirthdayDiscoInvitation, {...props, venue:'Salón', sections}));
+    const art = [...html.matchAll(/<img[^>]+src="\/birthday\/disco\/([^"\s]+)\.webp"/g)].map(match => match[1]);
+    const uniqueArt = art.filter(name => name !== 'holo-star');
+    assert.equal(new Set(uniqueArt).size, uniqueArt.length);
+    assert.ok(art.filter(name => name === 'holo-star').length >= 2);
+    const gifts = html.match(/<section class="disco-section disco-section-gifts"[^>]*>([\s\S]*?)<\/section>/);
+    if (gifts) assert.match(gifts[1], /\/balloon-dog.webp/);
+  }
+});
+
+test('Disco artwork belongs to removable sections and disappears when they are disabled', () => {
+  const fixture = createFixture();
+  const { BirthdayDiscoInvitation } = loadBirthdayComponent('BirthdayDiscoInvitation', fixture);
+  const assignments = {story:['ball-purple'],ceremony:['mundo'],reception:['hanging-ball'],program:['saturno'],parents:['ball-navy'],dress_code:['silver-stars'],gifts:['balloon-dog'],music:['helmet-silver'],rsvp:['pencil'],custom:['chrome-spark']};
+  const render = sections => renderToStaticMarkup(React.createElement(BirthdayDiscoInvitation,{...props,venue:'Salón',sections}));
+  const empty = render([]);
+  for (const [type, assets] of Object.entries(assignments)) {
+    const active = render([section(type)]);
+    const disabled = render([{...section(type),enabled:false}]);
+    const block = active.match(new RegExp('<section class="disco-section disco-section-'+type+'"[^>]*>([\\s\\S]*?)<\\/section>'))[1];
+    for (const asset of assets) {
+      assert.ok(block.includes('/birthday/disco/'+asset+'.webp'),type);
+      assert.ok(!empty.includes('/birthday/disco/'+asset+'.webp'),asset);
+      assert.ok(!disabled.includes('/birthday/disco/'+asset+'.webp'),asset);
+    }
+  }
+});
+
 test('Every birthday gallery preserves its palette and photos without decorative artwork', () => {
   const { BirthdayGallery, galleryThemes } = loadBirthdayComponent('BirthdayGallery', createFixture());
   for (const theme of Object.keys(galleryThemes)) {

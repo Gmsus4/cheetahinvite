@@ -85,8 +85,6 @@
 .cinema-cast { padding: 32px; background: #111310; }
 .cinema-soundtrack { padding: 32px; background: linear-gradient(#390409a6,#390409a6),url('/birthday/cinema/red-fabric.webp') center/350px auto repeat; }
 .birthday-cinema > :is(.cinema-section-dress_code,.cinema-section-ceremony) { padding: 32px clamp(24px,6vw,100px); }
-.cinema-location-heading,.cinema-countdown { color: var(--cinema-black); }
-.cinema-location-heading .cinema-overline,.cinema-countdown .cinema-overline { color: #775027; }
 .dino-section-rsvp .dino-section-heading { color: var(--dino-ink); }
 .dino-section-rsvp .dino-kicker { color: #52653e; }
 .dino-section-rsvp .dino-section-body { padding: 32px; border-radius: 24px; background: #173b2e; }

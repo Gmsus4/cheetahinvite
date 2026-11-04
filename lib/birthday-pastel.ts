@@ -2,10 +2,10 @@ import type { InvitationTemplate } from './invitation-templates';
 import { birthdayConfettiExample } from './birthday-designs';
 
 export const birthdayPastelId = 'birthday-pastel-v1';
-export const birthdayPastelAssets = ['bear-chef','cupcake','star-soft','star-gold','cloud-blue','cloud-light','sky','cake','duck','puppy-chef','balloons'] as const;
+export const birthdayPastelAssets = ['bear-chef','cupcake','star-soft','star-gold','cloud-blue','cloud-light','sky','cake','duck','puppy-chef','balloons','conejo','confeti','elefante','gatito','globos','pastel2','regalo','tigre'] as const;
 export const birthdayPastelTemplate: InvitationTemplate = {
   id: birthdayPastelId, eventType:'birthday', label:'Globos pastel', available:true, accent:'#526F87',
-  assets:{topLeft:'/birthday/pastel/cloud-light.webp',bottomRight:'/birthday/pastel/cake.webp',texture:'/birthday/pastel/sky.webp'},
+  assets:{topLeft:'/birthday/pastel/globos.webp',bottomRight:'/birthday/pastel/cake.webp',texture:'/birthday/pastel/sky.webp'},
 };
 export const birthdayPastelExample = {
   ...birthdayConfettiExample, templateId:birthdayPastelId, accent:'#526F87', name:'El cumpleaños de Emilia', hostNames:'Emilia',

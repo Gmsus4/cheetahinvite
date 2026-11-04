@@ -132,3 +132,16 @@
 
 /* Galleries give the photographs the full content width, without illustration columns. */
 .disco-section.disco-section-gallery .disco-section-inner { display: block; text-align: center; }
+.disco-art-mundo,.disco-art-saturno{mix-blend-mode:normal}
+.disco-extra-planets{display:flex;justify-content:center;align-items:center;gap:28px;max-width:500px;margin:auto}
+.disco-extra-planets:has(>.disco-art){margin-bottom:30px}
+.disco-extra-planets>.disco-art{width:180px;max-width:45%;height:150px}
+.disco-countdown>.disco-art-holo-star{mix-blend-mode:normal;width:100px;height:100px}
+.disco-mirror-scene-star{display:grid;place-items:center}
+.disco-mirror-scene-star>.disco-art{height:220px;max-width:65%;margin:auto}
+.disco-section-illustrations{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:22px;max-width:100%}
+.disco-section-illustrations>.disco-art{width:100%;max-height:210px;object-fit:contain;margin:auto}
+.disco-section:nth-of-type(even) .disco-section-inner>.disco-section-illustrations{order:2}
+.disco-section-rsvp .disco-section-illustrations{width:100px;margin:0 auto 25px}
+.disco-section-music .disco-section-illustrations>.disco-art{max-height:190px}
+@media(max-width:600px){.disco-section:nth-of-type(even) .disco-section-inner>.disco-section-illustrations{order:0}.disco-section-illustrations{max-width:170px;margin:auto}.disco-section-illustrations>.disco-art{max-height:150px}.disco-mirror-scene-star>.disco-art{height:180px}}

@@ -177,3 +177,9 @@
   .gamer-hud > span:first-child { max-width: 210px; }
 }
 @media (prefers-reduced-motion: reduce) { .gamer-button { transition: none; } }
+
+/* Extra characters share a scene without shrinking the primary illustration. */
+.gamer-section-art-pair > .gamer-art:last-of-type { position:absolute; right:-10px; bottom:0; width:43%; height:180px; max-height:180px; padding:0; transform:rotate(8deg); filter:drop-shadow(0 5px 3px #29213d30); }
+.gamer-closing-roster { display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-end; gap:24px; max-width:850px; margin:0 auto 40px; }
+.gamer-closing-roster > .gamer-art { width:145px; height:175px; max-width:calc((100% - 48px)/3); filter:drop-shadow(0 8px 4px #0003); }
+@media(max-width:760px) { .gamer-section-art-pair > .gamer-art:last-of-type { width:43%; height:130px; right:-15px; } .gamer-closing-roster { gap:16px; } .gamer-closing-roster > .gamer-art { height:125px; max-width:calc((100% - 32px)/3); } }

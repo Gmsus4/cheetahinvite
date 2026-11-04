@@ -1,21 +1,24 @@
 # Disco
 
-Cuarta identidad de cumpleaños: `birthday-disco-v1`. Disponible en el grid compartido y en `/ejemplo-invitacion/cumpleanos-disco`.
+Diseño de cumpleaños birthday-disco-v1. Ejemplo: /ejemplo-invitacion/cumpleanos-disco. Conserva los trece recursos WebP de public/birthday/disco/.
 
-La composición usa plata, lila y tornasol; tipografía Outfit con nombre cromado, DM Sans para texto y Caveat para notas. La portada muestra la bola colgante, ambas estrellas y el collage suave. La bienvenida reúne las otras dos bolas de espejos y el perrito metálico. Una franja musical oscura incorpora el casco y un disco de vinilo construido con CSS. Así se utilizan los ocho recursos iniciales incluso con secciones opcionales desactivadas.
+Las ilustraciones pertenecen a los apartados editables que el usuario puede agregar, quitar, activar y reordenar. No se trasladan al cierre al desactivar su apartado.
 
-Recursos optimizados en `public/birthday/disco/`: `helmet`, `collage`, `ball-purple`, `hanging-ball`, `ball-navy`, `chrome-spark`, `balloon-dog`, `holo-star`, `silver-stars`, `pencil`, todos WebP. Los originales se conservan. Las imágenes claras se mezclan sobre los fondos suaves; el casco conserva su apariencia sobre la franja oscura.
+| Apartado | Ilustración |
+| --- | --- |
+| Historia | Esfera morada (ball-purple) |
+| Ceremonia | Mundo cromado (mundo) |
+| Recepción | Bola colgante (hanging-ball) |
+| Programa | Saturno (saturno) |
+| Personas especiales | Esfera azul (ball-navy) |
+| Vestimenta | Estrellas plateadas (silver-stars) |
+| Regalos | Perrito metálico (balloon-dog) |
+| Música | Casco plateado (helmet-silver) |
+| Confirmación | Lápiz (pencil) |
+| Personalizado | Destello cromado (chrome-spark) |
 
-Secciones y fondos de ancho completo, sin texturas repetidas ni márgenes externos que generen huecos. El contenido se centra con contenedores interiores. El collage de portada se desvanece sin cortar el texto.
+La portada conserva el collage de fondo y usa la estrella tornasol como adorno común. El casco dorado (helmet) conserva su lugar en la franja musical fija. Bienvenida, ubicación, cuenta regresiva y cierre no consumen las ilustraciones asignadas a los apartados. La estrella tornasol también sustituye las repeticiones si se agregan varias secciones del mismo tipo. La galería se reserva para fotos del usuario.
 
-Admite color principal, fotografía opcional, datos reales, mapa, programa, mensajes, vestimenta, regalos, música, galería, RSVP integrado o externo y cuenta regresiva. Los datos del ejemplo son ficticios. Seleccionar Disco conserva el contenido personal. El RSVP reutiliza `RsvpForm` con un tema claro lila.
+La muestra incluye todos los tipos de apartado para mostrar la distribución completa; no altera los datos ni los apartados de invitaciones existentes. Conserva los enlaces seguros, la confirmación compartida, la cuenta regresiva y la alternancia dinámica de fondos.
 
-Verificación: TypeScript, pruebas de catálogo, enlaces y persistencia del diseño; revisión visual en escritorio y a 390 px; sin desbordamiento, imágenes fallidas ni huecos entre bloques; confirmación probada en modo de demostración.
-
-Se añadieron dos recursos para reducir repeticiones: `estrellas3discopng.png` → `silver-stars.webp` en vestimenta, y `lapizpng.png` → `pencil.webp` en confirmación. Sustituyen la estrella tornasol y el destello cromado que se repetían en esos bloques. El catálogo de recursos suma once imágenes; las dos nuevas aparecen cuando se activan sus secciones.
-
-La bola con estrellas azules (`ball-navy.webp`) se reserva exclusivamente para la bienvenida. En el cierre la sustituyen las estrellas plateadas. Las demás secciones conservan ilustraciones asignadas según el contenido: destello cromado en galería, bola morada en historia, perrito en personas especiales, bola colgante en ceremonia/recepción y estrella tornasol en información adicional. No dejar vacíos los espacios al sustituir un recurso repetido.
-
-`casco2png.png` se incorpora como `helmet-silver.webp` en la sección opcional de música, sustituyendo el casco dorado repetido. El casco dorado permanece en la franja musical inicial. Se conservan once recursos en total.
-
-La alternancia dinámica de fondos, la galería bento sin adornos y el visor siguen [el comportamiento compartido de cumpleaños](birthday-shared.md).
+Tipografías Outfit, DM Sans y Caveat; fondos plata y lila, acento personalizable, diseño adaptable a móvil.

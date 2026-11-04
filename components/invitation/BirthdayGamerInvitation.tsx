@@ -5,18 +5,46 @@ import { BirthdayGallery } from './BirthdayGallery';
 import type { CSSProperties } from 'react';
 import type { WeddingInvitationProps } from './WeddingInvitation';
 import type { InviteSection } from '@/lib/invitation-editor';
-import type { GamerAsset } from '@/lib/birthday-gamer';
+import { birthdayGamerAssets, type GamerAsset } from '@/lib/birthday-gamer';
 import { invitationMapUrl, invitationSectionUrl, invitationLinkLabel } from '@/lib/invitation-links';
 import { RsvpForm } from './RsvpForm';
 import { CountdownTimer } from './CountdownTimer';
 
+const extraDimensions: Partial<Record<GamerAsset, [number, number]>> = {
+  abejaminecraft: [651,742], caballoajedrez: [391,690],
+  clashroyale1: [655,1296], clashroyale2: [735,1003], pelotabeisbol: [555,555],
+  peonajedrez: [551,756],
+};
+const sectionArt: Partial<Record<InviteSection['type'], GamerAsset[]>> = {
+  story: ['abejaminecraft'], ceremony: ['pelotabeisbol'], reception: ['clashroyale2'],
+  program: ['chicken-rider', 'clashroyale1'], dress_code: ['pixel-dog', 'caballoajedrez'],
+  gifts: ['llama', 'abejaminecraft'], music: ['poco'],
+  rsvp: ['crewmate'], parents: ['peonajedrez'], custom: ['clashroyale2'],
+};
 function GameArt({ name, className = '', eager = false }: { name: GamerAsset; className?: string; eager?: boolean }) {
-  return <Image className={`gamer-art ${className}`} src={`/birthday/gamer/${name}.webp`} width={800} height={800} alt="" unoptimized loading={eager ? 'eager' : 'lazy'} />;
+  const [width, height] = extraDimensions[name] ?? [800,800];
+  return <Image className={`gamer-art ${className}`} src={`/birthday/gamer/${name}.webp`} width={width} height={height} alt="" unoptimized loading={eager ? 'eager' : 'lazy'} />;
 }
 
 export function BirthdayGamerInvitation({ name, hostNames, date, eventDateKey, eventTime, venue, address, message, imageUrl, sections, publicEventId, accent }: WeddingInvitationProps) {
   const title = hostNames || name || 'Tu cumpleaños';
   const sectionOffset = (venue || address ? 2 : 1);
+  const enabledSections = sections.filter(section => section.enabled);
+  const illustrationPool = birthdayGamerAssets.filter(asset => asset !== 'minecraft-world');
+  const usedArt = new Set<GamerAsset>(['mario-kart','lucky-block','fall-guy','peach-kart','spike']);
+  if (venue || address) usedArt.add('isabelle');
+  const artwork = enabledSections.map(section => {
+    if (section.type === 'gallery') return [];
+    const preferred = sectionArt[section.type] ?? ['fall-guy'];
+    const primary = preferred.find(asset => !usedArt.has(asset))
+      ?? illustrationPool.find(asset => !usedArt.has(asset)) ?? preferred[0];
+    usedArt.add(primary);
+    const secondary = preferred.find(asset => !usedArt.has(asset));
+    if (secondary) usedArt.add(secondary);
+    return secondary ? [primary, secondary] : [primary];
+  });
+  const closingArt: GamerAsset[] = illustrationPool.filter(asset => !usedArt.has(asset));
+  if (!closingArt.length) closingArt.push('fall-guy', 'spike');
   const time = eventTime && /^([01]\d|2[0-3]):[0-5]\d$/.test(eventTime) ? new Intl.DateTimeFormat('es-MX', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'UTC' }).format(new Date(`1970-01-01T${eventTime}:00Z`)) : eventTime;
   return <article className="birthday-gamer" style={{ '--gamer-accent': /^#[0-9a-f]{6}$/i.test(accent) ? accent : '#7450CC' } as CSSProperties}>
     <header className="gamer-hero">
@@ -39,23 +67,22 @@ export function BirthdayGamerInvitation({ name, hostNames, date, eventDateKey, e
 
     {(venue || address) && <section className="gamer-location" data-birthday-band="tinted"><div className="gamer-location-frame"><div className="gamer-location-art" aria-hidden="true"><span className="gamer-crosshair" /><GameArt name="isabelle" /><span className="gamer-tag">CHECKPOINT</span></div><div className="gamer-location-copy"><span className="gamer-kicker">DESTINO DESBLOQUEADO</span><h2>Nos vemos<br /><em>en este nivel.</em></h2><h3>{venue}</h3><p>{address}</p><p className="gamer-location-date">{date}{time ? ` · ${time}` : ''}</p><a className="gamer-button" href={invitationMapUrl(venue, address)} target="_blank" rel="noopener noreferrer">Cómo llegar <span aria-hidden="true">↗</span></a></div></div></section>}
 
-    {sections.filter(section => section.enabled).map((section, index) => <GamerSection key={section.id} section={section} bandIndex={index + sectionOffset} index={index} publicEventId={publicEventId} />)}
+    {enabledSections.map((section, index) => <GamerSection key={section.id} section={section} artwork={artwork[index]} bandIndex={index + sectionOffset} index={index} publicEventId={publicEventId} />)}
 
     {eventDateKey && eventTime && <section className="gamer-countdown" data-birthday-band={(sections.filter(section => section.enabled).length + sectionOffset) % 2 === 0 ? "base" : "tinted"}><div className="gamer-countdown-panel"><span className="gamer-kicker">EL SIGUIENTE NIVEL EMPIEZA EN</span><h2>¡Ya casi es<br /><em>hora de jugar!</em></h2><CountdownTimer date={eventDateKey} time={eventTime} /></div><div className="gamer-terrain" aria-hidden="true" /><span className="gamer-world-label" aria-hidden="true">NUEVO MUNDO · NUEVOS RECUERDOS</span></section>}
-    <footer className="gamer-footer"><span className="gamer-dpad" aria-hidden="true" /><span className="gamer-kicker">CONTINUAR LA PARTIDA</span><h2>¡Te espero<br />en mi cumpleaños!</h2><strong>{title}</strong><p>La mejor recompensa es celebrar contigo.</p><span className="gamer-footer-lives" aria-hidden="true">♥ &nbsp; ♥ &nbsp; ♥</span></footer>
+    <footer className="gamer-footer"><div className="gamer-closing-roster" aria-hidden="true">{closingArt.map(asset => <GameArt key={asset} name={asset} />)}</div><span className="gamer-dpad" aria-hidden="true" /><span className="gamer-kicker">CONTINUAR LA PARTIDA</span><h2>¡Te espero<br />en mi cumpleaños!</h2><strong>{title}</strong><p>La mejor recompensa es celebrar contigo.</p><span className="gamer-footer-lives" aria-hidden="true">♥ &nbsp; ♥ &nbsp; ♥</span></footer>
   </article>;
 }
 
-function GamerSection({ section, index, bandIndex, publicEventId }: { section: InviteSection; index: number; bandIndex: number; publicEventId?: string }) {
+function GamerSection({ section, artwork, index, bandIndex, publicEventId }: { section: InviteSection; artwork: GamerAsset[]; index: number; bandIndex: number; publicEventId?: string }) {
   const gallery = section.type === 'gallery';
   const link = invitationSectionUrl(section.type, section.link);
   const images = gallery ? [...new Set([section.imageUrl, ...(section.imageUrls || [])].filter(Boolean))] : [];
-  const art: GamerAsset = section.type === 'rsvp' ? 'crewmate' : section.type === 'music' ? 'poco' : section.type === 'gifts' ? 'llama' : section.type === 'program' ? 'chicken-rider' : section.type === 'dress_code' ? 'pixel-dog' : section.type === 'parents' ? 'isabelle' : section.type === 'ceremony' || section.type === 'reception' ? 'peach-kart' : 'fall-guy';
   return <section className={`gamer-section gamer-section-${section.type}`} data-birthday-band={bandIndex % 2 === 0 ? "base" : "tinted"}>
     <div className="gamer-section-frame">
       {!gallery && <div className="gamer-window-bar"><span>{section.type === 'rsvp' ? 'SALA DE ESPERA' : section.type === 'music' ? 'SOUNDTRACK' : `MISIÓN ${String(index + 1).padStart(2, '0')}`}</span><span aria-hidden="true">● ● ●</span></div>}
       <div className="gamer-section-inner">
-        {!gallery && <div className="gamer-section-art" aria-hidden="true"><GameArt name={art} /><span className="gamer-art-platform" /></div>}
+        {!gallery && <div className={`gamer-section-art${artwork.length > 1 ? ' gamer-section-art-pair' : ''}`} aria-hidden="true">{artwork.map(art => <GameArt key={art} name={art} />)}<span className="gamer-art-platform" /></div>}
         <div className="gamer-section-copy"><h2>{section.title}</h2>
           {section.type === 'program' ? <ol className="gamer-program">{section.content.split('\n').filter(Boolean).map((line, i) => {
             const [time, ...description] = line.split(/\s+[—–-]\s+/);
