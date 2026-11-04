@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { FiArrowDown, FiArrowUpRight, FiClock, FiGift, FiHeart, FiMapPin, FiMusic, FiCamera, FiUsers } from "react-icons/fi";
+import { FiArrowUpRight, FiClock, FiGift, FiHeart, FiMapPin, FiMusic, FiCamera, FiUsers } from "react-icons/fi";
 import type { InviteSection } from "@/lib/invitation-editor";
 import { getWeddingDesign } from "@/lib/wedding-designs";
 import { atmospherePanelStyle, atmosphereSections, atmosphereStyle, atmosphereTime } from "@/lib/wedding-atmosphere";
@@ -30,14 +30,14 @@ export function WeddingAtmosphereInvitation(props: WeddingInvitationProps) {
       <div className="wa-backdrop-texture" /><div className="wa-backdrop-shade" />
     </div>
     <div className="wa-column">
-      <header className="wa-panel wa-cover" data-surface="blur">
+      <div className="wa-shell">
+      <header className="wa-cover" data-surface="blur">
         <div className="wa-cover-heading"><span className="wa-kicker">Nuestra boda</span>
           <h1 aria-label={title}>{names.length === 2 ? <>{names[0]}<span className="wa-ampersand" aria-hidden="true">&amp;</span>{names[1]}</> : title}</h1>
           <p className="wa-date">{date}{time && <><span aria-hidden="true"> · </span>{time}</>}</p>
         </div>
-        {props.imageUrl ? <div className="wa-portrait"><Image src={props.imageUrl} alt={`La pareja: ${title}`} width={900} height={1125} sizes="(max-width:600px) 94vw, 540px" preload unoptimized /></div>
+        {props.imageUrl ? <div className="wa-portrait"><Image src={props.imageUrl} alt={`La pareja: ${title}`} width={900} height={1000} sizes="(max-width:600px) 94vw, 540px" preload unoptimized /></div>
           : <div className="wa-no-photo" aria-hidden="true"><span>{initials}</span><i>El comienzo de nuestro siempre</i></div>}
-        <a className="wa-discover" href="#wedding-celebration">Celebra con nosotros<FiArrowDown aria-hidden="true" /></a>
       </header>
       {props.eventDateKey && <section className="wa-panel wa-countdown" data-surface="blur-color" aria-label="Cuenta regresiva"><span className="wa-kicker">Cada vez más cerca</span><CountdownTimer date={props.eventDateKey} time={props.eventTime || "00:00"} /></section>}
       <section className="wa-panel wa-welcome" data-surface={atmospherePanelStyle(undefined, 1 + Number(Boolean(props.eventDateKey)))} id="wedding-celebration">
@@ -50,6 +50,7 @@ export function WeddingAtmosphereInvitation(props: WeddingInvitationProps) {
         <a className="wa-button" href={invitationMapUrl(props.venue, props.address)} target="_blank" rel="noopener noreferrer">Cómo llegar<FiArrowUpRight aria-hidden="true" /></a>
       </section>}
       {sections.map((section, index) => <AtmosphereSection key={section.id} section={section} surface={atmospherePanelStyle(section, firstDetailIndex + index)} eventId={props.publicEventId} />)}
+      </div>
       <footer className="wa-footer"><span className="wa-kicker">Con todo nuestro amor</span><strong>{title}</strong><p>Gracias por ser parte de nuestra historia.</p><small>Cheetah Invite</small></footer>
     </div>
   </article>;

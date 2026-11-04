@@ -8,6 +8,8 @@ Las doce bodas del catálogo v2 comparten ahora una composición centrada: fondo
 
 ## Contenido
 
+Una tarjeta exterior continua (`wa-shell`) envuelve desde «Nuestra boda» hasta la confirmación. Su fondo neutro con blur continúa por los espacios entre las tarjetas internas y las fotos; cada sección conserva su acabado Auto/Blur/BlurColor/Color. La despedida queda fuera de esta tarjeta.
+
 Se retiraron todas las decoraciones botánicas del renderizador alternativo: esquinas, ramas, flores de bienvenida y despedida y capas florales del fondo. Los recursos originales permanecen disponibles para las versiones anteriores.
 
 Los paneles alternan por defecto **Blur → BlurColor → Color**, contando únicamente los bloques visibles. Blur muestra un cristal neutro; BlurColor mezcla el color del tema con transparencia y desenfoque; Color usa el tono sólido sin blur. En cada detalle del editor, **Fondo de esta sección** ofrece **Auto | Blur | BlurColor | Color**. Auto restaura la alternancia y las elecciones explícitas se conservan al guardar, recuperar un borrador y cambiar de diseño. El campo opcional `InviteSection.panelStyle` admite `auto`, `blur`, `blur-color` y `color`; su ausencia equivale a Auto. Las fotos entre paneles mantienen su imagen nítida.
