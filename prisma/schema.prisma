@@ -43,6 +43,7 @@ model Event {
   address      String?
   message      String?     @db.Text
   imageUrl     String?     @db.Text
+  backgroundImageUrl String? @db.Text
   imageUploads Int         @default(0)
   contentVersion Int       @default(0)
   accent       String      @default("#E9560A")

@@ -25,11 +25,6 @@
 .wedding-atmosphere a { color: inherit; }
 .wedding-atmosphere img { display: block; max-width: 100%; }
 .wedding-atmosphere .wa-backdrop { position: fixed; z-index: -1; inset: 0; pointer-events: none; background: var(--wa-base); }
-.wedding-atmosphere .wa-backdrop-photos { position: absolute; inset: -2%; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 58% 42%; gap: 6px; }
-.wedding-atmosphere .wa-backdrop-photos > div { position: relative; overflow: hidden; }
-.wedding-atmosphere .wa-backdrop-photos img { object-fit: cover; object-position: 50% 40%; }
-.wedding-atmosphere .wa-backdrop-photos > :nth-child(2) img { object-position: 75% 35%; }
-.wedding-atmosphere .wa-backdrop-photos > :nth-child(3) img { object-position: 25% 65%; }
 .wedding-atmosphere .wa-backdrop-shade { position: absolute; inset: 0; background: linear-gradient(90deg,#0005,transparent 35%,transparent 65%,#0005), color-mix(in srgb,var(--wa-base) 32%,transparent); }
 .wedding-atmosphere .wa-backdrop-texture { position: absolute; inset: 0; background: var(--wa-texture) center/cover; opacity: .35; mix-blend-mode: screen; }
 .wedding-atmosphere[data-photo="true"] .wa-backdrop-texture { opacity: .06; }
@@ -139,9 +134,9 @@
   .wedding-atmosphere .invite-countdown-unit strong { font-size: 31px; }
   .wedding-atmosphere .wa-photo-grid { margin-inline: -13px; margin-bottom: -22px; gap: 9px; }
   .wedding-atmosphere .wa-section-photo { margin-bottom: 14px; border-radius: 18px; }
-  .wedding-atmosphere .wa-backdrop-photos { inset: -3%; grid-template-columns: 1fr; grid-template-rows: 1fr; }
-  .wedding-atmosphere .wa-backdrop-photos > :not(:first-child) { display: none; }
-  .wedding-atmosphere .wa-backdrop-photos img { filter: blur(3px); }
   .wedding-atmosphere .wa-backdrop-botanicals { background-size: 85vw auto,85vw auto; }
 }
 @media(prefers-reduced-motion:reduce) { .wedding-atmosphere :is(.wa-button,.wa-carousel-track,.wa-carousel-controls button,.wa-carousel-dots span) { transition: none; } }
+
+.wedding-atmosphere .wa-backdrop-image { position: absolute; inset: 0; }
+.wedding-atmosphere .wa-backdrop-image img { object-fit: cover; object-position: center; }

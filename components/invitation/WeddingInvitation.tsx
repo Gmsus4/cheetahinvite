@@ -16,7 +16,7 @@ import { WeddingAtmosphereInvitation } from "./WeddingAtmosphereInvitation";
 
 export type WeddingInvitationProps = {
   templateId: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string;
-  eventTime?: string; venue: string; address: string; message: string; imageUrl: string;
+  eventTime?: string; venue: string; address: string; message: string; imageUrl: string; backgroundImageUrl?: string;
   sections: InviteSection[]; publicEventId?: string;
 };
 

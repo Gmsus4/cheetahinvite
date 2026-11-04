@@ -4,7 +4,7 @@ export type SectionType = "story" | "ceremony" | "reception" | "program" | "pare
 export type InviteSection = { id: string; type: SectionType; title: string; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; panelStyle?: "auto" | "blur" | "blur-color" | "color"; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; enabled: boolean };
 export type EditorValues = {
   name: string; eventType: string; eventDate: string; eventTime: string; hostNames: string; venue: string; address: string;
-  message: string; imageUrl: string; accent: string; typography: string; bodyTypography: string; sections: InviteSection[];
+  message: string; imageUrl: string; backgroundImageUrl?: string; accent: string; typography: string; bodyTypography: string; sections: InviteSection[];
   customSlug: string; templateId: string; texture: string; heroHorizontal: string; heroVertical: string; buttonAppearance: InvitationButtonAppearance;
 };
 export type EditorSaveResult = { ok: true; eventId: string; version: number } | {
@@ -58,6 +58,7 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
     const values = JSON.parse(record.snapshot) as EditorValues;
     const strings = ["name", "eventType", "eventDate", "eventTime", "hostNames", "venue", "address", "message", "imageUrl", "accent", "typography", "bodyTypography", "customSlug", "templateId", "texture", "heroHorizontal", "heroVertical"] as const;
     if (!values || !strings.every(key => typeof values[key] === "string")
+      || (values.backgroundImageUrl !== undefined && (typeof values.backgroundImageUrl !== "string" || values.backgroundImageUrl.length > 1000))
       || (values.eventDate && (!/^\d{4}-\d{2}-\d{2}$/.test(values.eventDate) || !Number.isFinite(Date.parse(`${values.eventDate}T12:00:00Z`))))
       || !Array.isArray(values.sections) || values.sections.length > 12) return null;
     const types = ["story", "ceremony", "reception", "program", "parents", "dress_code", "gifts", "rsvp", "gallery", "music", "custom"];

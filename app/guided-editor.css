@@ -263,6 +263,7 @@
 .guided-section-surface { min-width: 0; margin: 0; padding: 0; border: 0; }
 .guided-section-surface legend { margin-bottom: 10px; font-size: 13px; font-weight: 600; }
 .guided-section-surface > div { display: flex; flex-wrap: wrap; gap: 6px; }
-.guided-section-surface button { padding: 9px 13px; border: 1px solid #d8ddcf; border-radius: 8px; background: #fff; color: #53604c; font: inherit; font-size: 12px; cursor: pointer; }
-.guided-section-surface button[aria-pressed="true"] { border-color: #56684e; background: #edf1e7; color: #273922; box-shadow: inset 0 0 0 1px #56684e; }
-.guided-section-surface small { display: block; margin-top: 9px; color: #6b7369; font-size: 11px; }
+.guided-section-surface button { padding: 9px 13px; border: 1px solid #e2dcd6; border-radius: 8px; background: #fff; color: #6b6058; font: inherit; font-size: 12px; cursor: pointer; }
+.guided-section-surface button:hover { border-color: #e9560a; background: #fff8f4; color: #c94708; }
+.guided-section-surface button[aria-pressed="true"] { border-color: #e9560a; background: #fff5ee; color: #c94708; box-shadow: inset 0 0 0 1px #e9560a; }
+.guided-section-surface small { display: block; margin-top: 9px; color: #786e66; font-size: 11px; }

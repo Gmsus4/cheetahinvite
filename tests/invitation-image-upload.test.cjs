@@ -4,6 +4,19 @@ const assert = require('node:assert/strict');
 const { createFixture } = require('./helpers/cloudinary-fixture.cjs');
 const HOUR = 60 * 60 * 1000;
 const MAX = 5 * 1024 * 1024;
+
+test('cleanup retains a photo referenced only as the invitation background', async () => {
+  const f = createFixture();
+  const asset = f.addAsset({ expiresAt: new Date(Date.now() - 1000) });
+  f.state.events.get('event').backgroundImageUrl = asset.url;
+  const retained = await f.storage.runCloudinaryCleanup('owner');
+  assert.equal(retained.retained, 1);
+  assert.ok(f.state.assets.has(asset.publicId));
+  f.state.events.get('event').backgroundImageUrl = null;
+  f.state.assets.get(asset.publicId).expiresAt = new Date(Date.now() - 1000);
+  const removed = await f.storage.runCloudinaryCleanup('owner');
+  assert.equal(removed.deleted, 1);
+});
 beforeEach(() => {
   Object.assign(process.env, { CLOUDINARY_CLOUD_NAME: 'test', CLOUDINARY_API_KEY: 'test', CLOUDINARY_API_SECRET: 'private-test-secret', CLOUDINARY_UPLOAD_PRESET: 'test', CRON_SECRET: 'cron-test-secret' });
 });

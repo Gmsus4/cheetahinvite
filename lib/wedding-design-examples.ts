@@ -8,6 +8,7 @@ export const weddingExample = {
   venue: "Hacienda Las Nubes", address: "Camino del Jardín 24, San Miguel de Allende",
   message: "Entre todos los lugares del mundo, nuestro favorito es estar juntos. Y entre todas las formas de celebrar, elegimos hacerlo contigo.",
   imageUrl: "/demo/boda/sofia-mateo.webp",
+  backgroundImageUrl: "/demo/boda/celebracion.webp",
   sections: [
     { id: "story", type: "story", title: "Nuestra historia", content: "Todo empezó con una conversación que no queríamos terminar. Vinieron los viajes, las sobremesas y los pequeños días que construyeron algo enorme. Hoy comienza nuestro siguiente capítulo.", detail: "", link: "", imageUrl: "/demo/boda/sofia-mateo.webp", imagePosition: "after", enabled: true },
     { id: "ceremony", type: "ceremony", title: "El sí de nuestras vidas", content: "Nos encontraremos en la capilla de la hacienda para compartir nuestros votos.", detail: "Ceremonia · 17:00 h", link: "https://maps.google.com/?q=San+Miguel+de+Allende", imageUrl: "", enabled: true },

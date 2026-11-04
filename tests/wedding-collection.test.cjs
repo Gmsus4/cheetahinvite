@@ -30,6 +30,20 @@ function loadComponents(hooks) {
   return load;
 }
 
+test('background is one independent photo and never uses the cover or gallery as a collage', () => {
+  const load = loadComponents();
+  const { WeddingInvitation } = load('components/invitation/WeddingInvitation.tsx');
+  const { weddingExample } = load('lib/wedding-design-examples.ts');
+  const render = backgroundImageUrl => renderToStaticMarkup(React.createElement(WeddingInvitation,{...weddingExample,templateId:'wedding-minimal-v2',accent:'#736048',backgroundImageUrl}));
+  const html = render('/independent-background.webp');
+  const backdrop = html.slice(html.indexOf('class="wa-backdrop"'),html.indexOf('class="wa-column"'));
+  assert.equal((backdrop.match(/<img\b/g)||[]).length,1);
+  assert.match(backdrop,/independent-background.webp/);
+  assert.doesNotMatch(backdrop,/sofia-mateo|ramo.webp|wa-backdrop-photos/);
+  assert.doesNotMatch(render(''),/wa-backdrop-image/);
+  assert.match(render(''),/wa-portrait/);
+});
+
 test('section surfaces alternate over visible panels and allow explicit overrides', () => {
   const load = loadComponents();
   const { WeddingInvitation } = load('components/invitation/WeddingInvitation.tsx');

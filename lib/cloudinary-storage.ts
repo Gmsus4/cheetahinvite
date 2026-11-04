@@ -8,7 +8,7 @@ import { destroyCloudinaryImage, destroyCloudinaryUploadVariants, isOwnCloudinar
 import { invitationImageUrls } from "@/lib/invitation-images";
 
 type Transaction = Prisma.TransactionClient;
-type Images = { imageUrl?: string | null; sections?: unknown };
+type Images = { imageUrl?: string | null; backgroundImageUrl?: string | null; sections?: unknown };
 const HOUR = 60 * 60 * 1000;
 const UPLOAD_LEASE = 10 * 60 * 1000;
 
@@ -38,7 +38,7 @@ async function adoptSavedImages(tx: Transaction, ownerId: string, eventId: strin
 
 export async function reserveCloudinaryImage(ownerId: string, eventId: string, signedUntil?: Date) {
   return withImageLock(ownerId, async tx => {
-    const event = await tx.event.findFirst({ where: { id: eventId, ownerId }, select: { imageUrl: true, sections: true } });
+    const event = await tx.event.findFirst({ where: { id: eventId, ownerId }, select: { imageUrl: true, backgroundImageUrl: true, sections: true } });
     if (!event) throw new ImageStorageError("No encontramos este evento.", 404);
     await adoptSavedImages(tx, ownerId, eventId, event);
     const usage = await tx.cloudinaryAsset.aggregate({ where: { eventId, ownerId }, _count: true, _sum: { bytes: true } });
@@ -170,6 +170,7 @@ export async function runCloudinaryCleanup(ownerId?: string, limit = 5) {
       // prevents destruction, including references in disabled sections.
       const references = await tx.$queryRaw<{ used: boolean }[]>(Prisma.sql`SELECT EXISTS (
         SELECT 1 FROM "Event" WHERE position(${asset.publicId} in COALESCE("imageUrl", '')) > 0
+          OR position(${asset.publicId} in COALESCE("backgroundImageUrl", '')) > 0
           OR position(${asset.publicId} in jsonb_path_query_array("sections", '$[*].imageUrl')::text) > 0
           OR position(${asset.publicId} in jsonb_path_query_array("sections", '$[*].imageUrls[*]')::text) > 0
       ) AS "used"`);

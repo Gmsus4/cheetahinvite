@@ -1,6 +1,7 @@
-export function invitationImageUrls(event: { imageUrl?: string | null; sections?: unknown }): string[] {
+export function invitationImageUrls(event: { imageUrl?: string | null; backgroundImageUrl?: string | null; sections?: unknown }): string[] {
   const urls = new Set<string>();
   if (event.imageUrl) urls.add(event.imageUrl);
+  if (event.backgroundImageUrl) urls.add(event.backgroundImageUrl);
   if (Array.isArray(event.sections)) {
     for (const section of event.sections) {
       if (!section || typeof section !== "object") continue;

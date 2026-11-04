@@ -72,7 +72,7 @@ function createFixture() {
       if (sql.includes('FOR UPDATE')) { fixture.locks++; return state.users.has(query.values[0]) ? [{ id: query.values[0] }] : []; }
       assert.match(sql, /SELECT EXISTS/);
       return [{ used: [...state.events.values()].some(event => JSON.stringify([
-        event.imageUrl, ...(event.sections ?? []).flatMap(section => [section.imageUrl, ...(section.imageUrls ?? [])]),
+        event.imageUrl, event.backgroundImageUrl, ...(event.sections ?? []).flatMap(section => [section.imageUrl, ...(section.imageUrls ?? [])]),
       ]).includes(query.values[0])) }];
     },
     async $transaction(work) {

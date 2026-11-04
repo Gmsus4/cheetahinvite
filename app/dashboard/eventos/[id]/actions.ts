@@ -23,7 +23,7 @@ export async function deleteEvent(eventId: string) {
 
   try {
     await withImageLock(session.user.id, async (tx) => {
-      const event = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, sections: true } });
+      const event = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, backgroundImageUrl: true, sections: true } });
       if (event) await queueEventImages(tx, session.user.id, eventId, event);
       const deleted = await tx.event.deleteMany({ where: { id: eventId, ownerId: session.user.id } });
       if (deleted.count) {
@@ -122,6 +122,8 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
   const address = String(formData.get("address") ?? "").trim();
   const message = String(formData.get("message") ?? "").trim();
   const imageUrl = String(formData.get("imageUrl") ?? "").trim();
+  const hasBackgroundImage = formData.has("backgroundImageUrl");
+  const backgroundImageUrl = String(formData.get("backgroundImageUrl") ?? "").trim();
   const accent = String(formData.get("accent") ?? "#E9560A");
   const typography = String(formData.get("typography") ?? "default");
   const bodyTypography = String(formData.get("bodyTypography") ?? "inter");
@@ -147,9 +149,10 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     sections.some((section) => !isValidSection(section))
   ) return failure("validation", "Revisa los campos marcados antes de guardar. Tus cambios siguen en este dispositivo.");
 
-  if (imageUrl) {
+  for (const photoUrl of [imageUrl, backgroundImageUrl]) {
+    if (!photoUrl) continue;
     try {
-      const url = new URL(imageUrl);
+      const url = new URL(photoUrl);
       if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error();
     } catch {
       return failure("validation", "Usa una imagen válida que comience con http:// o https://.");
@@ -170,7 +173,7 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
   } : {};
   try {
     const result = await withImageLock(session.user.id, async tx => {
-      const previous = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, sections: true, contentVersion: true, status: true, paidAt: true } });
+      const previous = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, contentVersion: true, status: true, paidAt: true } });
       if (!previous) throw new EditorWriteError(failure("not-found", "No encontramos esta invitación. Tu copia local sigue disponible."));
       if (previous.contentVersion !== version) throw new EditorWriteError({ ...failure("conflict", "Hay cambios guardados desde otra pestaña o dispositivo. Tu versión se conserva; revísala antes de reemplazarlos."), version: previous.contentVersion });
       if (automatic && (previous.paidAt || !["DRAFT", "PENDING_PAYMENT"].includes(previous.status))) {
@@ -178,14 +181,14 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
       }
       const changed = await tx.event.updateMany({
         where: { id: eventId, ownerId: session.user.id, contentVersion: version, ...(automatic ? { paidAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] } } : {}) },
-        data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, accent, typography, bodyTypography, heroHorizontal, heroVertical, buttonShape: buttonAppearance.shape, buttonFilled: buttonAppearance.filled, buttonIcons: buttonAppearance.icons, buttonBorder: buttonAppearance.border, buttonBold: buttonAppearance.bold, templateId, texture, sections, ...curated, contentVersion: { increment: 1 }, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
+        data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, ...(hasBackgroundImage ? { backgroundImageUrl: backgroundImageUrl || null } : {}), accent, typography, bodyTypography, heroHorizontal, heroVertical, buttonShape: buttonAppearance.shape, buttonFilled: buttonAppearance.filled, buttonIcons: buttonAppearance.icons, buttonBorder: buttonAppearance.border, buttonBold: buttonAppearance.bold, templateId, texture, sections, ...curated, contentVersion: { increment: 1 }, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
       });
       if (!changed.count) {
         const latest = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { contentVersion: true, paidAt: true, status: true } });
         if (automatic && latest && (latest.paidAt || !["DRAFT", "PENDING_PAYMENT"].includes(latest.status))) throw new EditorWriteError(failure("published", "Tu invitación se publicó. Usa Guardar cambios para aplicar las modificaciones pendientes."));
         throw new EditorWriteError({ ...failure("conflict", "La invitación cambió mientras guardabas. Tu copia local sigue disponible."), version: latest?.contentVersion });
       }
-      await syncCloudinaryImages(tx, session.user.id, eventId, previous, { imageUrl, sections: curated.sections ?? sections });
+      await syncCloudinaryImages(tx, session.user.id, eventId, previous, { imageUrl, backgroundImageUrl: hasBackgroundImage ? backgroundImageUrl : previous.backgroundImageUrl, sections: curated.sections ?? sections });
       return { ok: true as const, eventId, version: version + 1 };
     });
     scheduleCloudinaryCleanup(session.user.id);

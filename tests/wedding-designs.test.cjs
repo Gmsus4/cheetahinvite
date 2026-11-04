@@ -11,6 +11,32 @@ function setup() {
   return { f, ...f.load('lib/wedding-designs.ts') };
 }
 
+test('background saves independently, survives reopening and legacy saves, and keeps image ownership checks', async t => {
+  const originalCloud = process.env.CLOUDINARY_CLOUD_NAME;
+  process.env.CLOUDINARY_CLOUD_NAME = 'test';
+  t.after(() => { if (originalCloud === undefined) delete process.env.CLOUDINARY_CLOUD_NAME; else process.env.CLOUDINARY_CLOUD_NAME = originalCloud; });
+  const {f,weddingDesigns,applyWeddingDesign}=setup();
+  const cover=f.addAsset(), background=f.addAsset();
+  const form=f.saveForm(cover.url); form.set('templateId',weddingDesigns[0].id); form.set('backgroundImageUrl',background.url);
+  assert.equal((await f.actions.updateEvent('event',form)).ok,true);
+  const saved=f.state.events.get('event');
+  assert.equal(saved.imageUrl,cover.url); assert.equal(saved.backgroundImageUrl,background.url);
+  const opened=f.load('lib/guided-invitation.ts').initialGuidedValues(saved);
+  assert.equal(opened.backgroundImageUrl,background.url);
+  assert.equal(applyWeddingDesign(opened,weddingDesigns[1].id).backgroundImageUrl,background.url);
+  const legacy=f.saveForm(cover.url); assert.equal((await f.actions.updateEvent('event',legacy)).ok,true);
+  assert.equal(f.state.events.get('event').backgroundImageUrl,background.url);
+  const invalid=f.saveForm(cover.url); invalid.set('backgroundImageUrl','javascript:alert(1)');
+  assert.equal((await f.actions.updateEvent('event',invalid)).code,'validation');
+  const foreign=f.addAsset({ownerId:'another'});
+  const bad=f.saveForm(cover.url); bad.set('backgroundImageUrl',foreign.url);
+  assert.equal((await f.actions.updateEvent('event',bad)).code,'validation');
+  const cleared=f.saveForm(cover.url); cleared.set('backgroundImageUrl','');
+  assert.equal((await f.actions.updateEvent('event',cleared)).ok,true);
+  assert.equal(f.state.events.get('event').backgroundImageUrl,null);
+  assert.equal(f.state.events.get('event').imageUrl,cover.url);
+});
+
 test('section surface selections survive saving and design changes, with invalid values rejected', async () => {
   const { f, weddingDesigns, applyWeddingDesign } = setup();
   for (const panelStyle of ['auto','blur','blur-color','color','invalid']) {

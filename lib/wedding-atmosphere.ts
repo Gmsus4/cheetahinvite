@@ -16,13 +16,6 @@ export function atmosphereSections(sections: InviteSection[]) {
   ));
 }
 
-export function atmospherePhotos(imageUrl: string, sections: InviteSection[]) {
-  // An invitation without a cover photo must never acquire a demo portrait.
-  if (!imageUrl) return [];
-  const gallery = sections.filter(section => section.type === "gallery").flatMap(section => section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : []);
-  return [...new Set([imageUrl, ...gallery])].slice(0, 4);
-}
-
 export function atmosphereStyle(design: WeddingDesign, accent: string): CSSProperties {
   const palette = weddingPalette(design, accent);
   const art = weddingArtwork(design);

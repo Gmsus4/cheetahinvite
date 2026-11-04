@@ -4,7 +4,7 @@ import Image from "next/image";
 import { FiArrowDown, FiArrowUpRight, FiClock, FiGift, FiHeart, FiMapPin, FiMusic, FiCamera, FiUsers } from "react-icons/fi";
 import type { InviteSection } from "@/lib/invitation-editor";
 import { getWeddingDesign, weddingArtwork } from "@/lib/wedding-designs";
-import { atmospherePanelStyle, atmospherePhotos, atmosphereSections, atmosphereStyle, atmosphereTime } from "@/lib/wedding-atmosphere";
+import { atmospherePanelStyle, atmosphereSections, atmosphereStyle, atmosphereTime } from "@/lib/wedding-atmosphere";
 import { invitationLinkLabel, invitationMapUrl, invitationSectionUrl } from "@/lib/invitation-links";
 import type { WeddingInvitationProps } from "./WeddingInvitation";
 import { CountdownTimer } from "./CountdownTimer";
@@ -19,16 +19,15 @@ export function WeddingAtmosphereInvitation(props: WeddingInvitationProps) {
   const title = props.hostNames.trim() || "Nuestra boda";
   const names = title.split(/\s+(?:y|&)\s+/i);
   const sections = atmosphereSections(props.sections);
-  const photos = atmospherePhotos(props.imageUrl, sections);
   const time = atmosphereTime(props.eventTime);
   const date = props.eventDateKey ? props.date : "La fecha, muy pronto";
   const initials = names.map(name => name.trim()[0]).slice(0, 2).join(" & ");
   const hasLocation = Boolean(props.venue || props.address);
   const firstDetailIndex = 2 + Number(Boolean(props.eventDateKey)) + Number(hasLocation);
 
-  return <article className="wedding-atmosphere" data-design={design.kind} data-photo={Boolean(props.imageUrl)} data-long-names={title.length > 25 || undefined} style={atmosphereStyle(design, props.accent)}>
+  return <article className="wedding-atmosphere" data-design={design.kind} data-photo={Boolean(props.backgroundImageUrl)} data-long-names={title.length > 25 || undefined} style={atmosphereStyle(design, props.accent)}>
     <div className="wa-backdrop" aria-hidden="true">
-      {photos.length > 0 && <div className="wa-backdrop-photos">{Array.from({ length: 4 }, (_, index) => <div key={index}><Image src={photos[index % photos.length]} alt="" fill sizes="50vw" unoptimized loading={index === 0 ? "eager" : "lazy"} /></div>)}</div>}
+      {props.backgroundImageUrl && <div className="wa-backdrop-image"><Image src={props.backgroundImageUrl} alt="" fill sizes="100vw" unoptimized loading="eager" /></div>}
       <div className="wa-backdrop-texture" /><div className="wa-backdrop-botanicals" /><div className="wa-backdrop-shade" />
     </div>
     <div className="wa-column">
