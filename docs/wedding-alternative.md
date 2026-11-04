@@ -8,6 +8,8 @@ Las doce bodas del catálogo v2 comparten ahora una composición centrada: fondo
 
 ## Contenido
 
+Las identidades botánicas reutilizan sus flores y ramas originales como acentos de baja opacidad en portada, bienvenida, ceremonia, familias, regalos y confirmación, con una pequeña flor en la despedida. Se sitúan detrás del contenido, alternando esquinas, sin cubrir las fotos ni decorar el carrusel. Editorial, Minimalista y Art Déco conservan su sobriedad cuando no tienen recursos botánicos propios.
+
 Los paneles alternan por defecto **Blur → BlurColor → Color**, contando únicamente los bloques visibles. Blur muestra un cristal neutro; BlurColor mezcla el color del tema con transparencia y desenfoque; Color usa el tono sólido sin blur. En cada detalle del editor, **Fondo de esta sección** ofrece **Auto | Blur | BlurColor | Color**. Auto restaura la alternancia y las elecciones explícitas se conservan al guardar, recuperar un borrador y cambiar de diseño. El campo opcional `InviteSection.panelStyle` admite `auto`, `blur`, `blur-color` y `color`; su ausencia equivale a Auto. Las fotos entre paneles mantienen su imagen nítida.
 
 Se conservan mensaje, fecha, hora, lugar, dirección y secciones activadas. El itinerario mantiene cada línea; ceremonia y recepción mantienen enlaces a Maps; galería, familias, vestimenta, regalos y confirmación conservan su contenido. Música y secciones personalizadas también se renderizan si existen. Solo se omiten apartados desactivados o vacíos.

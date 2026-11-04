@@ -32,7 +32,7 @@ export function WeddingAtmosphereInvitation(props: WeddingInvitationProps) {
     </div>
     <div className="wa-column">
       <header className="wa-panel wa-cover" data-surface="blur">
-        <div className="wa-cover-heading"><span className="wa-kicker">Nuestra boda</span>
+        <div className="wa-cover-heading"><WeddingAccent src={art.topLeft} side="left" /><span className="wa-kicker">Nuestra boda</span>
           <h1 aria-label={title}>{names.length === 2 ? <>{names[0]}<span className="wa-ampersand" aria-hidden="true">&amp;</span>{names[1]}</> : title}</h1>
           <p className="wa-date">{date}{time && <><span aria-hidden="true"> · </span>{time}</>}</p>
         </div>
@@ -42,6 +42,7 @@ export function WeddingAtmosphereInvitation(props: WeddingInvitationProps) {
       </header>
       {props.eventDateKey && <section className="wa-panel wa-countdown" data-surface="blur-color" aria-label="Cuenta regresiva"><span className="wa-kicker">Cada vez más cerca</span><CountdownTimer date={props.eventDateKey} time={props.eventTime || "00:00"} /></section>}
       <section className="wa-panel wa-welcome" data-surface={atmospherePanelStyle(undefined, 1 + Number(Boolean(props.eventDateKey)))} id="wedding-celebration">
+        <WeddingAccent src={art.bottomRight} />
         {art.flower && <Image className="wa-small-motif" src={art.flower} alt="" width={68} height={68} unoptimized />}
         <h2>Queremos compartir<br /><em>este día contigo.</em></h2>
         <p>{props.message.trim() || "Nos encantará tenerte cerca para celebrar el comienzo de esta nueva etapa."}</p>
@@ -51,13 +52,17 @@ export function WeddingAtmosphereInvitation(props: WeddingInvitationProps) {
         <h3>{props.venue || "Nos vemos aquí"}</h3><p>{date}{time && ` · ${time}`}</p>{props.address && <p>{props.address}</p>}
         <a className="wa-button" href={invitationMapUrl(props.venue, props.address)} target="_blank" rel="noopener noreferrer">Cómo llegar<FiArrowUpRight aria-hidden="true" /></a>
       </section>}
-      {sections.map((section, index) => <AtmosphereSection key={section.id} section={section} surface={atmospherePanelStyle(section, firstDetailIndex + index)} eventId={props.publicEventId} />)}
-      <footer className="wa-footer"><span className="wa-kicker">Con todo nuestro amor</span><strong>{title}</strong><p>Gracias por ser parte de nuestra historia.</p><small>Cheetah Invite</small></footer>
+      {sections.map((section, index) => <AtmosphereSection key={section.id} section={section} accent={['ceremony','parents','gifts','rsvp'].includes(section.type) ? (index % 2 ? art.bottomRight : art.topLeft) : undefined} accentSide={index % 2 ? "right" : "left"} surface={atmospherePanelStyle(section, firstDetailIndex + index)} eventId={props.publicEventId} />)}
+      <footer className="wa-footer">{art.flower && <Image className="wa-footer-flower" src={art.flower} alt="" width={64} height={64} unoptimized />}<span className="wa-kicker">Con todo nuestro amor</span><strong>{title}</strong><p>Gracias por ser parte de nuestra historia.</p><small>Cheetah Invite</small></footer>
     </div>
   </article>;
 }
 
-function AtmosphereSection({ section, eventId, surface }: { section: InviteSection; eventId?: string; surface: "blur" | "blur-color" | "color" }) {
+function WeddingAccent({ src, side = "right" }: { src?: string; side?: "left" | "right" }) {
+  return src ? <span className="wa-botanical-accent" data-side={side} aria-hidden="true"><Image src={src} alt="" width={200} height={240} unoptimized /></span> : null;
+}
+
+function AtmosphereSection({ section, eventId, surface, accent, accentSide }: { section: InviteSection; eventId?: string; surface: "blur" | "blur-color" | "color"; accent?: string; accentSide?: "left" | "right" }) {
   const Icon = sectionIcons[section.type];
   const sectionPhoto = section.type !== "gallery" ? section.imageUrl : "";
   const attachedImages = section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : [];
@@ -68,6 +73,7 @@ function AtmosphereSection({ section, eventId, surface }: { section: InviteSecti
   </figure> : null;
   const url = invitationSectionUrl(section.type, section.link);
   return <>{photoPosition === "before" && photo}<section className={`wa-panel wa-section wa-${section.type}`} data-surface={surface} aria-label={section.title}>
+    <WeddingAccent src={accent} side={accentSide} />
     {section.type !== "gallery" && <Icon className="wa-section-icon" aria-hidden="true" />}<h2>{section.title}</h2>
     {section.detail && <p className="wa-detail">{section.detail}</p>}
     {section.type === "program" ? <ol className="wa-timeline">{section.content.split("\n").filter(line => line.trim()).map((line, index) => {

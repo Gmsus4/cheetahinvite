@@ -140,3 +140,13 @@
 
 .wedding-atmosphere .wa-backdrop-image { position: absolute; inset: 0; }
 .wedding-atmosphere .wa-backdrop-image img { object-fit: cover; object-position: center; }
+
+/* The supplied botanicals stay behind the content and away from photographs. */
+.wedding-atmosphere .wa-panel { isolation: isolate; }
+.wedding-atmosphere .wa-cover-heading { position: relative; isolation: isolate; }
+.wedding-atmosphere .wa-botanical-accent { position: absolute; z-index: -1; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; user-select: none; }
+.wedding-atmosphere .wa-botanical-accent img { position: absolute; right: -14px; bottom: -18px; width: 140px; height: 165px; object-fit: contain; object-position: bottom right; opacity: .2; -webkit-mask-image: linear-gradient(135deg,transparent 5%,#000 80%); mask-image: linear-gradient(135deg,transparent 5%,#000 80%); }
+.wedding-atmosphere .wa-botanical-accent[data-side="left"] img { right: auto; bottom: auto; top: -14px; left: -16px; object-position: top left; -webkit-mask-image: linear-gradient(315deg,transparent 5%,#000 80%); mask-image: linear-gradient(315deg,transparent 5%,#000 80%); }
+.wedding-atmosphere .wa-cover-heading .wa-botanical-accent img { width: 100px; height: 115px; opacity: .25; }
+.wedding-atmosphere .wa-footer-flower { width: 48px; height: 48px; margin: 0 auto 20px; object-fit: contain; opacity: .65; }
+@media(max-width:600px) { .wedding-atmosphere .wa-botanical-accent img { width: 106px; height: 130px; opacity: .16; } }
