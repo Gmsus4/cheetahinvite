@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { FiArrowDown, FiArrowUpRight, FiClock, FiGift, FiHeart, FiMapPin, FiMusic, FiCamera, FiUsers } from "react-icons/fi";
+import { FiArrowDown, FiArrowUpRight, FiClock, FiGift, FiHeart, FiMapPin, FiMusic, FiCamera, FiUsers, FiMaximize2 } from "react-icons/fi";
 import type { InviteSection } from "@/lib/invitation-editor";
 import { getWeddingDesign, weddingArtwork } from "@/lib/wedding-designs";
 import { atmospherePhotos, atmosphereSections, atmosphereStyle, atmosphereTime } from "@/lib/wedding-atmosphere";
@@ -9,6 +9,7 @@ import { invitationLinkLabel, invitationMapUrl, invitationSectionUrl } from "@/l
 import type { WeddingInvitationProps } from "./WeddingInvitation";
 import { CountdownTimer } from "./CountdownTimer";
 import { RsvpForm } from "./RsvpForm";
+import { WeddingPhotoCarousel } from "./WeddingPhotoCarousel";
 
 const sectionIcons = { story: FiHeart, ceremony: FiHeart, reception: FiMapPin, program: FiClock, parents: FiUsers, dress_code: FiUsers, gifts: FiGift, gallery: FiCamera, rsvp: FiHeart, music: FiMusic, custom: FiHeart };
 
@@ -57,17 +58,23 @@ export function WeddingAtmosphereInvitation(props: WeddingInvitationProps) {
 
 function AtmosphereSection({ section, eventId }: { section: InviteSection; eventId?: string }) {
   const Icon = sectionIcons[section.type];
-  const images = section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : [];
+  const sectionPhoto = section.type !== "gallery" ? section.imageUrl : "";
+  const attachedImages = section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : [];
+  const images = sectionPhoto ? attachedImages.filter(src => src !== sectionPhoto) : attachedImages;
+  const photoPosition = section.imagePosition ?? "after";
+  const photo = sectionPhoto ? <figure className="wa-section-photo" data-photo-position={photoPosition}>
+    <a href={sectionPhoto} target="_blank" rel="noopener noreferrer" aria-label={`Ampliar la foto de ${section.title}`}><Image src={sectionPhoto} alt={`Foto que acompaña ${section.title}`} width={1200} height={800} sizes="(max-width:600px) 90vw, 530px" unoptimized /><span aria-hidden="true"><FiMaximize2 /></span></a>
+  </figure> : null;
   const url = invitationSectionUrl(section.type, section.link);
-  return <section className={`wa-panel wa-section wa-${section.type}`} aria-label={section.title}>
-    <Icon className="wa-section-icon" aria-hidden="true" /><h2>{section.title}</h2>
+  return <>{photoPosition === "before" && photo}<section className={`wa-panel wa-section wa-${section.type}`} aria-label={section.title}>
+    {section.type !== "gallery" && <Icon className="wa-section-icon" aria-hidden="true" />}<h2>{section.title}</h2>
     {section.detail && <p className="wa-detail">{section.detail}</p>}
     {section.type === "program" ? <ol className="wa-timeline">{section.content.split("\n").filter(line => line.trim()).map((line, index) => {
       const parts = line.split(/\s+[—–-]\s+/);
       const time = parts.length > 1 ? parts.shift() : "";
       return <li key={index}>{time && <span className="wa-timeline-time">{time}</span>}<span>{parts.join(" — ")}</span></li>;
     })}</ol> : section.content && <p>{section.content}</p>}
-    {images.length > 0 && <div className="wa-gallery">{images.map((src, index) => <a key={`${src}-${index}`} href={src} target="_blank" rel="noopener noreferrer" aria-label={`Abrir fotografía ${index + 1} de ${section.title}`}><Image src={src} alt={`${section.title} · fotografía ${index + 1}`} width={800} height={1000} sizes="(max-width:600px) 88vw, 500px" unoptimized /></a>)}</div>}
+    {images.length > 0 && (section.type === "gallery" ? <WeddingPhotoCarousel images={images} title={section.title} /> : <div className="wa-photo-grid">{images.map((src, index) => <a key={`${src}-${index}`} href={src} target="_blank" rel="noopener noreferrer" aria-label={`Abrir fotografía ${index + 1} de ${section.title}`}><Image src={src} alt={`${section.title} · fotografía ${index + 1}`} width={800} height={1000} sizes="(max-width:600px) 88vw, 500px" unoptimized /></a>)}</div>)}
     {section.type === "rsvp" && section.rsvpMode === "integrated" ? <RsvpForm eventId={eventId} /> : url && <a className="wa-button" href={url} target="_blank" rel="noopener noreferrer">{invitationLinkLabel(section.type)}<FiArrowUpRight aria-hidden="true" /></a>}
-  </section>;
+  </section>{photoPosition === "after" && photo}</>;
 }

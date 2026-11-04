@@ -236,3 +236,14 @@ test('backup parser accepts incomplete fields but rejects foreign, malformed and
   const form = editorFormData(values('Nombre'), 3);
   assert.equal(form.get('contentVersion'), '3'); assert.equal(form.get('buttonFilled'), 'true'); assert.equal(form.get('sections'), '[]');
 });
+
+test('local backups retain section photo placement and reject unsupported positions', () => {
+  const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), version: 0, updatedAt: Date.now(), wizard: { step: 2, activeExtra: 'story' } };
+  for (const position of ['before', 'after', 'sideways']) {
+    const snapshot = JSON.parse(values('Mi boda'));
+    snapshot.sections = [{ id: 'story', type: 'story', title: 'Nuestra historia', content: '', detail: '', link: '', imageUrl: 'https://example.com/photo.jpg', imagePosition: position, enabled: true }];
+    const parsed = parseEditorDraft(JSON.stringify({ ...record, snapshot: JSON.stringify(snapshot) }), 'owner', 'event', Date.now());
+    if (position === 'sideways') assert.equal(parsed, null);
+    else assert.equal(JSON.parse(parsed.snapshot).sections[0].imagePosition, position);
+  }
+});

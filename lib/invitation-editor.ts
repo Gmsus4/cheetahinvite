@@ -1,7 +1,7 @@
 import type { InvitationButtonAppearance } from "@/lib/invitation-buttons";
 
 export type SectionType = "story" | "ceremony" | "reception" | "program" | "parents" | "dress_code" | "gifts" | "rsvp" | "gallery" | "music" | "custom";
-export type InviteSection = { id: string; type: SectionType; title: string; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; enabled: boolean };
+export type InviteSection = { id: string; type: SectionType; title: string; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; enabled: boolean };
 export type EditorValues = {
   name: string; eventType: string; eventDate: string; eventTime: string; hostNames: string; venue: string; address: string;
   message: string; imageUrl: string; accent: string; typography: string; bodyTypography: string; sections: InviteSection[];
@@ -63,6 +63,7 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
     const types = ["story", "ceremony", "reception", "program", "parents", "dress_code", "gifts", "rsvp", "gallery", "music", "custom"];
     if (values.sections.some(section => !section || !types.includes(section.type) || typeof section.enabled !== "boolean"
       || (section.rsvpMode !== undefined && (section.type !== "rsvp" || !["external", "integrated"].includes(section.rsvpMode)))
+      || (section.imagePosition !== undefined && !["before", "after"].includes(section.imagePosition))
       || !["id", "title", "content", "detail", "link", "imageUrl"].every(key => typeof section[key as keyof InviteSection] === "string")
       || (section.imageUrls !== undefined && (!Array.isArray(section.imageUrls) || section.imageUrls.length > 12 || section.imageUrls.some(url => typeof url !== "string"))))) return null;
     const buttons = values.buttonAppearance;

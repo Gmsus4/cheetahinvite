@@ -254,3 +254,9 @@
 .guided-form .editor-template-option:has(input[value="birthday-confetti-v1"]) .editor-template-thumbnail{justify-content:flex-start;padding:14px 8px}
 .guided-form .editor-template-option:has(input[value="birthday-confetti-v1"]) .editor-template-thumbnail i{font-size:17px;line-height:1.2}
 .guided-form .editor-template-option:has(input[value="birthday-confetti-v1"]) .editor-template-thumbnail>span{display:none}
+/* Optional photographs between wedding sections. */
+.guided-section-photo { grid-column: 1 / -1; min-width: 0; margin-top: 12px; padding-top: 20px; border-top: 1px solid #e5dfd5; }
+.guided-section-photo h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+.guided-section-photo h3 span { margin-left: 8px; color: #7b8278; font-size: 11px; font-weight: 400; }
+.guided-section-photo > p { margin: 0 0 16px; color: #6b7369; font-size: 12px; line-height: 1.7; }
+.guided-section-photo .guided-field { margin-top: 18px; }

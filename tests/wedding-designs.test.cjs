@@ -20,6 +20,28 @@ function contrast(first, second) {
   return (values[0] + .05) / (values[1] + .05);
 }
 
+test('section photo position survives saving, opening and design changes, and invalid positions are rejected', async () => {
+  const { f, weddingDesigns, applyWeddingDesign } = setup();
+  const asset = f.addAsset();
+  for (const imagePosition of ['before', 'after']) {
+    const section = { id: 'story', type: 'story', title: 'Nuestra historia', content: 'Nuestros recuerdos', detail: '', link: '', imageUrl: asset.url, imagePosition, enabled: true };
+    const form = f.saveForm('', [section]);
+    form.set('templateId', weddingDesigns[0].id);
+    assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+    const saved = f.state.events.get('event');
+    assert.equal(saved.sections[0].imagePosition, imagePosition);
+    assert.equal(saved.sections[0].imageUrl, asset.url);
+    const reopened = f.load('lib/guided-invitation.ts').initialGuidedValues(saved);
+    assert.equal(reopened.sections.find(s => s.id === 'story').imagePosition, imagePosition);
+    const switched = applyWeddingDesign(reopened, weddingDesigns[1].id);
+    assert.equal(switched.sections.find(s => s.id === 'story').imageUrl, asset.url);
+    assert.equal(switched.sections.find(s => s.id === 'story').imagePosition, imagePosition);
+  }
+  const invalid = f.saveForm('', [{ ...f.state.events.get('event').sections[0], imagePosition: 'sideways' }]);
+  invalid.set('templateId', weddingDesigns[0].id);
+  assert.equal((await f.actions.updateEvent('event', invalid)).code, 'validation');
+});
+
 test('edition 2 offers twelve distinct concepts while stored edition 1 invitations retain their identities', async () => {
   const { f, weddingDesigns, legacyWeddingDesigns, getWeddingDesign, applyWeddingDesign } = setup();
   assert.equal(legacyWeddingDesigns.length, 12);
