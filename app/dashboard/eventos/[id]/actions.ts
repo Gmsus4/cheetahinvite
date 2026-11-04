@@ -213,6 +213,7 @@ function isValidSection(value: unknown): value is {
   if ((section.id as string).length > 80 || (section.title as string).length > 100 || (section.content as string).length > 2000 || (section.detail as string).length > 240 || (section.link as string).length > 500 || (section.imageUrl as string).length > 1000) return false;
   if (section.layout !== undefined && !["auto", "split", "centered", "card"].includes(section.layout as string)) return false;
   if (section.imagePosition !== undefined && !["before", "after"].includes(section.imagePosition as string)) return false;
+  if (section.panelStyle !== undefined && !["auto", "blur", "blur-color", "color"].includes(section.panelStyle as string)) return false;
   if (section.imageUrls !== undefined && (!Array.isArray(section.imageUrls) || section.imageUrls.length > ACCOUNT_LIMITS.imagesPerGallery || section.imageUrls.some((url) => typeof url !== "string" || url.length > 1000 || !isHttpUrl(url)))) return false;
   if (section.link && !invitationSectionUrl(section.type as string, section.link as string)) return false;
   for (const value of [section.imageUrl] as string[]) {

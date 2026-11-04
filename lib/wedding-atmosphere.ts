@@ -4,6 +4,10 @@ import { getInvitationFont } from "./invitation-fonts";
 import { orderedWeddingSections, weddingArtwork, weddingPalette, type WeddingDesign } from "./wedding-designs";
 import { invitationSectionUrl } from "./invitation-links";
 
+export function atmospherePanelStyle(section: Pick<InviteSection, "panelStyle"> | undefined, index: number) {
+  return section?.panelStyle && section.panelStyle !== "auto" ? section.panelStyle : (["blur", "blur-color", "color"] as const)[index % 3];
+}
+
 export function atmosphereSections(sections: InviteSection[]) {
   const ordered = orderedWeddingSections(sections);
   return [...ordered, ...sections.filter(section => !ordered.includes(section))].filter(section => section.enabled && (

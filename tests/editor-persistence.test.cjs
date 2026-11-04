@@ -247,3 +247,14 @@ test('local backups retain section photo placement and reject unsupported positi
     else assert.equal(JSON.parse(parsed.snapshot).sections[0].imagePosition, position);
   }
 });
+
+test('local backups retain section surfaces and reject unsupported finishes', () => {
+  for (const panelStyle of ['auto','blur','blur-color','color','invalid']) {
+    const snapshot = JSON.parse(values('Mi boda'));
+    snapshot.sections = [{id:'story',type:'story',title:'Historia',content:'',detail:'',link:'',imageUrl:'',enabled:true,panelStyle}];
+    const record = {schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:Date.now(),wizard:{step:2,activeExtra:'story'},snapshot:JSON.stringify(snapshot)};
+    const parsed = parseEditorDraft(JSON.stringify(record),'owner','event',Date.now());
+    if (panelStyle === 'invalid') assert.equal(parsed,null);
+    else assert.equal(JSON.parse(parsed.snapshot).sections[0].panelStyle,panelStyle);
+  }
+});

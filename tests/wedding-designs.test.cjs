@@ -11,6 +11,20 @@ function setup() {
   return { f, ...f.load('lib/wedding-designs.ts') };
 }
 
+test('section surface selections survive saving and design changes, with invalid values rejected', async () => {
+  const { f, weddingDesigns, applyWeddingDesign } = setup();
+  for (const panelStyle of ['auto','blur','blur-color','color','invalid']) {
+    const section = { id:'story',type:'story',title:'Historia',content:'Nuestro texto',detail:'',link:'',imageUrl:'',enabled:true,panelStyle };
+    const form = f.saveForm('', [section]); form.set('templateId',weddingDesigns[0].id);
+    const result = await f.actions.updateEvent('event',form);
+    if (panelStyle === 'invalid') { assert.equal(result.code,'validation'); continue; }
+    assert.equal(result.ok,true);
+    const saved = f.state.events.get('event');
+    assert.equal(saved.sections[0].panelStyle,panelStyle);
+    assert.equal(applyWeddingDesign({...saved,sections:saved.sections},weddingDesigns[1].id).sections[0].panelStyle,panelStyle);
+  }
+});
+
 function contrast(first, second) {
   const luminance = hex => {
     const rgb = hex.slice(1).match(/../g).map(value => parseInt(value, 16) / 255).map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4);

@@ -30,6 +30,19 @@ function loadComponents(hooks) {
   return load;
 }
 
+test('section surfaces alternate over visible panels and allow explicit overrides', () => {
+  const load = loadComponents();
+  const { WeddingInvitation } = load('components/invitation/WeddingInvitation.tsx');
+  const { weddingExample } = load('lib/wedding-design-examples.ts');
+  const base = { id: 'story', type: 'story', title: 'Historia', content: 'Texto', detail: '', link: '', imageUrl: '', enabled: true };
+  const render = sections => renderToStaticMarkup(React.createElement(WeddingInvitation, { ...weddingExample, templateId: 'wedding-minimal-v2', accent: '#736048', sections }));
+  const html = render([base, { ...base, id: 'hidden', enabled: false }, { ...base, id: 'two' }, { ...base, id: 'three' }]);
+  assert.deepEqual([...html.matchAll(/data-surface="([^"]+)"/g)].map(match => match[1]), ['blur','blur-color','color','blur','blur-color','color','blur']);
+  for (const panelStyle of ['blur','blur-color','color']) {
+    assert.ok(render([{ ...base, panelStyle }]).includes(`wa-story" data-surface="${panelStyle}"`));
+  }
+});
+
 test('all twelve alternate wedding designs preserve real invitation content and confirmation', () => {
   const load = loadComponents();
   const { WeddingInvitation } = load('components/invitation/WeddingInvitation.tsx');

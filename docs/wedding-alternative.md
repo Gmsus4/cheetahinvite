@@ -8,6 +8,8 @@ Las doce bodas del catálogo v2 comparten ahora una composición centrada: fondo
 
 ## Contenido
 
+Los paneles alternan por defecto **Blur → BlurColor → Color**, contando únicamente los bloques visibles. Blur muestra un cristal neutro; BlurColor mezcla el color del tema con transparencia y desenfoque; Color usa el tono sólido sin blur. En cada detalle del editor, **Fondo de esta sección** ofrece **Auto | Blur | BlurColor | Color**. Auto restaura la alternancia y las elecciones explícitas se conservan al guardar, recuperar un borrador y cambiar de diseño. El campo opcional `InviteSection.panelStyle` admite `auto`, `blur`, `blur-color` y `color`; su ausencia equivale a Auto. Las fotos entre paneles mantienen su imagen nítida.
+
 Se conservan mensaje, fecha, hora, lugar, dirección y secciones activadas. El itinerario mantiene cada línea; ceremonia y recepción mantienen enlaces a Maps; galería, familias, vestimenta, regalos y confirmación conservan su contenido. Música y secciones personalizadas también se renderizan si existen. Solo se omiten apartados desactivados o vacíos.
 
 El fondo usa la fotografía principal y hasta tres imágenes de la galería activa. Sin fotografía principal, usa degradados, texturas y recursos del propio diseño; no se agregan fotografías de ejemplo a las invitaciones reales. En móvil se muestra un solo fondo para evitar saturación. El desenfoque tiene alternativa opaca para navegadores sin soporte. El formulario sigue utilizando `RsvpForm` y el mismo identificador público del evento.
