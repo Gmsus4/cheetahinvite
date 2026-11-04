@@ -1,24 +1,16 @@
-import type { CSSProperties } from "react";
-import { getInvitationFont } from "@/lib/invitation-fonts";
 import { weddingArtwork, type WeddingDesign } from "@/lib/wedding-designs";
-import styles from "@/components/dashboard/WeddingDesignPicker.module.css";
+import { atmosphereStyle } from "@/lib/wedding-atmosphere";
+import styles from "./WeddingAtmospherePreview.module.css";
 
 /** Shared miniature cover for the editor and the public catalog. */
 export function WeddingDesignPreview({ design }: { design: WeddingDesign }) {
   const palette = design.palettes[0];
   const art = weddingArtwork(design);
-  const style = {
-    "--paper": palette.paper, "--panel": palette.panel, "--ink": palette.ink,
-    "--accent": palette.accent, "--dark": palette.dark,
-    "--heading": getInvitationFont(design.typography).family,
-    "--art-top": art.topLeft ? `url("${art.topLeft}")` : "none",
-    "--art-bottom": art.bottomRight ? `url("${art.bottomRight}")` : "none",
-    "--flower": art.flower ? `url("${art.flower}")` : "none",
-  } as CSSProperties;
-
-  return <span className={styles.scene} style={style} data-design={design.kind} aria-hidden="true">
-    <span className={styles.paper} /><span className={styles.artTop} /><span className={styles.artBottom} />
-    <span className={styles.motif} /><span className={styles.kicker}>NOS ELEGIMOS PARA SIEMPRE</span>
-    <span className={styles.names}>Sofía <i>y</i> Mateo</span><span className={styles.rule} /><span className={styles.date}>12 · OCTUBRE · 2027</span>
+  return <span className={styles.scene} style={atmosphereStyle(design, palette.accent)} data-design={design.kind} aria-hidden="true">
+    <span className={styles.glass}><span className={styles.kicker}>NUESTRA BODA</span>
+      <span className={styles.names}>Sofía <i>&amp;</i> Mateo</span>
+      <span className={styles.date}>12 · OCTUBRE · 2027</span><span className={styles.photo} />
+    </span>
+    {art.flower && <span className={styles.motif} style={{ backgroundImage: `url("${art.flower}")` }} />}
   </span>;
 }

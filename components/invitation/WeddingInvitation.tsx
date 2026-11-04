@@ -12,7 +12,7 @@ import { RsvpForm } from "./RsvpForm";
 import { StarlightCover, StarlightPortrait } from "./StarlightCover";
 import { ArtDecoCover, ArtDecoPortrait } from "./ArtDecoCover";
 import { LoveLetterCover, LoveLetterMemory, LoveLetterClosing } from "./LoveLetterCover";
-import { WeddingIdentityInvitation } from "./WeddingIdentityInvitation";
+import { WeddingAtmosphereInvitation } from "./WeddingAtmosphereInvitation";
 
 export type WeddingInvitationProps = {
   templateId: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string;
@@ -21,7 +21,7 @@ export type WeddingInvitationProps = {
 };
 
 export function WeddingInvitation(props: WeddingInvitationProps) {
-  return getWeddingDesign(props.templateId)?.edition === 2 ? <WeddingIdentityInvitation {...props} /> : <LegacyWeddingInvitation {...props} />;
+  return getWeddingDesign(props.templateId)?.edition === 2 ? <WeddingAtmosphereInvitation {...props} /> : <LegacyWeddingInvitation {...props} />;
 }
 
 function LegacyWeddingInvitation({ templateId, accent, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, sections, publicEventId }: WeddingInvitationProps) {

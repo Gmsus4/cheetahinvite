@@ -29,7 +29,7 @@ function loadComponents() {
   return load;
 }
 
-test('ten new compositions preserve real invitation content and the two approved designs keep their renderer', () => {
+test('all twelve alternate wedding designs preserve real invitation content and confirmation', () => {
   const load = loadComponents();
   const { WeddingInvitation } = load('components/invitation/WeddingInvitation.tsx');
   const { weddingDesigns } = load('lib/wedding-designs.ts');
@@ -45,17 +45,11 @@ test('ten new compositions preserve real invitation content and the two approved
     assert.match(html, /Confirmar asistencia/); assert.match(html, /Guardar confirmación/);
     assert.match(html, /Nuestra historia/); assert.match(html, /Días que se quedan/);
     assert.match(html, /www\.google\.com\/maps\/search/);
-    if (['olive', 'love-letter'].includes(design.kind)) {
-      assert.match(html, /class="wedding-invitation wedding-identity"/);
-      assert.doesNotMatch(html, /class="wedding-collection"/);
-      if (design.kind === 'love-letter') assert.match(html, /love-envelope/);
-      else assert.match(html, /wedding-olive-butterfly/);
-    } else {
-      assert.match(html, /class="wedding-collection"/);
-      assert.doesNotMatch(html, /identity-chapter-number/);
-      if (design.artwork) assert.ok(html.includes(`/plantillas/boda/${design.artwork}/`), `${design.label} uses the supplied template illustrations`);
-      assert.doesNotMatch(html, /\/wedding-collection\/art\//);
-    }
+    assert.match(html, /class="wedding-atmosphere"/);
+    assert.match(html, /wa-backdrop/);
+    assert.match(html, /wa-column/);
+    if (design.artwork) assert.ok(html.includes(`/plantillas/boda/${design.artwork}/`), `${design.label} uses the supplied template illustrations`);
+    assert.doesNotMatch(html, /\/wedding-collection\/art\//);
   }
 });
 
@@ -64,15 +58,51 @@ test('new compositions remain complete without a portrait and omit disabled deta
   const { WeddingInvitation } = load('components/invitation/WeddingInvitation.tsx');
   const { weddingDesigns } = load('lib/wedding-designs.ts');
   const { weddingExample } = load('lib/wedding-design-examples.ts');
-  for (const design of weddingDesigns.filter(d => !['olive', 'love-letter'].includes(d.kind))) {
+  for (const design of weddingDesigns) {
     const html = renderToStaticMarkup(React.createElement(WeddingInvitation, {
       ...weddingExample, templateId: design.id, accent: design.palettes[0].accent,
       hostNames: 'María Fernanda y José Alejandro', imageUrl: '',
       sections: weddingExample.sections.map(s => s.type === 'gallery' ? { ...s, enabled: false } : s),
     }));
     assert.match(html, /María Fernanda/); assert.match(html, /José Alejandro/);
-    assert.doesNotMatch(html, /class="wc-cover-photo/);
+    assert.doesNotMatch(html, /class="wa-portrait/);
+    assert.doesNotMatch(html, /class="wa-backdrop-photos/);
     assert.doesNotMatch(html, /Días que se quedan/);
     assert.match(html, /Guardar confirmación/);
   }
+});
+
+test('every palette uses the alternate renderer while legacy weddings retain their original renderer', () => {
+  const load = loadComponents();
+  const { WeddingInvitation } = load('components/invitation/WeddingInvitation.tsx');
+  const { weddingDesigns, legacyWeddingDesigns } = load('lib/wedding-designs.ts');
+  const { weddingExample } = load('lib/wedding-design-examples.ts');
+  for (const design of weddingDesigns) for (const palette of design.palettes) {
+    const html = renderToStaticMarkup(React.createElement(WeddingInvitation, { ...weddingExample, templateId: design.id, accent: palette.accent }));
+    assert.ok(html.includes(`--wa-base:${palette.dark}`), `${design.label}: ${palette.label}`);
+    assert.match(html, /Guardar confirmación/);
+  }
+  for (const design of legacyWeddingDesigns) {
+    const html = renderToStaticMarkup(React.createElement(WeddingInvitation, { ...weddingExample, templateId: design.id, accent: design.palettes[0].accent }));
+    assert.match(html, /class="wedding-invitation"/);
+    assert.doesNotMatch(html, /wedding-atmosphere/);
+  }
+});
+
+test('disabled photos and empty sections are omitted, optional music and custom details survive, and links stay safe', () => {
+  const load = loadComponents();
+  const { WeddingInvitation } = load('components/invitation/WeddingInvitation.tsx');
+  const { weddingExample } = load('lib/wedding-design-examples.ts');
+  const base = { id: 'extra', title: 'Playlist especial', type: 'music', content: 'Nuestra música', detail: '', imageUrl: '', enabled: true, link: 'https://open.spotify.com/playlist/example' };
+  const html = renderToStaticMarkup(React.createElement(WeddingInvitation, {
+    ...weddingExample, templateId: 'wedding-minimal-v2', accent: '#736048', eventTime: '', sections: [
+      ...weddingExample.sections.map(section => section.type === 'gallery' ? { ...section, enabled: false, imageUrls: ['/private-disabled-photo.webp'] } : section),
+      base, { ...base, id: 'custom', title: 'Un detalle especial', type: 'custom', link: 'javascript:alert(1)' },
+      { ...base, id: 'empty', title: 'Sección vacía', type: 'custom', link: '', content: '' },
+    ],
+  }));
+  assert.doesNotMatch(html, /private-disabled-photo|javascript:|Sección vacía|Invalid Date/);
+  assert.match(html, /Escuchar playlist/);
+  assert.match(html, /Un detalle especial/);
+  assert.match(html, /Guardar confirmación/);
 });

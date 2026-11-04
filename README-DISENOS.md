@@ -1,5 +1,7 @@
 # Contexto y guía de los diseños de invitaciones
 
+> Rama `codex/boda-alt`: las doce bodas del catálogo usan una estructura fotográfica centrada con fondos continuos y paneles translúcidos. Ver [diseño alternativo de bodas](docs/wedding-alternative.md). La colección anterior está preservada en `master` (`1f321eb`); los apartados de papelería de este documento describen esa versión.
+
 Documento de continuidad de **Cheetah Invite**. Reúne el objetivo, las decisiones del propietario, la implementación actual, los recursos y el procedimiento para seguir con la colección. Actualizado al incorporar el décimo diseño de cumpleaños, **Cine · Red Carpet**.
 
 Este documento describe el estado del repositorio local; no acredita un despliegue en producción ni que los cambios estén confirmados en Git. Ante discrepancias, comprobar los archivos actuales y las instrucciones de `AGENTS.md`.

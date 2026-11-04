@@ -342,18 +342,18 @@ export const legacyWeddingDesigns: WeddingDesign[] = [
 
 // New compositions have separate identities; saved invitations keep their v1 renderer.
 const identities: Record<WeddingDesign["kind"], { concept: string; description: string }> = {
-  floral: { concept: "El jardín de nuestro sí", description: "Un arco botánico, flores blancas y un jardín que acompaña cada capítulo." },
-  editorial: { concept: "Una edición para siempre", description: "Una portada de revista, fotografías amplias y capítulos de una historia irrepetible." },
-  minimal: { concept: "Lo esencial eres tú", description: "Papelería marfil, caligrafía delicada y un hilo que une los momentos del día." },
-  garden: { concept: "Una cita entre flores", description: "Papelería violeta, un calendario y acuarelas que florecen entre sus recuerdos." },
-  blossom: { concept: "Donde florece el amor", description: "Ramas de cerezo, retratos redondos y pétalos sobre una delicada página de primavera." },
-  bougainvillea: { concept: "Amor de hacienda", description: "Un álbum de recuerdos, flores intensas y tarjetas de papel sobre un fondo de vino." },
-  sunlight: { concept: "Un día lleno de luz", description: "Flores doradas, bordes ondulados y recuerdos de una celebración bajo el sol." },
-  olive: { concept: "Raíces de nuestro amor", description: "Lino, ramas de olivo y fotografías impresas entre páginas de papelería natural." },
-  mediterranean: { concept: "Una postal para ustedes", description: "Una postal de la costa, azulejos, limones y detalles de un viaje para celebrar." },
-  "art-deco": { concept: "Una noche extraordinaria", description: "Una invitación de gala con marcos geométricos, papel oscuro y oro discreto." },
-  "love-letter": { concept: "Escrito con el corazón", description: "Un sobre abierto, un sello de cera y una carta que continúa en cada recuerdo." },
-  starlight: { concept: "El universo nos encontró", description: "Luna, órbitas y constelaciones que trazan los momentos de una noche inolvidable." },
+  floral: { concept: "El jardín de nuestro sí", description: "Fotografías envolventes, tonos botánicos y flores blancas como un acento delicado." },
+  editorial: { concept: "Una edición para siempre", description: "Fotografía editorial, tonos sobrios y una historia que se cuenta con imágenes." },
+  minimal: { concept: "Lo esencial eres tú", description: "Fotografía, tipografía y transparencia. Solo lo esencial para compartir su día." },
+  garden: { concept: "Una cita entre flores", description: "Una atmósfera violeta, fotografías amplias y acuarelas discretas." },
+  blossom: { concept: "Donde florece el amor", description: "Tonos de primavera y detalles de cerezo sobre sus fotografías favoritas." },
+  bougainvillea: { concept: "Amor de hacienda", description: "Un ambiente de vino y bugambilias, fotografías cálidas y detalles transparentes." },
+  sunlight: { concept: "Un día lleno de luz", description: "Tonos de miel y flores doradas para una celebración que se siente cálida." },
+  olive: { concept: "Raíces de nuestro amor", description: "Fotografías naturales, tonos olivo y ramas que acompañan su historia." },
+  mediterranean: { concept: "Una postal para ustedes", description: "Una atmósfera costera con tonos azules, fotografías y pequeños acentos de limón." },
+  "art-deco": { concept: "Una noche extraordinaria", description: "Fotografías de gala, transparencias oscuras y líneas de oro discretas." },
+  "love-letter": { concept: "Escrito con el corazón", description: "Fotografías cálidas, letras de amor y un pequeño sello como firma." },
+  starlight: { concept: "El universo nos encontró", description: "Cielo nocturno, fotografías y transparencias para una noche bajo las estrellas." },
 };
 
 export const weddingDesigns: WeddingDesign[] = legacyWeddingDesigns.map(design => ({

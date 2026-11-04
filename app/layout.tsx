@@ -22,6 +22,7 @@ import "./wedding-gallery.css";
 import "./wedding-collection.css";
 import "./wedding-collection-covers.css";
 import "./wedding-collection-interiors.css";
+import "./wedding-atmosphere.css";
 import "./site-typography.css";
 import "./birthday-confetti.css";
 import "./birthday-pastel.css";
