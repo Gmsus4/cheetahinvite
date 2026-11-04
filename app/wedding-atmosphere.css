@@ -80,15 +80,12 @@
 .wedding-atmosphere .wa-timeline-time { flex: 0 0 68px; font-size: 13px; font-variant-numeric: tabular-nums; }
 .wedding-atmosphere .wa-timeline li > span:last-child { min-width: 0; overflow-wrap: anywhere; color: var(--wa-soft); font-size: 14px; }
 .wedding-atmosphere .wa-photo-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 24px -20px -20px; }
-.wedding-atmosphere .wa-photo-grid a { display: block; overflow: hidden; border-radius: 10px; }
-.wedding-atmosphere .wa-photo-grid a:first-child { grid-column: 1/-1; }
+.wedding-atmosphere .wa-photo-grid figure { display: block; overflow: hidden; border-radius: 10px; }
+.wedding-atmosphere .wa-photo-grid figure:first-child { grid-column: 1/-1; }
 .wedding-atmosphere .wa-photo-grid img { width: 100%; height: auto; aspect-ratio: 4/5; object-fit: cover; }
-.wedding-atmosphere .wa-photo-grid a:first-child img { aspect-ratio: 5/4; }
-.wedding-atmosphere .wa-section-photo { position: relative; width: calc(100% - 30px); margin: 0 auto 18px; overflow: hidden; border-radius: 12px; aspect-ratio: 3/2; }
-.wedding-atmosphere .wa-section-photo a { display: block; width: 100%; height: 100%; }
+.wedding-atmosphere .wa-photo-grid figure:first-child img { aspect-ratio: 5/4; }
+.wedding-atmosphere .wa-section-photo { position: relative; width: 100%; margin: 0 auto 18px; overflow: hidden; border-radius: 22px; aspect-ratio: 3/2; }
 .wedding-atmosphere .wa-section-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; }
-.wedding-atmosphere .wa-section-photo span { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #fffaf24d; border-radius: 50%; background: #171a16b3; color: #fffaf2; }
-.wedding-atmosphere .wa-section-photo svg { width: 17px; height: 17px; }
 .wedding-atmosphere .wa-section.wa-gallery { display: block; padding: 32px 14px 14px; }
 .wedding-atmosphere .wa-section.wa-gallery > h2 { margin: 0 12px 18px; text-align: center; }
 .wedding-atmosphere .wa-section.wa-gallery > p { margin-inline: 18px; }
@@ -97,8 +94,6 @@
 .wedding-atmosphere .wa-carousel-track { position: absolute; inset: 0; display: flex; transition: transform .45s cubic-bezier(.22,.61,.36,1); }
 .wedding-atmosphere .wa-carousel-slide { flex: 0 0 100%; min-width: 0; height: 100%; }
 .wedding-atmosphere .wa-carousel-slide img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; user-select: none; }
-.wedding-atmosphere .wa-carousel-expand { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #fffaf24d; border-radius: 50%; background: #171a16b3; color: #fffaf2; }
-.wedding-atmosphere .wa-carousel-expand svg { width: 17px; height: 17px; }
 .wedding-atmosphere .wa-carousel-controls { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 12px; pointer-events: none; }
 .wedding-atmosphere .wa-carousel-controls button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid #fffaf24d; border-radius: 50%; background: #171a16a6; color: #fffaf2; cursor: pointer; pointer-events: auto; transition: background .2s; }
 .wedding-atmosphere .wa-carousel-controls button:hover { background: #171a16e6; }
@@ -136,6 +131,7 @@
   .wedding-atmosphere .wa-countdown { padding: 24px 16px; }
   .wedding-atmosphere .invite-countdown-unit strong { font-size: 31px; }
   .wedding-atmosphere .wa-photo-grid { margin-inline: -13px; margin-bottom: -22px; gap: 9px; }
+  .wedding-atmosphere .wa-section-photo { margin-bottom: 14px; border-radius: 18px; }
   .wedding-atmosphere .wa-backdrop-photos { inset: -3%; grid-template-columns: 1fr; grid-template-rows: 1fr; }
   .wedding-atmosphere .wa-backdrop-photos > :not(:first-child) { display: none; }
   .wedding-atmosphere .wa-backdrop-photos img { filter: blur(3px); }

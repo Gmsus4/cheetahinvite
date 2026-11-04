@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useId, useRef, useState } from "react";
-import { FiArrowLeft, FiArrowRight, FiMaximize2 } from "react-icons/fi";
+import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
 
 export function WeddingPhotoCarousel({ images, title }: { images: string[]; title: string }) {
   const photos = [...new Set(images.filter(Boolean))];
@@ -53,7 +53,6 @@ export function WeddingPhotoCarousel({ images, title }: { images: string[]; titl
         <button type="button" aria-label="Fotografía siguiente" aria-controls={viewportId} onClick={() => move(1)}><FiArrowRight aria-hidden="true" /></button>
       </div>}
     </div>
-    <a className="wa-carousel-expand" href={photos[active]} target="_blank" rel="noopener noreferrer" aria-label={`Abrir fotografía ${active + 1} de ${title} en tamaño completo`}><FiMaximize2 aria-hidden="true" /></a>
     {multiple && <>
       <div className="wa-carousel-dots" role="group" aria-label="Elegir fotografía">{photos.map((src, index) => <button key={src} type="button" aria-label={`Ver fotografía ${index + 1}`} aria-controls={viewportId} aria-current={index === active ? "true" : undefined} onClick={() => setSelected(src)}><span /></button>)}</div>
     </>}

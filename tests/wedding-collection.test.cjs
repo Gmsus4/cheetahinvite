@@ -75,7 +75,7 @@ test('wedding carousel cycles, selects indicators, handles keyboard and swipes, 
     return match;
   }
   const control = label => find(render(), node => node.type === 'button' && node.props['aria-label'] === label);
-  const current = (tree = render()) => find(tree, node => node.type === 'a').props.href;
+  const current = (tree = render()) => find(tree, node => node.type === 'figure' && node.props['aria-hidden'] === false).props.children.props.src;
   const viewport = () => find(render(), node => node.props?.className === 'wa-carousel-viewport');
   const next = () => control('Fotografía siguiente').props.onClick();
   assert.equal(current(), images[0]);
@@ -113,7 +113,7 @@ test('wedding carousel renders each unique photo, handles one or no photos, and 
   assert.equal((html.match(/aria-roledescription="diapositiva"/g) || []).length, 2);
   assert.equal((html.match(/aria-hidden="true"><img/g) || []).length, 1);
   assert.match(html, /Ver fotografía 2/);
-  assert.match(html, /href="\/portrait.webp"/);
+  assert.doesNotMatch(html, /<a\b|wa-carousel-expand/);
   const single = render(['/single.webp']);
   assert.match(single, /single.webp/);
   assert.doesNotMatch(single, /Fotografía siguiente|Fotografía anterior|Elegir fotografía/);
@@ -133,6 +133,7 @@ test('section photos appear outside their panel in the chosen position, without 
     assert.ok(figure > 0 && panel > 0);
     assert.equal(figure < panel, position === 'before');
     assert.equal((html.match(/src="\/personal-section.webp"/g) || []).length, 1);
+    assert.doesNotMatch(html, /href="\/personal-section.webp"/);
     assert.ok(html.includes(`data-photo-position="${position}"`));
   }
   assert.doesNotMatch(render({ enabled: false, imagePosition: 'before' }), /personal-section.webp|Una historia propia/);
