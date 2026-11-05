@@ -210,9 +210,9 @@ function SectionFields({ section, onChange, uploadProps, allowSectionPhoto = fal
     {(section.type === "gifts" || section.type === "music" || section.type === "custom" || (section.type === "rsvp" && section.rsvpMode === "external")) && <Field label={section.type === "gifts" ? "Enlace a la mesa de regalos (opcional)" : section.type === "music" ? "Enlace a la playlist" : section.type === "custom" ? "Enlace adicional (opcional)" : "Enlace de WhatsApp o confirmación"} id={`${prefix}-link`} help={section.type === "rsvp" ? "Por ejemplo: https://wa.me/521 seguido de tu número." : undefined}><input id={`${prefix}-link`} type="url" maxLength={500} value={section.link} placeholder="https://…" onChange={e => onChange({ link: e.target.value })} /></Field>}
     {allowSectionPhoto && <div className="guided-section-photo">
       <h3>Foto junto a esta sección <span>Opcional</span></h3>
-      <p>Intercala una foto grande entre los bloques de tu invitación.</p>
+      <p>En escritorio, las fotos alternan automáticamente entre izquierda y derecha. En móvil, elige si aparece antes o después de la sección.</p>
       <CloudinaryImageUpload {...uploadProps} multiple={false} images={section.imageUrl ? [section.imageUrl] : []} onChange={images => onChange({ imageUrl: images[0] ?? "", imagePosition: section.imagePosition ?? "after" })} />
-      {section.imageUrl && <Field label="¿Dónde quieres mostrar la foto?" id={`${prefix}-photo-position`}><select id={`${prefix}-photo-position`} value={section.imagePosition ?? "after"} onChange={event => onChange({ imagePosition: event.target.value as "before" | "after" })}><option value="before">Antes de esta sección</option><option value="after">Después de esta sección</option></select></Field>}
+      {section.imageUrl && <Field label="¿Dónde quieres mostrar la foto en móvil?" id={`${prefix}-photo-position`}><select id={`${prefix}-photo-position`} value={section.imagePosition ?? "after"} onChange={event => onChange({ imagePosition: event.target.value as "before" | "after" })}><option value="before">Antes de esta sección</option><option value="after">Después de esta sección</option></select></Field>}
     </div>}
   </>;
 }
