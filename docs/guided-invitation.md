@@ -1,11 +1,11 @@
 # Editor compartido de invitaciones
 
-`/crear` muestra primero la selección de tipo de celebración. No se crea un evento en el servidor hasta guardar el borrador o subir una fotografía. Todos los tipos abren `GuidedInvitationEditor`: diseño, datos principales, personalización y revisión, con la misma protección de borradores, vista previa móvil/escritorio, recuperación y manejo de conflictos.
+`/crear` muestra primero el tipo de celebración. No crea un evento en el servidor hasta guardar el borrador o subir una fotografía. Todos los tipos abren `GuidedInvitationEditor` con seis pasos: protagonistas, fecha y lugar, fotografías, contenido, apariencia y revisión.
 
-Boda mantiene sus doce identidades; cumpleaños ofrece Confeti, Globos pastel, Neón, Disco y la composición esencial. Los demás eventos utilizan los diseños disponibles de su catálogo y la composición esencial. No se anuncian plantillas sin recursos como opciones disponibles.
+La vista previa, la vista privada y la invitación pública utilizan `CelebrationInvitation`. El diseño base está definido en `lib/shared-invitation.ts`; no hay selector de diseños ni texturas. Cada organizador puede elegir colores, fuentes, fotos, orden de las fotografías y acabado de los paneles.
 
-`lib/guided-invitation.ts` adapta textos, secciones, paletas y validación según el tipo. Los datos de demostración nunca se copian a las invitaciones reales. Las invitaciones anteriores conservan su plantilla, contenido, color y modo de confirmación; una confirmación antigua sin modo explícito conserva el enlace externo.
+`lib/guided-invitation.ts` adapta textos, secciones y validación según el tipo de evento. Los ejemplos ficticios nunca se copian a las invitaciones reales. Las secciones personalizadas y las opciones desactivadas se conservan al reabrir o recuperar un borrador. Las confirmaciones antiguas sin modo explícito conservan el modo externo.
 
-Los requisitos de publicación para los eventos distintos de boda se comprueban tanto en el asistente como en publicación y pago: protagonista/anfitrión, fecha, hora, lugar, dirección y secciones activas completas. Boda conserva la validación de sus identidades versionadas. Guardar un borrador incompleto continúa permitido.
+Los requisitos de publicación se comprueban en el asistente, el servidor y el pago para todos los eventos: protagonistas o anfitriones, fecha, hora, lugar, dirección y secciones activas completas. Guardar un borrador incompleto continúa permitido.
 
-El contexto completo y la guía de continuidad se encuentran en [README-DISENOS.md](../README-DISENOS.md). Los selectores usan `InvitationDesignGrid` para mantener el mismo grid en todos los tipos de evento.
+La protección al salir, el autoguardado de borradores, la recuperación local y la detección de conflictos se describen en [protección del editor](editor-protection.md). El comportamiento visual y el recorrido detallado están en [presentación compartida](shared-invitation.md).

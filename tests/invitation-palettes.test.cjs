@@ -31,14 +31,13 @@ test('basic and extracted palettes preserve readable contrast, valid hex values 
 test('image colors and basic palettes survive saving and reopening for every occasion',async()=>{
  for(const eventType of ['wedding','birthday','graduation','baby_shower','anniversary','other']){
   const f=createFixture();const {paletteFromAccent}=f.load('lib/invitation-palettes.ts');
-  const {initialGuidedValues}=f.load('lib/guided-invitation.ts');const {atmosphereStyle}=f.load('lib/wedding-atmosphere.ts');
-  const {sharedInvitationDesign}=f.load('lib/shared-invitation.ts');
+  const {initialGuidedValues}=f.load('lib/guided-invitation.ts');const {atmosphereStyle}=f.load('lib/invitation-atmosphere.ts');
   for(const [index,accent] of ['#d07020','#397ac5'].entries()){
    const form=f.saveForm();form.set('eventType',eventType);form.set('templateId','celebration-v1');form.set('accent',accent);form.set('contentVersion',String(index));
    assert.equal((await f.actions.updateEvent('event',form)).ok,true);
    const saved=f.state.events.get('event');assert.equal(saved.accent,accent);
    const reopened=initialGuidedValues(saved);assert.equal(reopened.accent,accent);
-   const style=atmosphereStyle(sharedInvitationDesign,reopened.accent);
+   const style=atmosphereStyle(reopened.accent);
    assert.equal(style['--wa-base'],paletteFromAccent(accent).dark);
    assert.equal(style['--wa-tint'],accent);
   }

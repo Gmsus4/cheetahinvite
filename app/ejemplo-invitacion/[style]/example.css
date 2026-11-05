@@ -1,8 +1,0 @@
-/* Embedded examples remain scrollable without a scrollbar over the design. */
-html:has(.invitation-example-page) { scrollbar-width: none; }
-html:has(.invitation-example-page)::-webkit-scrollbar { display: none; }
-
-/* Crop to the real welcome section without fragment navigation, which would
-   also scroll the containing homepage when a nested frame finishes loading. */
-.invitation-example-decoration .invite-website > :not(.invite-welcome) { display: none; }
-.invitation-example-decoration .invite-website { min-height: 100svh; }

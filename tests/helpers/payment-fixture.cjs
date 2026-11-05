@@ -12,6 +12,7 @@ function matches(row, where = {}) {
 function createPaymentFixture(options = {}) {
   process.env.STRIPE_SECRET_KEY = 'sk_test_fixture'; process.env.STRIPE_WEBHOOK_SECRET = 'whsec_fixture'; process.env.APP_URL = 'http://localhost:3000';
   const f = { ownerId: options.ownerId ?? 'owner-fixture', payments: new Map(), events: new Map(), calls: [], invalidations: [], refunds: [], disputes: [], sessions: new Map(), intents: new Map() };
+  f.eventDetails = { eventType: 'wedding', templateId: 'celebration-v1', hostNames: 'Alex y Sam', eventDate: new Date('2027-01-15T12:00:00Z'), eventTime: '18:00', venue: 'Salón', address: 'Calle', sections: [] };
   function table(rows, defaults = {}) {
     return {
       async findUnique({ where }) { return this.findFirst({ where }); },
@@ -79,7 +80,7 @@ function createPaymentFixture(options = {}) {
   f.addPurchase = (overrides = {}) => {
     const payment = { id: 'payment-fixture', eventId: 'event-fixture', ownerId: f.ownerId, eventName: 'Celebración', amount: 49900, currency: 'mxn', status: 'PENDING', livemode: false, stripeCheckoutSessionId: 'cs_fixture', stripePaymentIntentId: null, paidAt: null, expiresAt: null, refundedAmount: 0, refundPendingAmount: 0, disputeStatus: null, checkoutExpiresAt: new Date(Date.now() + 3600000), ...overrides };
     f.payments.set(payment.id, payment);
-    f.events.set(payment.eventId, { id: payment.eventId, ownerId: payment.ownerId, name: payment.eventName, paidAt: null, slug: null, status: 'PENDING_PAYMENT', stripePaymentIntentId: null });
+    f.events.set(payment.eventId, { ...f.eventDetails, id: payment.eventId, ownerId: payment.ownerId, name: payment.eventName, paidAt: null, slug: null, status: 'PENDING_PAYMENT', stripePaymentIntentId: null });
     const session = { id: payment.stripeCheckoutSessionId, mode: 'payment', status: 'complete', payment_status: 'paid', amount_total: payment.amount, currency: payment.currency, livemode: false, client_reference_id: payment.eventId, payment_intent: 'pi_fixture', metadata: { eventId: payment.eventId, ownerId: payment.ownerId, paymentId: payment.id, product: 'invitation-12-months' } };
     f.sessions.set(session.id, session);
     f.intents.set('pi_fixture', { id: 'pi_fixture', livemode: false, status: 'succeeded', amount_received: payment.amount, currency: payment.currency, latest_charge: { id: 'ch_fixture', paid: true, captured: true, created: Math.floor(Date.now() / 1000), amount: payment.amount, currency: payment.currency, payment_intent: 'pi_fixture' } });

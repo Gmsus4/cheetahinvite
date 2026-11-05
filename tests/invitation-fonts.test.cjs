@@ -32,11 +32,11 @@ test('all font selections survive server saving and reopening in the shared invi
 });
 test('saved legacy wedding fonts survive opening and rendering uses the selected fonts independently',()=>{
  const f=createFixture();const {initialGuidedValues}=f.load('lib/guided-invitation.ts');
- const {weddingDesigns}=f.load('lib/wedding-designs.ts');const {atmosphereStyle}=f.load('lib/wedding-atmosphere.ts');
+ const {sharedInvitationDesign}=f.load('lib/shared-invitation.ts');const {atmosphereStyle}=f.load('lib/invitation-atmosphere.ts');
  const {getInvitationFont}=f.load('lib/invitation-fonts.ts');
- const values=initialGuidedValues({id:'saved',eventType:'wedding',templateId:weddingDesigns[0].id,typography:'fredoka',bodyTypography:'manrope',sections:[]});
+ const values=initialGuidedValues({id:'saved',eventType:'wedding',templateId:'wedding-floral-v1',typography:'fredoka',bodyTypography:'manrope',sections:[]});
  assert.equal(values.typography,'fredoka');assert.equal(values.bodyTypography,'manrope');
- const style=atmosphereStyle(weddingDesigns[0],weddingDesigns[0].palettes[0].accent,values);
+ const style=atmosphereStyle(sharedInvitationDesign.palettes[0].accent,values);
  assert.equal(style['--wa-heading'],getInvitationFont('fredoka').family);
  assert.equal(style['--wa-body'],getInvitationFont('manrope').family);
 });

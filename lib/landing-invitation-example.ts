@@ -1,66 +1,18 @@
-import type { InviteSection } from "@/components/dashboard/EventEditor";
-import { getInvitationTemplate } from "./invitation-templates";
-import { eventExampleSections, getInvitationEventContent, invitationEventTypes } from "./invitation-event-content";
-import { sharedInvitationId, sharedInvitationDesign } from "./shared-invitation";
+import { exampleStories } from "./invitation-example-stories";
+import type { InviteSection } from "./invitation-editor";
+import { eventExampleSections, makeEventExampleSection, getInvitationEventContent, invitationEventTypes } from "./invitation-event-content";
+import { sharedInvitationDesign } from "./shared-invitation";
 
-// Use available editor decorations and their actual catalog names.
-const exampleStyles = [
-  { slug: "flores-blancas", templateId: "plantilla5" },
-  { slug: "bugambilias", templateId: "plantilla3" },
-  { slug: "flores-amarillas", templateId: "plantilla4" },
-];
-
-export const landingInvitationStyles = exampleStyles.flatMap(({ slug, templateId }) => {
-  const template = getInvitationTemplate("wedding", templateId);
-  return template ? [{ slug, template }] : [];
-});
-
-// Fictional data shared by every example; customer invitations are not used.
-export const landingInvitationExample = {
-  ...getInvitationEventContent("wedding").demo,
-  eventType: "wedding",
-  message: getInvitationEventContent("wedding").message,
-  imageUrl: "/demo/boda/sofia-mateo.webp",
-  heroHorizontal: "center",
-  heroVertical: "bottom",
-  sections: [
-    {
-      id: "example-story", type: "story", title: "Nuestra historia",
-      content: "Entre conversaciones, viajes y momentos sencillos fuimos construyendo una historia juntos. Hoy queremos celebrar este nuevo comienzo con las personas que más queremos.",
-      detail: "", link: "", imageUrl: "/demo/boda/sofia-mateo.webp", enabled: true,
-    },
-    {
-      id: "example-ceremony", type: "ceremony", title: "La celebración",
-      content: "Nos vemos en el jardín de Hacienda Las Nubes para compartir la ceremonia, el brindis y una noche para recordar.",
-      detail: "12 de octubre de 2027 · 5:00 p.m.", link: "", imageUrl: "/demo/boda/celebracion.webp", enabled: true,
-    },
-    {
-      id: "example-program", type: "program", title: "Programa",
-      content: "17:00 — Ceremonia\n18:00 — Brindis\n19:00 — Cena y celebración",
-      detail: "", link: "", imageUrl: "", enabled: true,
-    },
-    {
-      id: "example-gallery", type: "gallery", title: "Nuestros momentos",
-      content: "Los detalles de un día que queremos compartir contigo.",
-      detail: "", link: "", imageUrl: "",
-      imageUrls: ["/demo/boda/sofia-mateo.webp", "/demo/boda/celebracion.webp", "/demo/boda/ramo.webp"],
-      enabled: true,
-    },
-    {
-      id: "example-dress-code", type: "dress_code", title: "Código de vestimenta",
-      content: "Formal. Elige algo con lo que te sientas especial y puedas disfrutar de la celebración.",
-      detail: "", link: "", imageUrl: "", enabled: true,
-    },
-  ] satisfies InviteSection[],
-};
-
-// Every occasion uses real editor capabilities. Only weddings have floral assets.
-export const landingEventExamples = invitationEventTypes.map((eventType) => {
+const baseExamples = invitationEventTypes.map((eventType) => {
   const content = getInvitationEventContent(eventType);
   const wedding = eventType === "wedding";
   const birthday = eventType === "birthday";
   const graduation = eventType === "graduation";
   const babyShower = eventType === "baby_shower";
+  const galleryImages = wedding ? ["/demo/boda/sofia-mateo.webp", "/demo/boda/celebracion.webp", "/demo/boda/ramo.webp"]
+    : birthday ? ["/demo/birthday/valeria.webp", "/demo/birthday/cena.webp", "/demo/birthday/pastel.webp"]
+    : graduation ? ["/demo/graduacion/graduacion.webp", "/demo/graduacion/diploma.webp", "/demo/graduacion/auditorio.webp"]
+    : babyShower ? ["/demo/babyshower/padres.webp", "/demo/babyshower/dulce.webp", "/demo/babyshower/jardin.webp"] : [];
   const sectionImages: Partial<Record<InviteSection["type"], string>> = birthday ? {
     story: "/demo/birthday/pastel.webp",
     reception: "/demo/birthday/cena.webp",
@@ -79,21 +31,56 @@ export const landingEventExamples = invitationEventTypes.map((eventType) => {
     available: true,
     invitation: {
       ...content.demo,
-      accent: sharedInvitationDesign.palettes[0].accent,
+      // The wedding background has a black base behind its yellow flowers.
+      accent: wedding ? "#000000" : sharedInvitationDesign.palettes[0].accent,
       typography: sharedInvitationDesign.typography,
       bodyTypography: sharedInvitationDesign.bodyTypography,
       eventType,
       message: content.message,
-      locationImageUrl: babyShower ? "/demo/babyshower/jardin.webp" : birthday ? "/demo/birthday/cena.webp" : undefined,
-      imageUrl: wedding ? landingInvitationExample.imageUrl : birthday ? "/demo/birthday/valeria.webp" : graduation ? "/demo/graduacion/graduacion.webp" : babyShower ? "/demo/babyshower/padres.webp" : "",
-      heroHorizontal: "center",
-      heroVertical: "center",
-      templateId: sharedInvitationId,
-      texture: "none",
-      sections: eventExampleSections(eventType).map((section) => ({
+      imageUrl: wedding ? "/demo/boda/sofia-mateo.webp" : birthday ? "/demo/birthday/valeria.webp" : graduation ? "/demo/graduacion/graduacion.webp" : babyShower ? "/demo/babyshower/padres.webp" : "",
+      sections: [...eventExampleSections(eventType), ...(!eventExampleSections(eventType).some(section => section.type === "gallery") ? [makeEventExampleSection("gallery", eventType)] : [])].map((section) => ({
         ...section, imageUrl: sectionImages[section.type] ?? section.imageUrl,
+        ...(section.type === "gallery" ? { imageUrls: galleryImages, enabled: galleryImages.length > 0 } : {}),
         ...(section.type === "rsvp" ? { rsvpMode: "integrated" as const } : {}),
       })),
     },
+  };
+});
+
+export const landingEventExamples = baseExamples.map(base => {
+  const story = exampleStories[base.invitation.eventType];
+  const eventType = base.invitation.eventType;
+  const date = new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(new Date(story.eventDateKey + "T12:00:00Z"));
+  const address = `Calle del Encuentro 120, Centro, ${story.city}`;
+  const labels: Record<string, string[]> = {
+    wedding: ["Recepción de invitados", "Cena y brindis", "Baile de celebración"],
+    birthday: ["Bienvenida y convivencia", "Comida y convivencia", "Pastel y buenos deseos"],
+    graduation: ["Bienvenida", "Palabras de agradecimiento", "Brindis por los nuevos caminos"],
+    baby_shower: ["Bienvenida y comida", "Juegos y buenos deseos", "Agradecimientos y despedida"],
+    anniversary: ["Bienvenida", "Comida y recuerdos compartidos", "Brindis y música"],
+    other: ["Bienvenida y presentación", "Actividad y convivencia", "Agradecimientos y cierre"],
+  };
+  const start = Number(story.eventTime.slice(0, 2)) * 60 + Number(story.eventTime.slice(3));
+  const program = labels[eventType].map((label, offset) => {
+    const minutes = start + offset * 60;
+    return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")} — ${label}`;
+  }).join("\n");
+  const make = (type: InviteSection["type"], title: string, content: string, extra: Partial<InviteSection> = {}): InviteSection => ({ id: `example-${story.key}-${type}`, type, title, content, detail: "", link: "", imageUrl: "", imageUrls: [], enabled: true, ...extra });
+  const fallbackGallery = base.invitation.sections.find(section => section.type === "gallery")?.imageUrls ?? [];
+  const sections = [
+    make("story", eventType === "wedding" || eventType === "anniversary" ? "Nuestra historia" : "El motivo de celebrar", story.story),
+    make("reception", "El lugar del encuentro", `Te esperamos en ${story.venue}, en ${story.city}.\n${address}.`, { detail: `${date} · ${story.eventTime}`, link: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(story.venue + " " + address)}` }),
+    make("program", "Así compartiremos el día", program),
+    make("parents", "Quienes nos acompañan", "Nuestra familia y nuestras amistades. Gracias por compartir este momento y por ser parte de nuestra historia."),
+    make("dress_code", "Para disfrutar la celebración", story.eventTime < "17:00" ? "Ropa cómoda para una reunión de día. Te recomendamos calzado cómodo y protección para el sol." : "Vestimenta casual elegante. Elige ropa y calzado con los que puedas disfrutar de la convivencia."),
+    ...(["wedding", "birthday", "baby_shower", "anniversary"].includes(eventType) ? [make("gifts", "Tu compañía es el mejor regalo", "Lo más importante para nosotros es compartir este día contigo. No es necesario traer un regalo.")] : []),
+    make("gallery", "Recuerdos para compartir", "Momentos que nos recuerdan por qué vale la pena celebrar.", { imageUrls: fallbackGallery, enabled: fallbackGallery.length > 0 }),
+    make("rsvp", "¿Nos acompañas?", "Confirma tu asistencia para que podamos preparar tu lugar. Este formulario es una demostración y no envía respuestas reales.", { rsvpMode: "integrated" }),
+  ];
+  return {
+    slug: `${getInvitationEventContent(eventType).slug}-${story.key}`, label: story.title,
+    typeLabel: base.label, available: true,
+    imageFolder: `/demo/eventos/${getInvitationEventContent(eventType).slug}/${story.key}`,
+    invitation: { ...base.invitation, name: story.title, hostNames: story.hostNames, date, eventDateKey: story.eventDateKey, eventTime: story.eventTime, venue: story.venue, address, message: `Nos encantará compartir este encuentro contigo. ${story.story}`, sections },
   };
 });

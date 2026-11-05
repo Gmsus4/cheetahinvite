@@ -6,16 +6,17 @@ import { FiArrowLeft, FiArrowRight, FiCamera, FiChevronDown, FiCheck, FiEye, FiL
 import { prepareEvent } from "@/app/crear/actions";
 import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 import { InvitationPalettePicker } from "./InvitationPalettePicker";
-import { InvitationFontSelect, InvitationCanvas } from "./EventEditor";
-import { initialGuidedValues, completeGuidedSections, changeGuidedEventType, guidedDetails, guidedDesign, guidedPublicationIssues, guidedRecoveryStep, guidedRecoverySection, guidedRecoveryAppearance, guidedContentSectionIds } from "@/lib/guided-invitation";
+import { InvitationFontSelect } from "./InvitationFontSelect";
+import { CelebrationInvitation } from "@/components/invitation/CelebrationInvitation";
+import { initialGuidedValues, completeGuidedSections, changeGuidedEventType, guidedDetails, guidedPublicationIssues, guidedRecoveryStep, guidedRecoverySection, guidedRecoveryAppearance, guidedContentSectionIds } from "@/lib/guided-invitation";
 import { getInvitationFont, recommendedInvitationFonts } from "@/lib/invitation-fonts";
 import { getInvitationEventContent, invitationEventTypes } from "@/lib/invitation-event-content";
-import { applyWeddingDesign, getWeddingDesign, weddingPalette } from "@/lib/wedding-designs";
-import { EditorSaveFailure, editorFormData, type EditorValues, type InviteSection } from "@/lib/invitation-editor";
+import { sharedInvitationDesign, invitationPalette } from "@/lib/shared-invitation";
+import { EditorSaveFailure, editorFormData, type EventData, type EditorValues, type InviteSection } from "@/lib/invitation-editor";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { invitationPriceLabel, isInvitationPublished } from "@/lib/invitation-payment";
 import { invitationPath } from "@/lib/invitation-url";
-import { CloudinaryImageUpload, type EventData } from "./EventEditor";
+import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
 import { useEditorProtection } from "./useEditorProtection";
 import { EditorProtectedLink } from "./EditorProtectedLink";
 import { EditorLeaveDialog } from "./EditorLeaveDialog";
@@ -73,7 +74,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   }, [step, activeSection]);
   const busy = saving || !protection.ready || Boolean(protection.recovery);
   const dirty = snapshot !== protection.acknowledged || protection.code === "conflict";
-  const design = guidedDesign(values.eventType, values.templateId);
+  const design = sharedInvitationDesign;
   const content = getInvitationEventContent(values.eventType);
   const details = guidedDetails(values.eventType);
   const editableSections = details.flatMap(detail => values.sections.filter(section => section.type === detail.type));
@@ -83,7 +84,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const contentKey = contentIds.includes(activeSection) ? activeSection : '__welcome';
   const contentIndex = contentIds.indexOf(contentKey);
   const currentSection = values.sections.find(section => section.id === contentKey);
-  const palette = weddingPalette(design, values.accent);
+  const palette = invitationPalette(values.accent);
   const continuingDetail = step === 3 && contentIndex < contentIds.length - 1;
   const continueLabel = step === 4 && !appearanceExpanded ? 'Me gusta así' : 'Continuar';
   const issues = guidedPublicationIssues(values);
@@ -128,7 +129,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     if (!record) return;
     const recovered = JSON.parse(record.snapshot) as EditorValues;
     const restored = { ...recovered, texture: "none", sections: completeGuidedSections(recovered.eventType, recovered.sections) };
-    setValues(restored.eventType === "wedding" && getWeddingDesign(restored.templateId) ? { ...applyWeddingDesign(restored, restored.templateId, restored.accent), typography: restored.typography, bodyTypography: restored.bodyTypography } : restored);
+    setValues({ ...restored, texture: "none" });
     setStep(guidedRecoveryStep(record.wizard));
     setActiveSection(guidedRecoverySection(record.wizard, restored.sections));
     setAddingDetail(record.wizard.flow === "content-v4" && Boolean(record.wizard.activeExtra?.startsWith("__add:")));
@@ -283,7 +284,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
           </div>
         </form>
       </div>
-      <aside className="guided-preview"><div className="guided-preview-heading"><span>ASÍ VA QUEDANDO</span><small>Se actualiza mientras editas</small></div><InvitationLivePreview initialDevice="mobile" fitViewport onExpand={() => void openPrivatePreview()} expandLabel={saving ? "Preparando vista previa…" : "Abrir vista previa privada"} expandDisabled={busy || uploads > 0} publicLink={<InvitationPublicLink event={event} dirty={dirty} />}><InvitationCanvas {...values} date={date} eventDateKey={values.eventDate} /></InvitationLivePreview></aside>
+      <aside className="guided-preview"><div className="guided-preview-heading"><span>ASÍ VA QUEDANDO</span><small>Se actualiza mientras editas</small></div><InvitationLivePreview initialDevice="mobile" fitViewport onExpand={() => void openPrivatePreview()} expandLabel={saving ? "Preparando vista previa…" : "Abrir vista previa privada"} expandDisabled={busy || uploads > 0} publicLink={<InvitationPublicLink event={event} dirty={dirty} />}><CelebrationInvitation {...values} date={date} eventDateKey={values.eventDate} /></InvitationLivePreview></aside>
     </div>
     <button className="guided-mobile-preview" type="button" disabled={busy || uploads > 0} onClick={() => void openPrivatePreview()} aria-label={saving ? "Preparando vista previa…" : "Abrir vista previa privada"} title="Abrir vista previa privada"><FiEye aria-hidden="true" /></button>
   </main>;

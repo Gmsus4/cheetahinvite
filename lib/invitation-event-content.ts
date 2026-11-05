@@ -1,4 +1,4 @@
-import type { InviteSection, SectionType } from "@/components/dashboard/EventEditor";
+import type { InviteSection, SectionType } from "./invitation-editor";
 
 export const invitationEventTypes = ["wedding", "birthday", "graduation", "baby_shower", "anniversary", "other"] as const;
 export type InvitationEventType = typeof invitationEventTypes[number];
@@ -8,9 +8,6 @@ type EventContent = {
   label: string;
   slug: string;
   defaultName: string;
-  heroKicker: string;
-  heroIntro: string;
-  welcomeTitle: string;
   message: string;
   recommendedSections: SectionType[];
   sections: Record<SectionType, SectionCopy>;
@@ -24,8 +21,6 @@ type EventContent = {
 const eventContent: Record<InvitationEventType, EventContent> = {
   wedding: {
     label: "Boda", slug: "boda", defaultName: "Nuestra boda",
-    heroKicker: "NOS CASAMOS", heroIntro: "Elegimos caminar juntos y queremos celebrarlo contigo",
-    welcomeTitle: "Bienvenidos",
     message: "Hay días que se vuelven inolvidables cuando los compartimos con las personas que queremos. Nos encantará contar contigo en el comienzo de esta nueva etapa.",
     recommendedSections: ["story", "ceremony", "reception", "program", "parents", "dress_code", "gifts", "rsvp"],
     demo: { name: "Nuestra boda", hostNames: "Sofía y Mateo", date: "12 de octubre de 2027", eventDateKey: "2027-10-12", eventTime: "17:00", venue: "Hacienda Las Nubes", address: "Oaxaca", accent: "#8c7258", typography: "great-vibes", bodyTypography: "inter" },
@@ -45,8 +40,6 @@ const eventContent: Record<InvitationEventType, EventContent> = {
   },
   birthday: {
     label: "Cumpleaños", slug: "cumpleanos", defaultName: "Mi cumpleaños",
-    heroKicker: "UNA VUELTA MÁS AL SOL", heroIntro: "Las mejores velitas se apagan en buena compañía",
-    welcomeTitle: "¡Que empiece la fiesta!",
     message: "Un año más de historias, aprendizajes y motivos para sonreír. Quiero celebrarlo con mis personas favoritas: ven por un abrazo, quédate por el pastel y acompáñame a crear nuevos recuerdos.",
     recommendedSections: ["story", "reception", "program", "dress_code", "gifts", "rsvp"],
     demo: { name: "Los 30 de Valeria", hostNames: "Valeria Pérez", date: "20 de noviembre de 2027", eventDateKey: "2027-11-20", eventTime: "18:00", venue: "Patio La Luna", address: "Puebla", accent: "#b33e63", typography: "fredoka", bodyTypography: "nunito" },
@@ -66,8 +59,6 @@ const eventContent: Record<InvitationEventType, EventContent> = {
   },
   graduation: {
     label: "Graduación", slug: "graduacion", defaultName: "Mi graduación",
-    heroKicker: "UN LOGRO QUE SE COMPARTE", heroIntro: "Cerramos una etapa y abrimos un mundo de posibilidades",
-    welcomeTitle: "Lo logramos, juntos",
     message: "Detrás de este logro hay horas de estudio, retos superados y personas que nunca dejaron de creer en nosotros. Queremos celebrar contigo el final de esta etapa y el inicio de todo lo que viene.",
     recommendedSections: ["story", "ceremony", "reception", "program", "parents", "dress_code", "rsvp"],
     demo: { name: "Generación 2027", hostNames: "Camila y su generación", date: "17 de julio de 2027", eventDateKey: "2027-07-17", eventTime: "18:00", venue: "Centro Cultural Horizonte", address: "Guadalajara", accent: "#755820", typography: "cinzel", bodyTypography: "inter" },
@@ -87,8 +78,6 @@ const eventContent: Record<InvitationEventType, EventContent> = {
   },
   baby_shower: {
     label: "Baby shower", slug: "baby-shower", defaultName: "Nuestro baby shower",
-    heroKicker: "UN PEQUEÑO GRAN COMIENZO", heroIntro: "La familia crece y la ilusión también",
-    welcomeTitle: "Ya viene alguien muy especial",
     message: "Hay un nuevo latido llenando nuestra casa de ilusión. Antes de conocer sus manitas y su sonrisa, queremos reunir a quienes formarán parte de su mundo para compartir una tarde llena de cariño.",
     recommendedSections: ["story", "reception", "program", "parents", "gifts", "dress_code", "rsvp"],
     demo: { name: "Esperando a Emilia", hostNames: "Lucía y Daniel", date: "14 de agosto de 2027", eventDateKey: "2027-08-14", eventTime: "12:00", venue: "Jardín Los Olivos", address: "Mérida", accent: "#526d56", typography: "comfortaa", bodyTypography: "nunito" },
@@ -108,8 +97,6 @@ const eventContent: Record<InvitationEventType, EventContent> = {
   },
   anniversary: {
     label: "Aniversario", slug: "aniversario", defaultName: "Nuestro aniversario",
-    heroKicker: "VOLVER A ELEGIRNOS", heroIntro: "El tiempo pasa, las razones para celebrar se multiplican",
-    welcomeTitle: "Una historia que sigue creciendo",
     message: "Los años se llenan de sentido con las personas que caminan a nuestro lado. Queremos celebrar el amor, las aventuras y la familia que hemos construido, rodeados de quienes forman parte de nuestra historia.",
     recommendedSections: ["story", "ceremony", "reception", "program", "dress_code", "gifts", "rsvp"],
     demo: { name: "25 años de nosotros", hostNames: "Elena y Gabriel", date: "18 de septiembre de 2027", eventDateKey: "2027-09-18", eventTime: "18:00", venue: "Hacienda Los Encinos", address: "Querétaro", accent: "#866137", typography: "playfair-display", bodyTypography: "lora" },
@@ -129,8 +116,6 @@ const eventContent: Record<InvitationEventType, EventContent> = {
   },
   other: {
     label: "Otro evento", slug: "reunion", defaultName: "Nuestra celebración",
-    heroKicker: "VOLVAMOS A ENCONTRARNOS", heroIntro: "No hace falta esperar una gran fecha para reunirnos",
-    welcomeTitle: "Qué gusto volver a verte",
     message: "Entre rutinas y distancias, a veces nos faltan momentos para estar juntos. Hagamos una pausa para compartir la mesa, ponernos al día y crear nuevas historias con las personas que queremos.",
     recommendedSections: ["story", "reception", "program", "dress_code", "gifts", "rsvp"],
     demo: { name: "Volver a encontrarnos", hostNames: "Familia Rivera", date: "6 de junio de 2027", eventDateKey: "2027-06-06", eventTime: "13:00", venue: "Parque La Arboleda", address: "Ciudad de México", accent: "#31756c", typography: "outfit", bodyTypography: "dm-sans" },

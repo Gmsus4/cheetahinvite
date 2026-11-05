@@ -37,7 +37,10 @@ test('validation, missing versions, session expiry and another owner return erro
 });
 
 test('publication rejects an outdated version before changing payment state', async () => {
-  const f = createFixture(); await f.actions.updateEvent('event', f.saveForm());
+  const f = createFixture();
+  const form = f.saveForm();
+  for (const [key, value] of Object.entries({ hostNames: 'Alex y Sam', eventDate: '2027-01-15', eventTime: '18:00', venue: 'Salón', address: 'Calle' })) form.set(key, value);
+  await f.actions.updateEvent('event', form);
   assert.equal((await f.actions.publishEvent('event', 0)).code, 'conflict');
   assert.equal(f.state.events.get('event').status, 'DRAFT');
   assert.equal((await f.actions.publishEvent('event', 1)).ok, true);
@@ -58,6 +61,7 @@ test('creation retries and simultaneous requests reuse one draft and consume onl
 
 test('a save racing with publication returns the new version for an explicit conflict decision', async () => {
   const f = createFixture();
+  Object.assign(f.state.events.get('event'), { eventType: 'wedding', hostNames: 'Alex y Sam', eventDate: new Date('2027-01-15T12:00:00Z'), eventTime: '18:00', venue: 'Salón', address: 'Calle' });
   f.prisma.event.updateMany = async () => { f.state.events.get('event').contentVersion = 1; return { count: 0 }; };
   const result = await f.actions.publishEvent('event', 0);
   assert.equal(result.code, 'conflict');

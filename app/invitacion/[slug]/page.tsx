@@ -1,9 +1,9 @@
-import { eventButtonAppearance } from "@/lib/invitation-buttons";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { invitationPath } from "@/lib/invitation-url";
-import { InvitationCanvas, type InviteSection } from "@/components/dashboard/EventEditor";
+import { CelebrationInvitation } from "@/components/invitation/CelebrationInvitation";
+import type { InviteSection } from "@/lib/invitation-editor";
 import { getPublicInvitation } from "@/lib/public-invitation";
 import { invitationMetadata } from "@/lib/invitation-metadata";
 import { invitationOrigin } from "@/lib/invitation-origin";
@@ -35,7 +35,7 @@ async function InvitationData({ params }: InvitationPageProps) {
     : "La fecha";
   const sections = Array.isArray(event.sections) ? event.sections as InviteSection[] : [];
   return <main className="public-invitation-page">
-    <InvitationCanvas
+    <CelebrationInvitation
       publicEventId={event.id}
       eventType={event.eventType}
       name={event.name}
@@ -48,11 +48,9 @@ async function InvitationData({ params }: InvitationPageProps) {
       message={event.message ?? ""}
       imageUrl={event.imageUrl ?? ""} backgroundImageUrl={event.backgroundImageUrl ?? ""}
       accent={event.accent}
-      texture={event.texture} templateId={event.templateId}
       typography={event.typography}
-      bodyTypography={event.bodyTypography} heroHorizontal={event.heroHorizontal} heroVertical={event.heroVertical} buttonAppearance={eventButtonAppearance(event)}
+      bodyTypography={event.bodyTypography}
       sections={sections}
-      full
     />
   </main>;
 }

@@ -1,0 +1,118 @@
+# Fotografías para los seis ejemplos de invitaciones
+
+Hay un ejemplo por tipo de evento. Todos comparten el diseño base y usan datos ficticios. El catálogo muestra los seis y el celular del hero permite elegir el tipo de evento. Estos datos no se copian a las invitaciones de clientes.
+
+## Preparación mínima
+
+Puedes preparar los seis ejemplos con un máximo de seis fotografías principales, una por evento. Las invitaciones también funcionan sin foto: muestran las iniciales de sus protagonistas. No hace falta buscar una fotografía distinta para cada sección. Los fondos de color funcionan sin imagen de fondo y todas las fotos adicionales son opcionales.
+
+Coloca cada foto como `principal.jpg` en la carpeta correspondiente. Puedes reutilizarla en una sección si quieres. También se aceptan `.webp`, `.jpeg`, `.png` y `.avif`; conserva la extensión real del archivo. Si hay varias versiones de un mismo nombre, se usa primero WebP, luego JPG, JPEG, PNG y AVIF.
+
+Reinicia el servidor de desarrollo y recarga después de agregar archivos. En producción ejecuta `npm run build` y vuelve a desplegar con la carpeta `public`. Las posiciones sin foto se omiten; se mantienen las imágenes de demostración que ya existen para estos ejemplos. No se aplica la reducción de calidad que se retiró anteriormente.
+
+## Nombres de archivo
+
+| Archivo | Uso | Necesidad |
+| --- | --- | --- |
+| `principal.jpg` | Foto de portada; busca un retrato acorde con los protagonistas. | Recomendado, opcional. |
+| `fondo.jpg` | Fondo fijo; paisaje o ambiente horizontal de buena resolución. | Opcional; puede usarse el fondo de color. |
+| `historia.jpg` | Foto junto a la historia. | Opcional. |
+| `lugar.jpg` | Foto de la sede. | Opcional. |
+| `programa.jpg` | Foto junto al itinerario. | Opcional. |
+| `galeria-1.jpg` hasta `galeria-12.jpg` | Hasta doce fotografías de recuerdos. | Opcionales; puedes reutilizar fotos existentes. |
+
+Las rutas de disco empiezan por `public/`. La URL pública comienza por `/demo/`, sin `public`. Ejemplo: `public/demo/eventos/boda/sofia-mateo/principal.jpg` se sirve como `/demo/eventos/boda/sofia-mateo/principal.jpg`. Usa imágenes con permiso de uso. Las sedes y las direcciones son ficticias.
+
+## Un ejemplo por evento
+
+### Boda en un jardín de hacienda
+
+- Tipo: boda.
+- Protagonistas o anfitriones: Sofía y Mateo.
+- Fecha y hora: 2027-10-12, 17:00.
+- Sede ficticia: Hacienda Las Nubes, Oaxaca.
+- Contexto: Nos conocimos en una exposición de fotografía y desde entonces aprendimos a mirar la vida juntos. Queremos celebrar nuestra boda entre jardines y las personas que han acompañado nuestra historia.
+- Carpeta exacta: `public/demo/eventos/boda/sofia-mateo/`.
+- Foto principal: `public/demo/eventos/boda/sofia-mateo/principal.jpg`.
+- Las fotos adicionales de la tabla se colocan en esta misma carpeta.
+- Ejemplo: `/ejemplo-invitacion/boda-sofia-mateo`.
+
+### Los 30 de Valeria
+
+- Tipo: cumpleanos.
+- Protagonistas o anfitriones: Valeria.
+- Fecha y hora: 2027-08-14, 19:00.
+- Sede ficticia: Terraza del Sol, Guadalajara.
+- Contexto: Cumplo treinta años y quiero brindar por las amistades, los viajes y las pequeñas aventuras que me han traído hasta aquí. Nos espera una cena en la terraza y una noche de baile.
+- Carpeta exacta: `public/demo/eventos/cumpleanos/valeria-30/`.
+- Foto principal: `public/demo/eventos/cumpleanos/valeria-30/principal.jpg`.
+- Las fotos adicionales de la tabla se colocan en esta misma carpeta.
+- Ejemplo: `/ejemplo-invitacion/cumpleanos-valeria-30`.
+
+### Daniela · Arquitectura
+
+- Tipo: graduacion.
+- Protagonistas o anfitriones: Daniela.
+- Fecha y hora: 2027-07-17, 17:00.
+- Sede ficticia: Patio de la Cantera, Querétaro.
+- Contexto: Después de cinco años de maquetas, planos y noches de estudio, terminé Arquitectura. Quiero celebrar este logro con quienes creyeron en mí y me ayudaron a construirlo.
+- Carpeta exacta: `public/demo/eventos/graduacion/daniela-arquitectura/`.
+- Foto principal: `public/demo/eventos/graduacion/daniela-arquitectura/principal.jpg`.
+- Las fotos adicionales de la tabla se colocan en esta misma carpeta.
+- Ejemplo: `/ejemplo-invitacion/graduacion-daniela-arquitectura`.
+
+### Esperando a Sofía
+
+- Tipo: baby-shower.
+- Protagonistas o anfitriones: Ana y Luis.
+- Fecha y hora: 2027-05-15, 12:00.
+- Sede ficticia: Jardín Azahar, Mérida.
+- Contexto: Estamos esperando a Sofía y queremos compartir la ilusión de su llegada. Nos reuniremos para una comida tranquila, juegos y buenos deseos para esta nueva etapa en familia.
+- Carpeta exacta: `public/demo/eventos/baby-shower/bienvenida-sofia/`.
+- Foto principal: `public/demo/eventos/baby-shower/bienvenida-sofia/principal.jpg`.
+- Las fotos adicionales de la tabla se colocan en esta misma carpeta.
+- Ejemplo: `/ejemplo-invitacion/baby-shower-bienvenida-sofia`.
+
+### 25 años de Laura y Javier
+
+- Tipo: aniversario.
+- Protagonistas o anfitriones: Laura y Javier.
+- Fecha y hora: 2027-10-09, 18:00.
+- Sede ficticia: Patio de la Bugambilia, Oaxaca.
+- Contexto: Hace veinticinco años comenzamos una vida juntos. Hoy celebramos las conversaciones, los retos y la familia que hemos construido con una cena para volver a brindar por nuestro amor.
+- Carpeta exacta: `public/demo/eventos/aniversario/laura-javier-25/`.
+- Foto principal: `public/demo/eventos/aniversario/laura-javier-25/principal.jpg`.
+- Las fotos adicionales de la tabla se colocan en esta misma carpeta.
+- Ejemplo: `/ejemplo-invitacion/aniversario-laura-javier-25`.
+
+### Reencuentro de la generación 2017
+
+- Tipo: reunion.
+- Protagonistas o anfitriones: Generación 2017.
+- Fecha y hora: 2027-07-24, 17:00.
+- Sede ficticia: Terraza Encuentro, Monterrey.
+- Contexto: Han pasado diez años desde que terminamos la preparatoria. Es momento de reencontrarnos, compartir en qué se han convertido nuestros sueños y recordar las historias del salón.
+- Carpeta exacta: `public/demo/eventos/reunion/reencuentro-2017/`.
+- Foto principal: `public/demo/eventos/reunion/reencuentro-2017/principal.jpg`.
+- Las fotos adicionales de la tabla se colocan en esta misma carpeta.
+- Ejemplo: `/ejemplo-invitacion/reunion-reencuentro-2017`.
+
+## Recursos incorporados al ejemplo de boda
+
+Las diez fotografías proporcionadas ya están copiadas en `public/demo/eventos/boda/sofia-mateo/`. Se conserva el JPG original, con sus dimensiones y calidad, sin compresión adicional. Se muestran en el ejemplo completo, en el catálogo y en el celular del hero. El fondo conserva su posición fija.
+
+| Archivo en el proyecto | Original proporcionado | Uso |
+| --- | --- | --- |
+| `fondo.jpg` | `pexels-daejeung-16293879 (1).jpg` | Fondo fijo floral |
+| `principal.jpg` | `pexels-fernando-capetillo-94107723-35658961.jpg` | Portada de la pareja |
+| `historia.jpg` | `pexels-fernando-capetillo-94107723-35658959.jpg` | Nuestra historia |
+| `lugar.jpg` | `pexels-fernando-capetillo-94107723-35658958.jpg` | El lugar del encuentro |
+| `programa.jpg` | `pexels-fernando-capetillo-94107723-9934796.jpg` | Detalle floral del itinerario |
+| `familias.jpg` | `pexels-eduardo-barrientos-140939364-16859801.jpg` | Quienes nos acompañan |
+| `galeria-1.jpg` | `pexels-fernando-capetillo-94107723-35658957.jpg` | Galería, foto 1 |
+| `galeria-2.jpg` | `pexels-fernando-capetillo-94107723-35658962.jpg` | Galería, foto 2 |
+| `galeria-3.jpg` | `pexels-fernando-capetillo-94107723-35658963.jpg` | Galería, foto 3 |
+| `galeria-4.jpg` | `pexels-fernando-capetillo-94107723-35658964.jpg` | Galería, foto 4 |
+
+
+El ejemplo de boda utiliza una paleta negra (`#000000`) acorde con la base oscura de la fotografía floral de fondo.

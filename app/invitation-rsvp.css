@@ -72,10 +72,6 @@
 .invite-rsvp-error, .invite-rsvp-success { margin: 0; padding: 12px 14px; border: 1px solid #e5c9bf; border-radius: 12px; background: #fff4ef; color: #8b3f25; font-size: 12px; line-height: 1.7; }
 .invite-rsvp-success { border-color: var(--rsvp-border); background: var(--rsvp-tint); color: var(--invite-action, #9a491b); }
 .invite-rsvp-honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; pointer-events: none; }
-.invite-website[data-button-filled="false"] .invite-rsvp-form .invite-rsvp-submit { background: transparent; color: var(--invite-action, #9a491b); }
-.invite-website[data-button-filled="false"] .invite-rsvp-form .invite-rsvp-submit:hover:not(:disabled) { background: var(--rsvp-tint); }
-.invite-website[data-button-icons="false"] .invite-rsvp-choice-icon, .invite-website[data-button-icons="false"] .invite-rsvp-companions-toggle > svg:first-child { display: none; }
-.invite-website[data-button-bold="false"] .invite-rsvp-form .invite-rsvp-button { font-weight: 400; }
 @media(max-width: 400px) {
   .invite-rsvp-form { gap: 21px; padding: 22px 18px; border-radius: 18px; }
   .invite-rsvp-choices { gap: 10px; }

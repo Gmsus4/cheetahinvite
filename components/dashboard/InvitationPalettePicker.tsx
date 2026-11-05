@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { FiCheck, FiImage } from 'react-icons/fi';
 import { extractBackgroundPalette, invitationPaletteChoices, paletteFromAccent } from '@/lib/invitation-palettes';
-import type { WeddingPalette } from '@/lib/wedding-designs';
+import type { InvitationPalette } from '@/lib/invitation-palettes';
 
 export function InvitationPalettePicker({ palettes, accent, backgroundImageUrl, onChange }: {
-  palettes: WeddingPalette[]; accent: string; backgroundImageUrl?: string; onChange: (accent: string) => void;
+  palettes: InvitationPalette[]; accent: string; backgroundImageUrl?: string; onChange: (accent: string) => void;
 }) {
-  const [photo, setPhoto] = useState<{ url: string; palette: WeddingPalette } | null>(null);
+  const [photo, setPhoto] = useState<{ url: string; palette: InvitationPalette } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const request = useRef(0);

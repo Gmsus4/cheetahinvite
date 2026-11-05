@@ -4,9 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { validCreationKey, type EditorSaveResult } from "@/lib/invitation-editor";
-import { getInvitationTemplate } from "@/lib/invitation-templates";
-import { getWeddingDesign } from "@/lib/wedding-designs";
-import { sharedInvitationId, sharedInvitationDesign } from "@/lib/shared-invitation";
+import { sharedInvitationDesign } from "@/lib/shared-invitation";
 
 const eventTypes = new Set([
   "wedding",
@@ -25,10 +23,7 @@ export async function prepareEvent(formData: FormData): Promise<EditorSaveResult
   const eventType = String(formData.get("eventType") ?? "");
   const dateValue = String(formData.get("eventDate") ?? "");
   const creationKey = String(formData.get("creationKey") ?? "");
-  const selectedId = String(formData.get("templateId") ?? "");
-  const design = selectedId === sharedInvitationId || eventType !== "wedding" ? sharedInvitationDesign : getWeddingDesign(selectedId);
-
-  const template = getInvitationTemplate(eventType, String(formData.get("templateId") ?? "none"));
+  const design = sharedInvitationDesign;
 
   if (name.length < 2 || name.length > 100 || !eventTypes.has(eventType) || !validCreationKey(creationKey)) {
     return { ok: false, code: "validation", message: "Revisa el nombre y el tipo de evento antes de continuar." };
@@ -47,7 +42,7 @@ export async function prepareEvent(formData: FormData): Promise<EditorSaveResult
     });
     if (!slot.count) return false;
 
-    const event = await tx.event.create({ data: { id: creationKey, ownerId: session.user.id, name, eventType, eventDate, sections: [], ...(template ? {templateId:template.id, ...(template.accent ? {accent:template.accent} : {})} : {}), ...(design ? { templateId: design.id, accent: design.palettes[0].accent, typography: design.typography, bodyTypography: design.bodyTypography } : {}) } });
+    const event = await tx.event.create({ data: { id: creationKey, ownerId: session.user.id, name, eventType, eventDate, sections: [], templateId: design.id, accent: design.palettes[0].accent, typography: design.typography, bodyTypography: design.bodyTypography } });
     return event.id;
     });
     if (!created) {

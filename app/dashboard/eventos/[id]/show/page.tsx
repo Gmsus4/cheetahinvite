@@ -1,4 +1,3 @@
-import { eventButtonAppearance } from "@/lib/invitation-buttons";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { invitationPath } from "@/lib/invitation-url";
@@ -9,7 +8,8 @@ import { BrandLoader } from "@/components/BrandLoader";
 import { FiEdit2, FiLock } from "react-icons/fi";
 import { isInvitationPublished } from "@/lib/invitation-payment";
 import { auth } from "@/auth";
-import { InvitationCanvas, type InviteSection } from "@/components/dashboard/EventEditor";
+import { CelebrationInvitation } from "@/components/invitation/CelebrationInvitation";
+import type { InviteSection } from "@/lib/invitation-editor";
 import { prisma } from "@/prisma";
 
 export const metadata: Metadata = { title: "Vista previa privada | Cheetah Invite" };
@@ -44,7 +44,7 @@ async function ShowInvitationData({ params }: ShowPageProps) {
     </header>
     <div className="show-preview-scroll">
       <div className="show-preview-caption"><span>VISTA PREVIA COMPLETA</span><p>Así se verá tu invitación cuando esté publicada.</p></div>
-      <InvitationCanvas
+      <CelebrationInvitation
         eventType={event.eventType}
         name={event.name}
         hostNames={event.hostNames ?? ""}
@@ -56,11 +56,9 @@ async function ShowInvitationData({ params }: ShowPageProps) {
         message={event.message ?? ""}
         imageUrl={event.imageUrl ?? ""} backgroundImageUrl={event.backgroundImageUrl ?? ""}
         accent={event.accent}
-        texture={event.texture} templateId={event.templateId}
       typography={event.typography}
-        bodyTypography={event.bodyTypography} heroHorizontal={event.heroHorizontal} heroVertical={event.heroVertical} buttonAppearance={eventButtonAppearance(event)}
+        bodyTypography={event.bodyTypography}
         sections={sections}
-        full
       />
     </div>
     <footer className="show-preview-footer">{isPublished && event.slug ? <><Link href={invitationPath(event)!} target="_blank">Abrir invitación pública</Link><span>·</span><span>Comparte el enlace desde tu panel.</span></> : <><FiLock /> Esta página es privada y no tiene enlace para compartir. Publícala desde el editor cuando esté lista.</>}</footer>

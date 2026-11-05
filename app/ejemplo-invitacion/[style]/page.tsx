@@ -1,53 +1,28 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
-import { InvitationCanvas } from "@/components/dashboard/EventEditor";
-import { landingEventExamples, landingInvitationExample, landingInvitationStyles } from "@/lib/landing-invitation-example";
-import "./example.css";
-import { WeddingInvitation } from "@/components/invitation/WeddingInvitation";
-import { weddingDesignExamples, weddingExample } from "@/lib/wedding-design-examples";
+import { CelebrationInvitation } from "@/components/invitation/CelebrationInvitation";
+import { landingEventExamples } from "@/lib/landing-invitation-example";
+import { exampleWithImages } from "@/lib/invitation-example-images";
+import { getInvitationEventContent, invitationEventTypes } from "@/lib/invitation-event-content";
 
-export const metadata: Metadata = {
-  title: "Invitación de ejemplo | Cheetah Invite",
-  robots: { index: false, follow: false },
-};
+export const metadata: Metadata = { title: "Invitación de ejemplo | Cheetah Invite", robots: { index: false, follow: false } };
 
 export function generateStaticParams() {
-  return [...landingInvitationStyles, ...landingEventExamples, ...weddingDesignExamples].map(({ slug }) => ({ style: slug }));
+  return landingEventExamples.map(({ slug }) => ({ style: slug }));
 }
 
-type ExampleProps = {
-  params: Promise<{ style: string }>;
-  searchParams: Promise<{ vista?: string | string[]; paleta?: string | string[]; foto?: string | string[]; nombres?: string | string[] }>;
-};
-
-export default function InvitationExamplePage(props: ExampleProps) {
-  return <Suspense fallback={<p role="status">Preparando invitación de ejemplo…</p>}>
-    <InvitationExampleData {...props} />
-  </Suspense>;
+export default function InvitationExamplePage({ params }: { params: Promise<{ style: string }> }) {
+  return <Suspense fallback={<p role="status">Preparando invitación de ejemplo…</p>}><InvitationExampleData params={params} /></Suspense>;
 }
 
-async function InvitationExampleData({ params, searchParams }: ExampleProps) {
-  const [{ style }, query] = await Promise.all([params, searchParams]);
+async function InvitationExampleData({ params }: { params: Promise<{ style: string }> }) {
+  const { style } = await params;
+  const example = landingEventExamples.find(({ slug }) => slug === style);
+  if (example) return <main className="public-invitation-page"><CelebrationInvitation {...exampleWithImages(example)} /></main>;
+  const occasion = invitationEventTypes.find(type => getInvitationEventContent(type).slug === style);
+  if (occasion) redirect(`/ejemplo-invitacion/${landingEventExamples.find(item => item.invitation.eventType === occasion)!.slug}`);
   if (style.startsWith("cumpleanos-")) redirect("/ejemplo-invitacion/cumpleanos");
-  const wedding = weddingDesignExamples.find(({ slug }) => slug === style);
-  if (wedding) {
-    const requestedPalette = typeof query.paleta === "string" ? query.paleta.toLowerCase() : "";
-    const palette = wedding.design.palettes.find(p => p.accent.slice(1).toLowerCase() === requestedPalette) ?? wedding.design.palettes[0];
-    const names = typeof query.nombres === "string" ? query.nombres.slice(0, 100) : "";
-    return <main className="public-invitation-page invitation-example-page"><WeddingInvitation {...weddingExample} templateId={wedding.design.id} accent={palette.accent} imageUrl={query.foto === "no" ? "" : weddingExample.imageUrl} hostNames={names || weddingExample.hostNames} /></main>;
-  }
-  const example = landingInvitationStyles.find(({ slug }) => slug === style);
-  const eventExample = landingEventExamples.find(({ slug }) => slug === style);
-  if (!example && !eventExample) notFound();
-
-  const invitation = eventExample?.invitation ?? {
-    ...landingInvitationExample,
-    templateId: example!.template.id,
-    accent: example!.template.accent ?? "#E9560A",
-  };
-
-  return <main className={`public-invitation-page invitation-example-page${query.vista === "decoracion" ? " invitation-example-decoration" : ""}`}>
-    <InvitationCanvas {...invitation} />
-  </main>;
+  if (style.startsWith("boda-") || ["flores-blancas", "bugambilias", "flores-amarillas"].includes(style)) redirect("/ejemplo-invitacion/boda");
+  notFound();
 }

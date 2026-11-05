@@ -1,86 +1,57 @@
-/* eslint-disable @typescript-eslint/no-require-imports -- Node runner loads the TypeScript template catalog. */
+/* eslint-disable @typescript-eslint/no-require-imports -- Exercise compatibility through actual server actions. */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const ts = require('typescript');
-require.extensions['.ts'] = (mod, filename) => mod._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
-  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-}).outputText, filename);
-const { invitationTemplates, getInvitationTemplate, isInvitationTemplate, sectionDecoration } = require('../lib/invitation-templates.ts');
+const { createFixture } = require('./helpers/cloudinary-fixture.cjs');
+const { createPaymentFixture } = require('./helpers/payment-fixture.cjs');
 
-test('wedding retains eight collections and other occasions only offer the shared presentation', () => {
-  for (const eventType of ['wedding', 'birthday', 'graduation', 'baby_shower', 'anniversary']) {
-    assert.deepEqual(invitationTemplates.filter((t) => t.eventType === eventType && /^plantilla/.test(t.id)).map((t) => t.id), eventType === 'wedding' ? ['plantilla1', 'plantilla2', 'plantilla3', 'plantilla4', 'plantilla5', 'plantilla6', 'plantilla7', 'plantilla8'] : []);
-    if(eventType !== 'wedding') assert.deepEqual(invitationTemplates.filter(t => t.eventType === eventType).map(t => t.id), ['celebration-v1']);
-    assert.equal(isInvitationTemplate(eventType, 'none'), true);
+const birthdayIds = ['confetti', 'pastel', 'neon', 'disco', 'dinosaur', 'space', 'gamer', 'cowboy', 'elegant', 'cinema'].map(kind => `birthday-${kind}-v1`);
+const weddingIds = ['floral','editorial','minimal','garden','blossom','bougainvillea','sunlight','olive','mediterranean','art-deco','love-letter','starlight'].flatMap(kind => [`wedding-${kind}-v1`, `wedding-${kind}-v2`]);
+
+test('all occasions accept the shared presentation and only their own retired identities', () => {
+  const f = createFixture();
+  const { isInvitationTemplate } = f.load('lib/invitation-templates.ts');
+  for (const type of ['wedding', 'birthday', 'graduation', 'baby_shower', 'anniversary', 'other']) {
+    for (const id of ['none', 'celebration-v1']) assert.equal(isInvitationTemplate(type, id), true);
+    for (const id of birthdayIds) assert.equal(isInvitationTemplate(type, id), type === 'birthday', id);
+    for (const id of weddingIds) assert.equal(isInvitationTemplate(type, id), type === 'wedding', id);
+    for (const id of ['../plantilla1', 'birthday-unknown-v1', 'wedding-unknown-v1', 'plantilla9']) assert.equal(isInvitationTemplate(type, id), false);
+  }
+  assert.equal(isInvitationTemplate('unknown', 'celebration-v1'), false);
+});
+
+test('saving every retired identity adopts the shared presentation without losing content or fonts', async () => {
+  const f = createFixture();
+  const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
+  const section = { id: 'own', type: 'custom', title: 'Mi apartado', content: 'Mis palabras', detail: '', link: '', imageUrl: '', enabled: true };
+  for (const [eventType, ids] of [['wedding', [...weddingIds, ...Array.from({ length: 8 }, (_, i) => 'plantilla' + (i + 1))]], ['birthday', birthdayIds]]) {
+    for (const templateId of ids) {
+      const form = f.saveForm('', [section]);
+      for (const [key, value] of Object.entries({ eventType, templateId, texture: 'linen', hostNames: 'Alex', typography: 'fredoka', bodyTypography: 'manrope', accent: '#123456' })) form.set(key, value);
+      assert.equal((await f.actions.updateEvent('event', form)).ok, true, templateId);
+      const saved = f.state.events.get('event');
+      const opened = initialGuidedValues(saved);
+      for (const value of [saved, opened]) {
+        assert.equal(value.templateId, 'celebration-v1'); assert.equal(value.texture, 'none');
+        assert.equal(value.hostNames, 'Alex'); assert.equal(value.typography, 'fredoka'); assert.equal(value.bodyTypography, 'manrope');
+        assert.equal(value.accent, '#123456'); assert.equal(value.sections.find(s => s.id === 'own').content, 'Mis palabras');
+      }
+    }
   }
 });
 
-test('Bugambilias distributes numbered decorations and older templates retain their fallback', () => {
-  const template = getInvitationTemplate('wedding', 'plantilla3');
-  assert.equal(template.label, 'Bugambilias');
-  for (const [index, type] of ['program', 'music', 'story', 'dress_code'].entries()) {
-    assert.equal(sectionDecoration(template, type), `/plantillas/boda/plantilla3/decoration${index + 1}.png`);
-    assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', sectionDecoration(template, type))));
-  }
-  const original = getInvitationTemplate('wedding', 'plantilla1');
-  assert.equal(sectionDecoration(original, 'program'), sectionDecoration(original, 'music'));
-  assert.equal(sectionDecoration(original, 'story'), undefined);
-  assert.equal(sectionDecoration(null, 'music'), undefined);
-});
-test('every available decoration has a published resource; empty templates cannot be selected', () => {
-  for (const template of invitationTemplates) {
-    assert.equal(isInvitationTemplate(template.eventType, template.id), template.available);
-    for (const resource of Object.values(template.assets)) assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', resource)));
-  }
-  assert.equal(getInvitationTemplate('wedding', '../plantilla1'), null);
-  assert.equal(getInvitationTemplate('other', 'plantilla1'), null);
-  assert.equal(getInvitationTemplate('wedding', 'plantilla1').assets.topLeft, '/plantillas/boda/plantilla1/topLeft.png');
-});
-
-test('wedding template 2 resolves source filenames with spaces and its own palette', () => {
-  const template = getInvitationTemplate('wedding', 'plantilla2');
-  assert.ok(template);
-  assert.equal(template.accent, '#A83D68');
-  for (const slot of ['topLeft', 'topRight', 'bottomLeft', 'bottomRight', 'flower', 'decoration']) {
-    assert.ok(template.assets[slot], `Missing ${slot}`);
-    assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', template.assets[slot])));
-  }
-});
-
-
-test('yellow flowers template resolves all corners and its numbered ornaments', () => {
-  const template = getInvitationTemplate('wedding', 'plantilla4');
-  assert.ok(template);
-  assert.equal(template.label, 'Flores amarillas');
-  assert.equal(template.accent, '#9A7418');
-  for (const slot of ['topLeft', 'topRight', 'bottomLeft', 'bottomRight', 'separator', 'flower', 'decoration']) {
-    assert.ok(template.assets[slot], `Missing ${slot}`);
-    assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', template.assets[slot])));
-  }
-  assert.equal(template.decorations.length, 2);
-  for (const resource of template.decorations) assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', resource)));
-});
-
-
-test('white flowers template includes its corners, flower and five ornaments', () => {
-  const template = getInvitationTemplate('wedding', 'plantilla5');
-  assert.ok(template);
-  assert.equal(template.label, 'Flores blancas');
-  assert.equal(template.accent, '#8C7455');
-  for (const slot of ['topLeft', 'topRight', 'bottomLeft', 'bottomRight', 'flower', 'decoration']) {
-    assert.ok(template.assets[slot], `Missing ${slot}`);
-    assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', template.assets[slot])));
-  }
-  assert.equal(template.decorations.length, 5);
-  for (const resource of template.decorations) assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', resource)));
-});
-
-test('birthday identity can be saved only for birthdays and has usable example sections', () => {
-  const { birthdayConfettiId, birthdayConfettiExample } = require('../lib/birthday-designs.ts');
-  assert.equal(isInvitationTemplate('birthday', birthdayConfettiId), true);
-  assert.equal(isInvitationTemplate('wedding', birthdayConfettiId), false);
-  assert.equal(getInvitationTemplate('birthday', birthdayConfettiId).available, true);
-  assert.ok(birthdayConfettiExample.sections.some(s => s.type === 'rsvp' && s.rsvpMode === 'integrated'));
+test('legacy weddings must supply event facts before publication or checkout', async () => {
+  const f = createFixture();
+  const { eventPublicationIssues } = f.load('lib/guided-invitation.ts');
+  const event = f.state.events.get('event');
+  Object.assign(event, { eventType: 'wedding', templateId: 'wedding-floral-v1' });
+  assert.equal(eventPublicationIssues(event).length, 5);
+  assert.equal((await f.actions.publishEvent('event', 0)).code, 'validation');
+  Object.assign(event, { hostNames: 'Alex y Sam', eventDate: new Date('2027-01-15T12:00:00Z'), eventTime: '18:00', venue: 'Mi salón', address: 'Mi dirección' });
+  assert.deepEqual(eventPublicationIssues(event), []);
+  assert.equal((await f.actions.publishEvent('event', 0)).ok, true);
+  const payment = createPaymentFixture();
+  payment.addPurchase();
+  Object.assign(payment.events.get('event-fixture'), { templateId: 'wedding-floral-v1', hostNames: '' });
+  await assert.rejects(payment.checkout.prepareInvitationCheckout('event-fixture', payment.ownerId), /Complete the invitation/);
+  assert.equal(payment.calls.some(call => call[0] === 'create'), false);
 });

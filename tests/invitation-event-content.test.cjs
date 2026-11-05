@@ -7,14 +7,15 @@ require.extensions['.ts'] = (mod, filename) => mod._compile(ts.transpileModule(f
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText, filename);
 
-const { invitationEventTypes, getInvitationEventContent, makeEventExampleSection, eventExampleSections } = require('../lib/invitation-event-content.ts');
+const { invitationEventTypes, getInvitationEventContent, invitationPresentation, makeEventExampleSection, eventExampleSections } = require('../lib/invitation-event-content.ts');
 
 test('every supported occasion has distinct welcome, story and program copy', () => {
   assert.deepEqual(invitationEventTypes, ['wedding', 'birthday', 'graduation', 'baby_shower', 'anniversary', 'other']);
   const content = invitationEventTypes.map(getInvitationEventContent);
-  for (const field of ['heroKicker', 'heroIntro', 'message', 'welcomeTitle']) {
+  for (const field of ['message']) {
     assert.equal(new Set(content.map((item) => item[field])).size, 6, field);
   }
+  for (const field of ['welcomeTitle', 'caption', 'closingMessage']) assert.equal(new Set(invitationEventTypes.map(type => invitationPresentation(type)[field])).size, 6, field);
   for (const type of ['story', 'reception', 'program', 'parents', 'dress_code', 'gifts', 'rsvp', 'gallery', 'music', 'custom', 'ceremony']) {
     assert.equal(new Set(content.map((item) => item.sections[type].content)).size, 6, type);
     for (const occasion of invitationEventTypes) {

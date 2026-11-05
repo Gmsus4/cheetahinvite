@@ -1,35 +1,11 @@
-/* Visible by default, including before hydration or without JavaScript. */
+/* Content remains visible before hydration and without JavaScript. */
 @media (prefers-reduced-motion: no-preference) {
-  :is(.invite-website,.wedding-atmosphere) [data-invite-motion="pending"] { opacity: 0; }
-
-  .invite-website.invite-website.invite-website[data-button-shape] :is(.invite-static-link,.invite-hero-button) {
-    transition: filter .2s ease, translate .25s ease, box-shadow .25s ease;
-  }
-  .invite-website :is(.invite-static-link,.invite-hero-button):active { translate: 0 1px; }
-  .invite-website :is(.invite-static-link,.invite-hero-button) svg { transition: translate .25s ease; }
-  .invite-website .invite-gallery-tile img { transition: transform .65s cubic-bezier(.22,1,.36,1); }
-  .invite-website .invite-gallery-tile-open { transition: background .25s ease, scale .25s ease; }
-  .invite-website .invite-gallery-lightbox { animation: invite-dialog-in .2s ease-out; }
-  .invite-website .invite-gallery-lightbox-image { animation: invite-photo-in .3s cubic-bezier(.22,1,.36,1); }
-
-  @media (hover: hover) and (pointer: fine) {
-    .invite-website :is(.invite-static-link,.invite-hero-button):hover {
-      translate: 0 -2px;
-      box-shadow: 0 6px 18px #00000012;
-    }
-    .invite-website :is(.invite-static-link,.invite-hero-button):hover svg { translate: 0 2px; }
-    .invite-website .invite-gallery-tile:hover .invite-gallery-tile-open { scale: 1.06; }
-  }
+  .celebration-invitation [data-invite-motion="pending"] { opacity: 0; }
 }
-
-@keyframes invite-dialog-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes invite-photo-in { from { opacity: 0; scale: .98; } to { opacity: 1; scale: 1; } }
-
 @media (prefers-reduced-motion: reduce) {
-  html:has(.invite-website,.wedding-atmosphere) { scroll-behavior: auto; }
-  :is(.invite-website,.wedding-atmosphere) [data-invite-motion="pending"] { opacity: 1; }
+  html:has(.celebration-invitation) { scroll-behavior: auto; }
+  .celebration-invitation [data-invite-motion="pending"] { opacity: 1; }
 }
-
 @media print {
-  :is(.invite-website,.wedding-atmosphere) [data-invite-motion="pending"] { opacity: 1; }
+  .celebration-invitation [data-invite-motion="pending"] { opacity: 1; }
 }

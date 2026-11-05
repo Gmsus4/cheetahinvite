@@ -1,0 +1,204 @@
+/* Shared photographic presentation for every occasion. */
+.celebration-invitation {
+  --wa-ink: #fffaf2;
+  --wa-soft: #eee7dc;
+  --invite-accent: #eee7dc;
+  --invite-action: #fffaf2;
+  --invite-ink: #fffaf2;
+  --invite-muted: #eee7dc;
+  --invite-paper: var(--wa-base);
+  --invite-body-font: var(--wa-body);
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  width: 100%;
+  overflow: clip;
+  background: var(--wa-base);
+  color: var(--wa-ink);
+  font: 400 15px/1.85 var(--wa-body);
+  -webkit-font-smoothing: antialiased;
+}
+.celebration-invitation *, .celebration-invitation *::before, .celebration-invitation *::after { box-sizing: border-box; }
+.celebration-invitation :is(h1,h2,h3,p,figure) { margin: 0; }
+/* Override site-wide text fonts within the invitation only. */
+.celebration-invitation :is(p,blockquote,li,small,a,button,input,textarea,select,label,nav) { font-family: var(--wa-body); }
+.celebration-invitation :is(h1,h2,h3) { color: inherit; font-family: var(--wa-heading); font-weight: 400; text-wrap: balance; overflow-wrap: anywhere; }
+.celebration-invitation :is(a,button,input):focus-visible { outline: 2px solid #fffaf2; outline-offset: 5px; }
+.celebration-invitation a { color: inherit; }
+.celebration-invitation img { display: block; max-width: 100%; }
+/* A stable viewport height prevents the photo from reframing when mobile
+   browser controls appear at the end of the page. */
+.celebration-invitation .wa-backdrop { position: fixed; z-index: -1; inset: 0 0 auto; height: 100vh; height: 100lvh; pointer-events: none; background: var(--wa-base); }
+html:has(.celebration-invitation), body:has(.celebration-invitation) { overscroll-behavior-y: none; }
+.celebration-invitation .wa-backdrop-shade { position: absolute; inset: 0; background: linear-gradient(90deg,#0005,transparent 35%,transparent 65%,#0005), color-mix(in srgb,var(--wa-base) 32%,transparent); }
+.celebration-invitation[data-photo="false"] .wa-backdrop-shade { background: radial-gradient(ellipse at 15% 15%,color-mix(in srgb,var(--wa-tint) 50%,transparent),transparent 65%),radial-gradient(ellipse at 85% 85%,color-mix(in srgb,var(--wa-tint) 40%,transparent),transparent 60%); }
+.celebration-invitation .wa-column { position: relative; width: min(100% - 40px,560px); margin: 0 auto; padding: 64px 0 34px; }
+.celebration-invitation .wa-shell { position: relative; isolation: isolate; }
+.celebration-invitation .wa-shell > :last-child { margin-bottom: 0; }
+.celebration-invitation .wa-panel { position: relative; margin: 0 0 24px; padding: 44px 36px; border: 0; border-radius: 14px; background: var(--wa-base); text-align: center; box-shadow: 0 16px 48px #00000018; }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .celebration-invitation .wa-panel { background: color-mix(in srgb,var(--wa-base) 80%,transparent); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+}
+.celebration-invitation .wa-panel[data-surface="blur"] { background: var(--wa-base); }
+.celebration-invitation .wa-panel[data-surface="blur-color"] { background: var(--wa-base); }
+.celebration-invitation .wa-panel[data-surface="color"] { background: var(--wa-base); -webkit-backdrop-filter: none; backdrop-filter: none; }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .celebration-invitation .wa-panel[data-surface="blur"] { background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(16px) saturate(110%); backdrop-filter: blur(16px) saturate(110%); }
+  .celebration-invitation .wa-panel[data-surface="blur-color"] { background: linear-gradient(145deg,color-mix(in srgb,var(--wa-tint) 24%,transparent),transparent 70%),color-mix(in srgb,var(--wa-base) 76%,transparent); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); }
+}
+.celebration-invitation .wa-kicker { display: block; color: var(--wa-soft); font: 500 10px/1.7 var(--wa-body); letter-spacing: .24em; text-transform: uppercase; }
+.celebration-invitation .wa-cover { padding: 30px 16px 16px; margin-bottom: 24px; overflow: hidden; border: 0; border-radius: 18px; background: var(--wa-base); text-align: center; box-shadow: 0 20px 64px #00000020; }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .celebration-invitation .wa-cover { background: linear-gradient(140deg,#fffaf21a,transparent 65%),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+}
+.celebration-invitation .wa-cover-heading { padding: 0 12px 28px; }
+.celebration-invitation .wa-cover h1 { margin: 20px auto 14px; font-size: clamp(44px,6vw,72px); line-height: 1.15; letter-spacing: -.035em; }
+.celebration-invitation .wa-ampersand { display: inline-block; margin: 0 .22em; font-family: 'Alex Brush',cursive; font-size: .7em; }
+.celebration-invitation[data-long-names] .wa-cover h1 { font-size: clamp(35px,5vw,57px); }
+.celebration-invitation .wa-date { color: var(--wa-soft); font-size: 12px; letter-spacing: .025em; }
+.celebration-invitation .wa-portrait { overflow: hidden; border-radius: 13px; }
+.celebration-invitation .wa-portrait img { width: 100%; height: auto; aspect-ratio: 9/10; object-fit: cover; object-position: center 42%; }
+.celebration-invitation .wa-no-photo { display: flex; min-height: 300px; padding: 28px; flex-direction: column; justify-content: center; align-items: center; gap: 22px; background: linear-gradient(145deg,#fffaf20c,transparent); border: 0; border-radius: 13px; }
+.celebration-invitation .wa-no-photo > span { font: 400 clamp(50px,12vw,84px)/1.1 var(--wa-heading); }
+.celebration-invitation .wa-no-photo > i { font: 400 28px/1.3 'Alex Brush',cursive; }
+.celebration-invitation .wa-countdown { padding: 26px 28px; }
+.celebration-invitation .invite-countdown-clock { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin: 20px 0 2px; }
+.celebration-invitation .invite-countdown-unit { display: flex; flex-direction: column; gap: 4px; }
+.celebration-invitation .invite-countdown-unit strong { font: 400 36px/1 var(--wa-heading); font-variant-numeric: tabular-nums; }
+.celebration-invitation .invite-countdown-unit span { color: var(--wa-soft); font-size: 10px; }
+.celebration-invitation .invite-countdown-started { margin-top: 14px; }
+.celebration-invitation h2 { margin: 0 auto 22px; font-size: clamp(31px,4vw,40px); line-height: 1.2; letter-spacing: -.02em; }
+.celebration-invitation h2 em { font-weight: 400; }
+.celebration-invitation p { white-space: pre-line; overflow-wrap: anywhere; }
+.celebration-invitation .wa-panel > p { color: var(--wa-soft); font-size: 16px; }
+.celebration-invitation .wa-panel > p + p { margin-top: 10px; }
+.celebration-invitation h3 { margin: 0 auto 14px; font-size: 27px; line-height: 1.3; }
+.celebration-invitation .wa-section-icon { display: block; width: 44px; height: 44px; margin: 0 auto 22px; stroke-width: 1; }
+.celebration-invitation .wa-button { display: inline-flex; min-height: 44px; max-width: 100%; align-items: center; justify-content: center; gap: 15px; margin: 24px auto 0; padding: 10px 24px; border: 1px solid #fffaf245; border-radius: 999px; background: #fffaf21a; color: var(--wa-ink); font: 500 12px/1.6 var(--wa-body); text-decoration: none; transition: background .2s; }
+.celebration-invitation .wa-button:hover { background: #fffaf230; }
+.celebration-invitation .wa-button svg { flex: 0 0 15px; width: 15px; height: 15px; }
+.celebration-invitation .wa-panel > .wa-detail { margin: -6px 0 20px; font-size: 16px; letter-spacing: .02em; }
+.celebration-invitation .wa-timeline { padding: 0; margin: 0; list-style: none; text-align: left; }
+.celebration-invitation .wa-timeline li { display: flex; gap: 24px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid #fffaf21c; }
+.celebration-invitation .wa-timeline li:last-child { border: 0; padding-bottom: 0; }
+.celebration-invitation .wa-timeline-time { flex: 0 0 68px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.celebration-invitation .wa-timeline li > span:last-child { min-width: 0; overflow-wrap: anywhere; color: var(--wa-soft); font-size: 14px; }
+.celebration-invitation .wa-photo-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 24px -20px -20px; }
+.celebration-invitation .wa-photo-grid figure { display: block; overflow: hidden; border-radius: 10px; }
+.celebration-invitation .wa-photo-grid figure:first-child { grid-column: 1/-1; }
+.celebration-invitation .wa-photo-grid img { width: 100%; height: auto; aspect-ratio: 4/5; object-fit: cover; }
+.celebration-invitation .wa-photo-grid figure:first-child img { aspect-ratio: 5/4; }
+.celebration-invitation .wa-section-row { margin-bottom: 24px; }
+.celebration-invitation .wa-section-row > .wa-panel { margin-bottom: 0; }
+.celebration-invitation .wa-section-media { min-width: 0; display: grid; gap: 14px; }
+.celebration-invitation .wa-section-media .wa-photo-carousel { margin-top: 0; }
+.celebration-invitation .wa-section-media .wa-photo-grid { margin: 0; }
+.celebration-invitation .wa-section-row[data-has-media="true"] > :first-child { margin-bottom: 16px; }
+.celebration-invitation .wa-section-photo { position: relative; width: 100%; margin: 0; overflow: hidden; border: 0; border-radius: 14px; aspect-ratio: 3/2; box-shadow: none; }
+.celebration-invitation .wa-section-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; }
+.celebration-invitation .wa-section.wa-gallery { display: block; padding: 32px 14px 14px; }
+.celebration-invitation .wa-section.wa-gallery > h2 { margin: 0 12px 18px; text-align: center; }
+.celebration-invitation .wa-section.wa-gallery > p { margin-inline: 18px; }
+.celebration-invitation .wa-photo-carousel { position: relative; width: 100%; min-width: 0; margin: 24px 0 0; }
+.celebration-invitation .wa-carousel-viewport { position: relative; width: 100%; aspect-ratio: 3/2; overflow: hidden; border-radius: 12px; background: #00000026; touch-action: pan-y pinch-zoom; }
+.celebration-invitation .wa-carousel-track { position: absolute; inset: 0; display: flex; transition: transform .45s cubic-bezier(.22,.61,.36,1); }
+.celebration-invitation .wa-carousel-slide { flex: 0 0 100%; min-width: 0; height: 100%; }
+.celebration-invitation .wa-carousel-slide img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; user-select: none; }
+.celebration-invitation .wa-carousel-controls { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 12px; pointer-events: none; }
+.celebration-invitation .wa-carousel-controls button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid #fffaf24d; border-radius: 50%; background: #171a16a6; color: #fffaf2; cursor: pointer; pointer-events: auto; transition: background .2s; }
+.celebration-invitation .wa-carousel-controls button:hover { background: #171a16e6; }
+.celebration-invitation .wa-carousel-controls svg { width: 18px; height: 18px; }
+.celebration-invitation .wa-carousel-counter { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); min-width: 54px; padding: 4px 12px; border-radius: 999px; background: #171a16a6; color: #fffaf2; font-size: 11px; font-variant-numeric: tabular-nums; letter-spacing: .12em; }
+.celebration-invitation .wa-carousel-dots { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 3px; margin-top: 10px; }
+.celebration-invitation .wa-carousel-dots button { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; }
+.celebration-invitation .wa-carousel-dots span { width: 5px; height: 5px; border-radius: 50%; background: #fffaf25c; transition: background .2s,transform .2s; }
+.celebration-invitation .wa-carousel-dots [aria-current="true"] span { width: 16px; border-radius: 4px; background: var(--wa-ink); }
+.celebration-invitation .wa-carousel-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.celebration-invitation .wa-footer { padding: 48px 20px 10px; text-align: center; text-shadow: 0 2px 20px #0009; }
+.celebration-invitation .wa-footer strong { display: block; margin: 16px 0; font: 400 38px/1.3 var(--wa-heading); overflow-wrap: anywhere; }
+.celebration-invitation .wa-footer p { font-size: 12px; }
+.celebration-invitation .wa-footer small { display: block; margin-top: 34px; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; }
+.celebration-invitation .invite-rsvp-form { --rsvp-border: #fffaf240; --rsvp-tint: #fffaf215; width: 100%; margin: 26px 0 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--wa-ink); box-shadow: none; font-size: 13px; }
+.celebration-invitation .invite-rsvp-form :is(input,.invite-rsvp-button,.invite-rsvp-companions,.invite-rsvp-counter button) { border-color: #fffaf240; background: #00000020; color: var(--wa-ink); }
+.celebration-invitation .invite-rsvp-form input::placeholder { color: #eee7dcb3; }
+.celebration-invitation .invite-rsvp-form :is(.invite-rsvp-submit,.invite-rsvp-choice[aria-pressed="true"]) { background: var(--wa-ink); color: var(--wa-base); border-color: var(--wa-ink); }
+.celebration-invitation .invite-rsvp-choice[aria-pressed="true"] .invite-rsvp-choice-icon { background: var(--wa-base); color: var(--wa-ink); }
+.celebration-invitation .invite-rsvp-form :is(.invite-rsvp-note,small,.invite-rsvp-total,.invite-rsvp-companions-copy small,.invite-rsvp-companions-heading small) { color: var(--wa-soft); }
+.celebration-invitation .invite-rsvp-form :is(.invite-rsvp-error,.invite-rsvp-success) { border: 1px solid #fffaf240; background: #0003; color: var(--wa-ink); }
+@media(max-width:600px) {
+  .celebration-invitation .wa-column { width: calc(100% - 24px); padding-top: 20px; }
+  .celebration-invitation .wa-panel { padding: 34px 25px; margin-bottom: 14px; border-radius: 18px; }
+  .celebration-invitation .wa-cover { padding: 26px 12px 12px; }
+  .celebration-invitation .wa-cover h1 { font-size: 54px; }
+  .celebration-invitation[data-long-names] .wa-cover h1 { font-size: 41px; }
+  .celebration-invitation .wa-ampersand { margin-inline: .16em; }
+  .celebration-invitation .wa-date { font-size: 11px; }
+  .celebration-invitation .wa-countdown { padding: 24px 16px; }
+  .celebration-invitation .invite-countdown-unit strong { font-size: 31px; }
+  .celebration-invitation .wa-photo-grid { margin-inline: -13px; margin-bottom: -22px; gap: 9px; }
+  .celebration-invitation .wa-section-row { margin-bottom: 14px; }
+  .celebration-invitation .wa-section-row > .wa-panel { margin-bottom: 0; }
+  .celebration-invitation .wa-section-photo { border-radius: 14px; }
+  .celebration-invitation .wa-section-media .wa-photo-grid { margin: 0; }
+}
+@media(min-width:960px) {
+  .celebration-invitation .wa-column { width: min(100% - 96px,1080px); padding-top: 64px; }
+  .celebration-invitation .wa-portrait { position: relative; align-self: stretch; min-height: clamp(360px,38vw,560px); border-radius: 14px; }
+  .celebration-invitation .wa-portrait img { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; }
+  .celebration-invitation .wa-intro { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.05fr); grid-template-rows: repeat(2,auto); align-items: center; gap: 32px 36px; padding: 24px; margin-bottom: 40px; border-radius: 18px; background: var(--wa-base); box-shadow: 0 20px 64px #00000020; }
+  .celebration-invitation .wa-intro > .wa-cover { display: contents; text-align: left; }
+  .celebration-invitation .wa-intro .wa-cover-heading { grid-column: 1; grid-row: 1; align-self: end; min-width: 0; padding: 20px 24px 0; }
+  .celebration-invitation .wa-intro .wa-cover-heading h1 { margin: 24px 0; font-size: clamp(60px,5.8vw,82px); line-height: 1.02; }
+  .celebration-invitation[data-long-names] .wa-intro .wa-cover-heading h1 { font-size: clamp(42px,4.6vw,64px); }
+  .celebration-invitation .wa-intro .wa-couple-name { display: block; }
+  .celebration-invitation .wa-intro .wa-ampersand { display: block; margin: 6px 0; font-size: .42em; line-height: 1; opacity: .65; }
+  .celebration-invitation .wa-intro .wa-date { font-size: 14px; line-height: 1.7; }
+  .celebration-invitation .wa-intro :is(.wa-portrait,.wa-no-photo) { grid-column: 2; grid-row: 1 / span 2; min-width: 0; }
+  .celebration-invitation .wa-intro > .wa-panel.wa-countdown { grid-column: 1; grid-row: 2; align-self: start; min-width: 0; margin: 0; padding: 0 24px 20px; border: 0; border-radius: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; text-align: left; }
+  .celebration-invitation .wa-intro .wa-countdown > .wa-kicker { font-size: 9px; letter-spacing: .18em; opacity: .7; }
+  .celebration-invitation .wa-intro .invite-countdown-clock { gap: 16px; margin-top: 16px; }
+  .celebration-invitation .wa-intro .invite-countdown-unit { gap: 8px; }
+  .celebration-invitation .wa-intro .invite-countdown-unit strong { font: 400 clamp(26px,2.5vw,34px)/1 var(--wa-body); font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+  .celebration-invitation .wa-intro .invite-countdown-unit span { font-size: 9px; letter-spacing: .1em; }
+  .celebration-invitation .wa-intro:not(:has(> .wa-countdown)) .wa-cover-heading { grid-row: 1 / span 2; align-self: center; padding-bottom: 20px; }
+  .celebration-invitation .wa-welcome { display: none; }
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .celebration-invitation .wa-intro { background: linear-gradient(140deg,#fffaf21a,transparent 65%),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+  }
+  .celebration-invitation .wa-section-row { margin-bottom: 40px; }
+  .celebration-invitation .wa-section-row[data-has-media="true"] { position: relative; isolation: isolate; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: center; gap: 28px; padding: 24px; }
+  .celebration-invitation .wa-section-row[data-has-media="true"]::before { content: ""; position: absolute; z-index: -1; inset: 0; border: 0; border-radius: 18px; background: var(--wa-base); box-shadow: 0 16px 48px #00000018; pointer-events: none; }
+  .celebration-invitation .wa-section-row[data-has-media="true"] > :first-child { margin-bottom: 0; }
+  .celebration-invitation .wa-section-row:nth-child(odd of .wa-section-row[data-has-media="true"]:not([data-section-type="gallery"])) { --wa-media-column: 1; --wa-copy-column: 2; --wa-copy-align: left; --wa-copy-justify: flex-start; --wa-icon-left: 0; --wa-icon-right: auto; }
+  .celebration-invitation .wa-section-row:nth-child(even of .wa-section-row[data-has-media="true"]:not([data-section-type="gallery"])) { --wa-media-column: 2; --wa-copy-column: 1; --wa-copy-align: right; --wa-copy-justify: flex-end; --wa-icon-left: auto; --wa-icon-right: 0; }
+  .celebration-invitation .wa-section-row[data-has-media="true"] > .wa-section-media { grid-column: var(--wa-media-column); grid-row: 1; }
+  .celebration-invitation .wa-section-row[data-has-media="true"] > .wa-panel { grid-column: var(--wa-copy-column); grid-row: 1; text-align: var(--wa-copy-align); }
+  .celebration-invitation .wa-section-row[data-has-media="true"] > .wa-panel > h2,
+  .celebration-invitation .wa-section-row[data-has-media="true"] .wa-timeline { text-align: var(--wa-copy-align); }
+  .celebration-invitation .wa-section-row[data-has-media="true"] .wa-section-icon { margin-left: var(--wa-icon-left); margin-right: var(--wa-icon-right); }
+  .celebration-invitation .wa-section-row[data-has-media="true"] .wa-timeline li { justify-content: var(--wa-copy-justify); }
+  .celebration-invitation .wa-section-row[data-has-media="true"] > .wa-panel { padding: 24px 16px; border: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .celebration-invitation .wa-section-media { align-self: stretch; padding: 0; }
+  .celebration-invitation .wa-section-photo { min-height: clamp(320px,30vw,420px); aspect-ratio: auto; border-radius: 14px; }
+  .celebration-invitation .wa-section-photo img { position: absolute; inset: 0; }
+  .celebration-invitation .wa-section-media .wa-photo-carousel { display: grid; grid-template-rows: minmax(0,1fr) auto; }
+  .celebration-invitation .wa-section-media .wa-carousel-viewport { min-height: clamp(320px,30vw,420px); aspect-ratio: auto; }
+  .celebration-invitation .wa-section-media .wa-photo-grid figure { position: relative; min-height: 240px; }
+  .celebration-invitation .wa-section-media .wa-photo-grid img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; }
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .celebration-invitation .wa-section-row[data-has-media="true"]:has(> .wa-panel[data-surface="blur"])::before { background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(16px) saturate(110%); backdrop-filter: blur(16px) saturate(110%); }
+    .celebration-invitation .wa-section-row[data-has-media="true"]:has(> .wa-panel[data-surface="blur-color"])::before { background: linear-gradient(145deg,color-mix(in srgb,var(--wa-tint) 24%,transparent),transparent 70%),color-mix(in srgb,var(--wa-base) 76%,transparent); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); }
+  }
+  .celebration-invitation .wa-section.wa-gallery { padding: 48px 32px; }
+  .celebration-invitation .wa-section-row[data-section-type="gallery"] { --wa-copy-align: center; grid-template-columns: minmax(0,1fr); }
+  .celebration-invitation .wa-section-row[data-section-type="gallery"] > .wa-panel { grid-column: 1; grid-row: 1; padding: 16px 24px 0; text-align: center; }
+  .celebration-invitation .wa-section-row[data-section-type="gallery"] > .wa-section-media { grid-column: 1; grid-row: 2; }
+  .celebration-invitation .wa-section-row[data-section-type="gallery"] .wa-carousel-viewport { min-height: 0; aspect-ratio: 3/2; }
+}
+@media(prefers-reduced-motion:reduce) { .celebration-invitation :is(.wa-button,.wa-carousel-track,.wa-carousel-controls button,.wa-carousel-dots span) { transition: none; } }
+
+.celebration-invitation .wa-backdrop-image { position: absolute; inset: 0; }
+.celebration-invitation .wa-backdrop-image img { object-fit: cover; object-position: center; }
+
+.celebration-invitation .wa-panel { isolation: isolate; }
+.celebration-invitation .wa-cover-heading { position: relative; isolation: isolate; }

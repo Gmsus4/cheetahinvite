@@ -4,7 +4,7 @@ import { eventPublicationIssues } from "@/lib/guided-invitation";
 import type { EditorSaveResult } from "@/lib/invitation-editor";
 import { invitationSectionUrl } from "@/lib/invitation-links";
 import { parseButtonAppearance } from "@/lib/invitation-buttons";
-import { getWeddingDesign, orderedWeddingSections, weddingPalette } from "@/lib/wedding-designs";
+import { orderedInvitationSections } from "@/lib/invitation-sections";
 import type { InviteSection } from "@/lib/invitation-editor";
 
 import { auth } from "@/auth";
@@ -15,7 +15,7 @@ import { isInvitationFont } from "@/lib/invitation-fonts";
 import { isValidInvitationSlug, normalizeInvitationSlug } from "@/lib/invitation-url";
 import { isInvitationTemplate } from "@/lib/invitation-templates";
 import { isInvitationTexture } from "@/lib/invitation-textures";
-import { sharedInvitationId, sharedInvitationDesign } from "@/lib/shared-invitation";
+import { sharedInvitationId, sharedInvitationDesign, invitationPalette } from "@/lib/shared-invitation";
 import { ImageStorageError, queueEventImages, scheduleCloudinaryCleanup, syncCloudinaryImages, withImageLock } from "@/lib/cloudinary-storage";
 
 export async function deleteEvent(eventId: string) {
@@ -164,15 +164,16 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     const duplicate = await prisma.event.findFirst({ where: { ownerId: session.user.id, customSlug, id: { not: eventId } }, select: { id: true } });
     if (duplicate) return failure("validation", "Ya tienes otra invitación con ese enlace. Elige otro nombre.");
   }
-  const design = templateId === sharedInvitationId || eventType !== "wedding" ? sharedInvitationDesign : getWeddingDesign(templateId);
-  const orderedSections = orderedWeddingSections(sections as InviteSection[]);
-  const curated = design ? {
-    accent: weddingPalette(design, accent).accent, typography, bodyTypography,
+  const design = sharedInvitationDesign;
+  const orderedSections = orderedInvitationSections(sections as InviteSection[]);
+  const curated = {
+    templateId: sharedInvitationId,
+    accent: invitationPalette(accent).accent, typography, bodyTypography,
     texture: "none", heroHorizontal: "center", heroVertical: "center",
     buttonShape: design.buttons.shape, buttonFilled: design.buttons.filled, buttonIcons: design.buttons.icons,
     buttonBorder: design.buttons.border, buttonBold: design.buttons.bold,
-    sections: [...orderedSections, ...(sections as InviteSection[]).filter(section => !orderedSections.includes(section))].map(section => ({ ...section, layout: "auto" as const })),
-  } : {};
+    sections: orderedSections.map(section => ({ ...section, layout: "auto" as const })),
+  };
   try {
     const result = await withImageLock(session.user.id, async tx => {
       const previous = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, contentVersion: true, status: true, paidAt: true } });
@@ -183,7 +184,7 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
       }
       const changed = await tx.event.updateMany({
         where: { id: eventId, ownerId: session.user.id, contentVersion: version, ...(automatic ? { paidAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] } } : {}) },
-        data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, ...(hasBackgroundImage ? { backgroundImageUrl: backgroundImageUrl || null } : {}), accent, typography, bodyTypography, heroHorizontal, heroVertical, buttonShape: buttonAppearance.shape, buttonFilled: buttonAppearance.filled, buttonIcons: buttonAppearance.icons, buttonBorder: buttonAppearance.border, buttonBold: buttonAppearance.bold, templateId, texture, sections, ...curated, contentVersion: { increment: 1 }, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
+        data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, ...(hasBackgroundImage ? { backgroundImageUrl: backgroundImageUrl || null } : {}), ...curated, contentVersion: { increment: 1 }, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
       });
       if (!changed.count) {
         const latest = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { contentVersion: true, paidAt: true, status: true } });

@@ -6,7 +6,6 @@ import {
 } from "react-icons/fi";
 import { HeroInvitationExamples } from "./HeroInvitationExamples";
 import { landingEventExamples } from "@/lib/landing-invitation-example";
-import { weddingDesigns } from "@/lib/wedding-designs";
 
 export function Hero() {
   return (
@@ -29,7 +28,7 @@ export function Hero() {
             Crea tu invitación <span><FiArrowUpRight aria-hidden="true" /></span>
           </a>
           <a className="text-link" href="#personalizacion">
-            Explorar estilos <span><FiChevronDown aria-hidden="true" /></span>
+            Ver ejemplos <span><FiChevronDown aria-hidden="true" /></span>
           </a>
         </div>
       </div>
@@ -40,15 +39,13 @@ export function Hero() {
           <span><FiStar aria-hidden="true" /></span> Tu historia, tu estilo
         </div>
         <HeroInvitationExamples
-          examples={landingEventExamples.map(({ slug, label, available }) => ({ slug, label, available }))}
-          weddingDesigns={weddingDesigns.map(({ kind, label }) => ({ slug: `boda-${kind}`, label }))}
-          birthdayDesigns={[]}
+          examples={landingEventExamples.map(({ slug, label, typeLabel, invitation, available }) => ({ slug, label, typeLabel, eventType: invitation.eventType, available }))}
         />
         <div className="floating-note note-bottom">
           <span className="note-check"><FiEdit3 aria-hidden="true" /></span>
           <span>
             <b>A tu estilo</b>
-            <small>Datos, fotos y decoración</small>
+            <small>Datos, fotos y colores</small>
           </span>
         </div>
         <div className="art-spark spark-one"><FiStar aria-hidden="true" /></div>

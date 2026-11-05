@@ -1,65 +1,52 @@
-## Contexto de los diseños de invitaciones
+# Cheetah Invite
 
-La colección de bodas y cumpleaños, los recursos entregados, las decisiones visuales y la guía para continuar están en [README-DISENOS.md](README-DISENOS.md).
+Invitaciones digitales para bodas, cumpleaños, graduaciones, baby showers, aniversarios y otros eventos. Todas utilizan una presentación fotográfica común, personalizada con los datos, las fotos, los colores y las fuentes del organizador.
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Desarrollo
 
-La operación de compras con Stripe, historial independiente, reembolsos y disputas
-se documenta en [docs/stripe.md](docs/stripe.md) y [docs/support-operations.md](docs/support-operations.md).
+```sh
+npm ci
+```
 
-La confirmación opcional de asistencia con enlace general, hasta cinco acompañantes
-extra y panel privado del organizador se documenta en [docs/rsvp.md](docs/rsvp.md).
+Copia `.env.example` a `.env` y configura PostgreSQL, autenticación y los servicios que vayas a utilizar. Aplica las migraciones antes de iniciar:
 
-## Getting Started
-
-First, run the development server:
-
-```bash
+```sh
+npx prisma migrate deploy
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`predev` y `prebuild` generan el cliente de Prisma. El proyecto no necesita sincronizar recursos de plantillas.
 
-## Image uploads
+## Verificación
 
-Event cover photos, section photos, and gallery images upload directly from the browser to Cloudinary. The server authorizes a reserved upload and verifies it with Cloudinary before accepting its URL; image bytes never pass through a Vercel Function. Add these values to `.env`:
-
-```env
-CLOUDINARY_CLOUD_NAME="..."
-CLOUDINARY_API_KEY="..."
-CLOUDINARY_API_SECRET="..."
-CLOUDINARY_UPLOAD_PRESET="..."
+```sh
+npm run lint
+npm test
+npm run build
+npm run typecheck
 ```
 
-Create a **signed** upload preset in the Cloudinary console and restrict it to JPG, PNG, WebP, and AVIF images. Disable unsigned upload presets for this application. The **5 MB** limit is checked in the browser, enforced by a signed image-validation rule in Cloudinary (`eval`), and checked again through the Admin API before confirmation. Cloudinary presets do not support a per-preset file-size limit. Keep the API secret server-side; never add it to a `NEXT_PUBLIC_` variable. Each gallery supports up to 12 photos. Uploaded images are delivered with automatic format and quality selection.
+Las pruebas unitarias utilizan servicios aislados. Las integraciones `tests/*.postgres.cjs` y `tests/cloudinary-direct.integration.cjs` requieren la configuración indicada en sus archivos y en la documentación del servicio.
 
-Server-enforced budgets, asset tracking, and retryable cleanup require the database migration and scheduler described in [Cloudinary storage](docs/cloudinary-storage.md). Limits are centralized in `lib/limits.ts`: 20 upload attempts/hour and 60/day per account, with 40 retained files and 100 MB per event. Pending uploads and deletions count toward storage until cleanup succeeds.
+## Arquitectura
 
-## Editor recovery
+- `components/dashboard/GuidedInvitationEditor.tsx`: asistente común de creación y edición.
+- `components/invitation/CelebrationInvitation.tsx`: presentación compartida por ejemplos, vista previa, vista privada e invitación pública.
+- `lib/shared-invitation.ts`: apariencia y paletas del diseño base.
+- `lib/invitation-event-presets.ts`: textos iniciales editables por ocasión, sin datos personales ficticios.
+- `lib/invitation-editor.ts`: tipos, serialización y recuperación de borradores.
+- `lib/invitation-templates.ts`: validación mínima de identificadores anteriores. Al guardar se normalizan al diseño actual.
+- `public/demo/`: fotografías de los ejemplos públicos. Las fotografías del organizador se alojan en Cloudinary.
 
-Unpaid drafts autosave after 1.5 seconds. Published invitations keep local changes until the owner explicitly saves. Device backups, creation recovery, conflict detection and verification are described in [Editor protection](docs/editor-protection.md). Apply the editor-version migration before deploying.
+Se retiraron las colecciones temáticas, sus imágenes, los editores y selectores antiguos y el proceso de copia de recursos. El historial de Git conserva las versiones anteriores. Las migraciones de Prisma se mantienen para poder actualizar bases de datos existentes.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Documentación
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [Presentación común](docs/shared-invitation.md) y [asistente de edición](docs/guided-invitation.md).
+- [Guardado y recuperación](docs/editor-protection.md).
+- [Fotografías y limpieza de Cloudinary](docs/cloudinary-storage.md).
+- [Pagos con Stripe](docs/stripe.md) y [operación de soporte](docs/support-operations.md).
+- [Confirmación de asistencia](docs/rsvp.md).
+- [Recuperación de contraseña](docs/password-recovery.md) y [operación legal y comercial](docs/legal-commercial.md).
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Las fotografías de los seis ejemplos públicos (uno por tipo de evento) se agregan manualmente siguiendo [readme.me](readme.me). Todos utilizan el diseño base compartido.

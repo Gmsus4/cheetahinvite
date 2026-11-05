@@ -10,7 +10,7 @@ let paymentId, eventId;
 (async () => {
   try {
     await prisma.user.create({ data: { id: ownerId, name: 'Payment integration fixture', invitationCount: 1 } });
-    eventId = (await prisma.event.create({ data: { ownerId, name: 'Payment fixture', eventType: 'wedding' } })).id;
+    eventId = (await prisma.event.create({ data: { ...f.eventDetails, ownerId, name: 'Payment fixture' } })).id;
     const urls = await Promise.all([f.checkout.prepareInvitationCheckout(eventId, ownerId), f.checkout.prepareInvitationCheckout(eventId, ownerId)]);
     assert.equal(urls[0], urls[1]);
     const payments = await prisma.invitationPayment.findMany({ where: { ownerId } });

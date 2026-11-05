@@ -12,41 +12,22 @@
 .dashboard-account-panel svg { width: 18px; height: 18px; flex-shrink: 0; color: #e9560a; }
 .dashboard-account-panel .dashboard-account-signout { margin-top: 6px; border-top: 1px solid #edf0f4; color: #b42318; }
 .dashboard-account-panel .dashboard-account-signout svg { order: -1; color: currentColor; }
-.account-settings-details { margin: 0; display: grid; gap: 6px; font-size: 14px; }.account-settings-details dt { color: #667080; }.account-settings-details dd { margin: 0 0 12px; overflow-wrap: anywhere; }
-.purchase-history :is(button, a, summary) { cursor: pointer; }
-.purchase-history.purchase-history .button { border: 1px solid transparent; border-radius: 12px; }
-.purchase-history.purchase-history .purchase-history-action { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 42px; max-width: 100%; padding: 10px 16px; border: 1px solid #dce1e8; border-radius: 12px; background: #fff; color: #26364a; font: 500 13px/1.5 Arial, sans-serif; text-align: center; text-decoration: none; transition: border-color .2s, background-color .2s, color .2s; }
-.purchase-history.purchase-history .purchase-history-action:hover { border-color: #e9560a; background: #fff6f0; color: #c94708; transform: none; }
-.purchase-history :is(a, button, summary):focus-visible { outline: 2px solid #e9560a; outline-offset: 3px; }
-.purchase-history .purchase-history-action > svg { width: 18px; height: 18px; flex-shrink: 0; }
-.purchase-history button:disabled { cursor: not-allowed; opacity: .6; }
-.editor-purchase-access { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin: 20px 0; padding: 18px; border: 1px solid #e3e7ec; border-radius: 12px; background: #f8f9fb; }
-.editor-purchase-access strong { color: #0b1320; font-size: 14px; }
-.editor-purchase-access p { margin: 6px 0; color: #596575; font-size: 12px; line-height: 1.7; }
-.editor-purchase-access small { color: #596575; font-size: 11px; overflow-wrap: anywhere; }
-.editor-purchase-access > div { min-width: 0; }
-.editor-page .editor-purchase-access .button { min-height: 42px; padding: 10px 16px; border: 1px solid #dce1e8; background: #fff; color: #26364a; font-size: 12px; font-weight: 500; }
-.editor-page .editor-purchase-access .button:hover { border-color: #e9560a; background: #fff6f0; color: #c94708; transform: none; }
 .dashboard-page.dashboard-page :is(button, .button, .dashboard-event-actions > a, .dashboard-skip-link),
-.editor-page.editor-page :is(button, .button, .image-upload-button, .editor-public-invitation):not(:where(.invite-website *, .invitation-preview *)),
 .create-event-page.create-event-page :is(button, .button),
 .invitation-delete-modal.invitation-delete-modal button,
-.editor-expanded-preview-header.editor-expanded-preview-header button,
-.invitation-payment-card.invitation-payment-card .button {
+.editor-expanded-preview-header.editor-expanded-preview-header button {
   border-radius: 12px;
 }
 
 /* Keep control icons readable and independent of text size or flex pressure. */
-.editor-page.editor-page :is(.button, .editor-back, .editor-public-invitation, .editor-open-preview, .onboarding-back, .onboarding-preview-toggle):not(:where(.invite-website *, .invitation-preview *)),
-.invitation-payment-card :is(.button, .editor-back, .purchase-help-link),
+
 .login-page :is(.login-submit, .login-back),
 .support-request .button {
   display: inline-flex;
   align-items: center;
   column-gap: 10px;
 }
-.editor-page.editor-page :is(.button, .editor-back, .editor-public-invitation, .editor-open-preview, .onboarding-back, .onboarding-preview-toggle):not(:where(.invite-website *, .invitation-preview *)) > svg,
-.invitation-payment-card :is(.button, .editor-back, .purchase-help-link) > svg,
+
 .login-page :is(.login-submit, .login-back) > svg,
 .support-request .button > svg {
   width: 18px;
@@ -54,16 +35,13 @@
   min-width: 18px;
   flex-shrink: 0;
 }
-.dashboard-page .dashboard-event-actions :is(a, button) { column-gap: 8px; }
-.dashboard-page .dashboard-event-actions :is(a, button) > svg { width: 18px; height: 18px; min-width: 18px; flex-shrink: 0; }
-.editor-save-help{margin:0 0 16px;color:#657184;font-size:12px;line-height:1.6}
-.editor-recovery,.editor-save-error{margin:0 0 18px;padding:16px;border:1px solid #edc29f;border-radius:8px;background:#fff6ec;color:#593a24;font-size:13px;line-height:1.6}
-.editor-recovery p,.editor-save-error p{margin:6px 0 12px}
+.editor-recovery{margin:0 0 18px;padding:16px;border:1px solid #edc29f;border-radius:8px;background:#fff6ec;color:#593a24;font-size:13px;line-height:1.6}
+.editor-recovery p{margin:6px 0 12px}
 .editor-recovery>.editor-resume-link{display:inline-flex;align-items:center;gap:12px}
 .editor-resume-link>svg{flex-shrink:0;color:#c34608}
-.editor-recovery>div,.editor-save-error>div{display:flex;flex-wrap:wrap;gap:10px}
-.editor-recovery button,.editor-save-error button,.editor-save-error a{padding:8px 12px;border:1px solid #b95820;border-radius:5px;background:#fff;color:#883f16;font:inherit;cursor:pointer;text-decoration:none}
-.editor-recovery button:disabled,.editor-save-error button:disabled{opacity:.5;cursor:wait}
+.editor-recovery>div{display:flex;flex-wrap:wrap;gap:10px}
+.editor-recovery button{padding:8px 12px;border:1px solid #b95820;border-radius:5px;background:#fff;color:#883f16;font:inherit;cursor:pointer;text-decoration:none}
+.editor-recovery button:disabled{opacity:.5;cursor:wait}
 .editor-leave-dialog{width:min(480px,calc(100% - 40px));max-height:calc(100dvh - 40px);margin:auto;padding:26px;overflow:auto;border:1px solid #dde3eb;border-radius:12px;background:#fff;color:#253044;box-shadow:0 20px 80px #0b132033}
 .editor-leave-dialog::backdrop{background:#0b132099}
 .editor-leave-dialog h2{margin:0 0 12px;font-size:22px}
@@ -71,5 +49,3 @@
 .editor-leave-dialog>div{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
 .editor-leave-dialog button{padding:10px 14px;border:1px solid #d8dee7;border-radius:6px;background:#fff;color:#273346;font:inherit;font-size:13px;cursor:pointer}
 .editor-leave-dialog button:first-child{border-color:#e9560a;background:#e9560a;color:#fff}
-.editor-protection-status{margin:16px 0 8px;padding:10px 14px;border-radius:8px;background:#edf7f0;color:#327447;font-size:13px;line-height:1.6;text-align:left}
-.editor-protection-status.is-dirty{background:#fff3e8;color:#9c481c}

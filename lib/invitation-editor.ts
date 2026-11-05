@@ -74,3 +74,14 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
     return record;
   } catch { return null; }
 }
+
+export type EventData = {
+  id: string; ownerId: string; contentVersion: number; customSlug: string | null; templateId: string; texture: string; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; paidAt: Date | null; expiresAt: Date | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED" | "SUSPENDED" | "REFUNDED"; slug: string | null;
+  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; backgroundImageUrl?: string | null; imageUploads: number; accent: string; typography: string; bodyTypography: string; heroHorizontal?: string; heroVertical?: string; buttonShape?: string; buttonFilled?: boolean; buttonIcons?: boolean; buttonBorder?: boolean; buttonBold?: boolean; sections: unknown;
+};
+
+export type InvitationProps = {
+  eventType: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string;
+  typography?: string; bodyTypography?: string; eventTime?: string; venue: string; address: string;
+  message: string; imageUrl: string; backgroundImageUrl?: string; sections: InviteSection[]; publicEventId?: string;
+};

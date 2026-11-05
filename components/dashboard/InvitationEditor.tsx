@@ -1,6 +1,6 @@
 "use client";
 
-import type { EventData } from './EventEditor';
+import type { EventData } from '@/lib/invitation-editor';
 import { GuidedInvitationEditor } from './GuidedInvitationEditor';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';

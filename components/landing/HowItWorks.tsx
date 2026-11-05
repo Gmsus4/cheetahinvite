@@ -10,7 +10,7 @@ const steps = [
   {
     number: "02",
     title: "Dale tu estilo",
-    description: "Incorpora tus fotos y elige colores, tipografía y decoraciones.",
+    description: "Incorpora tus fotos y elige los colores y las tipografías.",
     symbol: FiEdit3,
   },
   {

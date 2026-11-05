@@ -1,10 +1,10 @@
-import type { WeddingPalette } from './wedding-designs';
+export type InvitationPalette = { label: string; accent: string; paper: string; panel: string; ink: string; muted: string; dark: string };
 
 type Rgb = [number, number, number];
 const hex = (rgb: Rgb) => '#' + rgb.map(value => Math.round(value).toString(16).padStart(2, '0')).join('');
 const mix = (rgb: Rgb, target: Rgb, amount: number): Rgb => rgb.map((value, index) => value + (target[index] - value) * amount) as Rgb;
 
-export function paletteFromAccent(accent: string, label = 'De tu foto'): WeddingPalette {
+export function paletteFromAccent(accent: string, label = 'De tu foto'): InvitationPalette {
   const safe = /^#[\da-f]{6}$/i.test(accent) ? accent.toLowerCase() : '#58664e';
   const rgb = [1, 3, 5].map(start => parseInt(safe.slice(start, start + 2), 16)) as Rgb;
   return {
@@ -25,7 +25,7 @@ export const basicInvitationPalettes = [
   ['Blanco y perla', '#eee9e0'], ['Gris', '#80858e'], ['Negro', '#20232a'],
 ].map(([label, accent]) => paletteFromAccent(accent, label));
 
-export function invitationPaletteChoices(palettes: WeddingPalette[]) {
+export function invitationPaletteChoices(palettes: InvitationPalette[]) {
   return [...palettes, ...basicInvitationPalettes].filter((palette, index, all) =>
     all.findIndex(other => other.accent.toLowerCase() === palette.accent.toLowerCase()) === index);
 }
@@ -47,7 +47,7 @@ export function dominantImageColor(pixels: ArrayLike<number>): string {
   return hex(dominant.sum.map(value => value / dominant.count) as Rgb);
 }
 
-export async function extractBackgroundPalette(url: string): Promise<WeddingPalette> {
+export async function extractBackgroundPalette(url: string): Promise<InvitationPalette> {
   const image = new window.Image();
   image.crossOrigin = 'anonymous';
   image.referrerPolicy = 'no-referrer';

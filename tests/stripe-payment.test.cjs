@@ -129,7 +129,7 @@ test('second confirmed purchase cannot extend or revoke the primary purchase', a
 });
 
 test('checkout reservations reuse one payable session across tabs and lost responses', async () => {
-  const f = createPaymentFixture(); f.events.set('event', { id: 'event', ownerId: f.ownerId, name: 'Fixture', paidAt: null });
+  const f = createPaymentFixture(); f.events.set('event', { ...f.eventDetails, id: 'event', ownerId: f.ownerId, name: 'Fixture', paidAt: null });
   f.loseCreateResponse = true;
   await assert.rejects(f.checkout.prepareInvitationCheckout('event', f.ownerId), /Response lost/);
   const urls = await Promise.all([f.checkout.prepareInvitationCheckout('event', f.ownerId), f.checkout.prepareInvitationCheckout('event', f.ownerId)]);
@@ -143,7 +143,7 @@ test('checkout reservations reuse one payable session across tabs and lost respo
 });
 
 test('expired checkout starts a fresh attempt and keeps previous history', async () => {
-  const f = createPaymentFixture(); f.events.set('event', { id: 'event', ownerId: f.ownerId, name: 'Fixture', paidAt: null });
+  const f = createPaymentFixture(); f.events.set('event', { ...f.eventDetails, id: 'event', ownerId: f.ownerId, name: 'Fixture', paidAt: null });
   await f.checkout.prepareInvitationCheckout('event', f.ownerId); [...f.sessions.values()][0].status = 'expired';
   await f.checkout.prepareInvitationCheckout('event', f.ownerId);
   assert.equal(f.payments.size, 2); assert.equal([...f.payments.values()].filter(p => p.status === 'EXPIRED').length, 1);
