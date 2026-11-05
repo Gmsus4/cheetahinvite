@@ -362,7 +362,7 @@ export function EventEditor({ event, saved, error, published, creation = false }
   </main>;
 }
 
-function InvitationFontSelect({ role, eventType, value, onChange }: { role: FontRole; eventType: string; value: string; onChange: (value: string) => void }) {
+export function InvitationFontSelect({ role, eventType, value, onChange }: { role: FontRole; eventType: string; value: string; onChange: (value: string) => void }) {
   const recommended = recommendedInvitationFonts(eventType, role);
   const id = role === "heading" ? "typography" : "bodyTypography";
   return <div className="editor-field editor-typography-field">
@@ -515,7 +515,7 @@ function parseProgramEntry(line: string, index: number) {
 export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, backgroundImageUrl, locationImageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", buttonAppearance = defaultButtonAppearance, templateId = "none", texture = "none", sections, publicEventId }: {
   eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; backgroundImageUrl?: string; locationImageUrl?: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; buttonAppearance?: InvitationButtonAppearance; templateId?: string; texture?: string; sections: InviteSection[]; full?: boolean; publicEventId?: string;
 }) {
-  if ((invitationEventTypes as readonly string[]).includes(eventType)) return <WeddingAtmosphereInvitation eventType={eventType} backgroundImageUrl={backgroundImageUrl} templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
+  if ((invitationEventTypes as readonly string[]).includes(eventType)) return <WeddingAtmosphereInvitation eventType={eventType} typography={typography} bodyTypography={bodyTypography} backgroundImageUrl={backgroundImageUrl} templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
   return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} locationImageUrl={locationImageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} heroHorizontal={heroHorizontal} heroVertical={heroVertical} buttonAppearance={buttonAppearance} templateId={templateId} texture={texture} sections={sections} publicEventId={publicEventId} />;
 }
 

@@ -16,7 +16,7 @@ import { WeddingAtmosphereInvitation } from "./WeddingAtmosphereInvitation";
 import { sharedInvitationId } from "@/lib/shared-invitation";
 
 export type WeddingInvitationProps = {
-  eventType?: string;
+  eventType?: string; typography?: string; bodyTypography?: string;
   templateId: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string;
   eventTime?: string; venue: string; address: string; message: string; imageUrl: string; backgroundImageUrl?: string;
   sections: InviteSection[]; publicEventId?: string;

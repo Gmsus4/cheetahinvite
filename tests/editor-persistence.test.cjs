@@ -249,6 +249,30 @@ test('new wizard flow survives backup and recovery without changing event conten
   assert.equal(parseEditorDraft(JSON.stringify({ ...record, wizard: { ...wizard, flow: 'unknown' } }), 'owner', 'event', Date.now()), null);
 });
 
+test('three-step wizard retains the open personalization panel and event content in backups', t => {
+  const first = setup(t);
+  const wizard = { step: 1, activeExtra: 'appearance', flow: 'content-v3' };
+  first.controller.update(values('Mi celebración'), false, wizard, false);
+  first.controller.stop();
+  const next = setup(t, { storage: first.storage });
+  const record = next.controller.recover();
+  assert.deepEqual(record.wizard, wizard);
+  assert.equal(JSON.parse(record.snapshot).name, 'Mi celebración');
+  assert.equal(parseEditorDraft(JSON.stringify({ ...record, wizard: { ...wizard, flow: 'unknown' } }), 'owner', 'event', Date.now()), null);
+});
+
+test('gradual journey retains the active detail and event content in backups', t => {
+  const first = setup(t);
+  const wizard = { step: 3, activeExtra: 'my-story', flow: 'content-v4' };
+  first.controller.update(values('Mi celebración'), false, wizard, false);
+  first.controller.stop();
+  const next = setup(t, { storage: first.storage });
+  const record = next.controller.recover();
+  assert.deepEqual(record.wizard, wizard);
+  assert.equal(JSON.parse(record.snapshot).name, 'Mi celebración');
+  assert.equal(parseEditorDraft(JSON.stringify({ ...record, wizard: { ...wizard, flow: 'unknown' } }), 'owner', 'event', Date.now()), null);
+});
+
 test('local backups retain section photo placement and reject unsupported positions', () => {
   const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), version: 0, updatedAt: Date.now(), wizard: { step: 2, activeExtra: 'story' } };
   for (const position of ['before', 'after', 'sideways']) {

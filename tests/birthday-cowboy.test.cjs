@@ -54,7 +54,8 @@ test('Cowboy retains legacy data while new drafts use the shared presentation', 
   assert.equal(f.state.events.get(key).templateId, "celebration-v1");
   assert.equal((await f.actions.updateEvent('event', form)).ok, true);
   assert.equal(f.state.events.get('event').templateId, birthdayCowboyId);
-  assert.equal(f.state.events.get('event').typography, f.load('lib/shared-invitation.ts').sharedInvitationDesign.typography);
+  assert.equal(f.state.events.get('event').typography, selected.typography);
+  assert.equal(f.state.events.get('event').bodyTypography, selected.bodyTypography);
 });
 
 test('Cowboy distributes all supplied resources and connects the shared RSVP form', () => {

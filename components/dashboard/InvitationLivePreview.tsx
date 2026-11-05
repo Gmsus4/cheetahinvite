@@ -6,7 +6,7 @@ import { FiEye } from "react-icons/fi";
 
 const previewDocument = '<!doctype html><html lang="es"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head><body style="margin:0"><div id="invitation-preview-root"></div></body></html>';
 
-export function InvitationLivePreview({ children, expanded = false, onClose, onExpand, publicLink, initialDevice = "desktop", fitViewport = false }: { children: ReactNode; expanded?: boolean; onClose?: () => void; onExpand?: () => void; publicLink?: ReactNode; initialDevice?: "desktop" | "mobile"; fitViewport?: boolean }) {
+export function InvitationLivePreview({ children, expanded = false, onClose, onExpand, expandLabel = "Ampliar vista previa", expandDisabled = false, publicLink, initialDevice = "desktop", fitViewport = false }: { children: ReactNode; expanded?: boolean; onClose?: () => void; onExpand?: () => void; expandLabel?: string; expandDisabled?: boolean; publicLink?: ReactNode; initialDevice?: "desktop" | "mobile"; fitViewport?: boolean }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const container = useRef<HTMLDivElement>(null);
   const [root, setRoot] = useState<HTMLElement | null>(null);
@@ -106,7 +106,7 @@ export function InvitationLivePreview({ children, expanded = false, onClose, onE
     <div className="editor-preview-devices" role="group" aria-label="Dispositivo de vista previa">
       <button type="button" aria-pressed={device === "desktop"} onClick={() => setDevice("desktop")}>Escritorio</button>
       <button type="button" aria-pressed={device === "mobile"} onClick={() => setDevice("mobile")}>Móvil</button>
-      {onExpand && !expanded && <button className="editor-preview-expand" type="button" onClick={onExpand} aria-label="Ampliar vista previa" title="Ampliar vista previa"><FiEye aria-hidden="true" /></button>}
+      {onExpand && !expanded && <button className="editor-preview-expand" type="button" onClick={onExpand} disabled={expandDisabled} aria-label={expandLabel} title={expandLabel}><FiEye aria-hidden="true" /></button>}
       {publicLink}
     </div>
     <div className="editor-preview-viewport" ref={container}>

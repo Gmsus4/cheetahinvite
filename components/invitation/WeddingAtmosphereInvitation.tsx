@@ -31,7 +31,7 @@ export function WeddingAtmosphereInvitation(props: WeddingInvitationProps) {
   const hasLocation = Boolean(props.venue || props.address);
   const firstDetailIndex = 2 + Number(Boolean(props.eventDateKey)) + Number(hasLocation);
 
-  return <article ref={motion} className="wedding-atmosphere" data-event-type={eventType} data-design={design.kind} data-photo={Boolean(props.backgroundImageUrl)} data-long-names={title.length > 25 || undefined} style={atmosphereStyle(design, props.accent)}>
+  return <article ref={motion} className="wedding-atmosphere" data-event-type={eventType} data-design={design.kind} data-photo={Boolean(props.backgroundImageUrl)} data-long-names={title.length > 25 || undefined} style={atmosphereStyle(design, props.accent, props)}>
     <div className="wa-backdrop" aria-hidden="true">
       {props.backgroundImageUrl && <div className="wa-backdrop-image"><Image src={props.backgroundImageUrl} alt="" fill sizes="100vw" unoptimized loading="eager" /></div>}
       <div className="wa-backdrop-shade" />

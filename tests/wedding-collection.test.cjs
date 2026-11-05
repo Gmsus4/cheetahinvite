@@ -252,3 +252,13 @@ test('disabled photos and empty sections are omitted, optional music and custom 
   assert.match(html, /Un detalle especial/);
   assert.match(html, /Guardar confirmación/);
 });
+
+test('shared invitation rendering applies independent heading and body font choices',()=>{
+ const load=loadComponents();const {WeddingAtmosphereInvitation}=load('components/invitation/WeddingAtmosphereInvitation.tsx');
+ const html=renderToStaticMarkup(React.createElement(WeddingAtmosphereInvitation,{
+  eventType:'birthday',templateId:'celebration-v1',accent:'#58664e',typography:'fredoka',bodyTypography:'nunito',
+  name:'Mi cumpleaños',hostNames:'Alex',date:'',venue:'',address:'',message:'Mi mensaje',imageUrl:'',sections:[],
+ }));
+ assert.ok(html.includes("--wa-heading:&#x27;Fredoka Variable&#x27;"));
+ assert.ok(html.includes("--wa-body:&#x27;Nunito Variable&#x27;"));
+});

@@ -16,12 +16,12 @@ export function atmosphereSections(sections: InviteSection[]) {
   ));
 }
 
-export function atmosphereStyle(design: WeddingDesign, accent: string): CSSProperties {
+export function atmosphereStyle(design: WeddingDesign, accent: string, fonts?: { typography?: string; bodyTypography?: string }): CSSProperties {
   const palette = weddingPalette(design, accent);
   return {
     "--wa-base": palette.dark, "--wa-tint": palette.accent,
-    "--wa-heading": getInvitationFont(design.typography).family,
-    "--wa-body": getInvitationFont(design.bodyTypography).family,
+    "--wa-heading": getInvitationFont(fonts?.typography || design.typography).family,
+    "--wa-body": getInvitationFont(fonts?.bodyTypography || design.bodyTypography).family,
   } as CSSProperties;
 }
 

@@ -1,3 +1,4 @@
+import { invitationPaletteChoices, paletteFromAccent } from "./invitation-palettes";
 import type { EditorValues, InviteSection, SectionType } from "./invitation-editor";
 import type { InvitationButtonAppearance } from "./invitation-buttons";
 import { templateManifest } from "./generated-invitation-templates";
@@ -368,8 +369,8 @@ export function weddingArtwork(design: WeddingDesign): Partial<Record<"topLeft" 
   const assets = templateManifest.find(template => template.eventType === "wedding" && template.id === design.artwork && template.available)?.assets ?? {};
   return { ...assets, ...(design.texture ? { texture: design.texture } : {}), ...(design.edition === 2 ? weddingIdentityAssets[design.kind] : {}) };
 }
-export function weddingPalette(design: WeddingDesign, accent: string) {
-  return design.palettes.find(palette => palette.accent.toLowerCase() === accent.toLowerCase()) ?? design.palettes[0];
+export function weddingPalette(design: Pick<WeddingDesign, "palettes">, accent: string) {
+  return invitationPaletteChoices(design.palettes).find(palette => palette.accent.toLowerCase() === accent.toLowerCase()) ?? (/^#[0-9a-f]{6}$/i.test(accent) ? paletteFromAccent(accent, "Color personalizado") : design.palettes[0]);
 }
 
 export const weddingDetails: { type: SectionType; title: string; question: string; help: string }[] = [
@@ -405,7 +406,7 @@ export function applyWeddingDesign(values: EditorValues, id: string, accent?: st
 }
 
 export function weddingPublicationIssues(values: Pick<EditorValues, "hostNames" | "eventDate" | "eventTime" | "venue" | "address" | "sections">) {
-  const issues: { step: number; message: string }[] = [];
+  const issues: { step: number; message: string; sectionId?: string }[] = [];
   if (!values.hostNames.trim()) issues.push({ step: 1, message: "Agrega los nombres de la pareja." });
   if (!values.eventDate) issues.push({ step: 1, message: "Elige la fecha de la boda." });
   if (!values.eventTime) issues.push({ step: 1, message: "Agrega la hora de la celebración." });
@@ -417,7 +418,7 @@ export function weddingPublicationIssues(values: Pick<EditorValues, "hostNames" 
       : section.type === "rsvp" ? Boolean(section.link.trim())
       : section.type === "ceremony" || section.type === "reception" ? Boolean(section.content.trim() && section.detail.trim() && section.link.trim())
       : Boolean(section.content.trim() || section.link.trim());
-    if (!complete) issues.push({ step: 2, message: `Completa «${section.title}» o desactívala.` });
+    if (!complete) issues.push({ step: 2, message: `Completa «${section.title}» o desactívala.`, sectionId: section.id });
   }
   return issues;
 }

@@ -211,7 +211,7 @@ test('starlight publishes its celestial backgrounds and transparent full moon wi
 test('all new and existing wedding palettes survive server saving without falling back to the default', async () => {
   const { f, weddingDesigns } = setup();
   for (const design of weddingDesigns) for (const palette of design.palettes) {
-    const form = f.saveForm(); form.set('templateId', design.id); form.set('accent', palette.accent);
+    const form = f.saveForm(); form.set('templateId', design.id); form.set('accent', palette.accent); form.set('typography', design.typography);
     const result = await f.actions.updateEvent('event', form);
     assert.equal(result.ok, true, `${design.label} / ${palette.label}`);
     const stored = f.state.events.get('event');
@@ -230,7 +230,7 @@ test('switching between wedding designs preserves personal content and applies c
     assert.equal(result.typography, design.typography);
     assert.equal(result.bodyTypography, design.bodyTypography);
     assert.deepEqual(result.buttonAppearance, design.buttons);
-    assert.equal(result.accent, design.palettes[0].accent);
+    assert.equal(result.accent, '#ff00ff');
     assert.equal(weddingPalette(design, design.palettes[1].accent.toLowerCase()), design.palettes[1]);
     assert.deepEqual(result.sections.map(s => s.type), weddingSections().map(s => s.type));
   }
@@ -262,8 +262,8 @@ test('server saves a curated identity and fixed section order while preserving l
   assert.equal((await f.actions.updateEvent('event', form)).ok, true);
   const stored = f.state.events.get('event');
   assert.equal(stored.templateId, design.id);
-  assert.equal(stored.accent, design.palettes[0].accent);
-  assert.equal(stored.typography, design.typography);
+  assert.equal(stored.accent, '#ff00ff');
+  assert.equal(stored.typography, 'inter');
   assert.deepEqual(stored.sections.map(s => s.type), weddingSections().map(s => s.type));
   const legacy = f.saveForm(); legacy.set('contentVersion', '1'); legacy.set('accent', '#ff00ff'); legacy.set('templateId', 'plantilla3');
   assert.equal((await f.actions.updateEvent('event', legacy)).ok, true);

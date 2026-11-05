@@ -20,6 +20,8 @@
 }
 .wedding-atmosphere *, .wedding-atmosphere *::before, .wedding-atmosphere *::after { box-sizing: border-box; }
 .wedding-atmosphere :is(h1,h2,h3,p,figure) { margin: 0; }
+/* Override site-wide text fonts within the invitation only. */
+.wedding-atmosphere :is(p,blockquote,li,small,a,button,input,textarea,select,label,nav) { font-family: var(--wa-body); }
 .wedding-atmosphere :is(h1,h2,h3) { color: inherit; font-family: var(--wa-heading); font-weight: 400; text-wrap: balance; overflow-wrap: anywhere; }
 .wedding-atmosphere :is(a,button,input):focus-visible { outline: 2px solid #fffaf2; outline-offset: 5px; }
 .wedding-atmosphere a { color: inherit; }

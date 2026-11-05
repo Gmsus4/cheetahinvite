@@ -167,7 +167,7 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
   const design = templateId === sharedInvitationId || eventType !== "wedding" ? sharedInvitationDesign : getWeddingDesign(templateId);
   const orderedSections = orderedWeddingSections(sections as InviteSection[]);
   const curated = design ? {
-    accent: weddingPalette(design, accent).accent, typography: design.typography, bodyTypography: design.bodyTypography,
+    accent: weddingPalette(design, accent).accent, typography, bodyTypography,
     texture: "none", heroHorizontal: "center", heroVertical: "center",
     buttonShape: design.buttons.shape, buttonFilled: design.buttons.filled, buttonIcons: design.buttons.icons,
     buttonBorder: design.buttons.border, buttonBold: design.buttons.bold,
