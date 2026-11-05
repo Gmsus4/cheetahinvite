@@ -25,6 +25,7 @@
 @import "@fontsource-variable/manrope";
 @import "@fontsource-variable/dm-sans";
 @import '@fontsource/rye';
+@import '@fontsource/rye';
 
 :root{--paper:#faf8f3;--ink:#24392f;--green:#294737;--orange:#c56a48;--muted:#767b70;--line:#deded4;--font-inter:"Inter Variable";--font-nunito:"Nunito Variable";--font-poppins:"Poppins";--font-body:var(--font-nunito);--font-display:Georgia,"Times New Roman",serif}
 @theme inline{--color-background:var(--paper);--color-foreground:var(--ink);--font-sans:var(--font-body);--font-mono:var(--font-geist-mono)}
