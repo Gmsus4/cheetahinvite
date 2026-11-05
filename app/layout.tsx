@@ -7,7 +7,6 @@ import "./dashboard-workspace.css";
 import "./workspace-controls.css";
 import "./invitation-sections.css";
 import "./invitation-decorations.css";
-import "./invitation-textures.css";
 import "./invitation-system.css";
 import "./invitation-rsvp.css";
 import "./invitation-motion.css";
@@ -24,15 +23,11 @@ import "./wedding-collection-covers.css";
 import "./wedding-collection-interiors.css";
 import "./wedding-atmosphere.css";
 import "./site-typography.css";
-import "./birthday-confetti.css";
-import "./birthday-pastel.css";
-import "./birthday-neon.css";
-import "./birthday-disco.css";
 
 export const metadata: Metadata = {
   title: "Cheetah Invite — Invitaciones digitales para celebrar",
   description:
-    "Crea una invitación digital única y comparte los detalles de tu celebración. Diseños para bodas, cumpleaños, graduaciones y más.",
+    "Crea tu invitación digital para bodas, cumpleaños, graduaciones y más. Personaliza tus fotos, colores y los detalles de tu celebración.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -42,16 +37,3 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     </html>
   );
 }
-
-import "./birthday-space.css";
-import "./birthday-dinosaur.css";
-
-import "./birthday-gamer.css";
-
-import "./birthday-cowboy.css";
-
-import "./birthday-elegant.css";
-
-import "./birthday-cinema.css";
-
-import "./birthday-shared.css";

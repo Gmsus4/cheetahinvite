@@ -30,6 +30,38 @@ function loadComponents(hooks) {
   return load;
 }
 
+test('every occasion uses the same texture-free presentation with its own default copy', () => {
+  const load = loadComponents();
+  const { WeddingAtmosphereInvitation } = load('components/invitation/WeddingAtmosphereInvitation.tsx');
+  const { WeddingInvitation } = load('components/invitation/WeddingInvitation.tsx');
+  const { sharedInvitationDesign } = load('lib/shared-invitation.ts');
+  const { invitationEventTypes, getInvitationEventContent, invitationPresentation } = load('lib/invitation-event-content.ts');
+  for(const eventType of invitationEventTypes) {
+    const content = getInvitationEventContent(eventType), copy = invitationPresentation(eventType);
+    const html = renderToStaticMarkup(React.createElement(eventType === 'wedding' ? WeddingInvitation : WeddingAtmosphereInvitation, {
+      eventType,templateId:'celebration-v1',accent:sharedInvitationDesign.palettes[0].accent,
+      name:content.defaultName,hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'',sections:[],
+    }));
+    assert.match(html,/class="wedding-atmosphere"/);
+    assert.ok(html.includes(`data-event-type="${eventType}"`));
+    assert.ok(html.includes(content.defaultName));assert.ok(html.includes(copy.caption));assert.ok(html.includes(copy.closingMessage));
+    assert.doesNotMatch(html,/wa-backdrop-texture|--wa-texture|\/textures\/|\/birthday\/|\/plantillas\//);
+    if(eventType !== 'wedding') assert.doesNotMatch(html,/Nuestra boda|La pareja:|nuestro siempre/);
+  }
+});
+
+test('retired birthday identities show the shared layout and preserve customer content and photos',()=>{
+  const load = loadComponents();
+  const { WeddingAtmosphereInvitation } = load('components/invitation/WeddingAtmosphereInvitation.tsx');
+  const html = renderToStaticMarkup(React.createElement(WeddingAtmosphereInvitation, {
+    eventType:'birthday',templateId:'birthday-neon-v1',accent:'#F46BDE',name:'Mi fiesta',hostNames:'Alex',
+    date:'Mi fecha',venue:'Mi lugar',address:'Mi dirección',message:'Mis palabras',imageUrl:'/my-cover.webp',backgroundImageUrl:'/my-background.webp',
+    sections:[{id:'own',type:'custom',title:'Mi apartado',content:'Mi información',detail:'',link:'',imageUrl:'/my-section.webp',enabled:true}],
+  }));
+  for(const text of ['Mi fiesta','Alex','Mi lugar','Mi dirección','Mis palabras','Mi apartado','Mi información','/my-cover.webp','/my-background.webp','/my-section.webp'])assert.ok(html.includes(text),text);
+  assert.doesNotMatch(html,/birthday-neon|\/birthday\/|textures|Astronauta|Nuestra boda/);
+});
+
 test('background is one independent photo and never uses the cover or gallery as a collage', () => {
   const load = loadComponents();
   const { WeddingInvitation } = load('components/invitation/WeddingInvitation.tsx');

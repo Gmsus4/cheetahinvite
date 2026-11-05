@@ -31,7 +31,7 @@ function renderer(fixture) {
   return (props) => renderToStaticMarkup(React.createElement(exported.BirthdayCowboyInvitation, props));
 }
 
-test('Cowboy remains a birthday design through selection, preparation and saving', async () => {
+test('Cowboy retains legacy data while new drafts use the shared presentation', async () => {
   const f = createFixture();
   const { birthdayCowboyId, birthdayCowboyAssets } = f.load('lib/birthday-cowboy.ts');
   const { isInvitationTemplate } = f.load('lib/invitation-templates.ts');
@@ -51,10 +51,10 @@ test('Cowboy remains a birthday design through selection, preparation and saving
   form.set('eventType', 'birthday'); form.set('templateId', birthdayCowboyId); form.set('creationKey', key);
   form.set('typography', selected.typography); form.set('bodyTypography', selected.bodyTypography);
   assert.equal((await f.load('app/crear/actions.ts').prepareEvent(form)).ok, true);
-  assert.equal(f.state.events.get(key).templateId, birthdayCowboyId);
+  assert.equal(f.state.events.get(key).templateId, "celebration-v1");
   assert.equal((await f.actions.updateEvent('event', form)).ok, true);
   assert.equal(f.state.events.get('event').templateId, birthdayCowboyId);
-  assert.equal(f.state.events.get('event').typography, 'rye');
+  assert.equal(f.state.events.get('event').typography, f.load('lib/shared-invitation.ts').sharedInvitationDesign.typography);
 });
 
 test('Cowboy distributes all supplied resources and connects the shared RSVP form', () => {

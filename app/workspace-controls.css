@@ -59,6 +59,8 @@
 .editor-save-help{margin:0 0 16px;color:#657184;font-size:12px;line-height:1.6}
 .editor-recovery,.editor-save-error{margin:0 0 18px;padding:16px;border:1px solid #edc29f;border-radius:8px;background:#fff6ec;color:#593a24;font-size:13px;line-height:1.6}
 .editor-recovery p,.editor-save-error p{margin:6px 0 12px}
+.editor-recovery>.editor-resume-link{display:inline-flex;align-items:center;gap:12px}
+.editor-resume-link>svg{flex-shrink:0;color:#c34608}
 .editor-recovery>div,.editor-save-error>div{display:flex;flex-wrap:wrap;gap:10px}
 .editor-recovery button,.editor-save-error button,.editor-save-error a{padding:8px 12px;border:1px solid #b95820;border-radius:5px;background:#fff;color:#883f16;font:inherit;cursor:pointer;text-decoration:none}
 .editor-recovery button:disabled,.editor-save-error button:disabled{opacity:.5;cursor:wait}

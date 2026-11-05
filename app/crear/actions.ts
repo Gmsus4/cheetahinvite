@@ -6,6 +6,7 @@ import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { validCreationKey, type EditorSaveResult } from "@/lib/invitation-editor";
 import { getInvitationTemplate } from "@/lib/invitation-templates";
 import { getWeddingDesign } from "@/lib/wedding-designs";
+import { sharedInvitationId, sharedInvitationDesign } from "@/lib/shared-invitation";
 
 const eventTypes = new Set([
   "wedding",
@@ -24,7 +25,8 @@ export async function prepareEvent(formData: FormData): Promise<EditorSaveResult
   const eventType = String(formData.get("eventType") ?? "");
   const dateValue = String(formData.get("eventDate") ?? "");
   const creationKey = String(formData.get("creationKey") ?? "");
-  const design = eventType === "wedding" ? getWeddingDesign(String(formData.get("templateId") ?? "")) : null;
+  const selectedId = String(formData.get("templateId") ?? "");
+  const design = selectedId === sharedInvitationId || eventType !== "wedding" ? sharedInvitationDesign : getWeddingDesign(selectedId);
 
   const template = getInvitationTemplate(eventType, String(formData.get("templateId") ?? "none"));
 

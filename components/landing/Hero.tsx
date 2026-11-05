@@ -7,7 +7,6 @@ import {
 import { HeroInvitationExamples } from "./HeroInvitationExamples";
 import { landingEventExamples } from "@/lib/landing-invitation-example";
 import { weddingDesigns } from "@/lib/wedding-designs";
-import { birthdayDesigns } from "@/lib/birthday-design-catalog";
 
 export function Hero() {
   return (
@@ -43,7 +42,7 @@ export function Hero() {
         <HeroInvitationExamples
           examples={landingEventExamples.map(({ slug, label, available }) => ({ slug, label, available }))}
           weddingDesigns={weddingDesigns.map(({ kind, label }) => ({ slug: `boda-${kind}`, label }))}
-          birthdayDesigns={birthdayDesigns.map(({ slug, template }) => ({ slug, label: template.label }))}
+          birthdayDesigns={[]}
         />
         <div className="floating-note note-bottom">
           <span className="note-check"><FiEdit3 aria-hidden="true" /></span>

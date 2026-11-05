@@ -1,6 +1,7 @@
 import type { InviteSection } from "@/components/dashboard/EventEditor";
 import { getInvitationTemplate } from "./invitation-templates";
 import { eventExampleSections, getInvitationEventContent, invitationEventTypes } from "./invitation-event-content";
+import { sharedInvitationId, sharedInvitationDesign } from "./shared-invitation";
 
 // Use available editor decorations and their actual catalog names.
 const exampleStyles = [
@@ -75,18 +76,23 @@ export const landingEventExamples = invitationEventTypes.map((eventType) => {
   return {
     slug: content.slug,
     label: content.label,
-    available: wedding || birthday,
+    available: true,
     invitation: {
       ...content.demo,
+      accent: sharedInvitationDesign.palettes[0].accent,
+      typography: sharedInvitationDesign.typography,
+      bodyTypography: sharedInvitationDesign.bodyTypography,
       eventType,
       message: content.message,
       locationImageUrl: babyShower ? "/demo/babyshower/jardin.webp" : birthday ? "/demo/birthday/cena.webp" : undefined,
       imageUrl: wedding ? landingInvitationExample.imageUrl : birthday ? "/demo/birthday/valeria.webp" : graduation ? "/demo/graduacion/graduacion.webp" : babyShower ? "/demo/babyshower/padres.webp" : "",
       heroHorizontal: "center",
       heroVertical: "center",
-      templateId: wedding ? "plantilla5" : "none",
+      templateId: sharedInvitationId,
+      texture: "none",
       sections: eventExampleSections(eventType).map((section) => ({
         ...section, imageUrl: sectionImages[section.type] ?? section.imageUrl,
+        ...(section.type === "rsvp" ? { rsvpMode: "integrated" as const } : {}),
       })),
     },
   };

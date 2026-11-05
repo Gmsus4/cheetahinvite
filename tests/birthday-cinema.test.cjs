@@ -31,7 +31,7 @@ function renderer(fixture) {
   return (props) => renderToStaticMarkup(React.createElement(exported.BirthdayCinemaInvitation, props));
 }
 
-test('Cinema remains a birthday design through selection, preparation and saving', async () => {
+test('Cinema retains legacy data while new drafts use the shared presentation', async () => {
   const f = createFixture();
   const { birthdayCinemaId, birthdayCinemaAssets } = f.load('lib/birthday-cinema.ts');
   const { isInvitationTemplate } = f.load('lib/invitation-templates.ts');
@@ -51,10 +51,10 @@ test('Cinema remains a birthday design through selection, preparation and saving
   form.set('eventType', 'birthday'); form.set('templateId', birthdayCinemaId); form.set('creationKey', key);
   form.set('typography', selected.typography); form.set('bodyTypography', selected.bodyTypography);
   assert.equal((await f.load('app/crear/actions.ts').prepareEvent(form)).ok, true);
-  assert.equal(f.state.events.get(key).templateId, birthdayCinemaId);
+  assert.equal(f.state.events.get(key).templateId, "celebration-v1");
   assert.equal((await f.actions.updateEvent('event', form)).ok, true);
   assert.equal(f.state.events.get('event').templateId, birthdayCinemaId);
-  assert.equal(f.state.events.get('event').typography, 'cinzel');
+  assert.equal(f.state.events.get('event').typography, f.load('lib/shared-invitation.ts').sharedInvitationDesign.typography);
 });
 
 test('Cinema serves the selected artwork and connects the shared RSVP form', () => {

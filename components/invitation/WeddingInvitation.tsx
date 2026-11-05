@@ -13,15 +13,17 @@ import { StarlightCover, StarlightPortrait } from "./StarlightCover";
 import { ArtDecoCover, ArtDecoPortrait } from "./ArtDecoCover";
 import { LoveLetterCover, LoveLetterMemory, LoveLetterClosing } from "./LoveLetterCover";
 import { WeddingAtmosphereInvitation } from "./WeddingAtmosphereInvitation";
+import { sharedInvitationId } from "@/lib/shared-invitation";
 
 export type WeddingInvitationProps = {
+  eventType?: string;
   templateId: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string;
   eventTime?: string; venue: string; address: string; message: string; imageUrl: string; backgroundImageUrl?: string;
   sections: InviteSection[]; publicEventId?: string;
 };
 
 export function WeddingInvitation(props: WeddingInvitationProps) {
-  return getWeddingDesign(props.templateId)?.edition === 2 ? <WeddingAtmosphereInvitation {...props} /> : <LegacyWeddingInvitation {...props} />;
+  return props.templateId === sharedInvitationId || getWeddingDesign(props.templateId)?.edition === 2 ? <WeddingAtmosphereInvitation {...props} /> : <LegacyWeddingInvitation {...props} />;
 }
 
 function LegacyWeddingInvitation({ templateId, accent, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, sections, publicEventId }: WeddingInvitationProps) {

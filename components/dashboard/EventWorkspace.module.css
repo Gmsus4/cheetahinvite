@@ -210,6 +210,7 @@
   .workspace :global(.guided-step-layer-0) { left: 8px; z-index: 3; }
   .workspace :global(.guided-step-layer-1) { left: 16px; z-index: 2; }
   .workspace :global(.guided-step-layer-2) { left: 24px; z-index: 1; }
+  .workspace :global(.guided-step-layer-3) { left: 30px; z-index: 0; }
   .workspace :global(.guided-step-front) { left: 0; z-index: 4; background: #e9560a; color: #fff; }
   .workspace :global(.guided-step-stack svg) { width: 17px; height: 17px; }
   .workspace :global(.guided-bottom-bar .guided-progress[data-grouped="true"] ol) { display: none; }

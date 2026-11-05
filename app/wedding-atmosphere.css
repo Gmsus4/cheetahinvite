@@ -26,8 +26,6 @@
 .wedding-atmosphere img { display: block; max-width: 100%; }
 .wedding-atmosphere .wa-backdrop { position: fixed; z-index: -1; inset: 0; pointer-events: none; background: var(--wa-base); }
 .wedding-atmosphere .wa-backdrop-shade { position: absolute; inset: 0; background: linear-gradient(90deg,#0005,transparent 35%,transparent 65%,#0005), color-mix(in srgb,var(--wa-base) 32%,transparent); }
-.wedding-atmosphere .wa-backdrop-texture { position: absolute; inset: 0; background: var(--wa-texture) center/cover; opacity: .35; mix-blend-mode: screen; }
-.wedding-atmosphere[data-photo="true"] .wa-backdrop-texture { opacity: .06; }
 .wedding-atmosphere[data-photo="false"] .wa-backdrop-shade { background: radial-gradient(ellipse at 15% 15%,color-mix(in srgb,var(--wa-tint) 50%,transparent),transparent 65%),radial-gradient(ellipse at 85% 85%,color-mix(in srgb,var(--wa-tint) 40%,transparent),transparent 60%); }
 .wedding-atmosphere .wa-column { position: relative; width: min(100% - 40px,560px); margin: 0 auto; padding: 64px 0 34px; }
 .wedding-atmosphere .wa-shell { position: relative; isolation: isolate; }
@@ -144,17 +142,24 @@
 }
 @media(min-width:960px) {
   .wedding-atmosphere .wa-column { width: min(100% - 96px,1080px); padding-top: 64px; }
-  .wedding-atmosphere .wa-cover[data-has-media="true"] { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.05fr); align-items: center; gap: 36px; padding: 24px; margin-bottom: 40px; text-align: left; }
-  .wedding-atmosphere .wa-cover[data-has-media="true"] .wa-cover-heading { padding: 24px; }
-  .wedding-atmosphere .wa-cover[data-has-media="true"] h1 { margin-block: 28px; }
   .wedding-atmosphere .wa-portrait { position: relative; align-self: stretch; min-height: clamp(360px,38vw,560px); border-radius: 14px; }
   .wedding-atmosphere .wa-portrait img { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; }
-  .wedding-atmosphere .wa-intro { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.05fr); grid-template-rows: repeat(2,auto); align-items: center; column-gap: 36px; padding: 24px; margin-bottom: 40px; border-radius: 18px; background: var(--wa-base); box-shadow: 0 20px 64px #00000020; }
-  .wedding-atmosphere .wa-intro > .wa-cover { display: contents; }
-  .wedding-atmosphere .wa-intro .wa-cover-heading { grid-column: 1; grid-row: 1; min-width: 0; }
+  .wedding-atmosphere .wa-intro { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.05fr); grid-template-rows: repeat(2,auto); align-items: center; gap: 32px 36px; padding: 24px; margin-bottom: 40px; border-radius: 18px; background: var(--wa-base); box-shadow: 0 20px 64px #00000020; }
+  .wedding-atmosphere .wa-intro > .wa-cover { display: contents; text-align: left; }
+  .wedding-atmosphere .wa-intro .wa-cover-heading { grid-column: 1; grid-row: 1; align-self: end; min-width: 0; padding: 20px 24px 0; }
+  .wedding-atmosphere .wa-intro .wa-cover-heading h1 { margin: 24px 0; font-size: clamp(60px,5.8vw,82px); line-height: 1.02; }
+  .wedding-atmosphere[data-long-names] .wa-intro .wa-cover-heading h1 { font-size: clamp(42px,4.6vw,64px); }
+  .wedding-atmosphere .wa-intro .wa-couple-name { display: block; }
+  .wedding-atmosphere .wa-intro .wa-ampersand { display: block; margin: 6px 0; font-size: .42em; line-height: 1; opacity: .65; }
+  .wedding-atmosphere .wa-intro .wa-date { font-size: 14px; line-height: 1.7; }
   .wedding-atmosphere .wa-intro :is(.wa-portrait,.wa-no-photo) { grid-column: 2; grid-row: 1 / span 2; min-width: 0; }
-  .wedding-atmosphere .wa-intro > .wa-panel.wa-countdown { grid-column: 1; grid-row: 2; min-width: 0; margin: 0; padding: 24px; border: 0; border-radius: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; text-align: left; }
-  .wedding-atmosphere .wa-intro:not(:has(> .wa-countdown)) .wa-cover-heading { grid-row: 1 / span 2; }
+  .wedding-atmosphere .wa-intro > .wa-panel.wa-countdown { grid-column: 1; grid-row: 2; align-self: start; min-width: 0; margin: 0; padding: 0 24px 20px; border: 0; border-radius: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; text-align: left; }
+  .wedding-atmosphere .wa-intro .wa-countdown > .wa-kicker { font-size: 9px; letter-spacing: .18em; opacity: .7; }
+  .wedding-atmosphere .wa-intro .invite-countdown-clock { gap: 16px; margin-top: 16px; }
+  .wedding-atmosphere .wa-intro .invite-countdown-unit { gap: 8px; }
+  .wedding-atmosphere .wa-intro .invite-countdown-unit strong { font: 400 clamp(26px,2.5vw,34px)/1 var(--wa-body); font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+  .wedding-atmosphere .wa-intro .invite-countdown-unit span { font-size: 9px; letter-spacing: .1em; }
+  .wedding-atmosphere .wa-intro:not(:has(> .wa-countdown)) .wa-cover-heading { grid-row: 1 / span 2; align-self: center; padding-bottom: 20px; }
   .wedding-atmosphere .wa-welcome { display: none; }
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .wedding-atmosphere .wa-intro { background: linear-gradient(140deg,#fffaf21a,transparent 65%),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }

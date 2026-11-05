@@ -1,34 +1,10 @@
 "use client";
-import { BirthdayCinemaInvitation } from '@/components/invitation/BirthdayCinemaInvitation';
-import { birthdayCinemaId } from '@/lib/birthday-cinema';
-import { BirthdayElegantInvitation } from '@/components/invitation/BirthdayElegantInvitation';
-import { birthdayElegantId } from '@/lib/birthday-elegant';
-import { BirthdayCowboyInvitation } from '@/components/invitation/BirthdayCowboyInvitation';
-import { birthdayCowboyId } from '@/lib/birthday-cowboy';
-import { BirthdayGamerInvitation } from '@/components/invitation/BirthdayGamerInvitation';
-import { birthdayGamerId } from '@/lib/birthday-gamer';
 
-
-import { birthdayDinosaurId } from '@/lib/birthday-dinosaur';
-import { BirthdayDinosaurInvitation } from '@/components/invitation/BirthdayDinosaurInvitation';
-
-import { birthdaySpaceId } from '@/lib/birthday-space';
-import { BirthdaySpaceInvitation } from '@/components/invitation/BirthdaySpaceInvitation';
 import Image from "next/image";
 import { uploadInvitationImage } from "@/lib/cloudinary-upload";
 import { useRouter } from "next/navigation";
 import { prepareEvent } from "@/app/crear/actions";
-import { WeddingInvitation } from "@/components/invitation/WeddingInvitation";
-import { getWeddingDesign } from "@/lib/wedding-designs";
-import { InvitationTexturePicker } from "./InvitationTexturePicker";
-import { BirthdayDiscoInvitation } from "@/components/invitation/BirthdayDiscoInvitation";
-import { birthdayDiscoId } from "@/lib/birthday-disco";
-import { BirthdayNeonInvitation } from "@/components/invitation/BirthdayNeonInvitation";
-import { birthdayNeonId } from "@/lib/birthday-neon";
-import { BirthdayPastelInvitation } from "@/components/invitation/BirthdayPastelInvitation";
-import { birthdayPastelId } from "@/lib/birthday-pastel";
-import { BirthdayConfettiInvitation } from "@/components/invitation/BirthdayConfettiInvitation";
-import { birthdayConfettiId } from "@/lib/birthday-designs";
+import { WeddingAtmosphereInvitation } from "@/components/invitation/WeddingAtmosphereInvitation";
 import { CountdownTimer } from "@/components/invitation/CountdownTimer";
 import { InvitationTemplatePicker } from "./InvitationTemplatePicker";
 import { InvitationDecoration } from "./InvitationDecoration";
@@ -53,7 +29,7 @@ import { invitationSectionUrl, invitationLinkLabel, invitationMapUrl } from "@/l
 import { defaultButtonAppearance, eventButtonAppearance, type InvitationButtonAppearance } from "@/lib/invitation-buttons";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { getInvitationFont, invitationFonts, recommendedInvitationFonts, type FontRole } from "@/lib/invitation-fonts";
-import { getInvitationEventContent, eventExampleSections as exampleSections, makeEventExampleSection as makeExampleSection } from "@/lib/invitation-event-content";
+import { invitationEventTypes, getInvitationEventContent, eventExampleSections as exampleSections, makeEventExampleSection as makeExampleSection } from "@/lib/invitation-event-content";
 
 export type EventData = {
   id: string; ownerId: string; contentVersion: number; customSlug: string | null; templateId: string; texture: string; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; paidAt: Date | null; expiresAt: Date | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED" | "SUSPENDED" | "REFUNDED"; slug: string | null;
@@ -142,7 +118,7 @@ export function EventEditor({ event, saved, error, published, creation = false }
   const [customSlug, setCustomSlug] = useState(event.customSlug ?? "");
   const [eventType, setEventType] = useState(event.eventType);
   const [templateId, setTemplateId] = useState(event.templateId ?? "none");
-  const [texture, setTexture] = useState(event.texture ?? "none");
+  const [texture, setTexture] = useState("none");
   const [eventDate, setEventDate] = useState(dateInputValue(event.eventDate));
   const [eventTime, setEventTime] = useState(event.eventTime ?? "");
   const [hostNames, setHostNames] = useState(event.hostNames ?? "");
@@ -213,7 +189,7 @@ export function EventEditor({ event, saved, error, published, creation = false }
     if (!record) return;
     const values = JSON.parse(record.snapshot) as EditorValues;
     setName(values.name); setCustomSlug(values.customSlug); setEventType(values.eventType);
-    setTemplateId(values.templateId); setTexture(values.texture); setEventDate(values.eventDate); setEventTime(values.eventTime);
+    setTemplateId(values.templateId); setTexture("none"); setEventDate(values.eventDate); setEventTime(values.eventTime);
     setHostNames(values.hostNames); setVenue(values.venue); setAddress(values.address); setMessage(values.message);
     setImageUrl(values.imageUrl); setAccent(values.accent); setTypography(values.typography); setBodyTypography(values.bodyTypography);
     setSections(values.sections); setHeroHorizontal(values.heroHorizontal); setHeroVertical(values.heroVertical); setButtonAppearance(values.buttonAppearance);
@@ -308,7 +284,6 @@ export function EventEditor({ event, saved, error, published, creation = false }
             <div className="editor-group-fields editor-cover-fields">
               <div className="editor-field" hidden={creation && step !== 8}><label>Foto de portada <span>(opcional)</span></label><input type="hidden" name="imageUrl" value={imageUrl} /><CloudinaryImageUpload ensureEvent={creation ? ensureEvent : undefined} onBusyChange={(busy) => setUploadCount((count) => count + (busy ? 1 : -1))} eventId={event.id} images={imageUrl ? [imageUrl] : []} multiple={false} onChange={(images) => setImageUrl(images[0] ?? "")} /></div>
               <div className="onboarding-design-option" hidden={creation && step !== 9}><InvitationTemplatePicker eventType={eventType} value={templateId} onChange={(id) => { setTemplateId(id); const recommended = templateAccent(eventType, id); if (recommended) setAccent(recommended); }} /></div>
-              <div className="onboarding-design-option" hidden={creation && step !== 10}><InvitationTexturePicker value={texture} onChange={setTexture} /></div>
               <div className="editor-field editor-color-field" hidden={creation && step !== 11}><label htmlFor="accent">Color principal</label><div><input id="accent" name="accent" type="color" value={accent} onChange={e => setAccent(e.target.value)} /><span>{accent.toUpperCase()}</span></div><small className="editor-field-help">Se usará en algunos detalles de diseño.</small></div>
               <div className="editor-field" hidden={creation && step !== 8}><label htmlFor="heroHorizontal">Alineación del título de portada</label><select id="heroHorizontal" name="heroHorizontal" value={heroHorizontal} onChange={(e) => setHeroHorizontal(e.target.value)}><option value="left">Izquierda</option><option value="center">Centro</option><option value="right">Derecha</option></select></div>
               <div className="editor-field" hidden={creation && step !== 8}><label htmlFor="heroVertical">Posición vertical del título de portada</label><select id="heroVertical" name="heroVertical" value={heroVertical} onChange={(e) => setHeroVertical(e.target.value)}><option value="top">Arriba</option><option value="center">Centro</option><option value="bottom">Abajo</option></select></div>
@@ -540,17 +515,7 @@ function parseProgramEntry(line: string, index: number) {
 export function InvitationCanvas({ eventType, name, hostNames, date, eventDateKey = "", eventTime = "", venue, address, message, imageUrl, backgroundImageUrl, locationImageUrl, accent, typography = "default", bodyTypography = "inter", heroHorizontal = "left", heroVertical = "center", buttonAppearance = defaultButtonAppearance, templateId = "none", texture = "none", sections, publicEventId }: {
   eventType: string; name: string; hostNames: string; date: string; eventDateKey?: string; eventTime?: string; venue: string; address: string; message: string; imageUrl: string; backgroundImageUrl?: string; locationImageUrl?: string; accent: string; typography?: string; bodyTypography?: string; heroHorizontal?: string; heroVertical?: string; buttonAppearance?: InvitationButtonAppearance; templateId?: string; texture?: string; sections: InviteSection[]; full?: boolean; publicEventId?: string;
 }) {
-  if (eventType === "birthday" && templateId === birthdayCinemaId) return <BirthdayCinemaInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
-  if (eventType === "birthday" && templateId === birthdayElegantId) return <BirthdayElegantInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
-  if (eventType === "birthday" && templateId === birthdayCowboyId) return <BirthdayCowboyInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
-  if (eventType === "birthday" && templateId === birthdayGamerId) return <BirthdayGamerInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
-  if (eventType === "birthday" && templateId === birthdayDinosaurId) return <BirthdayDinosaurInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
-  if (eventType === "birthday" && templateId === birthdaySpaceId) return <BirthdaySpaceInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
-  if (eventType === "birthday" && templateId === birthdayDiscoId) return <BirthdayDiscoInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
-  if (eventType === "birthday" && templateId === birthdayNeonId) return <BirthdayNeonInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
-  if (eventType === "birthday" && templateId === birthdayPastelId) return <BirthdayPastelInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
-  if (eventType === "birthday" && templateId === birthdayConfettiId) return <BirthdayConfettiInvitation templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
-  if (eventType === "wedding" && getWeddingDesign(templateId)) return <WeddingInvitation backgroundImageUrl={backgroundImageUrl} templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
+  if ((invitationEventTypes as readonly string[]).includes(eventType)) return <WeddingAtmosphereInvitation eventType={eventType} backgroundImageUrl={backgroundImageUrl} templateId={templateId} accent={accent} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} sections={sections} publicEventId={publicEventId} />;
   return <InvitationWebsite eventType={eventType} name={name} hostNames={hostNames} date={date} eventDateKey={eventDateKey} eventTime={eventTime} venue={venue} address={address} message={message} imageUrl={imageUrl} locationImageUrl={locationImageUrl} accent={accent} typography={typography} bodyTypography={bodyTypography} heroHorizontal={heroHorizontal} heroVertical={heroVertical} buttonAppearance={buttonAppearance} templateId={templateId} texture={texture} sections={sections} publicEventId={publicEventId} />;
 }
 

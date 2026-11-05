@@ -15,7 +15,7 @@ export function TemplateGallery() {
         </div>
         <p>
           Tus datos, tus fotos y los detalles que van contigo. Personaliza los
-          colores, las letras y las decoraciones de tu invitación.
+          colores y la apariencia de tu invitación.
         </p>
       </div>
 

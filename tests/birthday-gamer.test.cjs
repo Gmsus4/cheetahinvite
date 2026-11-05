@@ -32,7 +32,7 @@ function renderer(fixture) {
   return (props) => renderToStaticMarkup(React.createElement(exported.BirthdayGamerInvitation, props));
 }
 
-test('Gamer remains a birthday design through selection, preparation and saving', async () => {
+test('Gamer retains legacy data while new drafts use the shared presentation', async () => {
   const f = createFixture();
   const { birthdayGamerId, birthdayGamerAssets } = f.load('lib/birthday-gamer.ts');
   const { isInvitationTemplate } = f.load('lib/invitation-templates.ts');
@@ -50,7 +50,7 @@ test('Gamer remains a birthday design through selection, preparation and saving'
   const form = f.saveForm();
   form.set('eventType', 'birthday'); form.set('templateId', birthdayGamerId); form.set('creationKey', key);
   assert.equal((await f.load('app/crear/actions.ts').prepareEvent(form)).ok, true);
-  assert.equal(f.state.events.get(key).templateId, birthdayGamerId);
+  assert.equal(f.state.events.get(key).templateId, "celebration-v1");
   assert.equal((await f.actions.updateEvent('event', form)).ok, true);
   assert.equal(f.state.events.get('event').templateId, birthdayGamerId);
 });

@@ -4,6 +4,23 @@ const assert=require('node:assert/strict');
 const {randomUUID}=require('node:crypto');
 const {createFixture}=require('./helpers/cloudinary-fixture.cjs');
 function setup(){const f=createFixture();return {f,...f.load('lib/guided-invitation.ts')};}
+test('draft recovery maps the removed design step and retains positions in the new content flow',()=>{
+ const {guidedRecoveryStep}=setup();
+ for(const [oldStep,expected] of [[0,0],[1,0],[2,1],[3,4],[15,4]]){
+  assert.equal(guidedRecoveryStep({step:oldStep,activeExtra:null}),expected);
+ }
+ for(let step=0;step<5;step++)assert.equal(guidedRecoveryStep({step,activeExtra:null,flow:'content-v2'}),step);
+});
+test('publication corrections lead to event data or details in the flow without design selection',()=>{
+ const {guidedPublicationIssues,guidedSections}=setup();
+ for(const eventType of ['wedding','birthday','graduation','baby_shower','anniversary','other']){
+  const values={eventType,hostNames:'',eventDate:'',eventTime:'',venue:'',address:'',sections:guidedSections(eventType)};
+  const missing=guidedPublicationIssues(values);
+  assert.equal(missing.length,5);assert.ok(missing.every(issue=>issue.step===0));
+  const rsvp=values.sections.find(s=>s.type==='rsvp');rsvp.rsvpMode='external';
+  assert.ok(guidedPublicationIssues(values).some(issue=>issue.step===2));
+ }
+});
 test('every occasion starts with the same guided model without fictional facts',()=>{
  const {initialGuidedValues,guidedDetails}=setup();
  for(const eventType of ['wedding','birthday','graduation','baby_shower','anniversary','other']){
@@ -12,9 +29,27 @@ test('every occasion starts with the same guided model without fictional facts',
   assert.ok(v.sections.every(s=>!s.content&&!s.detail&&!s.link));
   assert.equal(v.sections.filter(s=>s.enabled).length,1);
   assert.ok(guidedDetails(eventType).some(s=>s.type==='rsvp'));
-  if(eventType==='birthday')assert.equal(v.templateId,'birthday-confetti-v1');
+  assert.equal(v.templateId,'celebration-v1');assert.equal(v.texture,'none');
  }
 });
+test('shared invitations prepare, save, validate publication and retain custom sections for all occasions',async()=>{
+ for(const eventType of ['wedding','birthday','graduation','baby_shower','anniversary','other']){
+  const {f,eventPublicationIssues}=setup();
+  const section={id:'own',type:'custom',title:'Mi nota',content:'Información propia',detail:'',link:'',imageUrl:'',imageUrls:[],enabled:true};
+  const form=f.saveForm('',[section]);
+  const key=randomUUID();
+  for(const [field,value] of Object.entries({eventType,templateId:'celebration-v1',creationKey:key,texture:'paper',name:'Mi celebración',hostNames:'Alex',eventDate:'2027-10-12',eventTime:'17:00',venue:'Mi lugar',address:'Mi dirección'}))form.set(field,value);
+  assert.equal((await f.load('app/crear/actions.ts').prepareEvent(form)).ok,true);
+  assert.equal(f.state.events.get(key).templateId,'celebration-v1');
+  assert.equal((await f.actions.updateEvent('event',form)).ok,true);
+  const saved=f.state.events.get('event');
+  assert.equal(saved.eventType,eventType);assert.equal(saved.templateId,'celebration-v1');assert.equal(saved.texture,'none');
+  assert.equal(saved.hostNames,'Alex');assert.equal(saved.sections[0].content,'Información propia');
+  assert.equal(eventPublicationIssues(saved).length,0);
+  assert.equal(eventPublicationIssues({...saved,hostNames:'',eventDate:null,eventTime:'',venue:'',address:''}).length,5);
+ }
+});
+
 test('existing birthday content, layout and enabled sections survive opening and design changes',()=>{
  const {initialGuidedValues,applyGuidedDesign}=setup();
  const old={id:'event',eventType:'birthday',templateId:'none',name:'Mi fiesta',hostNames:'Alex',accent:'#123456',typography:'inter',bodyTypography:'nunito',sections:[{id:'own',type:'custom',title:'Mi título',content:'Mi contenido',detail:'',link:'',imageUrl:'',enabled:true}]};
@@ -31,11 +66,11 @@ test('every occasion validates required details and external confirmation links'
   rsvp.link='https://example.com/confirmar';assert.deepEqual(guidedPublicationIssues(v),[]);
  }
 });
-test('Confeti is retained during preparation and incomplete birthdays cannot proceed to payment',async()=>{
+test('retired birthday selections prepare the shared presentation and incomplete birthdays cannot proceed to payment',async()=>{
  const {f,guidedSections}=setup();const form=f.saveForm();const key=randomUUID();
  form.set('eventType','birthday');form.set('templateId','birthday-confetti-v1');form.set('creationKey',key);
  assert.equal((await f.load('app/crear/actions.ts').prepareEvent(form)).ok,true);
- assert.equal(f.state.events.get(key).templateId,'birthday-confetti-v1');
+ assert.equal(f.state.events.get(key).templateId,'celebration-v1');
  Object.assign(f.state.events.get('event'),{eventType:'birthday',templateId:'birthday-confetti-v1',sections:guidedSections('birthday')});
  assert.equal((await f.actions.publishEvent('event',0)).code,'validation');
  Object.assign(f.state.events.get('event'),{hostNames:'Alex',eventDate:new Date('2027-01-15T12:00:00Z'),eventTime:'17:00',venue:'Salón',address:'Calle'});
@@ -64,7 +99,7 @@ test('Globos pastel retains personal data, publishes its nineteen assets and sur
  assert.equal(after.typography,'comfortaa');assert.equal(after.templateId,birthdayPastelId);
  const key=randomUUID(),form=f.saveForm();form.set('eventType','birthday');form.set('templateId',birthdayPastelId);form.set('creationKey',key);
  assert.equal((await f.load('app/crear/actions.ts').prepareEvent(form)).ok,true);
- assert.equal(f.state.events.get(key).templateId,birthdayPastelId);
+ assert.equal(f.state.events.get(key).templateId,'celebration-v1');
  form.set('templateId',birthdayPastelId);assert.equal((await f.actions.updateEvent('event',form)).ok,true);
  assert.equal(f.state.events.get('event').templateId,birthdayPastelId);
 });
@@ -84,7 +119,7 @@ test('Neón keeps its identity through saving and preserves personal content whe
  assert.equal(selected.typography,'comfortaa');assert.equal(selected.bodyTypography,'dm-sans');
  const key=randomUUID(),form=f.saveForm();form.set('eventType','birthday');form.set('templateId',birthdayNeonId);form.set('creationKey',key);
  assert.equal((await f.load('app/crear/actions.ts').prepareEvent(form)).ok,true);
- assert.equal(f.state.events.get(key).templateId,birthdayNeonId);
+ assert.equal(f.state.events.get(key).templateId,'celebration-v1');
  assert.equal((await f.actions.updateEvent('event',form)).ok,true);
  assert.equal(f.state.events.get('event').templateId,birthdayNeonId);
 });
@@ -102,7 +137,7 @@ test('Disco registers thirteen assets, preserves personal content and survives p
  for(const key of ['name','hostNames','eventDate','message','imageUrl','sections'])assert.deepEqual(selected[key],input[key]);
  assert.equal(selected.typography,'outfit');assert.equal(selected.bodyTypography,'dm-sans');
  const key=randomUUID(),form=f.saveForm();form.set('eventType','birthday');form.set('templateId',birthdayDiscoId);form.set('creationKey',key);
- assert.equal((await f.load('app/crear/actions.ts').prepareEvent(form)).ok,true);assert.equal(f.state.events.get(key).templateId,birthdayDiscoId);
+ assert.equal((await f.load('app/crear/actions.ts').prepareEvent(form)).ok,true);assert.equal(f.state.events.get(key).templateId,'celebration-v1');
  assert.equal((await f.actions.updateEvent('event',form)).ok,true);assert.equal(f.state.events.get('event').templateId,birthdayDiscoId);
 });
 
@@ -119,6 +154,6 @@ test('Dinosaur registers sixteen assets, preserves personal content and survives
  for(const key of ['name','hostNames','eventDate','message','imageUrl','sections'])assert.deepEqual(selected[key],input[key]);
  assert.equal(selected.typography,'fredoka');assert.equal(selected.bodyTypography,'nunito');
  const key=randomUUID(),form=f.saveForm();form.set('eventType','birthday');form.set('templateId',birthdayDinosaurId);form.set('creationKey',key);
- assert.equal((await f.load('app/crear/actions.ts').prepareEvent(form)).ok,true);assert.equal(f.state.events.get(key).templateId,birthdayDinosaurId);
+ assert.equal((await f.load('app/crear/actions.ts').prepareEvent(form)).ok,true);assert.equal(f.state.events.get(key).templateId,'celebration-v1');
  assert.equal((await f.actions.updateEvent('event',form)).ok,true);assert.equal(f.state.events.get('event').templateId,birthdayDinosaurId);
 });

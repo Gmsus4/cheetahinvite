@@ -1,5 +1,7 @@
 # Contexto y guía de los diseños de invitaciones
 
+> **Dirección actual:** una presentación compartida, sin texturas, para todos los tipos de evento. Se retiraron del producto los diseños específicos de eventos distintos de boda. Los archivos de las colecciones anteriores se mantienen como historial y para compatibilidad de datos; los apartados antiguos de este documento describen esa etapa. Consultar [presentación compartida](docs/shared-invitation.md) antes de modificar el catálogo o los renderizadores.
+
 > Rama `codex/boda-alt`: las doce bodas del catálogo usan una estructura fotográfica centrada con fondos continuos y paneles translúcidos. Ver [diseño alternativo de bodas](docs/wedding-alternative.md). La colección anterior está preservada en `master` (`1f321eb`); los apartados de papelería de este documento describen esa versión.
 
 Documento de continuidad de **Cheetah Invite**. Reúne el objetivo, las decisiones del propietario, la implementación actual, los recursos y el procedimiento para seguir con la colección. Actualizado al incorporar el décimo diseño de cumpleaños, **Cine · Red Carpet**.
@@ -57,16 +59,19 @@ En el catálogo público de inicio (`/#personalizacion`), el filtro **Cumpleaño
 
 Ruta de creación: `/crear`.
 
+La elección inicial del tipo de evento se presenta en `EventTypePicker`: cabecera compartida con el panel, colores de marca (naranja, azul oscuro y gris claro), iconos de línea y seis opciones compactas. Este primer paso ya no anuncia cantidades ni nombres de diseños. Conserva la recuperación de borradores; elegir una ocasión abre el asistente con el tipo correspondiente. La presentación se organiza en dos columnas en escritorio y una lista vertical en móvil.
+
 1. Se elige el tipo: boda, cumpleaños, graduación, baby shower, aniversario u otro evento.
-2. Se abre el mismo asistente de cuatro pasos:
-   1. **Tu celebración**: tipo y diseño.
-   2. **Datos principales**: protagonistas/anfitriones, nombre de invitación, fecha, hora, lugar y dirección.
-   3. **Dale tu toque**: color, fotografía opcional, mensaje y secciones.
-   4. **Revisa y comparte**: revisión, pendientes, guardado y continuación al pago.
+2. Se abre directamente **Tu evento**, sin selección de diseño, en el mismo asistente de cinco pasos:
+   1. **Tu evento**: tipo, protagonistas/anfitriones, nombre de invitación, fecha, hora, lugar y dirección.
+   2. **Fotografías**: portada y fondo opcional, cuando corresponde.
+   3. **Detalles**: mensaje, secciones opcionales, galería y fotos de cada sección.
+   4. **Apariencia**: combinación de colores de la invitación.
+   5. **Revisa y publica**: revisión, pendientes, guardado y continuación al pago.
 
 El asistente mantiene vista previa móvil/escritorio, vista ampliada, recuperación local, protección al salir y control de conflictos. Los tipos distintos de boda ya no deben volver a abrir una interfaz diferente.
 
-Los borradores nuevos de cumpleaños empiezan con Confeti; el usuario puede cambiar a Globos pastel, Neón, Disco o Esencial. Seleccionar otro diseño conserva el contenido personal y aplica su color y tipografía recomendados.
+Los identificadores de las composiciones siguen siendo internos: los eventos nuevos conservan los valores predeterminados y los existentes mantienen su composición guardada. El asistente ya no muestra el catálogo ni permite elegir diseños. La revisión permite ajustar la apariencia. Los borradores locales nuevos guardan `wizard.flow = "content-v2"`; la recuperación adapta los índices del flujo anterior, que incluía el paso de diseño.
 
 Las secciones nuevas no se rellenan con historias, direcciones o datos de los ejemplos. La confirmación integrada se activa inicialmente; los demás detalles se activan según lo que el organizador quiera compartir.
 
@@ -90,7 +95,7 @@ La creación del evento en el servidor se prepara al guardar o al necesitar subi
 | `app/crear/page.tsx` | Entrada autenticada, límites de cuenta y recuperación de evento |
 | `app/crear/actions.ts` | Preparación del borrador; conserva el identificador del diseño elegido |
 | `components/dashboard/InvitationEditor.tsx` | Elección inicial del tipo y entrada al asistente común |
-| `components/dashboard/GuidedInvitationEditor.tsx` | Asistente de cuatro pasos y vista previa |
+| `components/dashboard/GuidedInvitationEditor.tsx` | Asistente de cinco pasos sin selector de diseños y vista previa |
 | `lib/guided-invitation.ts` | Valores iniciales, detalles por evento, selección de diseño, paletas y validación |
 | `lib/invitation-event-content.ts` | Etiquetas, textos base y ejemplos según el tipo de evento |
 | `components/dashboard/InvitationDesignGrid.tsx` | Grid y tarjetas compartidos por todos los tipos |

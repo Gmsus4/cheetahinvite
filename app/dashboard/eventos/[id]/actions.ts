@@ -15,6 +15,7 @@ import { isInvitationFont } from "@/lib/invitation-fonts";
 import { isValidInvitationSlug, normalizeInvitationSlug } from "@/lib/invitation-url";
 import { isInvitationTemplate } from "@/lib/invitation-templates";
 import { isInvitationTexture } from "@/lib/invitation-textures";
+import { sharedInvitationId, sharedInvitationDesign } from "@/lib/shared-invitation";
 import { ImageStorageError, queueEventImages, scheduleCloudinaryCleanup, syncCloudinaryImages, withImageLock } from "@/lib/cloudinary-storage";
 
 export async function deleteEvent(eventId: string) {
@@ -163,13 +164,14 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     const duplicate = await prisma.event.findFirst({ where: { ownerId: session.user.id, customSlug, id: { not: eventId } }, select: { id: true } });
     if (duplicate) return failure("validation", "Ya tienes otra invitación con ese enlace. Elige otro nombre.");
   }
-  const design = eventType === "wedding" ? getWeddingDesign(templateId) : null;
+  const design = templateId === sharedInvitationId || eventType !== "wedding" ? sharedInvitationDesign : getWeddingDesign(templateId);
+  const orderedSections = orderedWeddingSections(sections as InviteSection[]);
   const curated = design ? {
     accent: weddingPalette(design, accent).accent, typography: design.typography, bodyTypography: design.bodyTypography,
     texture: "none", heroHorizontal: "center", heroVertical: "center",
     buttonShape: design.buttons.shape, buttonFilled: design.buttons.filled, buttonIcons: design.buttons.icons,
     buttonBorder: design.buttons.border, buttonBold: design.buttons.bold,
-    sections: orderedWeddingSections(sections as InviteSection[]).map(section => ({ ...section, layout: "auto" as const })),
+    sections: [...orderedSections, ...(sections as InviteSection[]).filter(section => !orderedSections.includes(section))].map(section => ({ ...section, layout: "auto" as const })),
   } : {};
   try {
     const result = await withImageLock(session.user.id, async tx => {

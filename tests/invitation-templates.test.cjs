@@ -9,9 +9,10 @@ require.extensions['.ts'] = (mod, filename) => mod._compile(ts.transpileModule(f
 }).outputText, filename);
 const { invitationTemplates, getInvitationTemplate, isInvitationTemplate, sectionDecoration } = require('../lib/invitation-templates.ts');
 
-test('event types retain their numbered slots and wedding includes eight artwork collections', () => {
+test('wedding retains eight collections and other occasions only offer the shared presentation', () => {
   for (const eventType of ['wedding', 'birthday', 'graduation', 'baby_shower', 'anniversary']) {
-    assert.deepEqual(invitationTemplates.filter((t) => t.eventType === eventType && /^plantilla/.test(t.id)).map((t) => t.id), eventType === 'wedding' ? ['plantilla1', 'plantilla2', 'plantilla3', 'plantilla4', 'plantilla5', 'plantilla6', 'plantilla7', 'plantilla8'] : ['plantilla1', 'plantilla2', 'plantilla3']);
+    assert.deepEqual(invitationTemplates.filter((t) => t.eventType === eventType && /^plantilla/.test(t.id)).map((t) => t.id), eventType === 'wedding' ? ['plantilla1', 'plantilla2', 'plantilla3', 'plantilla4', 'plantilla5', 'plantilla6', 'plantilla7', 'plantilla8'] : []);
+    if(eventType !== 'wedding') assert.deepEqual(invitationTemplates.filter(t => t.eventType === eventType).map(t => t.id), ['celebration-v1']);
     assert.equal(isInvitationTemplate(eventType, 'none'), true);
   }
 });

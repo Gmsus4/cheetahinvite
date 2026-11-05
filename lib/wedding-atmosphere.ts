@@ -22,7 +22,6 @@ export function atmosphereStyle(design: WeddingDesign, accent: string): CSSPrope
     "--wa-base": palette.dark, "--wa-tint": palette.accent,
     "--wa-heading": getInvitationFont(design.typography).family,
     "--wa-body": getInvitationFont(design.bodyTypography).family,
-    "--wa-texture": design.celestial ? `url("${design.celestial.sky}")` : design.foil ? `url("${design.foil}")` : "url('/textures/wedding/stationery-grain.svg')",
   } as CSSProperties;
 }
 

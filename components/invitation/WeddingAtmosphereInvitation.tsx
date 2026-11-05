@@ -3,48 +3,55 @@
 import Image from "next/image";
 import { FiArrowUpRight, FiClock, FiGift, FiHeart, FiMapPin, FiMusic, FiCamera, FiUsers } from "react-icons/fi";
 import type { InviteSection } from "@/lib/invitation-editor";
-import { getWeddingDesign } from "@/lib/wedding-designs";
+import { invitationAppearance } from "@/lib/shared-invitation";
+import { getInvitationEventContent, invitationPresentation } from "@/lib/invitation-event-content";
 import { atmospherePanelStyle, atmosphereSections, atmosphereStyle, atmosphereTime } from "@/lib/wedding-atmosphere";
 import { invitationLinkLabel, invitationMapUrl, invitationSectionUrl } from "@/lib/invitation-links";
 import type { WeddingInvitationProps } from "./WeddingInvitation";
 import { CountdownTimer } from "./CountdownTimer";
 import { RsvpForm } from "./RsvpForm";
 import { WeddingPhotoCarousel } from "./WeddingPhotoCarousel";
+import { useInvitationMotion } from "@/components/dashboard/useInvitationMotion";
 
 const sectionIcons = { story: FiHeart, ceremony: FiHeart, reception: FiMapPin, program: FiClock, parents: FiUsers, dress_code: FiUsers, gifts: FiGift, gallery: FiCamera, rsvp: FiHeart, music: FiMusic, custom: FiHeart };
 
 export function WeddingAtmosphereInvitation(props: WeddingInvitationProps) {
-  const design = getWeddingDesign(props.templateId)!;
-  const title = props.hostNames.trim() || "Nuestra boda";
-  const names = title.split(/\s+(?:y|&)\s+/i);
+  const motion = useInvitationMotion();
+  const eventType = props.eventType ?? "wedding";
+  const design = invitationAppearance(eventType, props.templateId);
+  const content = getInvitationEventContent(eventType);
+  const copy = invitationPresentation(eventType);
+  const title = props.hostNames.trim() || props.name.trim() || content.defaultName;
+  const couple = eventType === "wedding" || eventType === "anniversary";
+  const names = couple ? title.split(/\s+(?:y|&)\s+/i) : [title];
   const sections = atmosphereSections(props.sections);
   const time = atmosphereTime(props.eventTime);
   const date = props.eventDateKey ? props.date : "La fecha, muy pronto";
-  const initials = names.map(name => name.trim()[0]).slice(0, 2).join(" & ");
+  const initials = couple ? names.map(name => name.trim()[0]).slice(0, 2).join(" & ") : title.split(/\s+/).map(part => part[0]).slice(0, 2).join("");
   const hasLocation = Boolean(props.venue || props.address);
   const firstDetailIndex = 2 + Number(Boolean(props.eventDateKey)) + Number(hasLocation);
 
-  return <article className="wedding-atmosphere" data-design={design.kind} data-photo={Boolean(props.backgroundImageUrl)} data-long-names={title.length > 25 || undefined} style={atmosphereStyle(design, props.accent)}>
+  return <article ref={motion} className="wedding-atmosphere" data-event-type={eventType} data-design={design.kind} data-photo={Boolean(props.backgroundImageUrl)} data-long-names={title.length > 25 || undefined} style={atmosphereStyle(design, props.accent)}>
     <div className="wa-backdrop" aria-hidden="true">
       {props.backgroundImageUrl && <div className="wa-backdrop-image"><Image src={props.backgroundImageUrl} alt="" fill sizes="100vw" unoptimized loading="eager" /></div>}
-      <div className="wa-backdrop-texture" /><div className="wa-backdrop-shade" />
+      <div className="wa-backdrop-shade" />
     </div>
     <div className="wa-column">
       <div className="wa-shell">
       <div className="wa-intro">
       <header className="wa-cover" data-surface="blur" data-has-media={Boolean(props.imageUrl)}>
-        <div className="wa-cover-heading"><span className="wa-kicker">Nuestra boda</span>
-          <h1 aria-label={title}>{names.length === 2 ? <>{names[0]}<span className="wa-ampersand" aria-hidden="true">&amp;</span>{names[1]}</> : title}</h1>
+        <div className="wa-cover-heading"><span className="wa-kicker">{props.name.trim() || content.defaultName}</span>
+          <h1 aria-label={title}>{names.length === 2 ? <><span className="wa-couple-name">{names[0]}</span><span className="wa-ampersand" aria-hidden="true">&amp;</span><span className="wa-couple-name">{names[1]}</span></> : title}</h1>
           <p className="wa-date">{date}{time && <><span aria-hidden="true"> · </span>{time}</>}</p>
         </div>
-        {props.imageUrl ? <div className="wa-portrait"><Image src={props.imageUrl} alt={`La pareja: ${title}`} width={900} height={1000} sizes="(max-width:600px) 94vw, 540px" preload unoptimized /></div>
-          : <div className="wa-no-photo" aria-hidden="true"><span>{initials}</span><i>El comienzo de nuestro siempre</i></div>}
+        {props.imageUrl ? <div className="wa-portrait"><Image src={props.imageUrl} alt={`${copy.photoLabel}: ${title}`} width={900} height={1000} sizes="(max-width:600px) 94vw, 540px" preload unoptimized /></div>
+          : <div className="wa-no-photo" aria-hidden="true"><span>{initials}</span><i>{copy.caption}</i></div>}
       </header>
       {props.eventDateKey && <section className="wa-panel wa-countdown" data-surface="blur-color" aria-label="Cuenta regresiva"><span className="wa-kicker">Cada vez más cerca</span><CountdownTimer date={props.eventDateKey} time={props.eventTime || "00:00"} /></section>}
       </div>
       <section className="wa-panel wa-welcome" data-surface={atmospherePanelStyle(undefined, 1 + Number(Boolean(props.eventDateKey)))} id="wedding-celebration">
-        <h2>Queremos compartir<br /><em>este día contigo.</em></h2>
-        <p>{props.message.trim() || "Nos encantará tenerte cerca para celebrar el comienzo de esta nueva etapa."}</p>
+        <h2>{copy.welcomeTitle}</h2>
+        <p>{props.message.trim() || content.message}</p>
       </section>
       {hasLocation && <section className="wa-panel wa-location" data-surface={atmospherePanelStyle(undefined, 2 + Number(Boolean(props.eventDateKey)))} aria-labelledby="wedding-location-title">
         <FiMapPin className="wa-section-icon" aria-hidden="true" /><h2 id="wedding-location-title">La celebración</h2>
@@ -53,7 +60,7 @@ export function WeddingAtmosphereInvitation(props: WeddingInvitationProps) {
       </section>}
       {sections.map((section, index) => <AtmosphereSection key={section.id} section={section} surface={atmospherePanelStyle(section, firstDetailIndex + index)} eventId={props.publicEventId} />)}
       </div>
-      <footer className="wa-footer"><span className="wa-kicker">Con todo nuestro amor</span><strong>{title}</strong><p>Gracias por ser parte de nuestra historia.</p><small>Cheetah Invite</small></footer>
+      <footer className="wa-footer"><span className="wa-kicker">{copy.closingKicker}</span><strong>{title}</strong><p>{copy.closingMessage}</p><small>Cheetah Invite</small></footer>
     </div>
   </article>;
 }

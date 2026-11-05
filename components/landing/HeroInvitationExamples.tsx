@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { FiCheck, FiChevronLeft, FiChevronRight, FiClock } from "react-icons/fi";
+import { FiCheck, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { InvitationExampleFrame } from "./InvitationExampleFrame";
 
 type Example = { slug: string; label: string };
@@ -47,7 +47,6 @@ export function HeroInvitationExamples({ examples, weddingDesigns, birthdayDesig
       </div>
       <div className="hero-example-meta">
         <span className="hero-example-hint" role="status"><FiCheck aria-hidden="true" /> {selected.label} · datos de ejemplo</span>
-        <span className="event-availability-note"><FiClock aria-hidden="true" /> Más celebraciones, próximamente</span>
       </div>
     </div>
     <div className="hero-example-phone" id="hero-invitation-example">

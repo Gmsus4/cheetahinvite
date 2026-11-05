@@ -5,7 +5,7 @@ import { birthdayGamerId } from './birthday-gamer';
 import { birthdayDinosaurId } from './birthday-dinosaur';
 import { birthdaySpaceId } from './birthday-space';
 import type { EventData } from '@/components/dashboard/EventEditor';
-import type { EditorValues, InviteSection } from './invitation-editor';
+import type { EditorValues, EditorWizard, InviteSection } from './invitation-editor';
 import { getInvitationEventContent } from './invitation-event-content';
 import { getInvitationTemplate } from './invitation-templates';
 import { birthdayDiscoId } from './birthday-disco';
@@ -13,7 +13,8 @@ import { birthdayNeonId } from './birthday-neon';
 import { birthdayPastelId } from './birthday-pastel';
 import { birthdayConfettiId } from './birthday-designs';
 import { eventButtonAppearance } from './invitation-buttons';
-import { applyWeddingDesign, getWeddingDesign, weddingDesigns, weddingDetails, weddingSections, weddingPublicationIssues, weddingEventPublicationIssues } from './wedding-designs';
+import { sharedInvitationId, sharedInvitationDesign } from './shared-invitation';
+import { applyWeddingDesign, getWeddingDesign, weddingDetails, weddingSections, weddingPublicationIssues, weddingEventPublicationIssues } from './wedding-designs';
 
 export function guidedDetails(eventType: string) {
   if (eventType === 'wedding') return weddingDetails;
@@ -29,6 +30,7 @@ export function guidedSections(eventType: string): InviteSection[] {
   return guidedDetails(eventType).map(d => ({ id: `${eventType}-${d.type}`, type:d.type, title:d.title, content:'', detail:'', link:'', imageUrl:'', imageUrls:[], enabled:d.type === 'rsvp', ...(d.type === 'rsvp' ? { rsvpMode:'integrated' as const } : {}) }));
 }
 export function guidedDesign(eventType: string, templateId: string) {
+  if (templateId === sharedInvitationId || eventType !== 'wedding') return sharedInvitationDesign;
   const wedding = eventType === 'wedding' ? getWeddingDesign(templateId) : null;
   if (wedding) return wedding;
   const template = getInvitationTemplate(eventType, templateId);
@@ -41,6 +43,7 @@ export function guidedDesign(eventType: string, templateId: string) {
   ] };
 }
 export function applyGuidedDesign(values: EditorValues, id: string): EditorValues {
+  if (id === sharedInvitationId) return { ...values, templateId: id, accent: sharedInvitationDesign.palettes[0].accent, typography: sharedInvitationDesign.typography, bodyTypography: sharedInvitationDesign.bodyTypography, texture: 'none', heroHorizontal: 'center', heroVertical: 'center', buttonAppearance: { ...sharedInvitationDesign.buttons } };
   if (values.eventType === 'wedding' && getWeddingDesign(id)) return applyWeddingDesign(values,id);
   const design = guidedDesign(values.eventType,id);
   const confetti = values.eventType === 'birthday' && (id === birthdayConfettiId || id === birthdayDinosaurId);
@@ -53,19 +56,25 @@ export function completeGuidedSections(eventType: string, stored: InviteSection[
 export function initialGuidedValues(event: EventData): EditorValues {
   const type = event.eventType;
   const content = getInvitationEventContent(type);
-  const id = !event.id && type === 'wedding' ? weddingDesigns[0].id : !event.id && type === 'birthday' ? birthdayConfettiId : event.templateId || 'none';
+  const id = !event.id ? sharedInvitationId : event.templateId || sharedInvitationId;
   const stored = Array.isArray(event.sections) ? event.sections as InviteSection[] : [];
   const sections = completeGuidedSections(type, stored);
   const values: EditorValues = {name:event.name || content.defaultName, eventType:type, hostNames:event.hostNames || '', eventDate:event.eventDate ? new Date(event.eventDate).toISOString().slice(0,10) : '', eventTime:event.eventTime || '', venue:event.venue || '', address:event.address || '', message:event.message || '', imageUrl:event.imageUrl || '', backgroundImageUrl:event.backgroundImageUrl || '', customSlug:event.customSlug || '', accent:event.accent, templateId:id, typography:event.typography, bodyTypography:event.bodyTypography, texture:event.texture || 'none', heroHorizontal:event.heroHorizontal || 'center', heroVertical:event.heroVertical || 'center', buttonAppearance:eventButtonAppearance(event), sections};
   if (type === 'wedding' && getWeddingDesign(id)) return applyWeddingDesign(values,id,event.accent);
-  return event.id ? values : applyGuidedDesign(values,id);
+  if (event.id) return { ...values, texture: 'none' };
+  return applyGuidedDesign(values,id);
 }
 export function guidedPublicationIssues(values: Pick<EditorValues,'eventType'|'hostNames'|'eventDate'|'eventTime'|'venue'|'address'|'sections'>) {
-  const issues = weddingPublicationIssues(values);
+  const issues = weddingPublicationIssues(values).map(issue => ({ ...issue, step: issue.step === 1 ? 0 : 2 }));
   if (values.eventType === 'wedding') return issues;
   return issues.map(issue => ({...issue, message:issue.message.replace('los nombres de la pareja','el nombre de quien celebra o de los anfitriones').replace('la fecha de la boda','la fecha del evento')}));
 }
+export function guidedRecoveryStep(wizard: EditorWizard) {
+  if (wizard.flow === 'content-v2') return Math.min(4, Math.max(0, wizard.step));
+  // Old drafts used design / event / personalization / review.
+  return [0, 0, 1, 4][Math.min(3, Math.max(0, wizard.step))];
+}
 export function eventPublicationIssues(event: Parameters<typeof weddingEventPublicationIssues>[0]) {
-  if (!event.eventType || event.eventType === 'wedding') return weddingEventPublicationIssues(event);
+  if ((!event.eventType || event.eventType === 'wedding') && event.templateId !== sharedInvitationId) return weddingEventPublicationIssues(event);
   return guidedPublicationIssues({eventType:event.eventType || 'other',hostNames:event.hostNames || '',eventDate:event.eventDate?.toISOString().slice(0,10) || '',eventTime:event.eventTime || '',venue:event.venue || '',address:event.address || '',sections:(Array.isArray(event.sections) ? event.sections : []) as InviteSection[]});
 }

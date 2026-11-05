@@ -1,6 +1,6 @@
 /* Visible by default, including before hydration or without JavaScript. */
 @media (prefers-reduced-motion: no-preference) {
-  .invite-website [data-invite-motion="pending"] { opacity: 0; }
+  :is(.invite-website,.wedding-atmosphere) [data-invite-motion="pending"] { opacity: 0; }
 
   .invite-website.invite-website.invite-website[data-button-shape] :is(.invite-static-link,.invite-hero-button) {
     transition: filter .2s ease, translate .25s ease, box-shadow .25s ease;
@@ -26,10 +26,10 @@
 @keyframes invite-photo-in { from { opacity: 0; scale: .98; } to { opacity: 1; scale: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  html:has(.invite-website) { scroll-behavior: auto; }
-  .invite-website [data-invite-motion="pending"] { opacity: 1; }
+  html:has(.invite-website,.wedding-atmosphere) { scroll-behavior: auto; }
+  :is(.invite-website,.wedding-atmosphere) [data-invite-motion="pending"] { opacity: 1; }
 }
 
 @media print {
-  .invite-website [data-invite-motion="pending"] { opacity: 1; }
+  :is(.invite-website,.wedding-atmosphere) [data-invite-motion="pending"] { opacity: 1; }
 }

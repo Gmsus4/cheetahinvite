@@ -237,6 +237,18 @@ test('backup parser accepts incomplete fields but rejects foreign, malformed and
   assert.equal(form.get('contentVersion'), '3'); assert.equal(form.get('buttonFilled'), 'true'); assert.equal(form.get('sections'), '[]');
 });
 
+test('new wizard flow survives backup and recovery without changing event content', t => {
+  const first = setup(t);
+  const wizard = { step: 4, activeExtra: null, flow: 'content-v2' };
+  first.controller.update(values('Mi celebración'), false, wizard, false);
+  first.controller.stop();
+  const next = setup(t, { storage: first.storage });
+  const record = next.controller.recover();
+  assert.deepEqual(record.wizard, wizard);
+  assert.equal(JSON.parse(record.snapshot).name, 'Mi celebración');
+  assert.equal(parseEditorDraft(JSON.stringify({ ...record, wizard: { ...wizard, flow: 'unknown' } }), 'owner', 'event', Date.now()), null);
+});
+
 test('local backups retain section photo placement and reject unsupported positions', () => {
   const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), version: 0, updatedAt: Date.now(), wizard: { step: 2, activeExtra: 'story' } };
   for (const position of ['before', 'after', 'sideways']) {

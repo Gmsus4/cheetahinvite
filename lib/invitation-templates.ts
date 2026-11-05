@@ -10,12 +10,16 @@ import { birthdayDiscoTemplate } from './birthday-disco';
 import { birthdayNeonTemplate } from './birthday-neon';
 import { birthdayPastelTemplate } from './birthday-pastel';
 import { birthdayConfettiTemplate } from './birthday-designs';
+import { invitationEventTypes } from './invitation-event-content';
+import { sharedInvitationId, sharedInvitationDesign } from './shared-invitation';
 
 export type DecorationSlot = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'separator' | 'flower' | 'decoration' | 'texture';
 export type InvitationTemplate = { id: string; eventType: string; label: string; available: boolean; accent?: string | null; assets: Partial<Record<DecorationSlot, string>>; decorations?: string[] };
-export const invitationTemplates: InvitationTemplate[] = [...templateManifest, birthdaySpaceTemplate, birthdayConfettiTemplate, birthdayPastelTemplate, birthdayNeonTemplate, birthdayDiscoTemplate, birthdayDinosaurTemplate, birthdayGamerTemplate, birthdayCowboyTemplate, birthdayElegantTemplate, birthdayCinemaTemplate];
+// Retired identities only resolve stored events; they are no longer offered.
+const retiredTemplates: InvitationTemplate[] = [...templateManifest.filter(template => template.eventType !== 'wedding'), birthdaySpaceTemplate, birthdayConfettiTemplate, birthdayPastelTemplate, birthdayNeonTemplate, birthdayDiscoTemplate, birthdayDinosaurTemplate, birthdayGamerTemplate, birthdayCowboyTemplate, birthdayElegantTemplate, birthdayCinemaTemplate];
+export const invitationTemplates: InvitationTemplate[] = [...templateManifest.filter(template => template.eventType === 'wedding'), ...invitationEventTypes.map(eventType => ({ id: sharedInvitationId, eventType, label: 'Celebración', available: true, accent: sharedInvitationDesign.palettes[0].accent, assets: {} }))];
 export function getInvitationTemplate(eventType: string, id: string) {
-  return invitationTemplates.find((template) => template.eventType === eventType && template.id === id && template.available) ?? null;
+  return [...invitationTemplates, ...retiredTemplates].find((template) => template.eventType === eventType && template.id === id && template.available) ?? null;
 }
 export function isInvitationTemplate(eventType: string, id: string) {
   return id === 'none' || (eventType === 'wedding' && Boolean(getWeddingDesign(id))) || Boolean(getInvitationTemplate(eventType, id));

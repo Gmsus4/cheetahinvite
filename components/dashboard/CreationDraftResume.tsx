@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useSyncExternalStore } from "react";
+import { LuArrowRight } from "react-icons/lu";
 import { editorDraftPrefix, parseEditorDraft } from "@/lib/invitation-editor";
 
 function latestCreation(ownerId: string) {
@@ -23,5 +24,5 @@ const serverSnapshot = () => null;
 export function CreationDraftResume({ ownerId }: { ownerId: string }) {
   const snapshot = useCallback(() => latestCreation(ownerId), [ownerId]);
   const id = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
-  return id ? <p className="editor-recovery"><Link href={`/crear?resume=${id}`}>Recuperar la invitación que estabas creando</Link></p> : null;
+  return id ? <p className="editor-recovery"><Link className="editor-resume-link" href={`/crear?resume=${id}`}><span>Recuperar la invitación que estabas creando</span><LuArrowRight size={18} aria-hidden="true" /></Link></p> : null;
 }

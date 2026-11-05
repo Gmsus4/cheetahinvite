@@ -11,7 +11,7 @@ export type EditorSaveResult = { ok: true; eventId: string; version: number } | 
   ok: false; code: "validation" | "auth" | "conflict" | "published" | "not-found" | "unavailable";
   message: string; version?: number;
 };
-export type EditorWizard = { step: number; activeExtra: string | null };
+export type EditorWizard = { step: number; activeExtra: string | null; flow?: "content-v2" };
 export class EditorSaveFailure extends Error {
   constructor(public result: Extract<EditorSaveResult, { ok: false }>) { super(result.message); }
 }
@@ -54,7 +54,8 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
       || !validCreationKey(record.creationKey) || !Number.isSafeInteger(record.version) || record.version < 0
       || !Number.isFinite(record.updatedAt) || record.updatedAt > now + 60_000 || record.updatedAt < now - EDITOR_DRAFT_LIFETIME
       || typeof record.snapshot !== "string" || !record.wizard || !Number.isInteger(record.wizard.step)
-      || record.wizard.step < 0 || record.wizard.step > 15 || !(record.wizard.activeExtra === null || typeof record.wizard.activeExtra === "string")) return null;
+      || record.wizard.step < 0 || record.wizard.step > 15 || !(record.wizard.activeExtra === null || typeof record.wizard.activeExtra === "string")
+      || (record.wizard.flow !== undefined && record.wizard.flow !== "content-v2")) return null;
     const values = JSON.parse(record.snapshot) as EditorValues;
     const strings = ["name", "eventType", "eventDate", "eventTime", "hostNames", "venue", "address", "message", "imageUrl", "accent", "typography", "bodyTypography", "customSlug", "templateId", "texture", "heroHorizontal", "heroVertical"] as const;
     if (!values || !strings.every(key => typeof values[key] === "string")

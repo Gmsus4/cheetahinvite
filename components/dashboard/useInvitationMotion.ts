@@ -5,6 +5,15 @@ import { useEffect, useRef } from "react";
 // Reveal content rather than containers so the gallery dialog stays fixed to
 // the viewport and long sections appear gradually as they are read.
 const revealSelector = [
+  ".wa-cover-heading > *",
+  ".wa-portrait",
+  ".wa-no-photo > *",
+  ".wa-panel > :not(.invite-countdown-clock):not(.wa-timeline)",
+  ".wa-timeline > li",
+  ".wa-section-photo",
+  ".wa-photo-grid > figure",
+  ".wa-photo-carousel",
+  ".wa-footer > *",
   ".wedding-hero-copy > *",
   ".wedding-hero-photo",
   ".wedding-welcome > *",
@@ -55,7 +64,7 @@ export function useInvitationMotion() {
       const siblings = Array.from(element.parentElement?.children ?? [])
         .filter((child) => child.matches(revealSelector) && child.getClientRects().length);
       const delay = Math.min(Math.max(0, siblings.indexOf(element)) * 65, 260);
-      const isPhoto = element.matches(".invite-location-photo,.invite-content-image,.invite-gallery-tile");
+      const isPhoto = element.matches(".invite-location-photo,.invite-content-image,.invite-gallery-tile,.wa-portrait,.wa-section-photo,.wa-photo-grid > figure,.wa-photo-carousel");
       const animation = element.animate([
         { opacity: 0, transform: isPhoto ? "scale(.985)" : "translateY(16px)" },
         { opacity: 1, transform: "none" },

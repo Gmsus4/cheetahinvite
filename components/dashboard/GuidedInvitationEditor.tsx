@@ -2,13 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { FiArrowLeft, FiArrowRight, FiCalendar, FiCheck, FiEye, FiHeart, FiLock, FiSave, FiSend, FiSliders } from "react-icons/fi";
+import { FiArrowLeft, FiArrowRight, FiCalendar, FiCamera, FiCheck, FiEye, FiList, FiLock, FiSave, FiSend, FiSliders } from "react-icons/fi";
 import { prepareEvent } from "@/app/crear/actions";
 import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 import { InvitationCanvas } from "./EventEditor";
-import { initialGuidedValues, completeGuidedSections, guidedDetails, guidedDesign, applyGuidedDesign, guidedPublicationIssues } from "@/lib/guided-invitation";
+import { initialGuidedValues, completeGuidedSections, guidedDetails, guidedDesign, guidedPublicationIssues, guidedRecoveryStep } from "@/lib/guided-invitation";
 import { getInvitationEventContent, invitationEventTypes } from "@/lib/invitation-event-content";
-import { EventDesignPicker } from "./EventDesignPicker";
 import { applyWeddingDesign, getWeddingDesign } from "@/lib/wedding-designs";
 import { EditorSaveFailure, editorFormData, type EditorValues, type InviteSection } from "@/lib/invitation-editor";
 import { invitationPriceLabel, isInvitationPublished } from "@/lib/invitation-payment";
@@ -21,13 +20,13 @@ import { EditorRecoveryDialog } from "./EditorRecoveryDialog";
 import { InvitationLivePreview } from "./InvitationLivePreview";
 import { InvitationPublicLink } from "./InvitationPublicLink";
 import { CustomInvitationLinkField } from "./CustomInvitationLinkField";
-import { WeddingDesignPicker } from "./WeddingDesignPicker";
 import styles from "./EventWorkspace.module.css";
 import { DashboardHeader } from "./DashboardHeader";
 
-const steps = ["Tu celebración", "Datos principales", "Dale tu toque", "Revisa y comparte"];
-const stepIcons = [FiHeart, FiCalendar, FiSliders, FiSend];
-const descriptions = ["Elige un diseño. Nosotros cuidamos cada detalle.", "Cuéntanos cuándo y dónde será la celebración.", "Hazla tuya con tus fotos y los detalles que quieras compartir.", "Así recibirán la invitación las personas que más quieres."];
+const steps = ["Tu evento", "Fotografías", "Detalles", "Apariencia", "Revisa y publica"];
+const stepIcons = [FiCalendar, FiCamera, FiList, FiSliders, FiSend];
+const descriptions = ["Cuéntanos quién celebra, cuándo y dónde será.", "Hazla tuya con tus fotografías favoritas.", "Elige lo que quieres compartir con tus invitados.", "Dale tu toque con los colores de tu celebración.", "Así recibirán la invitación las personas que más quieres."];
+const lastStep = steps.length - 1;
 
 export function GuidedInvitationEditor({ event, creation = false, error, account }: { event: EventData; creation?: boolean; saved: boolean; published: boolean; error: string; account?: { name: string; email: string; image?: string | null } }) {
   const router = useRouter();
@@ -58,7 +57,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     ownerId: event.ownerId, eventId: event.id, snapshot, version: event.contentVersion, creation, manualOnly,
     save: async (submitted, version, automatic) => updateEvent(await ensureEvent(submitted), editorFormData(submitted, version), automatic ? "auto" : "manual"),
   });
-  useEffect(() => { persistence.update(snapshot, uploads > 0, { step, activeExtra: null }, manualOnly); }, [persistence, snapshot, uploads, step, manualOnly]);
+  useEffect(() => { persistence.update(snapshot, uploads > 0, { step, activeExtra: null, flow: "content-v2" }, manualOnly); }, [persistence, snapshot, uploads, step, manualOnly]);
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
     if (scrollToTop.current) {
@@ -90,14 +89,14 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     const record = persistence.recover();
     if (!record) return;
     const recovered = JSON.parse(record.snapshot) as EditorValues;
-    const restored = { ...recovered, sections: completeGuidedSections(recovered.eventType, recovered.sections) };
+    const restored = { ...recovered, texture: "none", sections: completeGuidedSections(recovered.eventType, recovered.sections) };
     setValues(restored.eventType === "wedding" && getWeddingDesign(restored.templateId) ? applyWeddingDesign(restored, restored.templateId, restored.accent) : restored);
-    setStep(Math.min(3, record.wizard.step));
+    setStep(guidedRecoveryStep(record.wizard));
     if (creation && record.eventId) router.replace(`/crear?resume=${record.eventId}`);
   }
   async function save(forPublication = false, overwrite = false) {
     if (busy || uploads) return;
-    if (forPublication && issues.length) { setStep(3); setNotice("Completa los datos pendientes antes de continuar al pago."); return; }
+    if (forPublication && issues.length) { setStep(lastStep); setNotice("Completa los datos pendientes antes de continuar al pago."); return; }
     if (!form.current?.reportValidity()) return;
     setSaving(true); setNotice("");
     try {
@@ -113,12 +112,12 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     } catch { persistence.reportError("No pudimos completar la operación. Tu borrador sigue protegido; intenta de nuevo."); }
     finally { setSaving(false); }
   }
-  function submit(event: FormEvent) { event.preventDefault(); if (step < 3) goTo(step + 1); else void save(); }
+  function submit(event: FormEvent) { event.preventDefault(); if (step < lastStep) goTo(step + 1); else void save(); }
   const uploadBusy = (active: boolean) => setUploads(current => current + (active ? 1 : -1));
   const uploadProps = { eventId: event.id, ensureEvent: creation ? () => ensureEvent() : undefined, onBusyChange: uploadBusy };
   const CurrentStepIcon = stepIcons[step];
-  const progress = <nav className="guided-progress" data-grouped={step === 3} data-expanded={mobileStepsExpanded} aria-label="Pasos de tu invitación" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setMobileStepsExpanded(false); }} onKeyDown={event => { if (event.key === "Escape") { setMobileStepsExpanded(false); event.currentTarget.querySelector<HTMLButtonElement>(".guided-steps-toggle")?.focus(); } }}>
-    {step === 3 && <button className="guided-steps-toggle" type="button" aria-expanded={mobileStepsExpanded} aria-controls="guided-step-options" aria-label={`Paso ${step + 1}: ${steps[step]}. ${mobileStepsExpanded ? "Ocultar" : "Mostrar"} todos los pasos`} onClick={() => setMobileStepsExpanded(current => !current)}>
+  const progress = <nav className="guided-progress" data-grouped={step === lastStep} data-expanded={mobileStepsExpanded} aria-label="Pasos de tu invitación" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setMobileStepsExpanded(false); }} onKeyDown={event => { if (event.key === "Escape") { setMobileStepsExpanded(false); event.currentTarget.querySelector<HTMLButtonElement>(".guided-steps-toggle")?.focus(); } }}>
+    {step === lastStep && <button className="guided-steps-toggle" type="button" aria-expanded={mobileStepsExpanded} aria-controls="guided-step-options" aria-label={`Paso ${step + 1}: ${steps[step]}. ${mobileStepsExpanded ? "Ocultar" : "Mostrar"} todos los pasos`} onClick={() => setMobileStepsExpanded(current => !current)}>
       <i className="guided-step-stack" aria-hidden="true">{stepIcons.filter((_, index) => index !== step).map((Icon, index) => <i key={index} className={`guided-step-layer guided-step-layer-${index}`}><Icon /></i>)}<i className="guided-step-front"><CurrentStepIcon /></i></i>
     </button>}
     <ol id="guided-step-options">{steps.map((label, index) => {
@@ -132,22 +131,23 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     <DashboardHeader name={account?.name || "Usuario"} email={account?.email || ""} image={account?.image} guard={confirmNavigation} />
     <div className="guided-layout">
       <div className="guided-workspace">
-        <div className="guided-heading"><span className="guided-eyebrow">{creation ? "CREA ALGO ESPECIAL" : "TU INVITACIÓN"} · PASO {step + 1} DE 4</span><h1 ref={heading} tabIndex={-1}>{steps[step]}</h1><p>{descriptions[step]}</p></div>
+        <div className="guided-heading"><span className="guided-eyebrow">{creation ? "CREA ALGO ESPECIAL" : "TU INVITACIÓN"} · PASO {step + 1} DE {steps.length}</span><h1 ref={heading} tabIndex={-1}>{steps[step]}</h1><p>{descriptions[step]}</p></div>
         {protection.localWarning && <p className="guided-alert" role="status">El navegador no permite guardar una copia local. Guarda tu borrador antes de salir.</p>}
         {(protection.error || error) && <div className="guided-alert" role="alert"><p>{protection.error || (error === "pendientes" ? "Completa los datos principales y los detalles activos antes de continuar al pago." : "Revisa tus datos e intenta guardar de nuevo.")}</p><div>{protection.conflictVersion !== undefined && <><button type="button" disabled={busy || uploads > 0} onClick={() => void save(false, true)}>Guardar mi versión</button><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${persistence.getEventId()}/show`} target="_blank">Revisar versión guardada</EditorProtectedLink></>}{protection.code === "unavailable" && <button type="button" disabled={busy || uploads > 0} onClick={() => void save()}>Reintentar guardado</button>}{protection.code === "auth" && <EditorProtectedLink guard={confirmNavigation} href={`/login?callbackUrl=${encodeURIComponent(creation ? "/crear" : `/dashboard/eventos/${event.id}`)}`}>Iniciar sesión</EditorProtectedLink>}</div></div>}
         {notice && <p className="guided-notice" role="status">{notice}</p>}
         <form ref={form} onSubmit={submit} noValidate className="guided-form" aria-busy={saving}>
           <fieldset disabled={busy} className="guided-fields">
-            {step === 0 && <>
-              <Field label="Tipo de invitación" id="event-type"><select id="event-type" value={values.eventType} onChange={e => {
+            {step === 0 && <div className="guided-data-grid">
+              <Field label="Tipo de evento" id="event-type" wide><select id="event-type" value={values.eventType} onChange={e => {
                 const eventType = e.target.value;
                 const defaults = initialGuidedValues({ ...event, id: "", eventType, name: values.name === content.defaultName ? "" : values.name, sections: [] });
-                patch({ ...defaults, name: values.name === content.defaultName ? defaults.name : values.name, hostNames: values.hostNames, eventDate: values.eventDate, eventTime: values.eventTime, venue: values.venue, address: values.address, message: values.message, imageUrl: values.imageUrl, customSlug: values.customSlug, sections: defaults.sections.map(section => values.sections.find(old => old.type === section.type) ? { ...values.sections.find(old => old.type === section.type)!, title: getInvitationEventContent(eventType).sections[section.type].title } : section) });
+                patch({ ...defaults, accent: values.accent, typography: values.typography, bodyTypography: values.bodyTypography, name: values.name === content.defaultName ? defaults.name : values.name, hostNames: values.hostNames, eventDate: values.eventDate, eventTime: values.eventTime, venue: values.venue, address: values.address, message: values.message, imageUrl: values.imageUrl, backgroundImageUrl: values.backgroundImageUrl, customSlug: values.customSlug, sections: defaults.sections.map(section => {
+                  const previous = values.sections.find(old => old.type === section.type);
+                  if (!previous) return section;
+                  const defaultTitle = previous.title === content.sections[section.type].title || previous.title === details.find(detail => detail.type === section.type)?.title;
+                  return { ...previous, title: defaultTitle ? section.title : previous.title };
+                }) });
               }}>{invitationEventTypes.map(type => <option key={type} value={type}>{getInvitationEventContent(type).label}</option>)}</select></Field>
-              {values.eventType === "wedding" ? <WeddingDesignPicker value={design.id} onChange={id => setValues(current => applyGuidedDesign(current, id))} /> : <EventDesignPicker eventType={values.eventType} value={values.templateId} onChange={id => setValues(current => applyGuidedDesign(current, id))} />}
-
-            </>}
-            {step === 1 && <div className="guided-data-grid">
               <Field label={values.eventType === "wedding" ? "¿Cómo se llaman?" : "¿Quién celebra?"} id="w-hosts" wide help="Escribe los nombres tal como quieres que aparezcan."><input id="w-hosts" value={values.hostNames} maxLength={120} placeholder={values.eventType === "wedding" ? "Ej. Sofía y Mateo" : "Nombre de quien celebra o de los anfitriones"} onChange={e => patch({ hostNames: e.target.value })} /></Field>
               <Field label="Nombre de la invitación" id="w-name" wide><input id="w-name" value={values.name} required minLength={2} maxLength={100} onChange={e => patch({ name: e.target.value })} /></Field>
               <Field label="Fecha" id="w-date"><input id="w-date" type="date" value={values.eventDate} onChange={e => patch({ eventDate: e.target.value, ...(!e.target.value ? { eventTime: "" } : {}) })} /></Field>
@@ -156,21 +156,24 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
               <Field label="Dirección" id="w-address" wide help="Incluye calle, número y ciudad. Crearemos el botón para abrir el mapa."><input id="w-address" value={values.address} maxLength={240} placeholder="Calle, número, colonia y ciudad" onChange={e => patch({ address: e.target.value })} /></Field>
               <p className="guided-help guided-wide">¿Aún no tienes todos los datos? Puedes guardar un borrador y completarlos antes de publicar.</p>
             </div>}
+            {step === 1 && <>
+              <div className="guided-photo-field"><h2>Foto de fondo <span>Opcional</span></h2><p>Una sola imagen detrás de toda la invitación. Es independiente de la portada y de la galería.</p><CloudinaryImageUpload {...uploadProps} images={values.backgroundImageUrl ? [values.backgroundImageUrl] : []} multiple={false} onChange={images => patch({ backgroundImageUrl: images[0] ?? "" })} /></div>
+              <div className="guided-photo-field"><h2>Foto de portada <span>Opcional</span></h2><p>La imagen principal de tu invitación. Puedes continuar sin fotografía.</p><CloudinaryImageUpload {...uploadProps} images={values.imageUrl ? [values.imageUrl] : []} multiple={false} onChange={images => patch({ imageUrl: images[0] ?? "" })} /></div>
+              <p className="guided-help">Puedes agregar una galería y fotos para acompañar tus secciones en el siguiente paso.</p>
+            </>}
             {step === 2 && <>
-              <fieldset className="guided-palettes"><legend>El color de tu celebración</legend><p>{design.palettes.length} combinaciones creadas para {design.label.toLowerCase()}.</p><div>{design.palettes.map(palette => <label key={palette.accent}><input type="radio" name="wedding-palette" checked={values.accent === palette.accent} onChange={() => patch({ accent: palette.accent })} /><span className="guided-palette-swatches" aria-hidden="true">{[palette.paper, palette.panel, palette.accent, palette.dark].map(color => <i key={color} style={{ background: color }} />)}</span><strong>{palette.label}</strong>{values.accent === palette.accent && <FiCheck />}</label>)}</div></fieldset>
-              {values.eventType === "wedding" && getWeddingDesign(values.templateId)?.edition === 2 && <div className="guided-photo-field"><h2>Foto de fondo <span>Opcional</span></h2><p>Una sola imagen detrás de toda la invitación. Es independiente de la portada y de la galería.</p><CloudinaryImageUpload {...uploadProps} images={values.backgroundImageUrl ? [values.backgroundImageUrl] : []} multiple={false} onChange={images => patch({ backgroundImageUrl: images[0] ?? "" })} /></div>}
-              <div className="guided-photo-field"><h2>Una foto especial <span>Opcional</span></h2><p>{values.eventType === "wedding" ? "La foto principal de la portada. No se utiliza como fondo." : "Elige tu fotografía favorita o conserva el diseño sin foto."}</p><CloudinaryImageUpload {...uploadProps} images={values.imageUrl ? [values.imageUrl] : []} multiple={false} onChange={images => patch({ imageUrl: images[0] ?? "" })} /></div>
               <Field label="Un mensaje para tus invitados" id="w-message" help="Opcional. Si lo dejas vacío, usaremos una bienvenida breve."><textarea id="w-message" rows={3} maxLength={1200} value={values.message} placeholder="Nos encantará compartir este día contigo…" onChange={e => patch({ message: e.target.value })} /></Field>
               <div className="guided-details-heading"><h2>Los detalles de tu celebración</h2><p>Activa los detalles que quieras compartir y personaliza cada sección.</p></div>
               <div className="guided-details">{details.map(detail => {
                 const section = values.sections.find(section => section.type === detail.type);
                 if (!section) return null;
-                return <div className={`guided-detail${section.enabled ? " is-enabled" : ""}`} key={detail.type}><label className="guided-toggle" htmlFor={`toggle-${section.id}`}><span><strong>{detail.question}</strong><small>{detail.help}</small></span><input id={`toggle-${section.id}`} type="checkbox" checked={section.enabled} onChange={e => changeSection(section.id, { enabled: e.target.checked })} /><span className="guided-switch" aria-hidden="true" /></label>{section.enabled && <div className="guided-detail-fields"><SectionFields section={section} onChange={changes => changeSection(section.id, changes)} uploadProps={uploadProps} allowSectionPhoto={values.eventType === "wedding" && getWeddingDesign(values.templateId)?.edition === 2} /></div>}</div>;
+                return <div className={`guided-detail${section.enabled ? " is-enabled" : ""}`} key={detail.type}><label className="guided-toggle" htmlFor={`toggle-${section.id}`}><span><strong>{detail.question}</strong><small>{detail.help}</small></span><input id={`toggle-${section.id}`} type="checkbox" checked={section.enabled} onChange={e => changeSection(section.id, { enabled: e.target.checked })} /><span className="guided-switch" aria-hidden="true" /></label>{section.enabled && <div className="guided-detail-fields"><SectionFields section={section} onChange={changes => changeSection(section.id, changes)} uploadProps={uploadProps} allowSectionPhoto /></div>}</div>;
               })}</div>
             </>}
-            {step === 3 && <>
-              <div className="guided-review-design"><FiCheck /><div><strong>{design.label}</strong><span>{(design.palettes.find(p => p.accent.toLowerCase() === values.accent.toLowerCase())?.label || "Color personalizado")} · Diseño listo</span></div><button type="button" onClick={() => goTo(0)}>Cambiar</button></div>
-              <dl className="guided-review">{[["Protagonistas", values.hostNames || "Por definir"], ["Fecha y hora", `${date}${values.eventTime ? ` · ${values.eventTime}` : ""}`], ["Lugar", values.venue || "Por definir"], ["Dirección", values.address || "Por definir"]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}<button type="button" onClick={() => goTo(1)} aria-label={`Editar ${label.toLowerCase()}`}>Editar</button></dd></div>)}</dl>
+            {step === 3 && <fieldset className="guided-palettes"><legend>El color de tu celebración</legend><p>Elige una combinación para personalizar tu invitación.</p><div>{design.palettes.map(palette => <label key={palette.accent}><input type="radio" name="invitation-palette" checked={values.accent === palette.accent} onChange={() => patch({ accent: palette.accent })} /><span className="guided-palette-swatches" aria-hidden="true">{[palette.paper, palette.panel, palette.accent, palette.dark].map(color => <i key={color} style={{ background: color }} />)}</span><strong>{palette.label}</strong>{values.accent === palette.accent && <FiCheck />}</label>)}</div></fieldset>}
+            {step === lastStep && <>
+              <div className="guided-review-design"><FiCheck /><div><strong>Apariencia de tu invitación</strong><span>{(design.palettes.find(p => p.accent.toLowerCase() === values.accent.toLowerCase())?.label || "Color personalizado")}</span></div><button type="button" onClick={() => goTo(3)}>Ajustar apariencia</button></div>
+              <dl className="guided-review">{[["Protagonistas", values.hostNames || "Por definir"], ["Fecha y hora", `${date}${values.eventTime ? ` · ${values.eventTime}` : ""}`], ["Lugar", values.venue || "Por definir"], ["Dirección", values.address || "Por definir"]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}<button type="button" onClick={() => goTo(0)} aria-label={`Editar ${label.toLowerCase()}`}>Editar</button></dd></div>)}</dl>
               <div className="guided-checklist"><h2>{issues.length ? "Antes de publicar" : "Todo listo para compartir"}</h2>{issues.length ? <><p>Puedes guardar el borrador ahora. Para publicar, completa lo siguiente:</p><ul>{issues.map(issue => <li key={issue.message}><button type="button" onClick={() => goTo(issue.step)}>{issue.message}<FiArrowRight /></button></li>)}</ul></> : <p>Los datos principales están completos. Revisa la vista previa antes de continuar.</p>}</div>
               {!creation && <CustomInvitationLinkField eventId={event.id} ownerId={event.ownerId} value={values.customSlug} savedValue={event.customSlug} suggestion={content.slug} onChange={customSlug => patch({ customSlug })} />}
               {!event.paidAt && <p className="guided-payment"><FiLock />{invitationPriceLabel} MXN · IVA incluido · 12 meses activa. Tu enlace será público al confirmar el pago.</p>}
@@ -180,7 +183,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
           <div className="guided-bottom-bar">
             <button className="guided-back" type="button" aria-label="Paso anterior" disabled={step === 0 || busy || uploads > 0} onClick={() => goTo(step - 1)}><FiArrowLeft /><span className="guided-bottom-label">Anterior</span></button>
             {progress}
-            {step < 3 ? <button className="button" type="submit" aria-label="Continuar al siguiente paso" disabled={busy || uploads > 0}><span className="guided-bottom-label">Continuar</span><FiArrowRight /></button> : <div className="guided-footer-actions">
+            {step < lastStep ? <button className="button" type="submit" aria-label="Continuar al siguiente paso" disabled={busy || uploads > 0}><span className="guided-bottom-label">Continuar</span><FiArrowRight /></button> : <div className="guided-footer-actions">
               <button className={`button${!event.paidAt ? " guided-save-compact" : ""}`} type="button" aria-label={saveLabel} title={saveLabel} data-save-state={changesSaved ? "saved" : undefined} disabled={busy || uploads > 0 || changesSaved || (!creation && !dirty)} onClick={() => void save()}>{changesSaved ? <FiCheck aria-hidden="true" /> : <FiSave aria-hidden="true" />}<span className="guided-bottom-label" role="status">{saveLabel}</span></button>
               {!event.paidAt && <button className="button guided-publish" type="button" aria-label="Guardar y continuar al pago" title={issues.length ? "Completa los datos indicados antes de continuar al pago" : "Guardar y continuar al pago"} disabled={busy || uploads > 0 || issues.length > 0} onClick={() => void save(true)}><span className="guided-bottom-label">{saving ? "Guardando…" : "Continuar al pago"}</span><span className="guided-mobile-payment-label">{saving ? "Guardando…" : "Pagar"}</span><FiArrowRight aria-hidden="true" /></button>}
             </div>}
