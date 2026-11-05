@@ -116,5 +116,5 @@ export function InvitationLivePreview({ children, expanded = false, onClose, onE
       </div>
     </div>
     {root && createPortal(children, root)}
-  </div>;
+  </div>; 
 }
