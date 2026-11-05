@@ -1,9 +1,9 @@
 import { Footer } from "@/components/landing/Footer";
+import { FAQ } from "@/components/landing/FAQ";
 import { Hero } from "@/components/landing/Hero";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Navbar } from "@/components/landing/Navbar";
 import { Pricing } from "@/components/landing/Pricing";
-import { TemplateGallery } from "@/components/landing/TemplateGallery";
 import { TrustStrip } from "@/components/landing/TrustStrip";
 import { Benefits } from "@/components/landing/Benefits";
 import "./landing-home.css";
@@ -31,9 +31,9 @@ function LandingContent() {
       <Hero />
       <TrustStrip />
       <HowItWorks />
-      <TemplateGallery />
       <Benefits />
       <Pricing />
+      <FAQ />
       <Footer />
     </main>
   );

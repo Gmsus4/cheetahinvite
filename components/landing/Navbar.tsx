@@ -6,8 +6,8 @@ import { BrandEmblem } from "@/components/BrandEmblem";
 
 const navigation = [
   { id: "como-funciona", label: "Cómo funciona" },
-  { id: "personalizacion", label: "Diseños" },
   { id: "precios", label: "Precios" },
+  { id: "preguntas-frecuentes", label: "Preguntas" },
 ];
 
 export function Navbar() {

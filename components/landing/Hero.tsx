@@ -27,13 +27,13 @@ export function Hero() {
           <a className="button" href="/crear">
             Crea tu invitación <span><FiArrowUpRight aria-hidden="true" /></span>
           </a>
-          <a className="text-link" href="#personalizacion">
+          <a className="text-link" href="#ejemplos">
             Ver ejemplos <span><FiChevronDown aria-hidden="true" /></span>
           </a>
         </div>
       </div>
 
-      <div className="hero-art hero-product-stage" aria-label="Ejemplo de una invitación creada con el editor">
+      <div className="hero-art hero-product-stage" id="ejemplos" aria-label="Ejemplo de una invitación creada con el editor">
         <div className="art-sun sun-one" aria-hidden="true" />
         <div className="floating-note note-top">
           <span><FiStar aria-hidden="true" /></span> Tu historia, tu estilo

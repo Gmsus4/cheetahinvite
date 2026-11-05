@@ -18,9 +18,9 @@ export function Footer() {
       <div className="footer-link-group">
       <span className="footer-group-label">EXPLORA</span>
       <nav className="footer-navigation" aria-label="Navegación al pie de página">
-        <a href="#personalizacion">Personalización</a>
         <a href="#como-funciona">Cómo funciona</a>
         <a href="#precios">Precios</a>
+        <a href="#preguntas-frecuentes">Preguntas frecuentes</a>
       </nav>
       </div>
       <div className="footer-start">

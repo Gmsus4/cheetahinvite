@@ -5,7 +5,8 @@
   width: 100%; background: var(--paper); color: var(--ink);
 }
 .landing-home section[id] { scroll-margin-top: 110px; }
-.landing-home :is(a, button):focus-visible { outline: 3px solid var(--orange); outline-offset: 5px; }
+.landing-home #ejemplos { scroll-margin-top: 110px; }
+.landing-home :is(a, button, summary):focus-visible { outline: 3px solid var(--orange); outline-offset: 5px; }
 .landing-home :is(h1,h2,h3) { color: var(--ink); font-family: var(--font-poppins), Arial, sans-serif; font-weight: 600; }
 .landing-home :is(h1,h2) { letter-spacing: -.055em; }
 .landing-home :is(h1,h2) em { color: var(--orange); font-style: normal; }
@@ -80,7 +81,7 @@
 .landing-home .trust-strip[data-paused="true"] .trust-strip-track, .landing-home .trust-strip-marquee:hover .trust-strip-track { animation-play-state: paused; }
 @keyframes celebration-ribbon { to { transform: translateX(-50%); } }
 /* Generous section spacing, centered titles, outlined illustrated cards. */
-.landing-home :is(.how-section,.templates-section,.home-benefits,.pricing-section) { padding: 100px var(--home-inset); }
+.landing-home :is(.how-section,.templates-section,.home-benefits,.pricing-section,.home-faq) { padding: 100px var(--home-inset); }
 .landing-home :is(.how-intro,.section-heading,.benefits-heading,.pricing-copy) { display: block; max-width: 750px; margin: 0 auto 42px; text-align: center; }
 .landing-home :is(.how-intro,.section-heading,.benefits-heading,.pricing-copy) h2 { margin: 13px 0 18px; font-size: clamp(32px,3.5vw,46px); line-height: 1.2; }
 .landing-home .how-intro h2 { color: var(--ink); }
@@ -116,16 +117,86 @@
 .landing-home .palette-art { display: flex; align-items: center; justify-content: center; gap: 15px; }.landing-home .palette-art > svg { width: 25px; height: 25px; color: var(--muted); }.landing-home .palette-art > span { width: 32px; height: 32px; border-radius: 50%; background: var(--orange); border: 4px solid #fff; box-shadow: 0 0 0 1px var(--line); }.landing-home .palette-art > span:nth-of-type(2) { background: var(--ink); }.landing-home .palette-art > span:nth-of-type(3) { background: #F47B42; }.landing-home .palette-art b { margin-left: 9px; font-size: 32px; letter-spacing: -.05em; }
 .landing-home .export-art { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 20px; }.landing-home .export-art > svg { width: 25px; height: 25px; color: var(--orange); }.landing-home .export-art span { font-size: 12px; }.landing-home .export-art b { display: block; margin-top: 6px; font-size: 10px; font-weight: 400; }.landing-home .benefit-export .text-link { margin-top: 16px; color: var(--orange); font-size: 12px; }
 /* Keep the actual single-event price and purchase conditions. */
-.landing-home .pricing-section { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; align-items: center; border-top: 1px solid var(--line); }
-.landing-home .pricing-copy { margin: 0; text-align: left; }.landing-home .pricing-copy > p { margin-left: 0; }
-.landing-home .price-card { display: block; margin: 0; padding: 36px; border: 2px solid var(--orange); border-radius: 26px; background: #fff; box-shadow: 0 16px 36px #0b132006; }
-.landing-home .price-label { color: var(--orange); font-size: 10px; font-weight: 600; letter-spacing: .13em; }.landing-home .price { margin: 14px 0 8px; color: var(--ink); font-size: 65px; line-height: 1.1; }.landing-home .price span { font-size: 13px; }.landing-home .price-overview p { color: var(--muted); font-size: 11px; line-height: 1.8; }
-.landing-home .price-card ul { display: flex; flex-direction: column; gap: 15px; margin: 25px 0; padding-top: 25px; border-top: 1px solid var(--line); }.landing-home .price-card li { display: flex; gap: 10px; color: var(--muted); font-size: 12px; line-height: 1.6; }.landing-home .price-card li span { padding-top: 3px; color: var(--orange); }.landing-home .price-action .button { width: 100%; }.landing-home .price-footnote { display: block; margin-top: 13px; text-align: center; color: var(--muted); font-size: 10px; line-height: 1.7; }
+.landing-home .pricing-section { display: block; padding-block: 80px; border-top: 1px solid var(--line); }
+.landing-home .pricing-copy { margin: 0 auto 38px; text-align: center; }
+.landing-home .pricing-copy > p { margin-inline: auto; }
+.landing-home .price-card { display: grid; grid-template-columns: minmax(260px,.85fr) minmax(0,1.45fr); width: min(100%,1080px); margin: auto; padding: 0; overflow: hidden; border: 1px solid #edc9b7; border-radius: 28px; background: #fff; box-shadow: 0 16px 36px #0b132006; }
+.landing-home .price-purchase { display: flex; flex-direction: column; gap: 28px; padding: 36px; border-right: 1px solid #edc9b7; background: #fff8f3; }
+.landing-home .price-label { color: #b94006; font-size: 11px; font-weight: 600; letter-spacing: .13em; }
+.landing-home .price { margin: 12px 0 8px; color: var(--ink); font-size: 72px; letter-spacing: -.06em; line-height: 1.1; }
+.landing-home .price span { font-size: 14px; letter-spacing: 0; }
+.landing-home .price-overview p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.landing-home .price-duration { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; padding: 8px 12px; border: 1px solid #edc9b7; border-radius: 999px; background: #fff; color: #a53d0b; font-size: 12px; font-weight: 500; }
+.landing-home .price-duration svg { width: 15px; height: 15px; }
+.landing-home .price-action { margin-top: auto; }
+.landing-home .price-action .button { width: 100%; }
+.landing-home .price-footnote { display: block; margin-top: 12px; text-align: center; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.landing-home .price-includes { display: flex; flex-direction: column; justify-content: center; min-width: 0; padding: 40px; }
+.landing-home .price-includes h3 { max-width: 380px; margin: 10px 0 0; font-size: 28px; letter-spacing: -.045em; line-height: 1.3; }
+.landing-home .price-card ul { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; margin: 30px 0 0; padding: 0; border: 0; list-style: none; }
+.landing-home .price-card li { display: flex; align-items: flex-start; gap: 10px; color: var(--muted); font-size: 15px; line-height: 1.65; }
+.landing-home .price-card li > span { display: grid; place-items: center; flex: 0 0 22px; width: 22px; height: 22px; margin-top: 1px; border-radius: 50%; background: #fff0e7; color: #c74606; }
+.landing-home .price-card li svg { width: 14px; height: 14px; }
+/* Native disclosures keep common questions accessible without extra scripts. */
+.landing-home .home-faq { display: block; padding-block: 80px; border-top: 1px solid var(--line); }
+.landing-home .home-faq-heading { max-width: 750px; margin: 0 auto 38px; text-align: center; }
+.landing-home .home-faq-heading h2 { margin: 13px 0 18px; font-size: clamp(32px,3.5vw,46px); line-height: 1.2; }
+.landing-home .home-faq-heading > p { max-width: 520px; margin: auto; color: var(--muted); font-size: 16px; line-height: 1.75; }
+.landing-home .home-faq-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; gap: 24px; width: min(100%,1080px); margin: auto; }
+.landing-home .home-faq-group { min-width: 0; padding: 26px 28px 4px; border: 1px solid var(--line); border-radius: 24px; background: #fff; }
+.landing-home .home-faq-group h3 { margin: 0; padding-bottom: 18px; border-bottom: 1px solid var(--line); font-size: 18px; letter-spacing: -.03em; line-height: 1.5; }
+.landing-home .home-faq-item + .home-faq-item { border-top: 1px solid var(--line); }
+.landing-home .home-faq-item summary { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 0; color: var(--ink); font-size: 16px; font-weight: 600; line-height: 1.6; list-style: none; cursor: pointer; }
+.landing-home .home-faq-item summary::-webkit-details-marker { display: none; }
+.landing-home .home-faq-item summary > svg { flex: 0 0 30px; width: 30px; height: 30px; padding: 6px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); transition: transform .2s, background .2s, color .2s; }
+.landing-home .home-faq-item summary:hover, .landing-home .home-faq-item[open] summary { color: #c74606; }
+.landing-home .home-faq-item[open] summary > svg { transform: rotate(45deg); border-color: var(--orange); background: var(--orange); color: #fff; }
+.landing-home .home-faq-item > p { margin: 0; padding: 0 0 24px; color: var(--muted); font-size: 16px; line-height: 1.8; }
+.landing-home .home-faq-support { display: flex; align-items: center; gap: 14px; width: min(100%,1080px); margin: 24px auto 0; padding: 22px 28px; border: 1px solid var(--line); border-radius: 20px; }
+.landing-home .home-faq-support-icon { display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px; border-radius: 50%; background: #fff; color: var(--orange); font-size: 18px; }
+.landing-home .home-faq-support p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+.landing-home .home-faq-support strong { color: var(--ink); font-weight: 600; }
+.landing-home .home-faq-support .text-link { flex-shrink: 0; margin-left: auto; color: #c74606; font-size: 14px; }
+@media (max-width: 1050px) {
+  .landing-home .price-purchase { padding: 30px; }
+  .landing-home .price-includes { padding: 30px; }
+  .landing-home .price-card ul { column-gap: 18px; }
+  .landing-home .home-faq-grid { gap: 18px; }
+  .landing-home .home-faq-group { padding-inline: 22px; }
+}
+@media (max-width: 760px) {
+  .landing-home .home-faq { padding-block: 65px; }
+  .landing-home .price-card { grid-template-columns: minmax(220px,.85fr) minmax(0,1.15fr); }
+  .landing-home .price-purchase { padding: 26px; }
+  .landing-home .price-includes { padding: 26px; }
+  .landing-home .price-includes h3 { font-size: 24px; }
+  .landing-home .price-card ul { grid-template-columns: 1fr; gap: 16px; margin-top: 22px; }
+  .landing-home .home-faq-heading h2 { font-size: 34px; }
+  .landing-home .home-faq-grid { grid-template-columns: 1fr; }
+  .landing-home .home-faq-support { flex-wrap: wrap; padding: 22px; }
+  .landing-home .home-faq-support p { flex: 1; }
+  .landing-home .home-faq-support .text-link { margin-left: 52px; }
+}
+@media (max-width: 680px) {
+  .landing-home .price-card { grid-template-columns: 1fr; }
+  .landing-home .price-purchase { align-items: center; gap: 24px; padding: 28px 24px; border-right: 0; border-bottom: 1px solid #edc9b7; text-align: center; }
+  .landing-home .price-action { width: min(100%,340px); }
+  .landing-home .price-includes { padding: 28px 24px; }
+}
+@media (max-width: 520px) {
+  .landing-home .pricing-copy, .landing-home .home-faq-heading { margin-bottom: 28px; }
+  .landing-home .price { font-size: 64px; }
+  .landing-home .home-faq-heading h2 { font-size: 30px; }
+  .landing-home .home-faq-group { padding: 22px 20px 2px; border-radius: 22px; }
+  .landing-home .home-faq-item summary { gap: 14px; padding-block: 20px; font-size: 15px; }
+  .landing-home .home-faq-support { margin-top: 18px; padding: 20px; }
+  .landing-home .home-faq-support strong { display: block; }
+}
 /* Open footer with clear link columns. */
 .landing-home .home-footer { padding: 60px var(--home-inset) 25px; border-top: 1px solid var(--line); background: #fff; }.landing-home .home-footer-shell { padding: 0; }.landing-home .home-footer-main { display: grid; grid-template-columns: 1.4fr .8fr 1fr; gap: 50px; padding-bottom: 45px; }.landing-home .footer-brand-block > p { margin-top: 22px; color: var(--muted); font-size: 13px; line-height: 1.8; }.landing-home .footer-group-label { display: block; margin: 10px 0 20px; color: var(--muted); font-size: 9px; letter-spacing: .12em; }.landing-home .footer-navigation { display: flex; flex-direction: column; gap: 14px; }.landing-home .footer-navigation a { font-size: 12px; }.landing-home .footer-start > p { margin-bottom: 22px; font-size: 21px; font-weight: 600; line-height: 1.4; letter-spacing: -.03em; }.landing-home .home-footer-bottom { display: flex; align-items: center; flex-wrap: wrap; gap: 22px; padding-top: 25px; border-top: 1px solid var(--line); }.landing-home .home-footer-bottom small, .landing-home .home-footer-bottom a { color: var(--muted); font-size: 10px; }.landing-home .footer-legal-links { display: flex; flex-wrap: wrap; gap: 20px; }.landing-home .footer-back-top { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }.landing-home .home-footer a:not(.button):hover { color: var(--orange); }
 @media (max-width: 1050px) {
   .landing-home .home-navbar-shell { gap: 18px; }.landing-home .main-nav { gap: 16px; }.landing-home .brand-name { font-size: 16px; }.landing-home .header-actions { gap: 15px; }.landing-home .button-small { padding: 10px 14px; font-size: 11px; }
-  .landing-home .hero { gap: 28px; }.landing-home .hero h1 { font-size: 48px; }.landing-home .floating-note { font-size: 9px; padding: 10px; }.landing-home .note-top { right: -10px; }.landing-home .note-bottom { left: -10px; }.landing-home .pricing-section { gap: 40px; }
+  .landing-home .hero { gap: 28px; }.landing-home .hero h1 { font-size: 48px; }.landing-home .floating-note { font-size: 9px; padding: 10px; }.landing-home .note-top { right: -10px; }.landing-home .note-bottom { left: -10px; }
 }
 @media (max-width: 760px) {
   .landing-home .site-header { padding: 12px 16px; }.landing-home .home-navbar-shell { min-height: 62px; padding: 8px 10px 8px 15px; }.landing-home .brand-name { font-size: 18px; }
@@ -136,12 +207,12 @@
   .landing-home .trust-strip > span { grid-column: 1 / -1; text-align: left; font-size: 12px; }
   .landing-home .trust-strip .trust-strip-marquee { mask-image: linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 18px), transparent); }
   .landing-home .trust-strip-chip { gap: 8px; min-height: 38px; padding: 8px 13px; font-size: 12px; }
-  .landing-home :is(.how-section,.templates-section,.home-benefits,.pricing-section) { padding: 65px var(--home-inset); }.landing-home .home-benefits { padding-top: 10px; }.landing-home :is(.how-intro,.section-heading,.benefits-heading,.pricing-copy) h2 { font-size: 34px; }.landing-home .steps { gap: 14px; }.landing-home .steps article, .landing-home .steps article:first-child { padding: 10px 10px 20px; border-radius: 20px; }.landing-home .step-illustration { height: 155px; }.landing-home .step-paper { width: 120px; padding: 18px 8px; gap: 10px; }.landing-home .step-paper span { font-size: 10px; }.landing-home .steps article > div:last-child { padding: 0 4px; }.landing-home .steps h3 { font-size: 15px; }.landing-home .steps p { font-size: 11px; }.landing-home .benefit-card { padding: 15px 18px 25px; }.landing-home .benefit-card h3 { font-size: 23px; }.landing-home .rsvp-example { flex-wrap: wrap; }.landing-home .confirmed { margin-left: 42px; }.landing-home .palette-art { gap: 10px; }.landing-home .palette-art > span { width: 26px; height: 26px; }.landing-home .palette-art b { font-size: 25px; }.landing-home .pricing-section { grid-template-columns: 1fr; gap: 30px; }.landing-home .pricing-copy { text-align: center; margin: auto; }.landing-home .pricing-copy > p { margin: auto; }.landing-home .price-card { width: min(100%,480px); margin: auto; }
+  .landing-home :is(.how-section,.templates-section,.home-benefits,.pricing-section) { padding: 65px var(--home-inset); }.landing-home .home-benefits { padding-top: 10px; }.landing-home :is(.how-intro,.section-heading,.benefits-heading,.pricing-copy) h2 { font-size: 34px; }.landing-home .steps { gap: 14px; }.landing-home .steps article, .landing-home .steps article:first-child { padding: 10px 10px 20px; border-radius: 20px; }.landing-home .step-illustration { height: 155px; }.landing-home .step-paper { width: 120px; padding: 18px 8px; gap: 10px; }.landing-home .step-paper span { font-size: 10px; }.landing-home .steps article > div:last-child { padding: 0 4px; }.landing-home .steps h3 { font-size: 15px; }.landing-home .steps p { font-size: 11px; }.landing-home .benefit-card { padding: 15px 18px 25px; }.landing-home .benefit-card h3 { font-size: 23px; }.landing-home .rsvp-example { flex-wrap: wrap; }.landing-home .confirmed { margin-left: 42px; }.landing-home .palette-art { gap: 10px; }.landing-home .palette-art > span { width: 26px; height: 26px; }.landing-home .palette-art b { font-size: 25px; }
   .landing-home .home-footer-main { grid-template-columns: 1fr 1fr; gap: 30px; }.landing-home .footer-brand-block { grid-column: 1 / -1; }.landing-home .footer-back-top { margin-left: 0; }
 }
 @media (max-width: 520px) {
   .landing-home .hero h1 { font-size: clamp(34px,9.5vw,46px); }.landing-home .hero .eyebrow { font-size: 8px; }.landing-home .hero-actions { gap: 18px; }.landing-home .hero .button { font-size: 12px; }.landing-home .hero-product-stage { gap: 25px; }.landing-home .hero-example-selector button { min-height: 44px; padding: 8px 12px; }.landing-home .floating-note { font-size: 9px; }.landing-home .note-top { top: 45px; right: -6px; }.landing-home .note-bottom { bottom: 180px; left: -5px; }.landing-home .note-bottom small { display: none; }.landing-home .note-check { width: 24px; height: 24px; }.landing-home .art-sun { right: 0; width: 290px; height: 290px; }.landing-home .spark-one { left: 15px; }.landing-home .spark-two { right: 10px; }
-  .landing-home :is(.how-intro,.section-heading,.benefits-heading,.pricing-copy) h2 { font-size: 30px; }.landing-home :is(.how-summary,.section-heading,.benefits-heading,.pricing-copy) p { font-size: 13px; }.landing-home .steps { grid-template-columns: 1fr; gap: 20px; }.landing-home .steps article, .landing-home .steps article:first-child { padding: 13px 13px 26px; gap: 22px; border-radius: 25px; }.landing-home .steps article > div:last-child { padding: 0 10px; }.landing-home .step-illustration { height: 200px; }.landing-home .step-paper { width: 160px; padding: 22px; }.landing-home .step-paper span { font-size: 12px; }.landing-home .steps h3 { font-size: 20px; }.landing-home .steps p { font-size: 13px; }.landing-home .benefits-grid { grid-template-columns: 1fr; }.landing-home .benefit-card { padding: 18px 20px 28px; }.landing-home .rsvp-example { flex-wrap: nowrap; }.landing-home .confirmed { margin-left: auto; }.landing-home .palette-art { gap: 14px; }.landing-home .price-card { padding: 28px 24px; }.landing-home .price { font-size: 60px; }.landing-home .home-footer { padding-top: 45px; }.landing-home .home-footer-main { grid-template-columns: 1fr; gap: 30px; }.landing-home .home-footer-bottom { flex-direction: column; align-items: flex-start; gap: 18px; }.landing-home .footer-legal-links { gap: 12px 18px; }
+  .landing-home :is(.how-intro,.section-heading,.benefits-heading,.pricing-copy) h2 { font-size: 30px; }.landing-home :is(.how-summary,.section-heading,.benefits-heading,.pricing-copy) p { font-size: 13px; }.landing-home .steps { grid-template-columns: 1fr; gap: 20px; }.landing-home .steps article, .landing-home .steps article:first-child { padding: 13px 13px 26px; gap: 22px; border-radius: 25px; }.landing-home .steps article > div:last-child { padding: 0 10px; }.landing-home .step-illustration { height: 200px; }.landing-home .step-paper { width: 160px; padding: 22px; }.landing-home .step-paper span { font-size: 12px; }.landing-home .steps h3 { font-size: 20px; }.landing-home .steps p { font-size: 13px; }.landing-home .benefits-grid { grid-template-columns: 1fr; }.landing-home .benefit-card { padding: 18px 20px 28px; }.landing-home .rsvp-example { flex-wrap: nowrap; }.landing-home .confirmed { margin-left: auto; }.landing-home .palette-art { gap: 14px; }.landing-home .home-footer { padding-top: 45px; }.landing-home .home-footer-main { grid-template-columns: 1fr; gap: 30px; }.landing-home .home-footer-bottom { flex-direction: column; align-items: flex-start; gap: 18px; }.landing-home .footer-legal-links { gap: 12px 18px; }
 }
 @media (prefers-reduced-motion: reduce) { .landing-home *, .landing-home *::before, .landing-home *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 @media (prefers-reduced-motion: reduce) {
