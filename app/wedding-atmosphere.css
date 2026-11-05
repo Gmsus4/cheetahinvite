@@ -30,20 +30,20 @@
 .wedding-atmosphere[data-photo="true"] .wa-backdrop-texture { opacity: .06; }
 .wedding-atmosphere[data-photo="false"] .wa-backdrop-shade { background: radial-gradient(ellipse at 15% 15%,color-mix(in srgb,var(--wa-tint) 50%,transparent),transparent 65%),radial-gradient(ellipse at 85% 85%,color-mix(in srgb,var(--wa-tint) 40%,transparent),transparent 60%); }
 .wedding-atmosphere .wa-column { position: relative; width: min(100% - 40px,560px); margin: 0 auto; padding: 64px 0 34px; }
-.wedding-atmosphere .wa-shell { position: relative; isolation: isolate; padding: 14px; border: 1px solid #fffaf224; border-radius: 24px; background: #343434f0; box-shadow: 0 16px 60px #0000001a; }
+.wedding-atmosphere .wa-shell { position: relative; isolation: isolate; padding: 14px; border: 1px solid #fffaf224; border-radius: 24px; background: #ffffff0d; box-shadow: 0 16px 60px #0000001a; }
 .wedding-atmosphere .wa-shell > :last-child { margin-bottom: 0; }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .wedding-atmosphere .wa-shell { background: #24242459; -webkit-backdrop-filter: blur(28px); backdrop-filter: blur(28px); }
+  .wedding-atmosphere .wa-shell { background: #ffffff0d; -webkit-backdrop-filter: blur(28px); backdrop-filter: blur(28px); }
 }
 .wedding-atmosphere .wa-panel { position: relative; margin: 0 0 18px; padding: 44px 36px; border: 1px solid #fffaf224; border-radius: 22px; background: color-mix(in srgb,var(--wa-base) 94%,transparent); text-align: center; box-shadow: 0 12px 50px #00000012; }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .wedding-atmosphere .wa-panel { background: color-mix(in srgb,var(--wa-base) 80%,transparent); -webkit-backdrop-filter: blur(28px); backdrop-filter: blur(28px); }
 }
-.wedding-atmosphere .wa-panel[data-surface="blur"] { background: #343434f0; }
+.wedding-atmosphere .wa-panel[data-surface="blur"] { background: #ffffff14; }
 .wedding-atmosphere .wa-panel[data-surface="blur-color"] { background: var(--wa-base); }
 .wedding-atmosphere .wa-panel[data-surface="color"] { background: var(--wa-base); -webkit-backdrop-filter: none; backdrop-filter: none; }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .wedding-atmosphere .wa-panel[data-surface="blur"] { background: #24242459; -webkit-backdrop-filter: blur(28px); backdrop-filter: blur(28px); }
+  .wedding-atmosphere .wa-panel[data-surface="blur"] { background: #ffffff14; -webkit-backdrop-filter: blur(28px); backdrop-filter: blur(28px); }
   .wedding-atmosphere .wa-panel[data-surface="blur-color"] { background: color-mix(in srgb,var(--wa-base) 58%,transparent); -webkit-backdrop-filter: blur(28px); backdrop-filter: blur(28px); }
 }
 .wedding-atmosphere .wa-kicker { display: block; color: var(--wa-soft); font: 500 10px/1.7 var(--wa-body); letter-spacing: .24em; text-transform: uppercase; }
