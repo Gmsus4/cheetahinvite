@@ -61,6 +61,9 @@ model Event {
   sections     Json        @default("[]")
   slug         String?     @unique
   customSlug   String?     @db.VarChar(80)
+  privacy String @default("UNSET")
+  pinHash String?
+  privacyVersion Int @default(0)
   templateId   String      @default("none")
   texture      String      @default("none")
   status       EventStatus @default(DRAFT)
@@ -76,6 +79,8 @@ model Event {
   rsvpResponses RsvpResponse[]
   rsvpBudgets RsvpSubmissionBudget[]
   invitationLinks InvitationLink[]
+  accessSessions InvitationAccessSession[]
+  pinBudgets InvitationPinBudget[]
 
   @@index([ownerId, status])
   @@unique([ownerId, customSlug])
@@ -88,6 +93,26 @@ model InvitationLink {
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
+}
+
+model InvitationAccessSession {
+  tokenHash String @id
+  eventId String
+  version Int
+  expiresAt DateTime
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, expiresAt])
+}
+
+model InvitationPinBudget {
+  key String @id
+  eventId String
+  count Int @default(1)
+  expiresAt DateTime
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, expiresAt])
 }
 
 model Account {

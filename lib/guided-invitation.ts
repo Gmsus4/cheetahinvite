@@ -103,6 +103,8 @@ export function guidedRecoverySection(wizard: EditorWizard, sections: InviteSect
 export function guidedRecoveryAppearance(wizard: EditorWizard) {
   return wizard.flow === 'content-v4' ? wizard.activeExtra === 'appearance-custom' : (wizard.flow === 'content-v3' && wizard.step === 1 && wizard.activeExtra === 'appearance') || (wizard.flow === 'content-v2' && wizard.step === 3);
 }
-export function eventPublicationIssues(event: { eventType?: string; hostNames?: string | null; eventDate?: Date | null; eventTime?: string | null; venue?: string | null; address?: string | null; sections?: unknown }) {
-  return guidedPublicationIssues({eventType:event.eventType || 'other',hostNames:event.hostNames || '',eventDate:event.eventDate?.toISOString().slice(0,10) || '',eventTime:event.eventTime || '',venue:event.venue || '',address:event.address || '',sections:(Array.isArray(event.sections) ? event.sections : []) as InviteSection[]});
+export function eventPublicationIssues(event: { privacy?: string; eventType?: string; hostNames?: string | null; eventDate?: Date | null; eventTime?: string | null; venue?: string | null; address?: string | null; sections?: unknown }) {
+  const issues = guidedPublicationIssues({eventType:event.eventType || 'other',hostNames:event.hostNames || '',eventDate:event.eventDate?.toISOString().slice(0,10) || '',eventTime:event.eventTime || '',venue:event.venue || '',address:event.address || '',sections:(Array.isArray(event.sections) ? event.sections : []) as InviteSection[]});
+  if (event.privacy === "UNSET") issues.unshift({ step: 5, message: "Elige si tu invitación será pública o protegida con PIN." });
+  return issues;
 }

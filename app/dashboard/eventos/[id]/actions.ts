@@ -94,6 +94,7 @@ export async function publishEvent(eventId: string, version: number): Promise<Ed
   if (!Number.isInteger(version) || version < 0) return failure("validation", "Guarda tus cambios antes de continuar.");
   const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
   if (!event) return failure("not-found", "No encontramos esta invitación. Tu copia local sigue disponible.");
+  if (event.privacy === "UNSET") return failure("validation", "Elige si tu invitación será pública o protegida con PIN antes de continuar al pago.");
   if (event.contentVersion !== version) return { ...failure("conflict", "La invitación cambió en otra pestaña. Revisa tus cambios antes de continuar."), version: event.contentVersion };
   const issues = eventPublicationIssues(event);
   if (issues.length) return failure("validation", issues[0].message);

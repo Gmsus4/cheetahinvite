@@ -1,6 +1,6 @@
 /* Full-width workspace for every event editor and private preview. */
 .editor-live-preview{width:100%;min-width:0}
-.editor-live-preview.is-expanded{position:fixed;z-index:1000;inset:0;display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px clamp(16px,4vw,60px);overflow:auto;background:#eef0f3}
+.editor-live-preview.is-expanded{position:fixed;z-index:1000;inset:0;display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px clamp(16px,4vw,60px);overflow:auto;background:var(--app-background)}
 .editor-live-preview.is-expanded .editor-preview-devices{width:min(100%,420px);flex-shrink:0;margin:0}
 .editor-live-preview.is-expanded .editor-preview-viewport{width:min(100%,1280px);flex-shrink:0}
 .editor-expanded-preview-header{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;color:#26364a;font-size:14px}

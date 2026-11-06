@@ -39,7 +39,7 @@ async function CreateEventData({
   const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { invitationCount: true } });
   const invitationLimitReached = (user?.invitationCount ?? 0) >= ACCOUNT_LIMITS.invitations;
   const resumeId = typeof params.resume === "string" && /^[a-zA-Z0-9_-]{1,80}$/.test(params.resume) ? params.resume : "";
-  const resumed = resumeId ? await prisma.event.findFirst({ where: { id: resumeId, ownerId: session.user.id, paidAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] } } }) : null;
+  const resumed = resumeId ? await prisma.event.findFirst({ where: { id: resumeId, ownerId: session.user.id, paidAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] } }, omit: { pinHash: true } }) : null;
   if (resumed) return <EventEditor key={`${session.user.id}:new`} creation account={account} event={resumed} saved={false} published={false} error="" />;
 
   if (!invitationLimitReached) return <EventEditor key={`${session.user.id}:new`} creation account={account} event={{

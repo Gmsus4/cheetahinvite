@@ -24,6 +24,7 @@ import { EditorLeaveDialog } from "./EditorLeaveDialog";
 import { EditorRecoveryDialog } from "./EditorRecoveryDialog";
 import { InvitationLivePreview } from "./InvitationLivePreview";
 import { InvitationPublicLink } from "./InvitationPublicLink";
+import { InvitationPrivacySettings } from "./InvitationPrivacySettings";
 import { CustomInvitationLinkField } from "./CustomInvitationLinkField";
 import styles from "./EventWorkspace.module.css";
 import { DashboardHeader } from "./DashboardHeader";
@@ -276,9 +277,10 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                 <nav aria-label="Secciones elegidas para la invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.title || extraDetailLabel(section)} aria-label={`Revisar sección: ${section.title || extraDetailLabel(section)}`} disabled={busy || uploads > 0} onClick={() => goTo(3, section.id)}>{section.title || extraDetailLabel(section)}</button>)}{!includedSections.length && <button type="button" disabled={busy || uploads > 0} onClick={() => goTo(3, '__more')}>Agregar detalles</button>}</nav>
               </section>
               <div className="guided-checklist"><h2>{issues.length ? "Antes de publicar" : "Todo listo para compartir"}</h2>{issues.length ? <><p>Puedes guardar el borrador ahora. Para publicar, completa lo siguiente:</p><ul>{issues.map(issue => <li key={issue.message}><button type="button" data-target-step={issue.step} data-target-section={issue.sectionId} onClick={() => goTo(issue.step, issue.sectionId)}>{issue.message}<FiArrowRight /></button></li>)}</ul></> : <p>Los datos principales están completos. Revisa la vista previa antes de continuar.</p>}</div>
+              {!event.paidAt && <InvitationPrivacySettings eventId={event.id} initialPrivacy={event.privacy} initialVersion={event.privacyVersion} hasPin={event.privacy === "PRIVATE"} ensureEvent={() => ensureEvent()} />}
               {!creation && event.paidAt && <CustomInvitationLinkField eventId={event.id} value={values.customSlug} savedValue={event.customSlug} suggestion={content.slug} onChange={customSlug => patch({ customSlug })} />}
               {!event.paidAt && <p className="guided-payment"><FiLock />{invitationPriceLabel} MXN · IVA incluido · 12 meses activa. Podrás personalizar y compartir tu enlace cuando se confirme el pago.</p>}
-              {!creation && <div className="guided-management"><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${event.id}/asistencias`}>Ver confirmaciones</EditorProtectedLink><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${event.id}/pago`}>Pago y soporte</EditorProtectedLink>{published && <EditorProtectedLink guard={confirmNavigation} href={invitationPath(event)!} target="_blank">Abrir invitación pública</EditorProtectedLink>}</div>}
+              {!creation && <div className="guided-management"><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${event.id}/ajustes`}>Ajustes de la invitación</EditorProtectedLink>{published && <EditorProtectedLink guard={confirmNavigation} href={invitationPath(event)!} target="_blank">Abrir invitación</EditorProtectedLink>}</div>}
             </>}
           </fieldset>
           <div className="guided-bottom-bar">

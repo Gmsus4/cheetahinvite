@@ -1,0 +1,3 @@
+/* Shared page background for the application and its loading states. */
+:root { --app-background: #f8f8f6; }
+body { background: var(--app-background); }

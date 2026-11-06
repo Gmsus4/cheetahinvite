@@ -2,7 +2,7 @@ import type { Event } from "@/generated/prisma/client";
 import { isInvitationPanelStyle, type InviteSection } from "@/lib/invitation-editor";
 import { CelebrationInvitation } from "./CelebrationInvitation";
 
-export function PublicInvitationContent({ event }: { event: Event }) {
+export function PublicInvitationContent({ event }: { event: Omit<Event, "pinHash"> }) {
   const date = event.eventDate
     ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(event.eventDate)
     : "La fecha";

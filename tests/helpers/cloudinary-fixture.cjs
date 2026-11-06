@@ -26,10 +26,10 @@ function matches(row, where = {}) {
 }
 
 function createFixture() {
-  const state = { users: new Map([['owner', { id: 'owner', invitationCount: 1 }]]), events: new Map([['event', { id: 'event', ownerId: 'owner', contentVersion: 0, status: 'DRAFT', paidAt: null, name: 'Celebración', imageUrl: '', sections: [] }]]), links: new Map(), assets: new Map(), budgets: new Map() };
+  const state = { users: new Map([['owner', { id: 'owner', invitationCount: 1 }]]), events: new Map([['event', { id: 'event', ownerId: 'owner', contentVersion: 0, status: 'DRAFT', privacy: 'PUBLIC', privacyVersion: 0, pinHash: null, paidAt: null, name: 'Celebración', imageUrl: '', sections: [] }]]), accessSessions: new Map(), pinBudgets: new Map(), links: new Map(), assets: new Map(), budgets: new Map() };
   const jobs = [], requests = [];
   let tail = Promise.resolve();
-  const fixture = { state, jobs, requests, clientCalls: [], providerAssets: new Map(), owner: 'owner', failure: null, responseOverride: null, locks: 0,
+  const fixture = { state, jobs, requests, clientCalls: [], providerAssets: new Map(), owner: 'owner', cookies: new Map(), failure: null, responseOverride: null, locks: 0,
     preset: { unsigned: false, settings: { allowed_formats: ['jpg', 'png', 'webp', 'avif'] } } };
   function table(name, primaryKey, defaults = {}) {
     const values = () => [...state[name].values()];
@@ -64,12 +64,13 @@ function createFixture() {
     return api;
   }
   const prisma = {
-    invitationLink: table('links', 'path'), event: table('events', 'id', { contentVersion: 0, status: 'DRAFT', paidAt: null }), user: table('users', 'id'),
+    invitationAccessSession: table('accessSessions', 'tokenHash'), invitationPinBudget: table('pinBudgets', 'key', { count: 1 }),
+    invitationLink: table('links', 'path'), event: table('events', 'id', { contentVersion: 0, status: 'DRAFT', privacy: 'PUBLIC', privacyVersion: 0, pinHash: null, paidAt: null }), user: table('users', 'id'),
     cloudinaryAsset: table('assets', 'publicId', { state: 'UPLOADING', expiresAt: null, nextAttemptAt: null, attempts: 0, url: null }),
     imageUploadBudget: table('budgets', 'key', { count: 1 }),
     async $queryRaw(query) {
       const sql = query.strings.join('?');
-      if (sql.includes('FOR UPDATE')) { fixture.locks++; return state.users.has(query.values[0]) ? [{ id: query.values[0] }] : []; }
+      if (sql.includes('FOR UPDATE')) { fixture.locks++; return (sql.includes('FROM "Event"') ? state.events : state.users).has(query.values[0]) ? [{ id: query.values[0] }] : []; }
       assert.match(sql, /SELECT EXISTS/);
       return [{ used: [...state.events.values()].some(event => JSON.stringify([
         event.imageUrl, event.backgroundImageUrl, ...(event.sections ?? []).flatMap(section => [section.imageUrl, ...(section.imageUrls ?? [])]),
@@ -92,6 +93,7 @@ function createFixture() {
     const requireMock = name => {
       if (name === 'server-only') return {};
       if (name === 'next/server') return { NextResponse: Response, connection: async () => {}, after: job => jobs.push(job) };
+      if (name === 'next/headers') return { cookies: async () => ({ get: key => fixture.cookies.has(key) ? { value: fixture.cookies.get(key) } : undefined, set: (key, value) => fixture.cookies.set(key, value) }) };
       if (name === 'next/cache') return { revalidatePath() {} };
       if (name === 'next/navigation') return { redirect: url => { throw Object.assign(Error('redirect'), { url }); } };
       if (name === '@/auth') return { auth: async () => fixture.owner ? { user: { id: fixture.owner } } : null };

@@ -14,7 +14,8 @@ import {
   FiGift,
   FiPlus,
   FiHelpCircle,
-  FiCreditCard,
+  FiSettings,
+  FiLock,
   FiExternalLink,
   FiCopy,
 } from "react-icons/fi";
@@ -36,6 +37,7 @@ type DashboardEvent = {
   slug: string | null;
   ownerId: string;
   customSlug: string | null;
+  privacy?: string;
   updatedAt: Date;
 };
 
@@ -126,17 +128,19 @@ export function DashboardContent({ userName, userEmail, userImage, events, now }
                     <div className="dashboard-invitation-body">
                       <span className="dashboard-invitation-type">{eventLabels[event.eventType] ?? event.eventType}</span>
                       <h3>{event.name}</h3>
-                      <span className="dashboard-invitation-date"><FiCalendar aria-hidden="true" /> {formatDate(event.eventDate)}</span>
+                      <div className="dashboard-invitation-meta">
+                        <span className="dashboard-invitation-date"><FiCalendar aria-hidden="true" /> {formatDate(event.eventDate)}</span>
+                        {event.privacy === "PRIVATE" && <span className="dashboard-invitation-privacy"><FiLock aria-hidden="true" /> Protegida con PIN</span>}
+                      </div>
                       <div className="dashboard-invitation-actions">
-                        <Link className="dashboard-card-edit" href={`/dashboard/eventos/${event.id}`} aria-label={`Editar invitación: ${event.name}`}><FiEdit2 aria-hidden="true" /> Editar invitación</Link>
+                        <Link className="dashboard-card-edit" href={`/dashboard/eventos/${event.id}`} aria-label={`Editar invitación: ${event.name}`}><FiEdit2 aria-hidden="true" /> Editar</Link>
+                        <Link className="dashboard-card-payment" href={`/dashboard/eventos/${event.id}/ajustes`} aria-label={`Ajustes de ${event.name}`}><FiSettings aria-hidden="true" /> Ajustes</Link>
                         <div className="dashboard-card-share">
                           {isInvitationPublished(event, new Date(now)) && event.slug ? <CopyInvitationLink path={invitationPath(event)!} /> : <>
                             <button className="dashboard-event-open" type="button" disabled title="Disponible cuando tu invitación esté publicada" aria-label="Ver invitación: disponible cuando esté publicada"><FiExternalLink aria-hidden="true" /><span>Ver</span></button>
                             <button className="dashboard-event-share" type="button" disabled title="Disponible cuando tu invitación esté publicada" aria-label="Compartir invitación: disponible cuando esté publicada"><FiCopy aria-hidden="true" /><span>Compartir</span></button>
                           </>}
                         </div>
-                        <Link className="dashboard-card-payment" href={`/dashboard/eventos/${event.id}/pago`} aria-label={`Ver pago y soporte de ${event.name}`}><FiCreditCard aria-hidden="true" /> Pago y soporte</Link>
-                        <Link className="dashboard-card-payment" href={`/dashboard/eventos/${event.id}/asistencias`} aria-label={`Ver respuestas de asistencia de ${event.name}`}><FiCheckCircle aria-hidden="true" /> Respuestas de asistencia</Link>
                       </div>
                       <div className="dashboard-card-footer"><a href={supportMailto({ email: userEmail, eventId: event.id, eventName: event.name })} aria-label={`Pedir soporte para ${event.name}`}><FiHelpCircle aria-hidden="true" /> Ayuda</a><DeleteInvitationButton eventId={event.id} eventName={event.name} /></div>
                       <small className="dashboard-card-updated">Actualizada el {formatDate(event.updatedAt)}</small>

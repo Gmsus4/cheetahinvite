@@ -22,7 +22,7 @@ async function EditorData({ params, searchParams }: PageProps<"/dashboard/evento
   const session = await auth();
   if (!session?.user?.id) redirect(`/login?callbackUrl=${encodeURIComponent(`/dashboard/eventos/${id}`)}`);
 
-  const event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id } });
+  const event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id }, omit: { pinHash: true } });
   if (!event) notFound();
 
   return <EventEditor key={`${event.ownerId}:${event.id}`} event={event} account={{ name: session.user.name || "Usuario", email: session.user.email || "", image: session.user.image }} saved={query.saved === "1"} published={query.published === "1"} error={typeof query.error === "string" ? query.error : ""} />;

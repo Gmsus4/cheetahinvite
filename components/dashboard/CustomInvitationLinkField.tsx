@@ -25,7 +25,7 @@ export function CustomInvitationLinkField({ eventId, value, savedValue, suggesti
   const status = !slug ? "empty" : !isValidInvitationSlug(slug) ? "invalid" : slug === savedValue ? "available" : availability?.slug === slug ? availability.status : "checking";
   return <div className="editor-field editor-group-wide editor-custom-link">
     <label htmlFor="custom-slug">Personaliza tu enlace <span>(opcional)</span></label>
-    <input id="custom-slug" name="customSlug" maxLength={80} value={value} onChange={(event) => onChange(event.target.value)} onBlur={() => onChange(slug)} placeholder={suggestion || "nuestra-celebracion"} autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-describedby="custom-slug-help custom-slug-status" aria-invalid={status === "invalid" || status === "unavailable"} />
+    <input id="custom-slug" name="customSlug" maxLength={80} value={value} onChange={(event) => onChange(event.target.value)} onBlur={() => onChange(slug)} placeholder={suggestion || "nuestra-celebracion"} autoCapitalize="none" autoCorrect="off" spellCheck={false} aria-describedby="custom-slug-help custom-slug-status" aria-invalid={status === "invalid" || status === "unavailable"} aria-busy={status === "checking"} />
     <small id="custom-slug-help" className="editor-field-help">Elige el nombre final del enlace. Ajustamos espacios y acentos automáticamente. Cada enlace es único en la plataforma.</small>
     <code className="editor-custom-link-path">/event/{slug || "nombre-personalizado"}</code>
     {status === "pending" && <button className="editor-link-suggestion" type="button" onClick={() => onChange(savedValue || "")}>Conservar mi enlace actual</button>}

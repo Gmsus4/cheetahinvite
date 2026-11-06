@@ -1,4 +1,4 @@
-.legal-page.legal-modern { --legal-inset: max(24px, calc((100% - 1200px) / 2)); --dashboard-header-width: 1200px; --dashboard-header-inset: var(--legal-inset); background: #f2f4f7; }
+.legal-page.legal-modern { --legal-inset: max(24px, calc((100% - 1200px) / 2)); --dashboard-header-width: 1200px; --dashboard-header-inset: var(--legal-inset); background: var(--app-background); }
 .legal-modern .legal-header { height: auto; min-height: 76px; margin: 16px var(--legal-inset) 0; padding: 14px 20px; border: 1px solid #e3e7ec; border-radius: 20px; gap: 20px; }
 .legal-modern .legal-header .brand { font-size: 23px; }
 .legal-modern .legal-home { min-height: 44px; padding: 10px 16px; border: 1px solid #d9dee5; border-radius: 12px; font-size: 12px; }

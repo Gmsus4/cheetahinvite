@@ -1,0 +1,13 @@
+.card { display: flex; align-items: center; gap: 16px; width: 100%; min-width: 0; box-sizing: border-box; padding: 24px 22px; border: 1px solid #e5e8e1; border-radius: 18px; background: #fff; color: #182522; text-decoration: none; transition: border-color .18s,box-shadow .18s,transform .18s; }
+.icon { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 14px; font-size: 21px; }
+.copy { flex: 1 1 0; min-width: 0; overflow-wrap: anywhere; }
+.lavender .icon { background: #f0edf9; color: #79619e; }
+.peach .icon { background: #fff0e4; color: #ba6a35; }
+.card .copy h2 { margin: 0; font-family: var(--font-poppins),Arial,sans-serif; font-size: 16px; font-weight: 600; line-height: 1.45; letter-spacing: -.025em; }
+.card .copy p { margin: 7px 0 0; color: #69746e; font-size: 12px; font-weight: 400; line-height: 1.7; }
+.arrow { display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; margin-left: auto; border: 1px solid #e7eae4; border-radius: 50%; color: #69746e; font-size: 16px; transition: background .18s,border-color .18s,color .18s; }
+.card:hover { border-color: #d7dcd2; box-shadow: 0 8px 24px #26352e08; transform: translateY(-2px); }
+.card:hover .arrow { background: #182522; border-color: #182522; color: #fff; }
+.card:focus-visible { outline: 3px solid #e9560a; outline-offset: 4px; }
+@media(max-width:700px) { .card { padding: 22px 18px; gap: 12px; } }
+@media(prefers-reduced-motion:reduce) { .card,.arrow { transition: none; } .card:hover { transform: none; } }

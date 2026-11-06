@@ -2,7 +2,7 @@
   --dashboard-header-width: 1180px;
   --dashboard-header-inset: 24px;
   min-height: 100dvh;
-  background: #f2f4f7;
+  background: var(--app-background);
   color: #0b1320;
   font-family: var(--font-body), Arial, sans-serif;
 }

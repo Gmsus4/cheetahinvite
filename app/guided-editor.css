@@ -1,4 +1,4 @@
-.guided-editor{min-height:100dvh;background:#f7f7f5;color:#26352e;font-family:var(--font-inter),Arial,sans-serif}
+.guided-editor{min-height:100dvh;background: var(--app-background);color:#26352e;font-family:var(--font-inter),Arial,sans-serif}
 .guided-editor *{box-sizing:border-box}
 .guided-editor button,.guided-editor input,.guided-editor select,.guided-editor textarea{font:inherit}
 .guided-editor button{cursor:pointer}
@@ -110,6 +110,10 @@
 .guided-editor .editor-custom-link{display:flex;flex-direction:column;gap:10px;font-size:12px}
 .guided-editor .editor-custom-link input{width:100%;min-height:48px;padding:12px;border:1px solid #d8dfcf;border-radius:8px;background:#fff}
 .guided-editor .editor-custom-link small{font-size:11px;line-height:1.7}
+.guided-editor .link-status-checking{display:flex;align-items:center;gap:8px}
+.guided-editor .link-status-checking::before{content:"";flex-shrink:0;width:14px;height:14px;box-sizing:border-box;border:2px solid #e9560a33;border-top-color:#e9560a;border-radius:50%;animation:invitation-link-spin .75s linear infinite}
+@keyframes invitation-link-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.guided-editor .link-status-checking::before{animation:none}}
 .guided-editor .editor-custom-link-path{padding:12px;border-radius:8px;background:#eaece5;font-size:11px;overflow-wrap:anywhere}
 .guided-editor .editor-link-suggestion{padding:10px;border:1px solid #d8dfcf;border-radius:8px;background:#fff;font-size:11px;text-align:left}
 .guided-editor :is(.link-status-invalid,.link-status-unavailable){color:#a43e2c}

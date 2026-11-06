@@ -1,4 +1,4 @@
-.page { min-height: 100dvh; padding-bottom: 32px; background: #f2f4f7; color: #0b1320; font-family: var(--font-body),Arial,sans-serif; }
+.page { min-height: 100dvh; padding-bottom: 32px; background: var(--app-background); color: #0b1320; font-family: var(--font-body),Arial,sans-serif; }
 .page * { box-sizing: border-box; }
 .page :is(h1,h2) { font-family: var(--font-poppins),Arial,sans-serif; font-weight: 600; }
 .page :is(a,button,summary,input,select,textarea):focus-visible { outline: 2px solid #e9560a; outline-offset: 4px; }

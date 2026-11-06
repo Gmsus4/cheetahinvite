@@ -69,6 +69,7 @@ function createPaymentFixture(options = {}) {
     const code = ts.transpileModule(fs.readFileSync(absolute, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true } }).outputText;
     function requireMock(name) {
       if (name === 'server-only') return {};
+      if (name === 'next/headers') return { cookies: async () => ({ get: () => undefined }) };
       if (name === 'next/cache') return { revalidatePath: value => f.invalidations.push(value) };
       if (name === 'next/navigation') return { redirect: url => { throw Object.assign(Error('redirect'), { url }); } };
       if (name === '@/auth') return { auth: async () => f.ownerId ? { user: { id: f.ownerId } } : null };

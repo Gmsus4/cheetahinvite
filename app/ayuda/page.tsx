@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FiArrowRight, FiArrowUpRight, FiCreditCard, FiHelpCircle, FiMail, FiMessageCircle } from "react-icons/fi";
+import { FiArrowUpRight, FiCreditCard, FiHelpCircle, FiMail, FiMessageCircle } from "react-icons/fi";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { auth } from "@/auth";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { InvitationActionLink } from "@/components/dashboard/InvitationActionLink";
 import { BrandLoader } from "@/components/BrandLoader";
 import { BrandEmblem } from "@/components/BrandEmblem";
 import { SupportRequest } from "@/components/SupportRequest";
@@ -25,7 +26,11 @@ async function HelpContent() {
     {session?.user ? <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} active="help" /> : <header className={styles.guestHeader}><Link className="brand" href="/" aria-label="Cheetah Invite, inicio"><BrandEmblem size={40} priority /><span className="brand-name">Cheetah<span>Invite</span></span></Link><nav aria-label="Acceso a tu cuenta"><Link href="/login">Iniciar sesión</Link><Link href="/registro">Crear cuenta <FiArrowUpRight aria-hidden="true" /></Link></nav></header>}
     <div className="support-shell">
       <div className="support-heading"><span className={styles.eyebrow}>ESTAMOS PARA AYUDARTE</span><h1>¿En qué podemos ayudarte?</h1><p>Encuentra respuestas sobre tu cuenta, tu invitación y tus compras. Si necesitas una mano, estamos a un correo de distancia.</p></div>
-      <nav className={styles.shortcuts} aria-label="Opciones de ayuda"><Link href="/dashboard/compras"><span><FiCreditCard aria-hidden="true" /></span><div><strong>Revisa tus compras</strong><small>Consulta pagos, reembolsos y su estado.</small></div><FiArrowUpRight aria-hidden="true" /></Link><a href="#preguntas-frecuentes"><span><FiHelpCircle aria-hidden="true" /></span><div><strong>Encuentra una respuesta</strong><small>Resuelve las dudas más frecuentes.</small></div><FiArrowRight aria-hidden="true" /></a><a href={`mailto:${SUPPORT_EMAIL}`}><span><FiMail aria-hidden="true" /></span><div><strong>Escríbenos por correo</strong><small>{SUPPORT_EMAIL}</small></div><FiArrowUpRight aria-hidden="true" /></a></nav>
+      <nav className={styles.shortcuts} aria-label="Opciones de ayuda">
+        <InvitationActionLink href="/dashboard/compras" title="Revisa tus compras" description="Consulta pagos, reembolsos y su estado." icon={<FiCreditCard />} />
+        <InvitationActionLink href="#preguntas-frecuentes" title="Encuentra una respuesta" description="Resuelve las dudas más frecuentes." icon={<FiHelpCircle />} tone="lavender" />
+        <InvitationActionLink href={`mailto:${SUPPORT_EMAIL}`} title="Escríbenos por correo" description={SUPPORT_EMAIL} icon={<FiMail />} />
+      </nav>
       <div className="support-layout">
         <section className="support-card" aria-labelledby="support-contact-title"><div className={styles.sectionHeading}><span><FiMessageCircle aria-hidden="true" /></span><div><span className={styles.eyebrow}>HABLEMOS</span><h2 id="support-contact-title">Contacta al equipo</h2></div></div><p className={styles.intro}>Cuéntanos qué ocurrió. Prepararemos un correo con los datos necesarios para revisar tu caso.</p><SupportRequest initialEmail={session?.user?.email ?? ""} /></section>
         <section className="support-card support-faq" id="preguntas-frecuentes" aria-labelledby="support-faq-title"><div className={styles.sectionHeading}><span><FiHelpCircle aria-hidden="true" /></span><div><span className={styles.eyebrow}>RESPUESTAS A UN CLIC</span><h2 id="support-faq-title">Antes de escribirnos</h2></div></div>

@@ -47,6 +47,7 @@ async function DashboardData() {
         slug: true,
         ownerId: true,
         customSlug: true,
+        privacy: true,
         updatedAt: true,
       },
     }),

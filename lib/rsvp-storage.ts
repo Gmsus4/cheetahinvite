@@ -4,6 +4,7 @@ import { prisma } from "@/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { isInvitationPublished } from "@/lib/invitation-payment";
 import { hasIntegratedRsvp, RSVP_LIMITS, type RsvpValues } from "@/lib/rsvp";
+import { canAccessInvitation } from "@/lib/invitation-access";
 
 export class RsvpError extends Error {
   constructor(public status: number, message: string) { super(message); }
@@ -15,13 +16,16 @@ function canRespond(event: { status: string; paidAt: Date | null; slug: string |
 export async function readRsvp(eventId: string, token: string) {
   const event = await prisma.event.findUnique({ where: { id: eventId } });
   canRespond(event);
+  if (!await canAccessInvitation(event!)) throw new RsvpError(403, "Introduce el PIN de la invitación antes de consultar tu respuesta.");
   return prisma.rsvpResponse.findUnique({ where: { eventId_tokenHash: { eventId, tokenHash: tokenHash(token) } }, select: { name: true, attending: true, companions: true } });
 }
 export async function saveRsvp(eventId: string, values: RsvpValues & { token: string }) {
   return prisma.$transaction(async tx => {
     // Serializes admission, resource limits and simultaneous edits/deletion.
     await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${eventId} FOR UPDATE`);
-    canRespond(await tx.event.findUnique({ where: { id: eventId } }));
+    const event = await tx.event.findUnique({ where: { id: eventId } });
+    canRespond(event);
+    if (!await canAccessInvitation(event!, tx)) throw new RsvpError(403, "Introduce el PIN de la invitación antes de confirmar tu asistencia.");
     const hash = tokenHash(values.token);
     const now = new Date();
     const hour = Math.floor(now.getTime() / 3600000);

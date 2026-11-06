@@ -31,7 +31,7 @@
   display: block;
   width: 100%;
   min-height: 100svh;
-  background: #F2F4F7;
+  background: var(--app-background);
   color: #0B1320;
 }
 .dashboard-page :is(a,button):focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }
