@@ -1,3 +1,4 @@
+import { isInvitationPanelStyle, isInvitationBlurIntensity } from "./invitation-editor";
 import { weddingDetails } from "./invitation-sections";
 import type { EventData, EditorValues, EditorWizard, InviteSection } from './invitation-editor';
 import { recommendedInvitationFonts } from './invitation-fonts';
@@ -35,7 +36,7 @@ export function initialGuidedValues(event: EventData): EditorValues {
   const id = !event.id ? sharedInvitationId : event.templateId || sharedInvitationId;
   const stored = Array.isArray(event.sections) ? event.sections as InviteSection[] : [];
   const sections = !event.id && stored.length === 0 ? guidedSections(type) : completeGuidedSections(type, stored);
-  const values: EditorValues = {name:event.name || content.defaultName, eventType:type, hostNames:event.hostNames || '', eventDate:event.eventDate ? new Date(event.eventDate).toISOString().slice(0,10) : '', eventTime:event.eventTime || '', venue:event.venue || '', address:event.address || '', message:event.message || '', imageUrl:event.imageUrl || '', backgroundImageUrl:event.backgroundImageUrl || '', customSlug:event.customSlug || '', accent:event.accent, templateId:id, typography:event.typography, bodyTypography:event.bodyTypography, texture:event.texture || 'none', heroHorizontal:event.heroHorizontal || 'center', heroVertical:event.heroVertical || 'center', buttonAppearance:eventButtonAppearance(event), sections};
+  const values: EditorValues = {name:event.name || content.defaultName, eventType:type, hostNames:event.hostNames || '', eventDate:event.eventDate ? new Date(event.eventDate).toISOString().slice(0,10) : '', eventTime:event.eventTime || '', venue:event.venue || '', address:event.address || '', message:event.message || '', imageUrl:event.imageUrl || '', blurIntensity:isInvitationBlurIntensity(event.blurIntensity) ? event.blurIntensity : 50, panelStyle:isInvitationPanelStyle(event.panelStyle) ? event.panelStyle : "auto", backgroundImageUrl:event.backgroundImageUrl || '', customSlug:event.customSlug || '', accent:event.accent, templateId:id, typography:event.typography, bodyTypography:event.bodyTypography, texture:event.texture || 'none', heroHorizontal:event.heroHorizontal || 'center', heroVertical:event.heroVertical || 'center', buttonAppearance:eventButtonAppearance(event), sections};
   if (event.id) return { ...values, texture: 'none' };
   const initial = { ...values, templateId: sharedInvitationId, message: !stored.length ? event.message || invitationEventPreset(type).message : values.message,
     accent: sharedInvitationDesign.palettes[0].accent, typography: sharedInvitationDesign.typography, bodyTypography: sharedInvitationDesign.bodyTypography,

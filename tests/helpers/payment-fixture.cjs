@@ -11,7 +11,7 @@ function matches(row, where = {}) {
 }
 function createPaymentFixture(options = {}) {
   process.env.STRIPE_SECRET_KEY = 'sk_test_fixture'; process.env.STRIPE_WEBHOOK_SECRET = 'whsec_fixture'; process.env.APP_URL = 'http://localhost:3000';
-  const f = { ownerId: options.ownerId ?? 'owner-fixture', payments: new Map(), events: new Map(), calls: [], invalidations: [], refunds: [], disputes: [], sessions: new Map(), intents: new Map() };
+  const f = { ownerId: options.ownerId ?? 'owner-fixture', payments: new Map(), events: new Map(), links: new Map(), calls: [], invalidations: [], refunds: [], disputes: [], sessions: new Map(), intents: new Map() };
   f.eventDetails = { eventType: 'wedding', templateId: 'celebration-v1', hostNames: 'Alex y Sam', eventDate: new Date('2027-01-15T12:00:00Z'), eventTime: '18:00', venue: 'Salón', address: 'Calle', sections: [] };
   function table(rows, defaults = {}) {
     return {
@@ -25,12 +25,16 @@ function createPaymentFixture(options = {}) {
   let tail = Promise.resolve();
   f.prisma = options.prisma ?? {
     invitationPayment: table(f.payments), event: table(f.events),
+    invitationLink: {
+      async createMany({ data }) { for (const row of data) if (!f.links.has(row.path)) f.links.set(row.path, structuredClone(row)); },
+      async findUnique({ where }) { return structuredClone(f.links.get(where.path) ?? null); },
+    },
     async $queryRaw() {},
     async $transaction(work) {
       const previous = tail; let unlock; tail = new Promise(resolve => { unlock = resolve; }); await previous;
-      const snapshot = structuredClone({ payments: f.payments, events: f.events });
+      const snapshot = structuredClone({ payments: f.payments, events: f.events, links: f.links });
       try { return await work(f.prisma); }
-      catch (error) { f.payments.clear(); f.events.clear(); snapshot.payments.forEach((v, k) => f.payments.set(k, v)); snapshot.events.forEach((v, k) => f.events.set(k, v)); throw error; }
+      catch (error) { f.payments.clear(); f.events.clear(); f.links.clear(); snapshot.links.forEach((v, k) => f.links.set(k, v)); snapshot.payments.forEach((v, k) => f.payments.set(k, v)); snapshot.events.forEach((v, k) => f.events.set(k, v)); throw error; }
       finally { unlock(); }
     },
   };

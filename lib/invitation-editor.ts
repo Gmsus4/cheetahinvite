@@ -1,10 +1,18 @@
 import type { InvitationButtonAppearance } from "@/lib/invitation-buttons";
 
+export type InvitationPanelStyle = "auto" | "blur" | "blur-color" | "color";
+export const invitationPanelStyles = ["auto", "blur", "blur-color", "color"] as const;
+export function isInvitationPanelStyle(value: unknown): value is InvitationPanelStyle {
+  return typeof value === "string" && invitationPanelStyles.some(style => style === value);
+}
+export function isInvitationBlurIntensity(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 100;
+}
 export type SectionType = "story" | "ceremony" | "reception" | "program" | "parents" | "dress_code" | "gifts" | "rsvp" | "gallery" | "music" | "custom";
 export type InviteSection = { id: string; type: SectionType; title: string; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; panelStyle?: "auto" | "blur" | "blur-color" | "color"; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; enabled: boolean };
 export type EditorValues = {
   name: string; eventType: string; eventDate: string; eventTime: string; hostNames: string; venue: string; address: string;
-  message: string; imageUrl: string; backgroundImageUrl?: string; accent: string; typography: string; bodyTypography: string; sections: InviteSection[];
+  message: string; imageUrl: string; backgroundImageUrl?: string; panelStyle?: InvitationPanelStyle; blurIntensity?: number; accent: string; typography: string; bodyTypography: string; sections: InviteSection[];
   customSlug: string; templateId: string; texture: string; heroHorizontal: string; heroVertical: string; buttonAppearance: InvitationButtonAppearance;
 };
 export type EditorSaveResult = { ok: true; eventId: string; version: number } | {
@@ -59,6 +67,8 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
     const values = JSON.parse(record.snapshot) as EditorValues;
     const strings = ["name", "eventType", "eventDate", "eventTime", "hostNames", "venue", "address", "message", "imageUrl", "accent", "typography", "bodyTypography", "customSlug", "templateId", "texture", "heroHorizontal", "heroVertical"] as const;
     if (!values || !strings.every(key => typeof values[key] === "string")
+      || (values.blurIntensity !== undefined && !isInvitationBlurIntensity(values.blurIntensity))
+      || (values.panelStyle !== undefined && !invitationPanelStyles.includes(values.panelStyle))
       || (values.backgroundImageUrl !== undefined && (typeof values.backgroundImageUrl !== "string" || values.backgroundImageUrl.length > 1000))
       || (values.eventDate && (!/^\d{4}-\d{2}-\d{2}$/.test(values.eventDate) || !Number.isFinite(Date.parse(`${values.eventDate}T12:00:00Z`))))
       || !Array.isArray(values.sections) || values.sections.length > 12) return null;
@@ -77,11 +87,11 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
 
 export type EventData = {
   id: string; ownerId: string; contentVersion: number; customSlug: string | null; templateId: string; texture: string; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; paidAt: Date | null; expiresAt: Date | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED" | "SUSPENDED" | "REFUNDED"; slug: string | null;
-  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; backgroundImageUrl?: string | null; imageUploads: number; accent: string; typography: string; bodyTypography: string; heroHorizontal?: string; heroVertical?: string; buttonShape?: string; buttonFilled?: boolean; buttonIcons?: boolean; buttonBorder?: boolean; buttonBold?: boolean; sections: unknown;
+  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; backgroundImageUrl?: string | null; panelStyle?: string; blurIntensity?: number; imageUploads: number; accent: string; typography: string; bodyTypography: string; heroHorizontal?: string; heroVertical?: string; buttonShape?: string; buttonFilled?: boolean; buttonIcons?: boolean; buttonBorder?: boolean; buttonBold?: boolean; sections: unknown;
 };
 
 export type InvitationProps = {
-  eventType: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string;
+  eventType: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string; panelStyle?: InvitationPanelStyle; blurIntensity?: number;
   typography?: string; bodyTypography?: string; eventTime?: string; venue: string; address: string;
   message: string; imageUrl: string; backgroundImageUrl?: string; sections: InviteSection[]; publicEventId?: string;
 };

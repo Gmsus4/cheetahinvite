@@ -14,8 +14,10 @@ const connectionString = explicitSslMode(configuredConnectionString);
 const adapter = new PrismaPg({ connectionString });
 
 // Regenerated models must not reuse a client from the previous schema.
-const schemaKey = [Prisma.EventScalarFieldEnum, Prisma.UserScalarFieldEnum, Prisma.PasswordRecoveryLimitScalarFieldEnum, Prisma.CloudinaryAssetScalarFieldEnum, Prisma.ImageUploadBudgetScalarFieldEnum, Prisma.InvitationPaymentScalarFieldEnum, Prisma.RsvpResponseScalarFieldEnum, Prisma.RsvpSubmissionBudgetScalarFieldEnum]
-  .map(fields => Object.values(fields).sort().join(",")).join(";");
+const schemaKey = Object.entries(Prisma)
+  .filter(([name]) => name.endsWith("ScalarFieldEnum"))
+  .sort(([left], [right]) => left.localeCompare(right))
+  .map(([name, fields]) => `${name}:${Object.values(fields).sort().join(",")}`).join(";");
 const cached = globalForPrisma.cheetahInvitePrisma;
 export const prisma = cached?.schemaKey === schemaKey
   ? cached.client

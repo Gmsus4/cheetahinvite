@@ -1,3 +1,4 @@
+import { isInvitationPanelStyle } from "@/lib/invitation-editor";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
@@ -46,7 +47,7 @@ async function ShowInvitationData({ params }: ShowPageProps) {
       imageUrl={event.imageUrl ?? ""} backgroundImageUrl={event.backgroundImageUrl ?? ""}
       accent={event.accent}
       typography={event.typography}
-      bodyTypography={event.bodyTypography}
+      bodyTypography={event.bodyTypography} blurIntensity={event.blurIntensity} panelStyle={isInvitationPanelStyle(event.panelStyle) ? event.panelStyle : "auto"}
       sections={sections}
     />
   </main>;

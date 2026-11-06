@@ -16,6 +16,7 @@ const sectionIcons = { story: FiHeart, ceremony: FiHeart, reception: FiMapPin, p
 
 export function CelebrationInvitation(props: InvitationProps) {
   const motion = useInvitationMotion();
+  const panelStyle = props.panelStyle ?? "auto";
   const eventType = props.eventType ?? "wedding";
   const content = getInvitationEventContent(eventType);
   const copy = invitationPresentation(eventType);
@@ -29,15 +30,15 @@ export function CelebrationInvitation(props: InvitationProps) {
   const hasLocation = Boolean(props.venue || props.address);
   const firstDetailIndex = 2 + Number(Boolean(props.eventDateKey)) + Number(hasLocation);
 
-  return <article ref={motion} className="celebration-invitation" data-event-type={eventType} data-photo={Boolean(props.backgroundImageUrl)} data-long-names={title.length > 25 || undefined} style={atmosphereStyle(props.accent, props)}>
+  return <article ref={motion} className="celebration-invitation" data-panel-style={panelStyle === "auto" ? undefined : panelStyle} data-event-type={eventType} data-photo={Boolean(props.backgroundImageUrl)} data-long-names={title.length > 25 || undefined} style={atmosphereStyle(props.accent, props)}>
     <div className="wa-backdrop" aria-hidden="true">
       {props.backgroundImageUrl && <div className="wa-backdrop-image"><Image src={props.backgroundImageUrl} alt="" fill sizes="100vw" unoptimized loading="eager" /></div>}
       <div className="wa-backdrop-shade" />
     </div>
     <div className="wa-column">
       <div className="wa-shell">
-      <div className="wa-intro">
-      <header className="wa-cover" data-surface="blur" data-has-media={Boolean(props.imageUrl)}>
+      <div className="wa-intro" data-surface={panelStyle === "auto" ? undefined : panelStyle}>
+      <header className="wa-cover" data-surface={panelStyle === "auto" ? "blur" : panelStyle} data-has-media={Boolean(props.imageUrl)}>
         <div className="wa-cover-heading"><span className="wa-kicker">{props.name.trim() || content.defaultName}</span>
           <h1 aria-label={title}>{names.length === 2 ? <><span className="wa-couple-name">{names[0]}</span><span className="wa-ampersand" aria-hidden="true">&amp;</span><span className="wa-couple-name">{names[1]}</span></> : title}</h1>
           <p className="wa-date">{date}{time && <><span aria-hidden="true"> · </span>{time}</>}</p>
@@ -45,18 +46,18 @@ export function CelebrationInvitation(props: InvitationProps) {
         {props.imageUrl ? <div className="wa-portrait"><Image src={props.imageUrl} alt={`${copy.photoLabel}: ${title}`} width={900} height={1000} sizes="(max-width:600px) 94vw, 540px" preload unoptimized /></div>
           : <div className="wa-no-photo" aria-hidden="true"><span>{initials}</span><i>{copy.caption}</i></div>}
       </header>
-      {props.eventDateKey && <section className="wa-panel wa-countdown" data-surface="blur-color" aria-label="Cuenta regresiva"><span className="wa-kicker">Cada vez más cerca</span><CountdownTimer date={props.eventDateKey} time={props.eventTime || "00:00"} /></section>}
+      {props.eventDateKey && <section className="wa-panel wa-countdown" data-surface={panelStyle === "auto" ? "blur-color" : panelStyle} aria-label="Cuenta regresiva"><span className="wa-kicker">Cada vez más cerca</span><CountdownTimer date={props.eventDateKey} time={props.eventTime || "00:00"} /></section>}
       </div>
-      <section className="wa-panel wa-welcome" data-surface={atmospherePanelStyle(undefined, 1 + Number(Boolean(props.eventDateKey)))} id="invitation-celebration">
+      <section className="wa-panel wa-welcome" data-surface={atmospherePanelStyle(undefined, 1 + Number(Boolean(props.eventDateKey)), panelStyle)} id="invitation-celebration">
         <h2>{copy.welcomeTitle}</h2>
         <p>{props.message.trim() || content.message}</p>
       </section>
-      {hasLocation && <section className="wa-panel wa-location" data-surface={atmospherePanelStyle(undefined, 2 + Number(Boolean(props.eventDateKey)))} aria-labelledby="invitation-location-title">
+      {hasLocation && <section className="wa-panel wa-location" data-surface={atmospherePanelStyle(undefined, 2 + Number(Boolean(props.eventDateKey)), panelStyle)} aria-labelledby="invitation-location-title">
         <FiMapPin className="wa-section-icon" aria-hidden="true" /><h2 id="invitation-location-title">La celebración</h2>
         <h3>{props.venue || "Nos vemos aquí"}</h3><p>{date}{time && ` · ${time}`}</p>{props.address && <p>{props.address}</p>}
         <a className="wa-button" href={invitationMapUrl(props.venue, props.address)} target="_blank" rel="noopener noreferrer">Cómo llegar<FiArrowUpRight aria-hidden="true" /></a>
       </section>}
-      {sections.map((section, index) => <AtmosphereSection key={section.id} section={section} surface={atmospherePanelStyle(section, firstDetailIndex + index)} eventId={props.publicEventId} />)}
+      {sections.map((section, index) => <AtmosphereSection key={section.id} section={section} surface={atmospherePanelStyle(section, firstDetailIndex + index, panelStyle)} eventId={props.publicEventId} />)}
       </div>
       <footer className="wa-footer"><span className="wa-kicker">{copy.closingKicker}</span><strong>{title}</strong><p>{copy.closingMessage}</p><small>Cheetah Invite</small></footer>
     </div>

@@ -20,12 +20,12 @@ test('shares the cover and event message across Open Graph and Twitter', () => {
   assert.equal(metadata.openGraph.images[0].url, event.imageUrl);
   assert.equal(metadata.twitter.images[0].url, event.imageUrl);
   assert.equal(metadata.twitter.card, 'summary_large_image');
-  assert.equal(metadata.openGraph.url, 'https://invite.example/invitacion/legacy');
+  assert.equal(metadata.openGraph.url, 'https://invite.example/event/legacy');
 });
 
 test('uses the canonical custom link and resolves relative image URLs', () => {
   const metadata = invitationMetadata({ ...event, customSlug: 'nuestra-boda', imageUrl: '/cover.jpg' }, 'https://invite.example');
-  assert.equal(metadata.alternates.canonical, 'https://invite.example/invitacion/owner/nuestra-boda');
+  assert.equal(metadata.alternates.canonical, 'https://invite.example/event/nuestra-boda');
   assert.equal(metadata.openGraph.images[0].url, 'https://invite.example/cover.jpg');
 });
 

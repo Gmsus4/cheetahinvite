@@ -1,30 +1,20 @@
+import { PublicInvitationContent } from "@/components/invitation/PublicInvitationContent";
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
+import { notFound, redirect } from "next/navigation";
 import { getPublicInvitation } from "@/lib/public-invitation";
-import { invitationMetadata } from "@/lib/invitation-metadata";
-import { invitationOrigin } from "@/lib/invitation-origin";
-import { CelebrationInvitation } from "@/components/invitation/CelebrationInvitation";
-import type { InviteSection } from "@/lib/invitation-editor";
+import { invitationPath } from "@/lib/invitation-url";
 
 type Props = Pick<PageProps<"/invitacion/[slug]/[customSlug]">, "params">;
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug: ownerId, customSlug } = await params;
-  const event = await getPublicInvitation(ownerId, customSlug);
-  if (!event) notFound();
-  return invitationMetadata(event, await invitationOrigin());
+export default function LegacyInvitationPage({ params }: Props) {
+  return <Suspense fallback={<div className="editor-loading">Preparando tu invitación…</div>}><LegacyInvitationData params={params} /></Suspense>;
 }
 
-export default function CustomInvitationPage({ params }: Props) {
-  return <Suspense fallback={<div className="editor-loading">Preparando tu invitación…</div>}><InvitationData params={params} /></Suspense>;
-}
-
-async function InvitationData({ params }: Props) {
-  // The first segment reuses the existing [slug] folder for legacy URL compatibility.
-  const { slug: ownerId, customSlug } = await params;
-  const event = await getPublicInvitation(ownerId, customSlug);
+async function LegacyInvitationData({ params }: Props) {
+  const { slug, customSlug } = await params;
+  const event = await getPublicInvitation(slug, customSlug);
   if (!event) notFound();
-  const date = event.eventDate ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(event.eventDate) : "La fecha";
-  return <main className="public-invitation-page"><CelebrationInvitation publicEventId={event.id} eventType={event.eventType} name={event.name} hostNames={event.hostNames ?? ""} date={date} eventDateKey={event.eventDate?.toISOString().slice(0, 10) ?? ""} eventTime={event.eventTime ?? ""} venue={event.venue ?? ""} address={event.address ?? ""} message={event.message ?? ""} imageUrl={event.imageUrl ?? ""} backgroundImageUrl={event.backgroundImageUrl ?? ""} accent={event.accent} typography={event.typography} bodyTypography={event.bodyTypography} sections={Array.isArray(event.sections) ? event.sections as InviteSection[] : []} /></main>;
+  const canonical = await getPublicInvitation(event.customSlug || event.slug!, undefined, true);
+  if (canonical?.id === event.id) return redirect(invitationPath(event)!);
+  return <PublicInvitationContent event={event} />;
 }

@@ -4,7 +4,8 @@ import { prisma } from "@/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { getStripe } from "@/lib/stripe";
 import { invitationSlug, isPaidInvitationSession } from "@/lib/stripe-payment";
-import { invitationPath } from "@/lib/invitation-url";
+import { invitationLinkRegistryReady, reserveInvitationPath } from "@/lib/invitation-link-storage";
+import { invitationPath, legacyInvitationPath } from "@/lib/invitation-url";
 import { paymentAccess } from "@/lib/payment-status";
 
 export function stripeLiveMode() {
@@ -15,6 +16,7 @@ const objectId = (object: string | { id: string } | null) => typeof object === "
 // Serialize the Stripe read AND write per purchase: a slow older webhook must
 // not overwrite a newer reconciliation with stale data.
 export async function reconcileInvitationPayment(paymentId: string, minimumAgeMs = 0) {
+  const registryReady = await invitationLinkRegistryReady(prisma);
   return prisma.$transaction(async tx => {
     await tx.$queryRaw(Prisma.sql`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtextextended(${paymentId}, 0))`);
     const payment = await tx.invitationPayment.findUnique({ where: { id: paymentId } });
@@ -67,7 +69,13 @@ export async function reconcileInvitationPayment(paymentId: string, minimumAgeMs
     } });
     const invitation = await tx.event.findFirst({ where: { id: payment.eventId, ownerId: payment.ownerId } });
     if (!invitation) return { paymentId: payment.id, invitation: null };
-    const slug = invitation.slug || invitationSlug(invitation.name, invitation.id);
+    let slug = invitation.slug || invitationSlug(invitation.name, invitation.id);
+    const baseSlug = slug;
+    let suffix = 2;
+    if (registryReady) {
+      while (!await reserveInvitationPath(tx, `/event/${slug}`, invitation.id)) slug = `${baseSlug}-${suffix++}`;
+      if (invitation.customSlug && !await reserveInvitationPath(tx, `/event/${invitation.customSlug}`, invitation.id)) throw new Error("Invitation URL is already reserved");
+    }
     // A second charge is retained for support; it cannot replace the purchase
     // that controls access or extend its original term.
     if ((!invitation.paidAt || invitation.stripePaymentIntentId === intent.id)
@@ -79,7 +87,8 @@ export async function reconcileInvitationPayment(paymentId: string, minimumAgeMs
         stripeCheckoutSessionId: checkout.id, stripePaymentIntentId: intent.id,
       } });
     }
-    return { paymentId: payment.id, invitation: { id: invitation.id, slug, path: invitationPath({ ...invitation, slug })! } };
+    const publicPath = registryReady ? invitationPath : legacyInvitationPath;
+    return { paymentId: payment.id, invitation: { id: invitation.id, slug, path: publicPath({ ...invitation, slug })! } };
   }, { timeout: 45000, maxWait: 10000 });
 }
 

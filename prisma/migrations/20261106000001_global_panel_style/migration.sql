@@ -1,0 +1,1 @@
+ALTER TABLE "Event" ADD COLUMN "panelStyle" TEXT NOT NULL DEFAULT 'auto';

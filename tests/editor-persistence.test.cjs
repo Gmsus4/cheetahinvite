@@ -294,3 +294,35 @@ test('local backups retain section surfaces and reject unsupported finishes', ()
     else assert.equal(JSON.parse(parsed.snapshot).sections[0].panelStyle,panelStyle);
   }
 });
+
+
+test('local draft recovery retains the global finish and rejects unsupported finishes', () => {
+  const now = Date.now();
+  const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), version: 0, updatedAt: now, wizard: { step: 5, activeExtra: null, flow: 'content-v4' } };
+  for (const panelStyle of ['auto', 'blur', 'blur-color', 'color', undefined]) {
+    const snapshot = JSON.stringify({ ...JSON.parse(values('Celebracion')), panelStyle });
+    const recovered = parseEditorDraft(JSON.stringify({ ...record, snapshot }), 'owner', 'event', now);
+    assert.ok(recovered);
+    assert.equal(JSON.parse(recovered.snapshot).panelStyle, panelStyle);
+    if (panelStyle) assert.equal(editorFormData(snapshot, 0).get('panelStyle'), panelStyle);
+  }
+  const snapshot = JSON.stringify({ ...JSON.parse(values('Celebracion')), panelStyle: 'invalid' });
+  assert.equal(parseEditorDraft(JSON.stringify({ ...record, snapshot }), 'owner', 'event', now), null);
+});
+
+
+test('draft recovery retains blur intensity and rejects unsupported values', () => {
+  const now = Date.now();
+  const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), version: 0, updatedAt: now, wizard: { step: 4, activeExtra: null, flow: 'content-v4' } };
+  for (const blurIntensity of [0, 50, 100, undefined]) {
+    const snapshot = JSON.stringify({ ...JSON.parse(values('Celebracion')), blurIntensity });
+    const recovered = parseEditorDraft(JSON.stringify({ ...record, snapshot }), 'owner', 'event', now);
+    assert.ok(recovered);
+    assert.equal(JSON.parse(recovered.snapshot).blurIntensity, blurIntensity);
+    if (blurIntensity !== undefined) assert.equal(editorFormData(snapshot, 0).get('blurIntensity'), String(blurIntensity));
+  }
+  for (const blurIntensity of [-1, 101, 0.5, '50', null]) {
+    const snapshot = JSON.stringify({ ...JSON.parse(values('Celebracion')), blurIntensity });
+    assert.equal(parseEditorDraft(JSON.stringify({ ...record, snapshot }), 'owner', 'event', now), null);
+  }
+});

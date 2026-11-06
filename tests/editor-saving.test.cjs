@@ -68,3 +68,66 @@ test('a save racing with publication returns the new version for an explicit con
   assert.equal(result.version, 1);
   assert.equal(f.state.events.get('event').status, 'DRAFT');
 });
+
+
+test('global finishes persist independently and restore per-section choices after reload', async () => {
+  const f = createFixture();
+  const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
+  const sections = [{ id: 'story', type: 'story', title: 'Historia', content: 'Nuestra historia', detail: '', link: '', imageUrl: '', enabled: true, panelStyle: 'color' }];
+  for (const panelStyle of ['blur', 'blur-color', 'color', 'auto']) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('panelStyle', panelStyle);
+    form.set('sections', JSON.stringify(sections));
+    assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+    const stored = f.state.events.get('event');
+    assert.equal(stored.panelStyle, panelStyle);
+    assert.equal(stored.sections[0].panelStyle, 'color');
+    const restored = initialGuidedValues(stored);
+    assert.equal(restored.panelStyle, panelStyle);
+    assert.equal(restored.sections[0].panelStyle, 'color');
+  }
+  const legacy = f.saveForm();
+  legacy.set('contentVersion', String(f.state.events.get('event').contentVersion));
+  f.state.events.get('event').panelStyle = 'blur';
+  assert.equal((await f.actions.updateEvent('event', legacy)).ok, true);
+  assert.equal(f.state.events.get('event').panelStyle, 'blur');
+});
+
+test('invalid global finishes are rejected without changing the saved invitation', async () => {
+  const f = createFixture();
+  const before = structuredClone(f.state.events.get('event'));
+  for (const value of ['', 'invalid', 'BLUR']) {
+    const form = f.saveForm(); form.set('panelStyle', value);
+    assert.equal((await f.actions.updateEvent('event', form)).code, 'validation');
+    assert.deepEqual(f.state.events.get('event'), before);
+  }
+});
+
+
+test('blur intensity saves and reloads independently from the finish, including zero', async () => {
+  const f = createFixture();
+  const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
+  for (const intensity of [0, 25, 50, 100]) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('blurIntensity', String(intensity));
+    form.set('panelStyle', 'blur-color');
+    assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+    assert.equal(initialGuidedValues(f.state.events.get('event')).blurIntensity, intensity);
+  }
+  const legacy = f.saveForm();
+  legacy.set('contentVersion', String(f.state.events.get('event').contentVersion));
+  assert.equal((await f.actions.updateEvent('event', legacy)).ok, true);
+  assert.equal(f.state.events.get('event').blurIntensity, 100);
+});
+
+test('invalid blur intensities cannot overwrite the saved invitation', async () => {
+  const f = createFixture();
+  const before = structuredClone(f.state.events.get('event'));
+  for (const value of ['', '-1', '101', '50.5', 'abc', 'Infinity']) {
+    const form = f.saveForm(); form.set('blurIntensity', value);
+    assert.equal((await f.actions.updateEvent('event', form)).code, 'validation');
+    assert.deepEqual(f.state.events.get('event'), before);
+  }
+});

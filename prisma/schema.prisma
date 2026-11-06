@@ -56,6 +56,8 @@ model Event {
   heroVertical String @default("center")
   typography   String      @default("default")
   bodyTypography String    @default("inter")
+  panelStyle   String      @default("auto")
+  blurIntensity Int        @default(50)
   sections     Json        @default("[]")
   slug         String?     @unique
   customSlug   String?     @db.VarChar(80)
@@ -73,9 +75,19 @@ model Event {
   owner        User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   rsvpResponses RsvpResponse[]
   rsvpBudgets RsvpSubmissionBudget[]
+  invitationLinks InvitationLink[]
 
   @@index([ownerId, status])
   @@unique([ownerId, customSlug])
+}
+
+// Keeps previous URLs reserved for the same invitation after a rename.
+model InvitationLink {
+  path String @id
+  eventId String
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
 }
 
 model Account {

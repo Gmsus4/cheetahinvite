@@ -37,19 +37,19 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
 .celebration-invitation .wa-shell > :last-child { margin-bottom: 0; }
 .celebration-invitation .wa-panel { position: relative; margin: 0 0 24px; padding: 44px 36px; border: 0; border-radius: 14px; background: var(--wa-base); text-align: center; box-shadow: 0 16px 48px #00000018; }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .celebration-invitation .wa-panel { background: color-mix(in srgb,var(--wa-base) 80%,transparent); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+  .celebration-invitation .wa-panel { background: color-mix(in srgb,var(--wa-base) 80%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur-panel,18px)); backdrop-filter: blur(var(--wa-blur-panel,18px)); }
 }
 .celebration-invitation .wa-panel[data-surface="blur"] { background: var(--wa-base); }
 .celebration-invitation .wa-panel[data-surface="blur-color"] { background: var(--wa-base); }
 .celebration-invitation .wa-panel[data-surface="color"] { background: var(--wa-base); -webkit-backdrop-filter: none; backdrop-filter: none; }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .celebration-invitation .wa-panel[data-surface="blur"] { background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(16px) saturate(110%); backdrop-filter: blur(16px) saturate(110%); }
-  .celebration-invitation .wa-panel[data-surface="blur-color"] { background: linear-gradient(145deg,color-mix(in srgb,var(--wa-tint) 24%,transparent),transparent 70%),color-mix(in srgb,var(--wa-base) 76%,transparent); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); }
+  .celebration-invitation .wa-panel[data-surface="blur"] { background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur,16px)) saturate(110%); backdrop-filter: blur(var(--wa-blur,16px)) saturate(110%); }
+  .celebration-invitation .wa-panel[data-surface="blur-color"] { background: linear-gradient(145deg,color-mix(in srgb,var(--wa-tint) 24%,transparent),transparent 70%),color-mix(in srgb,var(--wa-base) 76%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur-color,24px)); backdrop-filter: blur(var(--wa-blur-color,24px)); }
 }
 .celebration-invitation .wa-kicker { display: block; color: var(--wa-soft); font: 500 10px/1.7 var(--wa-body); letter-spacing: .24em; text-transform: uppercase; }
 .celebration-invitation .wa-cover { padding: 30px 16px 16px; margin-bottom: 24px; overflow: hidden; border: 0; border-radius: 18px; background: var(--wa-base); text-align: center; box-shadow: 0 20px 64px #00000020; }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .celebration-invitation .wa-cover { background: linear-gradient(140deg,#fffaf21a,transparent 65%),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+  .celebration-invitation .wa-cover { background: linear-gradient(140deg,#fffaf21a,transparent 65%),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur-cover,20px)); backdrop-filter: blur(var(--wa-blur-cover,20px)); }
 }
 .celebration-invitation .wa-cover-heading { padding: 0 12px 28px; }
 .celebration-invitation .wa-cover h1 { margin: 20px auto 14px; font-size: clamp(44px,6vw,72px); line-height: 1.15; letter-spacing: -.035em; }
@@ -163,7 +163,7 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
   .celebration-invitation .wa-intro:not(:has(> .wa-countdown)) .wa-cover-heading { grid-row: 1 / span 2; align-self: center; padding-bottom: 20px; }
   .celebration-invitation .wa-welcome { display: none; }
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .celebration-invitation .wa-intro { background: linear-gradient(140deg,#fffaf21a,transparent 65%),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+    .celebration-invitation .wa-intro { background: linear-gradient(140deg,#fffaf21a,transparent 65%),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur-cover,20px)); backdrop-filter: blur(var(--wa-blur-cover,20px)); }
   }
   .celebration-invitation .wa-section-row { margin-bottom: 40px; }
   .celebration-invitation .wa-section-row[data-has-media="true"] { position: relative; isolation: isolate; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: center; gap: 28px; padding: 24px; }
@@ -186,8 +186,8 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
   .celebration-invitation .wa-section-media .wa-photo-grid figure { position: relative; min-height: 240px; }
   .celebration-invitation .wa-section-media .wa-photo-grid img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; }
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .celebration-invitation .wa-section-row[data-has-media="true"]:has(> .wa-panel[data-surface="blur"])::before { background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(16px) saturate(110%); backdrop-filter: blur(16px) saturate(110%); }
-    .celebration-invitation .wa-section-row[data-has-media="true"]:has(> .wa-panel[data-surface="blur-color"])::before { background: linear-gradient(145deg,color-mix(in srgb,var(--wa-tint) 24%,transparent),transparent 70%),color-mix(in srgb,var(--wa-base) 76%,transparent); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); }
+    .celebration-invitation .wa-section-row[data-has-media="true"]:has(> .wa-panel[data-surface="blur"])::before { background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur,16px)) saturate(110%); backdrop-filter: blur(var(--wa-blur,16px)) saturate(110%); }
+    .celebration-invitation .wa-section-row[data-has-media="true"]:has(> .wa-panel[data-surface="blur-color"])::before { background: linear-gradient(145deg,color-mix(in srgb,var(--wa-tint) 24%,transparent),transparent 70%),color-mix(in srgb,var(--wa-base) 76%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur-color,24px)); backdrop-filter: blur(var(--wa-blur-color,24px)); }
   }
   .celebration-invitation .wa-section.wa-gallery { padding: 48px 32px; }
   .celebration-invitation .wa-section-row[data-section-type="gallery"] { --wa-copy-align: center; grid-template-columns: minmax(0,1fr); }
@@ -202,3 +202,14 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
 
 .celebration-invitation .wa-panel { isolation: isolate; }
 .celebration-invitation .wa-cover-heading { position: relative; isolation: isolate; }
+
+/* Global finishes also cover the mobile cover and the combined desktop intro. */
+.celebration-invitation[data-panel-style] :is(.wa-cover,.wa-intro)[data-surface] { background: var(--wa-base); -webkit-backdrop-filter: none; backdrop-filter: none; }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .celebration-invitation[data-panel-style] :is(.wa-cover,.wa-intro)[data-surface="blur"] { background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur,16px)) saturate(110%); backdrop-filter: blur(var(--wa-blur,16px)) saturate(110%); }
+  .celebration-invitation[data-panel-style] :is(.wa-cover,.wa-intro)[data-surface="blur-color"] { background: linear-gradient(145deg,color-mix(in srgb,var(--wa-tint) 24%,transparent),transparent 70%),color-mix(in srgb,var(--wa-base) 76%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur-color,24px)); backdrop-filter: blur(var(--wa-blur-color,24px)); }
+}
+/* The intro surface belongs to the shared container only on desktop. */
+@media(max-width:959px) {
+  .celebration-invitation[data-panel-style] .wa-intro[data-surface] { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}

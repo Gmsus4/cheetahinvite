@@ -26,7 +26,7 @@ function matches(row, where = {}) {
 }
 
 function createFixture() {
-  const state = { users: new Map([['owner', { id: 'owner', invitationCount: 1 }]]), events: new Map([['event', { id: 'event', ownerId: 'owner', contentVersion: 0, status: 'DRAFT', paidAt: null, name: 'Celebración', imageUrl: '', sections: [] }]]), assets: new Map(), budgets: new Map() };
+  const state = { users: new Map([['owner', { id: 'owner', invitationCount: 1 }]]), events: new Map([['event', { id: 'event', ownerId: 'owner', contentVersion: 0, status: 'DRAFT', paidAt: null, name: 'Celebración', imageUrl: '', sections: [] }]]), links: new Map(), assets: new Map(), budgets: new Map() };
   const jobs = [], requests = [];
   let tail = Promise.resolve();
   const fixture = { state, jobs, requests, clientCalls: [], providerAssets: new Map(), owner: 'owner', failure: null, responseOverride: null, locks: 0,
@@ -64,7 +64,7 @@ function createFixture() {
     return api;
   }
   const prisma = {
-    event: table('events', 'id', { contentVersion: 0, status: 'DRAFT', paidAt: null }), user: table('users', 'id'),
+    invitationLink: table('links', 'path'), event: table('events', 'id', { contentVersion: 0, status: 'DRAFT', paidAt: null }), user: table('users', 'id'),
     cloudinaryAsset: table('assets', 'publicId', { state: 'UPLOADING', expiresAt: null, nextAttemptAt: null, attempts: 0, url: null }),
     imageUploadBudget: table('budgets', 'key', { count: 1 }),
     async $queryRaw(query) {
@@ -91,7 +91,7 @@ function createFixture() {
     const source = ts.transpileModule(fs.readFileSync(absolute, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true } }).outputText;
     const requireMock = name => {
       if (name === 'server-only') return {};
-      if (name === 'next/server') return { NextResponse: Response, after: job => jobs.push(job) };
+      if (name === 'next/server') return { NextResponse: Response, connection: async () => {}, after: job => jobs.push(job) };
       if (name === 'next/cache') return { revalidatePath() {} };
       if (name === 'next/navigation') return { redirect: url => { throw Object.assign(Error('redirect'), { url }); } };
       if (name === '@/auth') return { auth: async () => fixture.owner ? { user: { id: fixture.owner } } : null };

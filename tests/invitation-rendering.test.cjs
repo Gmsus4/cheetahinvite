@@ -243,3 +243,37 @@ test('catalog displays six occasions and the hero selects their single example w
     assert.equal(find(render(), node => node.props?.['aria-label'] === 'Ejemplo anterior'), null);
   }
 });
+
+
+test('global finishes cover every panel and switching back restores the original mix without mutating sections', () => {
+  const load = loadComponents();
+  const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');
+  const example = { ...load('lib/landing-invitation-example.ts').landingEventExamples[0].invitation, date: '12 de octubre de 2027', eventDateKey: '2027-10-12' };
+  const sections = example.sections.map((section, index) => ({ ...section, panelStyle: index % 2 ? 'color' : 'blur-color' }));
+  const original = structuredClone(sections);
+  const render = panelStyle => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...example, sections, panelStyle }));
+  const baseline = render('auto');
+  for (const style of ['blur', 'blur-color', 'color']) {
+    const html = render(style);
+    const finishes = [...html.matchAll(/data-surface="([^"]+)"/g)].map(match => match[1]);
+    assert.ok(finishes.length >= 5);
+    assert.ok(finishes.every(finish => finish === style), style);
+    assert.equal(render('auto'), baseline);
+    assert.deepEqual(sections, original);
+  }
+});
+
+
+test('blur intensity controls all blur layers while preserving the original default strengths', () => {
+  const load = loadComponents();
+  const { atmosphereStyle } = load('lib/invitation-atmosphere.ts');
+  const defaults = atmosphereStyle('#58664E');
+  assert.equal(defaults['--wa-blur'], '16px');
+  assert.equal(defaults['--wa-blur-color'], '24px');
+  assert.equal(defaults['--wa-blur-cover'], '20px');
+  for (const blurIntensity of [0, 25, 50, 100]) {
+    const style = atmosphereStyle('#58664E', { blurIntensity });
+    for (const [variable, radius] of [['--wa-blur', 16], ['--wa-blur-color', 24], ['--wa-blur-cover', 20], ['--wa-blur-panel', 18]]) assert.equal(style[variable], (radius * blurIntensity / 50) + 'px');
+  }
+  assert.equal(atmosphereStyle('#58664E', { blurIntensity: NaN })['--wa-blur'], '16px');
+});

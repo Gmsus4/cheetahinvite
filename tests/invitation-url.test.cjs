@@ -18,9 +18,9 @@ test('rejects malformed, traversal and oversized path segments', () => {
   for (const value of ['mi-boda', 'boda-2026', 'a'.repeat(80)]) assert.equal(isValidInvitationSlug(value), true);
 });
 
-test('custom names are scoped to the account and legacy URLs remain available', () => {
-  assert.equal(invitationPath({ ownerId: 'user-1', customSlug: 'mi-boda', slug: 'legacy' }), '/invitacion/user-1/mi-boda');
-  assert.equal(invitationPath({ ownerId: 'user-2', customSlug: 'mi-boda', slug: 'legacy' }), '/invitacion/user-2/mi-boda');
-  assert.equal(invitationPath({ ownerId: 'user-1', customSlug: null, slug: 'legacy' }), '/invitacion/legacy');
+test('custom names and fallback slugs use the public event route', () => {
+  assert.equal(invitationPath({ ownerId: 'user-1', customSlug: 'mi-boda', slug: 'legacy' }), '/event/mi-boda');
+  assert.equal(invitationPath({ ownerId: 'user-2', customSlug: 'mi-boda', slug: 'legacy' }), '/event/mi-boda');
+  assert.equal(invitationPath({ ownerId: 'user-1', customSlug: null, slug: 'legacy' }), '/event/legacy');
   assert.equal(invitationPath({ ownerId: 'user-1', customSlug: null, slug: null }), null);
 });

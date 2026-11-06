@@ -44,14 +44,14 @@ test('preview action never exposes an unpaid, unavailable or expired public link
 
 test('confirmed publication opens the canonical saved URL in a new tab', () => {
   const custom = render(publishedEvent);
-  assert.match(custom, /href="\/invitacion\/owner\/nuestra-boda"/);
+  assert.match(custom, /href="\/event\/nuestra-boda"/);
   assert.match(custom, /target="_blank"/);
   assert.match(custom, /rel="noopener noreferrer"/);
-  assert.match(render({ ...publishedEvent, customSlug: null }), /href="\/invitacion\/published-token"/);
+  assert.match(render({ ...publishedEvent, customSlug: null }), /href="\/event\/published-token"/);
 });
 
 test('pending edits explain that the public link uses the last saved version', () => {
   const html = render(publishedEvent, true);
-  assert.match(html, /href="\/invitacion\/owner\/nuestra-boda"/);
+  assert.match(html, /href="\/event\/nuestra-boda"/);
   assert.match(html, /última versión guardada/);
 });

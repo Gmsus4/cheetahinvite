@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FiArrowLeft, FiArrowRight, FiCamera, FiChevronDown, FiCheck, FiEye, FiList, FiLock, FiSave, FiSend, FiSliders, FiUsers, FiMapPin, FiPlus } from "react-icons/fi";
 import { prepareEvent } from "@/app/crear/actions";
 import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
+import { InvitationSurfacePicker } from "./InvitationSurfacePicker";
 import { InvitationPalettePicker } from "./InvitationPalettePicker";
 import { InvitationFontSelect } from "./InvitationFontSelect";
 import { CelebrationInvitation } from "@/components/invitation/CelebrationInvitation";
@@ -12,7 +13,7 @@ import { initialGuidedValues, completeGuidedSections, changeGuidedEventType, gui
 import { getInvitationFont, recommendedInvitationFonts } from "@/lib/invitation-fonts";
 import { getInvitationEventContent, invitationEventTypes } from "@/lib/invitation-event-content";
 import { sharedInvitationDesign, invitationPalette } from "@/lib/shared-invitation";
-import { EditorSaveFailure, editorFormData, type EventData, type EditorValues, type InviteSection } from "@/lib/invitation-editor";
+import { EditorSaveFailure, editorFormData, type EventData, type EditorValues, type InviteSection, type InvitationPanelStyle } from "@/lib/invitation-editor";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { invitationPriceLabel, isInvitationPublished } from "@/lib/invitation-payment";
 import { invitationPath } from "@/lib/invitation-url";
@@ -62,7 +63,12 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   }
   const { controller: persistence, state: protection, confirmNavigation, navigation } = useEditorProtection({
     ownerId: event.ownerId, eventId: event.id, snapshot, version: event.contentVersion, creation, manualOnly,
-    save: async (submitted, version, automatic) => updateEvent(await ensureEvent(submitted), editorFormData(submitted, version), automatic ? "auto" : "manual"),
+    save: async (submitted, version, automatic) => {
+      const formData = editorFormData(submitted, version);
+      // Older device backups may contain a link chosen before payment.
+      if (!event.paidAt) formData.delete("customSlug");
+      return updateEvent(await ensureEvent(submitted), formData, automatic ? "auto" : "manual");
+    },
   });
   useEffect(() => { persistence.update(snapshot, uploads > 0, { step, activeExtra: step === 3 ? (addingDetail ? `__add:${activeSection}` : activeSection) : step === 4 && appearanceExpanded ? "appearance-custom" : null, flow: "content-v4" }, manualOnly); }, [persistence, snapshot, uploads, step, activeSection, addingDetail, appearanceExpanded, manualOnly]);
   useEffect(() => {
@@ -239,7 +245,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                       <span><strong>Incluir en mi invitación</strong><small>{currentSection.enabled ? 'Este detalle aparecerá en tu invitación.' : 'Este detalle no aparecerá. Conservaremos lo que hayas escrito.'}</small></span>
                       <input id={`include-${currentSection.id}`} type="checkbox" role="switch" checked={currentSection.enabled} onChange={e => changeSection(currentSection.id, { enabled: e.target.checked })} /><span className="guided-switch" aria-hidden="true" />
                     </label>
-                    {currentSection.enabled ? <SectionFields section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} uploadProps={uploadProps} allowSectionPhoto /> : <p className="guided-excluded-note">Puedes continuar o volver a activarlo cuando quieras.</p>}
+                    {currentSection.enabled ? <SectionFields globalPanelStyle={values.panelStyle ?? "auto"} section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} uploadProps={uploadProps} allowSectionPhoto /> : <p className="guided-excluded-note">Puedes continuar o volver a activarlo cuando quieras.</p>}
                   </>}
                 </div>
               </>}
@@ -251,6 +257,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                 <div className="guided-font-preview"><h3 style={{ fontFamily: getInvitationFont(values.typography).family }}>{values.hostNames || values.name}</h3><p style={{ fontFamily: getInvitationFont(values.bodyTypography).family }}>Nos encantará compartir este día contigo. Una celebración para recordar.</p></div>
                 <p>{getInvitationFont(values.typography).label} para títulos · {getInvitationFont(values.bodyTypography).label} para textos.</p>
               </section>
+              <InvitationSurfacePicker values={values} onBlurChange={blurIntensity => patch({ blurIntensity })} onChange={panelStyle => patch({ panelStyle })} />
               <button className="guided-customize-look" type="button" aria-expanded={appearanceExpanded} aria-controls="guided-appearance-options" onClick={() => setAppearanceExpanded(current => !current)}><FiSliders />{appearanceExpanded ? 'Ocultar ajustes' : 'Personalizar colores y tipografías'}<FiChevronDown /></button>
               <div id="guided-appearance-options" className="guided-appearance-options" hidden={!appearanceExpanded}>
                 <InvitationPalettePicker palettes={design.palettes} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={accent => patch({ accent })} />
@@ -269,8 +276,8 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                 <nav aria-label="Secciones elegidas para la invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.title || extraDetailLabel(section)} aria-label={`Revisar sección: ${section.title || extraDetailLabel(section)}`} disabled={busy || uploads > 0} onClick={() => goTo(3, section.id)}>{section.title || extraDetailLabel(section)}</button>)}{!includedSections.length && <button type="button" disabled={busy || uploads > 0} onClick={() => goTo(3, '__more')}>Agregar detalles</button>}</nav>
               </section>
               <div className="guided-checklist"><h2>{issues.length ? "Antes de publicar" : "Todo listo para compartir"}</h2>{issues.length ? <><p>Puedes guardar el borrador ahora. Para publicar, completa lo siguiente:</p><ul>{issues.map(issue => <li key={issue.message}><button type="button" data-target-step={issue.step} data-target-section={issue.sectionId} onClick={() => goTo(issue.step, issue.sectionId)}>{issue.message}<FiArrowRight /></button></li>)}</ul></> : <p>Los datos principales están completos. Revisa la vista previa antes de continuar.</p>}</div>
-              {!creation && <CustomInvitationLinkField eventId={event.id} ownerId={event.ownerId} value={values.customSlug} savedValue={event.customSlug} suggestion={content.slug} onChange={customSlug => patch({ customSlug })} />}
-              {!event.paidAt && <p className="guided-payment"><FiLock />{invitationPriceLabel} MXN · IVA incluido · 12 meses activa. Tu enlace será público al confirmar el pago.</p>}
+              {!creation && event.paidAt && <CustomInvitationLinkField eventId={event.id} value={values.customSlug} savedValue={event.customSlug} suggestion={content.slug} onChange={customSlug => patch({ customSlug })} />}
+              {!event.paidAt && <p className="guided-payment"><FiLock />{invitationPriceLabel} MXN · IVA incluido · 12 meses activa. Podrás personalizar y compartir tu enlace cuando se confirme el pago.</p>}
               {!creation && <div className="guided-management"><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${event.id}/asistencias`}>Ver confirmaciones</EditorProtectedLink><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${event.id}/pago`}>Pago y soporte</EditorProtectedLink>{published && <EditorProtectedLink guard={confirmNavigation} href={invitationPath(event)!} target="_blank">Abrir invitación pública</EditorProtectedLink>}</div>}
             </>}
           </fieldset>
@@ -298,9 +305,10 @@ function Field({ label, id, help, wide, children }: { label: string; id: string;
   return <div className={`guided-field${wide ? " guided-wide" : ""}`}><label htmlFor={id}>{label}</label>{children}{help && <small>{help}</small>}</div>;
 }
 
-function SectionFields({ section, onChange, uploadProps, allowSectionPhoto = false }: { section: InviteSection; onChange(changes: Partial<InviteSection>): void; uploadProps: { eventId: string; ensureEvent?: () => Promise<string>; onBusyChange(active: boolean): void }; allowSectionPhoto?: boolean }) {
+function SectionFields({ section, onChange, uploadProps, allowSectionPhoto = false, globalPanelStyle = "auto" }: { globalPanelStyle?: InvitationPanelStyle; section: InviteSection; onChange(changes: Partial<InviteSection>): void; uploadProps: { eventId: string; ensureEvent?: () => Promise<string>; onBusyChange(active: boolean): void }; allowSectionPhoto?: boolean }) {
   const prefix = section.id;
-  const surfaceControl = allowSectionPhoto && <fieldset className="guided-section-surface"><legend>Fondo de esta sección</legend><div role="group" aria-label={`Fondo de ${section.title}`}>{([['auto', 'Auto'], ['blur', 'Blur'], ['blur-color', 'BlurColor'], ['color', 'Color']] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={(section.panelStyle ?? 'auto') === value} onClick={() => onChange({ panelStyle: value })}>{label}</button>)}</div><small>Auto alterna los tres acabados durante el recorrido.</small></fieldset>;
+  const surfaceLocked = globalPanelStyle !== "auto";
+  const surfaceControl = allowSectionPhoto && <fieldset className="guided-section-surface"><legend>Fondo de esta sección</legend><div role="group" aria-label={`Fondo de ${section.title}`}>{([['auto', 'Auto'], ['blur', 'Blur'], ['blur-color', 'BlurColor'], ['color', 'Color']] as const).map(([value, label]) => <button key={value} type="button" disabled={surfaceLocked} aria-pressed={(surfaceLocked ? globalPanelStyle : section.panelStyle ?? 'auto') === value} onClick={() => { if (!surfaceLocked) onChange({ panelStyle: value }); }}>{label}</button>)}</div><small>{surfaceLocked ? 'Para modificar el fondo de una sección específica, selecciona «Por defecto» en el paso 5.' : 'Auto alterna los tres acabados durante el recorrido.'}</small></fieldset>;
   if (section.type === "gallery") return <><div className="guided-section-media">{surfaceControl}</div><CloudinaryImageUpload {...uploadProps} multiple images={section.imageUrls ?? []} onChange={imageUrls => onChange({ imageUrls, imageUrl: imageUrls[0] ?? "" })} /></>;
   return <>
     <Field label="Título de la sección" id={`${prefix}-title`}><input id={`${prefix}-title`} value={section.title} maxLength={120} onChange={e => onChange({ title: e.target.value })} /></Field>
