@@ -14,8 +14,8 @@ import { useInvitationMotion } from "@/components/dashboard/useInvitationMotion"
 
 const sectionIcons = { story: FiHeart, ceremony: FiHeart, reception: FiMapPin, program: FiClock, parents: FiUsers, dress_code: FiUsers, gifts: FiGift, gallery: FiCamera, rsvp: FiHeart, music: FiMusic, custom: FiHeart };
 
-export function CelebrationInvitation(props: InvitationProps) {
-  const motion = useInvitationMotion();
+export function CelebrationInvitation(props: InvitationProps & { preview?: boolean }) {
+  const motion = useInvitationMotion(!props.preview);
   const panelStyle = props.panelStyle ?? "auto";
   const eventType = props.eventType ?? "wedding";
   const content = getInvitationEventContent(eventType);
@@ -30,7 +30,7 @@ export function CelebrationInvitation(props: InvitationProps) {
   const hasLocation = Boolean(props.venue || props.address);
   const firstDetailIndex = 2 + Number(Boolean(props.eventDateKey)) + Number(hasLocation);
 
-  return <article ref={motion} className="celebration-invitation" data-panel-style={panelStyle === "auto" ? undefined : panelStyle} data-event-type={eventType} data-photo={Boolean(props.backgroundImageUrl)} data-long-names={title.length > 25 || undefined} style={atmosphereStyle(props.accent, props)}>
+  return <article ref={motion} className="celebration-invitation" data-preview={props.preview || undefined} data-panel-style={panelStyle === "auto" ? undefined : panelStyle} data-event-type={eventType} data-photo={Boolean(props.backgroundImageUrl)} data-long-names={title.length > 25 || undefined} style={atmosphereStyle(props.accent, props)}>
     <div className="wa-backdrop" aria-hidden="true">
       {props.backgroundImageUrl && <div className="wa-backdrop-image"><Image src={props.backgroundImageUrl} alt="" fill sizes="100vw" unoptimized loading="eager" /></div>}
       <div className="wa-backdrop-shade" />

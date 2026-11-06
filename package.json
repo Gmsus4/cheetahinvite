@@ -5,7 +5,8 @@
   "scripts": {
     "predev": "prisma generate",
     "dev": "next dev",
-    "prebuild": "prisma generate",
+    "prebuild": "npm run images:hero && prisma generate",
+    "images:hero": "node scripts/generate-hero-images.cjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -58,6 +59,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "prisma": "^7.10.1",
+    "sharp": "0.35.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

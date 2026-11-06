@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { BrandLoader } from "@/components/BrandLoader";
 
-export function InvitationExampleFrame({ styleSlug, label, viewportHeight, hideScrollbar = false, loading = "lazy" }: {
+export function InvitationExampleFrame({ styleSlug, label, viewportHeight, hideScrollbar = false, loading = "lazy", preview = false }: {
   styleSlug: string;
   label: string;
   viewportHeight?: number;
   hideScrollbar?: boolean;
   loading?: "eager" | "lazy";
+  preview?: boolean;
 }) {
   const viewport = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -33,7 +34,7 @@ export function InvitationExampleFrame({ styleSlug, label, viewportHeight, hideS
     {!ready && <BrandLoader className="invitation-example-loader" message="Preparando tu invitación…" />}
     <iframe
       title={`Invitación de ejemplo · ${label}`}
-      src={`/ejemplo-invitacion/${styleSlug}`}
+      src={`/ejemplo-invitacion/${styleSlug}${preview ? "/hero" : ""}`}
       loading={loading}
       onLoad={(event) => {
         const document = event.currentTarget.contentDocument;

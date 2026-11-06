@@ -17,10 +17,11 @@ const revealSelector = [
   ".invite-countdown-unit",
 ].join(",");
 
-export function useInvitationMotion() {
+export function useInvitationMotion(enabled = true) {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    if (!enabled) return;
     const root = ref.current;
     const view = root?.ownerDocument.defaultView;
     // The editor renders the invitation into its own iframe document.
@@ -110,7 +111,7 @@ export function useInvitationMotion() {
       preference.removeEventListener("change", onPreferenceChange);
       root.removeEventListener("focusin", onFocus);
     };
-  }, []);
+  }, [enabled]);
 
   return ref;
 }
