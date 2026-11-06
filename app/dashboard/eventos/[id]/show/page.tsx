@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { invitationPath } from "@/lib/invitation-url";
 import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { BrandLoader } from "@/components/BrandLoader";
-import { FiEdit2, FiLock } from "react-icons/fi";
-import { isInvitationPublished } from "@/lib/invitation-payment";
 import { auth } from "@/auth";
 import { CelebrationInvitation } from "@/components/invitation/CelebrationInvitation";
 import type { InviteSection } from "@/lib/invitation-editor";
@@ -35,32 +31,23 @@ async function ShowInvitationData({ params }: ShowPageProps) {
     ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(event.eventDate)
     : "La fecha";
   const sections = Array.isArray(event.sections) ? event.sections as InviteSection[] : [];
-  const isPublished = isInvitationPublished(event);
 
-  return <main className="show-preview-page">
-    <header className="show-preview-toolbar" style={{ gridTemplateColumns: "1fr auto" }}>
-      <div className="show-preview-private">{isPublished ? "INVITACIÓN PUBLICADA" : <><FiLock /> VISTA PRIVADA · BORRADOR</>}</div>
-      <Link href={`/dashboard/eventos/${event.id}`} className="show-preview-edit"><FiEdit2 /> Editar</Link>
-    </header>
-    <div className="show-preview-scroll">
-      <div className="show-preview-caption"><span>VISTA PREVIA COMPLETA</span><p>Así se verá tu invitación cuando esté publicada.</p></div>
-      <CelebrationInvitation
-        eventType={event.eventType}
-        name={event.name}
-        hostNames={event.hostNames ?? ""}
-        date={date}
-        eventDateKey={event.eventDate?.toISOString().slice(0, 10) ?? ""}
-        eventTime={event.eventTime ?? ""}
-        venue={event.venue ?? ""}
-        address={event.address ?? ""}
-        message={event.message ?? ""}
-        imageUrl={event.imageUrl ?? ""} backgroundImageUrl={event.backgroundImageUrl ?? ""}
-        accent={event.accent}
+  return <main className="public-invitation-page">
+    <CelebrationInvitation
+      eventType={event.eventType}
+      name={event.name}
+      hostNames={event.hostNames ?? ""}
+      date={date}
+      eventDateKey={event.eventDate?.toISOString().slice(0, 10) ?? ""}
+      eventTime={event.eventTime ?? ""}
+      venue={event.venue ?? ""}
+      address={event.address ?? ""}
+      message={event.message ?? ""}
+      imageUrl={event.imageUrl ?? ""} backgroundImageUrl={event.backgroundImageUrl ?? ""}
+      accent={event.accent}
       typography={event.typography}
-        bodyTypography={event.bodyTypography}
-        sections={sections}
-      />
-    </div>
-    <footer className="show-preview-footer">{isPublished && event.slug ? <><Link href={invitationPath(event)!} target="_blank">Abrir invitación pública</Link><span>·</span><span>Comparte el enlace desde tu panel.</span></> : <><FiLock /> Esta página es privada y no tiene enlace para compartir. Publícala desde el editor cuando esté lista.</>}</footer>
+      bodyTypography={event.bodyTypography}
+      sections={sections}
+    />
   </main>;
 }
