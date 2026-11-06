@@ -36,7 +36,7 @@ export function HeroInvitationExamples({ examples }: { examples: EventExample[] 
     </div>
     <div className="hero-example-phone" id="hero-invitation-example">
       <div className="hero-example-phone-screen">
-        <InvitationExampleFrame key={selected.slug} styleSlug={selected.slug} label={selected.label} viewportHeight={830} />
+        <InvitationExampleFrame key={selected.slug} styleSlug={selected.slug} label={selected.label} viewportHeight={830} hideScrollbar loading="eager" />
       </div>
       <Image
         className="hero-phone-frame"

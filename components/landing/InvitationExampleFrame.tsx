@@ -3,15 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import { BrandLoader } from "@/components/BrandLoader";
 
-export function InvitationExampleFrame({ styleSlug, label, viewportHeight }: {
+export function InvitationExampleFrame({ styleSlug, label, viewportHeight, hideScrollbar = false, loading = "lazy" }: {
   styleSlug: string;
   label: string;
   viewportHeight?: number;
+  hideScrollbar?: boolean;
+  loading?: "eager" | "lazy";
 }) {
   const viewport = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const height = viewportHeight ?? 740;
+  const ready = loaded && width > 0;
 
   useEffect(() => {
     const element = viewport.current;
@@ -24,20 +27,26 @@ export function InvitationExampleFrame({ styleSlug, label, viewportHeight }: {
   return <div
     ref={viewport}
     className="invitation-example-viewport"
-    aria-busy={!loaded}
+    aria-busy={!ready}
     style={{ aspectRatio: `390 / ${height}` }}
   >
-    {!loaded && <BrandLoader className="invitation-example-loader" message="Preparando tu invitación…" />}
-    <div>
-      <iframe
-        title={`Invitación de ejemplo · ${label}`}
-        src={`/ejemplo-invitacion/${styleSlug}`}
-        loading="lazy"
-        onLoad={() => setLoaded(true)}
-        tabIndex={!loaded ? -1 : undefined}
-        aria-hidden={!loaded || undefined}
-        style={{ width: 390, height, opacity: loaded ? 1 : 0, pointerEvents: loaded ? undefined : "none", transform: `scale(${width ? width / 390 : 1})` }}
-      />
-    </div>
+    {!ready && <BrandLoader className="invitation-example-loader" message="Preparando tu invitación…" />}
+    <iframe
+      title={`Invitación de ejemplo · ${label}`}
+      src={`/ejemplo-invitacion/${styleSlug}`}
+      loading={loading}
+      onLoad={(event) => {
+        const document = event.currentTarget.contentDocument;
+        if (hideScrollbar && document) {
+          const style = document.createElement("style");
+          style.textContent = "html { scrollbar-width: none; } html::-webkit-scrollbar { display: none; }";
+          document.head.appendChild(style);
+        }
+        setLoaded(true);
+      }}
+      tabIndex={!ready ? -1 : undefined}
+      aria-hidden={!ready || undefined}
+      style={{ width: 390, height, opacity: ready ? 1 : 0, pointerEvents: ready ? undefined : "none", transform: `scale(${width / 390})` }}
+    />
   </div>;
 }
