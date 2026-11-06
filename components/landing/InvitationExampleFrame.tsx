@@ -31,7 +31,7 @@ export function InvitationExampleFrame({ styleSlug, label, viewportHeight, hideS
     aria-busy={!ready}
     style={{ aspectRatio: `390 / ${height}` }}
   >
-    {!ready && <BrandLoader className="invitation-example-loader" message="Preparando tu invitación…" />}
+    {!ready && <BrandLoader className="invitation-example-loader" message="Preparando tu invitación…" showMessage={false} />}
     <iframe
       title={`Invitación de ejemplo · ${label}`}
       src={`/ejemplo-invitacion/${styleSlug}${preview ? "/hero" : ""}`}

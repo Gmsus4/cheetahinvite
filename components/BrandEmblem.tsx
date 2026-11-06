@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { brandEmblemSource } from "@/lib/brand-emblem";
 
 export function BrandEmblem({ size = 40, className = "", priority = false }: {
   size?: number;
@@ -10,6 +11,6 @@ export function BrandEmblem({ size = 40, className = "", priority = false }: {
     style={{ "--brand-emblem-size": `${size}px` } as React.CSSProperties}
     aria-hidden="true"
   >
-    <Image src="/Logo.webp" alt="" width={128} height={128} priority={priority} />
+    <Image src={brandEmblemSource} alt="" width={128} height={128} unoptimized loading="eager" priority={priority} />
   </span>;
 }

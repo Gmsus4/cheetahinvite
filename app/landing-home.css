@@ -203,8 +203,48 @@
   .landing-home .home-faq-support { margin-top: 18px; padding: 20px; }
   .landing-home .home-faq-support strong { display: block; }
 }
-/* Open footer with clear link columns. */
-.landing-home .home-footer { padding: 60px var(--home-inset) 25px; border-top: 1px solid var(--line); background: #fff; }.landing-home .home-footer-shell { padding: 0; }.landing-home .home-footer-main { display: grid; grid-template-columns: 1.4fr .8fr 1fr; gap: 50px; padding-bottom: 45px; }.landing-home .footer-brand-block > p { margin-top: 22px; color: var(--muted); font-size: 13px; line-height: 1.8; }.landing-home .footer-group-label { display: block; margin: 10px 0 20px; color: var(--muted); font-size: 9px; letter-spacing: .12em; }.landing-home .footer-navigation { display: flex; flex-direction: column; gap: 14px; }.landing-home .footer-navigation a { font-size: 12px; }.landing-home .footer-start > p { margin-bottom: 22px; font-size: 21px; font-weight: 600; line-height: 1.4; letter-spacing: -.03em; }.landing-home .home-footer-bottom { display: flex; align-items: center; flex-wrap: wrap; gap: 22px; padding-top: 25px; border-top: 1px solid var(--line); }.landing-home .home-footer-bottom small, .landing-home .home-footer-bottom a { color: var(--muted); font-size: 10px; }.landing-home .footer-legal-links { display: flex; flex-wrap: wrap; gap: 20px; }.landing-home .footer-back-top { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }.landing-home .home-footer a:not(.button):hover { color: var(--orange); }
+/* Compact footer with clear navigation and a high-contrast brand treatment. */
+.landing-home .home-footer { padding: 0 var(--home-inset) 24px; border-radius: 40px 40px 0 0; background: #0b1320; color: #fff8f1; }
+.landing-home .home-footer-shell { padding: 0; }
+.landing-home .home-footer-main { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 50px; padding: 42px 0 38px; }
+.landing-home .home-footer .brand-name { color: #fff8f1; font-size: 21px; }
+.landing-home .home-footer .brand-name > span { color: #f6a77f; }
+.landing-home .footer-brand-block > p { margin: 18px 0 0; color: #b3bdcb; font-size: 14px; line-height: 1.8; }
+.landing-home .footer-group-label { display: block; margin: 8px 0 18px; color: #a9b5c6; font-size: 10px; font-weight: 600; letter-spacing: .12em; }
+.landing-home .footer-navigation { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.landing-home .footer-navigation a { display: inline-flex; align-items: center; min-height: 36px; color: #eee8e3; font-size: 14px; }
+.landing-home .footer-help > p { margin: 0 0 14px; color: #b3bdcb; font-size: 14px; line-height: 1.7; }
+.landing-home .footer-help-link { display: inline-flex; align-items: center; gap: 11px; color: #fff8f1; font-size: 14px; }
+.landing-home .footer-help-icon { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid #ffffff24; border-radius: 12px; background: #ffffff06; color: #f6a77f; }
+.landing-home .footer-help-link > svg { width: 16px; height: 16px; color: #f6a77f; }
+.landing-home .home-footer-bottom { display: flex; align-items: center; flex-wrap: wrap; gap: 16px 28px; padding-top: 22px; border-top: 1px solid #ffffff24; }
+.landing-home .home-footer-bottom small, .landing-home .home-footer-bottom a { color: #a9b5c6; font-size: 12px; line-height: 1.6; }
+.landing-home .footer-legal-links { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.landing-home .footer-legal-links a { display: inline-flex; align-items: center; min-height: 36px; }
+.landing-home .footer-back-top { display: inline-flex; align-items: center; gap: 12px; margin-left: auto; }
+.landing-home .footer-back-top > span { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #ffffff30; border-radius: 50%; color: #fff8f1; transition: border-color .2s,transform .2s; }
+.landing-home .home-footer a:not(.button) { transition: color .2s; }
+.landing-home .home-footer a:not(.button):hover { color: #f6a77f; }
+.landing-home .footer-back-top:hover > span { border-color: #f6a77f; transform: translateY(-3px); }
+.landing-home .home-footer :is(a,button):focus-visible { outline-color: #f6a77f; }
+@media (max-width: 1050px) {
+  .landing-home .home-footer-main { gap: 28px; }
+}
+@media (max-width: 760px) {
+  .landing-home .home-footer { border-radius: 28px 28px 0 0; }
+  .landing-home .home-footer-main { grid-template-columns: 1fr 1fr; gap: 32px 24px; padding-block: 34px; }
+  .landing-home .footer-brand-block { grid-column: 1 / -1; }
+  .landing-home .home-footer-bottom { justify-content: space-between; gap: 12px 20px; }
+  .landing-home .home-footer-bottom > small { flex-basis: 100%; }
+  .landing-home .footer-back-top { margin-left: 0; }
+}
+@media (max-width: 520px) {
+  .landing-home .home-footer-main { grid-template-columns: 1fr; gap: 28px; }
+  .landing-home .footer-group-label { margin-top: 0; margin-bottom: 12px; }
+  .landing-home .home-footer-bottom { align-items: flex-start; gap: 14px; }
+  .landing-home .footer-legal-links { flex-basis: 100%; gap: 6px 20px; }
+  .landing-home .footer-back-top { margin-top: 2px; }
+}
 @media (max-width: 1050px) {
   .landing-home .home-navbar-shell { gap: 18px; }.landing-home .main-nav { gap: 16px; }.landing-home .brand-name { font-size: 16px; }.landing-home .header-actions { gap: 15px; }.landing-home .button-small { padding: 10px 14px; font-size: 11px; }
   .landing-home .hero { gap: 28px; }.landing-home .hero h1 { font-size: 48px; }.landing-home .floating-note { font-size: 9px; padding: 10px; }.landing-home .note-top { right: -10px; }.landing-home .note-bottom { left: -10px; }
@@ -219,11 +259,10 @@
   .landing-home .trust-strip .trust-strip-marquee { mask-image: linear-gradient(to right, transparent, #000 18px, #000 calc(100% - 18px), transparent); }
   .landing-home .trust-strip-chip { gap: 8px; min-height: 38px; padding: 8px 13px; font-size: 12px; }
   .landing-home :is(.how-section,.templates-section,.home-benefits,.pricing-section) { padding: 65px var(--home-inset); }.landing-home .home-benefits { padding-top: 10px; }.landing-home :is(.how-intro,.section-heading,.benefits-heading,.pricing-copy) h2 { font-size: 34px; }.landing-home .steps { gap: 14px; }.landing-home .steps article, .landing-home .steps article:first-child { padding: 10px 10px 20px; border-radius: 20px; }.landing-home .step-illustration { height: 155px; }.landing-home .step-paper { width: 120px; padding: 18px 8px; gap: 10px; }.landing-home .step-paper span { font-size: 10px; }.landing-home .steps article > div:last-child { padding: 0 4px; }.landing-home .steps h3 { font-size: 15px; }.landing-home .steps p { font-size: 11px; }.landing-home .benefit-card { padding: 15px 18px 25px; }.landing-home .benefit-card h3 { font-size: 23px; }.landing-home .rsvp-example { flex-wrap: wrap; }.landing-home .confirmed { margin-left: 42px; }.landing-home .palette-art { gap: 10px; }.landing-home .palette-art > span { width: 26px; height: 26px; }.landing-home .palette-art b { font-size: 25px; }
-  .landing-home .home-footer-main { grid-template-columns: 1fr 1fr; gap: 30px; }.landing-home .footer-brand-block { grid-column: 1 / -1; }.landing-home .footer-back-top { margin-left: 0; }
 }
 @media (max-width: 520px) {
   .landing-home .hero h1 { font-size: clamp(34px,9.5vw,46px); }.landing-home .hero .eyebrow { font-size: 8px; }.landing-home .hero-actions { gap: 18px; }.landing-home .hero .button { font-size: 12px; }.landing-home .hero-product-stage { gap: 25px; }.landing-home .hero-example-selector button { min-height: 44px; padding: 8px 12px; }.landing-home .floating-note { font-size: 9px; }.landing-home .note-top { top: 45px; right: -6px; }.landing-home .note-bottom { bottom: 180px; left: -5px; }.landing-home .note-bottom small { display: none; }.landing-home .note-check { width: 24px; height: 24px; }.landing-home .art-sun { right: 0; width: 290px; height: 290px; }.landing-home .spark-one { left: 15px; }.landing-home .spark-two { right: 10px; }
-  .landing-home :is(.how-intro,.section-heading,.benefits-heading,.pricing-copy) h2 { font-size: 30px; }.landing-home :is(.how-summary,.section-heading,.benefits-heading,.pricing-copy) p { font-size: 13px; }.landing-home .steps { grid-template-columns: 1fr; gap: 20px; }.landing-home .steps article, .landing-home .steps article:first-child { padding: 13px 13px 26px; gap: 22px; border-radius: 25px; }.landing-home .steps article > div:last-child { padding: 0 10px; }.landing-home .step-illustration { height: 200px; }.landing-home .step-paper { width: 160px; padding: 22px; }.landing-home .step-paper span { font-size: 12px; }.landing-home .steps h3 { font-size: 20px; }.landing-home .steps p { font-size: 13px; }.landing-home .benefits-grid { grid-template-columns: 1fr; }.landing-home .benefit-card { padding: 18px 20px 28px; }.landing-home .rsvp-example { flex-wrap: nowrap; }.landing-home .confirmed { margin-left: auto; }.landing-home .palette-art { gap: 14px; }.landing-home .home-footer { padding-top: 45px; }.landing-home .home-footer-main { grid-template-columns: 1fr; gap: 30px; }.landing-home .home-footer-bottom { flex-direction: column; align-items: flex-start; gap: 18px; }.landing-home .footer-legal-links { gap: 12px 18px; }
+  .landing-home :is(.how-intro,.section-heading,.benefits-heading,.pricing-copy) h2 { font-size: 30px; }.landing-home :is(.how-summary,.section-heading,.benefits-heading,.pricing-copy) p { font-size: 13px; }.landing-home .steps { grid-template-columns: 1fr; gap: 20px; }.landing-home .steps article, .landing-home .steps article:first-child { padding: 13px 13px 26px; gap: 22px; border-radius: 25px; }.landing-home .steps article > div:last-child { padding: 0 10px; }.landing-home .step-illustration { height: 200px; }.landing-home .step-paper { width: 160px; padding: 22px; }.landing-home .step-paper span { font-size: 12px; }.landing-home .steps h3 { font-size: 20px; }.landing-home .steps p { font-size: 13px; }.landing-home .benefits-grid { grid-template-columns: 1fr; }.landing-home .benefit-card { padding: 18px 20px 28px; }.landing-home .rsvp-example { flex-wrap: nowrap; }.landing-home .confirmed { margin-left: auto; }.landing-home .palette-art { gap: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .landing-home *, .landing-home *::before, .landing-home *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 @media (prefers-reduced-motion: reduce) {
