@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FiArrowUpRight, FiMenu, FiX } from "react-icons/fi";
+import { FiArrowRight, FiArrowUpRight, FiMenu, FiX } from "react-icons/fi";
 import { BrandEmblem } from "@/components/BrandEmblem";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -56,7 +56,7 @@ export function Navbar() {
       if (!header.current?.contains(event.target as Node)) setMenuOpen(false);
     };
     const close = () => setMenuOpen(false);
-    const desktop = window.matchMedia("(min-width: 761px)");
+    const desktop = window.matchMedia("(min-width: 801px)");
     const onDeviceChange = () => { if (desktop.matches) close(); };
     document.addEventListener("keydown", onEscape);
     document.addEventListener("pointerdown", onOutside);
@@ -103,11 +103,11 @@ export function Navbar() {
             onClick={() => setMenuOpen(false)}
           >{label}</a>)}
           <div className="header-actions">
+            <ThemeToggle variant="subtle" />
             <a className="login-link" href="/login" onClick={() => setMenuOpen(false)}>
               Iniciar sesión <FiArrowUpRight aria-hidden="true" />
             </a>
-            <a className="button button-small" href="/crear" onClick={() => setMenuOpen(false)}>Crear invitación <FiArrowUpRight aria-hidden="true" /></a>
-            <ThemeToggle />
+            <a className="button button-small" href="/crear" onClick={() => setMenuOpen(false)}>Crear invitación <FiArrowRight aria-hidden="true" /></a>
           </div>
         </nav>
       </div>

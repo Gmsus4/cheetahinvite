@@ -1,5 +1,6 @@
 .root { position: relative; flex: 0 0 auto; color: var(--ink); }
 .root .trigger.trigger { display: grid; place-items: center; width: 42px; height: 42px; min-height: 42px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--muted); cursor: pointer; transition: background .18s, border-color .18s, color .18s; }
+.root.subtle .trigger { width: 40px; height: 40px; min-height: 40px; border-color: transparent; border-radius: 12px; background: transparent; }
 .root .trigger:hover, .root .trigger[aria-expanded="true"] { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
 .trigger svg { width: 18px; height: 18px; }
 .trigger .moon { display: none; }

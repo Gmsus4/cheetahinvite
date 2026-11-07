@@ -22,7 +22,7 @@ const options = [
   { value: "system", label: "Sistema", icon: FiMonitor },
 ] as const;
 
-export function ThemeToggle() {
+export function ThemeToggle({ variant = "default" }: { variant?: "default" | "subtle" }) {
   const preference = useSyncExternalStore(subscribeThemePreference, readThemePreference, () => "system" as const);
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -56,7 +56,7 @@ export function ThemeToggle() {
     trigger.current?.focus();
   }
 
-  return <div className={styles.root} ref={root} onBlur={event => {
+  return <div className={`${styles.root}${variant === "subtle" ? ` ${styles.subtle}` : ""}`} ref={root} onBlur={event => {
     if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
   }}>
     <button ref={trigger} type="button" className={styles.trigger} aria-label="Cambiar apariencia" title="Cambiar apariencia" aria-expanded={open} aria-controls={id} onClick={() => setOpen(value => !value)}>
