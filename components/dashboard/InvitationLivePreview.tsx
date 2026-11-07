@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { FiEye } from "react-icons/fi";
+import { FiEdit3, FiEye, FiMonitor, FiSmartphone } from "react-icons/fi";
 
 const previewDocument = '<!doctype html><html lang="es"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head><body style="margin:0"><div id="invitation-preview-root"></div></body></html>';
 
-export function InvitationLivePreview({ children, expanded = false, onClose, onExpand, expandLabel = "Ampliar vista previa", expandDisabled = false, publicLink, initialDevice = "desktop", fitViewport = false }: { children: ReactNode; expanded?: boolean; onClose?: () => void; onExpand?: () => void; expandLabel?: string; expandDisabled?: boolean; publicLink?: ReactNode; initialDevice?: "desktop" | "mobile"; fitViewport?: boolean }) {
+export type InvitationPreviewFocus = { target: string; label: string; fallback?: string; sequence?: number };
+
+export function InvitationLivePreview({ children, focus, expanded = false, onClose, onExpand, expandLabel = "Ampliar vista previa", expandDisabled = false, publicLink, initialDevice = "desktop", fitViewport = false }: { children: ReactNode; focus?: InvitationPreviewFocus; expanded?: boolean; onClose?: () => void; onExpand?: () => void; expandLabel?: string; expandDisabled?: boolean; publicLink?: ReactNode; initialDevice?: "desktop" | "mobile"; fitViewport?: boolean }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const container = useRef<HTMLDivElement>(null);
   const [root, setRoot] = useState<HTMLElement | null>(null);
@@ -101,20 +103,108 @@ export function InvitationLivePreview({ children, expanded = false, onClose, onE
     return () => { observer.disconnect(); preview.removeEventListener("click", navigateWithinPreview); };
   }, [root]);
 
+  const focusTarget = focus?.target;
+  const focusFallback = focus?.fallback;
+  const focusSequence = focus?.sequence;
+  useEffect(() => {
+    const view = root?.ownerDocument.defaultView;
+    if (!root || !view || !focusTarget) return;
+    let active: HTMLElement | undefined;
+    let animationFrame = 0;
+    const find = (key?: string) => key ? Array.from(root.querySelectorAll<HTMLElement>("[data-invitation-field]"))
+      .find(element => element.dataset.invitationField?.split(" ").includes(key)) : undefined;
+    const position = (smooth: boolean) => {
+      if (!active || !active.getClientRects().length) return;
+      const rect = active.getBoundingClientRect();
+      const top = view.scrollY + rect.top - Math.max(24, (view.innerHeight - rect.height) / 2);
+      // Scroll only the iframe document; never move the form or steal input focus.
+      view.scrollTo({ top: Math.max(0, top), behavior: smooth && !view.matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "instant" });
+    };
+    const resize = new ResizeObserver(() => {
+      view.cancelAnimationFrame(animationFrame);
+      animationFrame = view.requestAnimationFrame(() => {
+        const rect = active?.getBoundingClientRect();
+        if (rect && (rect.bottom < 24 || rect.top > view.innerHeight - 24)) position(false);
+      });
+    });
+    const sync = () => {
+      const next = find(focusTarget) ?? find(focusFallback);
+      if (next === active) return;
+      if (active) { active.removeAttribute("data-preview-active"); resize.unobserve(active); }
+      active = next;
+      if (active) {
+        active.setAttribute("data-preview-active", "true");
+        resize.observe(active);
+        view.cancelAnimationFrame(animationFrame);
+        animationFrame = view.requestAnimationFrame(() => position(true));
+      }
+    };
+    sync();
+    const mutations = new MutationObserver(sync);
+    mutations.observe(root, { childList: true, subtree: true });
+    return () => {
+      mutations.disconnect();
+      resize.disconnect();
+      view.cancelAnimationFrame(animationFrame);
+      active?.removeAttribute("data-preview-active");
+    };
+  }, [root, focusTarget, focusFallback, focusSequence, device, height]);
+
   return <div ref={previewContainer} className={`editor-live-preview${expanded ? " is-expanded" : ""}`} role={expanded ? "dialog" : undefined} aria-modal={expanded || undefined} aria-label={expanded ? "Vista previa completa" : undefined}>
     {expanded && <div className="editor-expanded-preview-header"><strong>Vista previa completa</strong><button ref={closeButton} type="button" onClick={onClose}>Cerrar vista previa ✕</button></div>}
     <div className="editor-preview-devices" role="group" aria-label="Dispositivo de vista previa">
-      <button type="button" aria-pressed={device === "desktop"} onClick={() => setDevice("desktop")}>Escritorio</button>
-      <button type="button" aria-pressed={device === "mobile"} onClick={() => setDevice("mobile")}>Móvil</button>
+      <button className="editor-preview-device" type="button" aria-pressed={device === "desktop"} onClick={() => setDevice("desktop")}><FiMonitor aria-hidden="true" />Escritorio</button>
+      <button className="editor-preview-device" type="button" aria-pressed={device === "mobile"} onClick={() => setDevice("mobile")}><FiSmartphone aria-hidden="true" />Móvil</button>
       {onExpand && !expanded && <button className="editor-preview-expand" type="button" onClick={onExpand} disabled={expandDisabled} aria-label={expandLabel} title={expandLabel}><FiEye aria-hidden="true" /></button>}
       {publicLink}
     </div>
+    {focus && <div className="editor-preview-focus" role="status">
+      <span className="editor-preview-focus-icon" aria-hidden="true"><FiEdit3 /></span>
+      <span className="editor-preview-focus-copy"><small>Editando ahora</small><strong>{focus.label}</strong></span>
+      <span className="editor-preview-focus-live" aria-hidden="true"><i />En vivo</span>
+    </div>}
     <div className="editor-preview-viewport" ref={container}>
       <div className="editor-preview-frame-space" style={{ width: width * scale, height: height * scale }}>
         {!root && <p className="editor-preview-loading" role="status">Preparando tu invitación…</p>}
         <iframe ref={frame} title="Vista previa interactiva de tu invitación" srcDoc={previewDocument} style={{ width, height, transform: `scale(${scale})`, visibility: availableWidth ? "visible" : "hidden" }} />
       </div>
     </div>
-    {root && createPortal(children, root)}
+    {root && createPortal(<>{focus && <style>{`
+      #invitation-preview-root [data-preview-active] {
+        position: relative;
+        isolation: isolate;
+        z-index: 1;
+      }
+      #invitation-preview-root [data-preview-active]::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        inset: -10px -8px;
+        border-radius: 20px;
+        background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--wa-ink, #fffaf2) 14%, transparent), transparent 78%);
+        box-shadow: 0 14px 40px -22px #00000055;
+        pointer-events: none;
+        animation: preview-focus-reveal 240ms ease-out both;
+      }
+      #invitation-preview-root [data-preview-active]::after {
+        content: "";
+        position: absolute;
+        bottom: -8px;
+        left: calc(50% - 18px);
+        width: 36px;
+        height: 2px;
+        border-radius: 999px;
+        background: var(--wa-ink, #fffaf2);
+        opacity: .55;
+        pointer-events: none;
+      }
+      @keyframes preview-focus-reveal {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #invitation-preview-root [data-preview-active]::before { animation: none; }
+      }
+    `}</style>}{children}</>, root)}
   </div>;
 }

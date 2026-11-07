@@ -30,6 +30,34 @@ function loadComponents(hooks) {
   return load;
 }
 
+test('editor location placeholders are available before typing and stay out of public and hero invitations', () => {
+  const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
+  const values = { name: 'Mi invitación', hostNames: 'Alex', date: '', venue: '', address: '', message: '', imageUrl: '', sections: [], accent: '#58664E' };
+  const render = options => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...values, ...options }));
+  const editor = render({ preview: true, showPlaceholders: true });
+  assert.match(editor, /data-invitation-field="w-venue">Nos vemos aquí/);
+  assert.match(editor, /data-invitation-field="w-address">Dirección por definir/);
+  assert.doesNotMatch(editor, /Cómo llegar/);
+  for (const options of [{}, { preview: true }]) assert.doesNotMatch(render(options), /wa-location|Dirección por definir/);
+});
+
+test('editor targets distinguish invitation name, hosts and individual detail fields', () => {
+  const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
+  const html = renderToStaticMarkup(React.createElement(CelebrationInvitation, {
+    name: 'Nuestra celebración', hostNames: 'Alex y Sam', date: '', venue: '', address: '', message: 'Bienvenidos', imageUrl: '', accent: '#58664E',
+    sections: [{ id: 'ceremony', type: 'ceremony', title: 'Ceremonia', content: 'El jardín', detail: '17:00', link: 'Calle principal', imageUrl: '', enabled: true },
+      { id: 'hidden', type: 'custom', title: 'Oculto', content: 'Texto', detail: '', link: '', imageUrl: '', enabled: false }],
+  }));
+  assert.match(html, /data-invitation-field="w-name">Nuestra celebración/);
+  assert.match(html, /<h1 aria-label="Alex y Sam" data-invitation-field="w-hosts">/);
+  assert.match(html, /data-invitation-field="w-message">Bienvenidos/);
+  assert.match(html, /data-invitation-field="ceremony-title">Ceremonia/);
+  assert.match(html, /data-invitation-field="ceremony-content">El jardín/);
+  assert.match(html, /data-invitation-field="ceremony-time">17:00/);
+  assert.match(html, /data-invitation-field="ceremony-link ceremony-map ceremony-mode"/);
+  assert.doesNotMatch(html, /section:hidden|data-preview-active/);
+});
+
 test('every occasion uses the same texture-free presentation with its own default copy', () => {
   const load = loadComponents();
   const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');

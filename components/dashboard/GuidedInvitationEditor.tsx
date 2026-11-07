@@ -22,7 +22,7 @@ import { useEditorProtection } from "./useEditorProtection";
 import { EditorProtectedLink } from "./EditorProtectedLink";
 import { EditorLeaveDialog } from "./EditorLeaveDialog";
 import { EditorRecoveryDialog } from "./EditorRecoveryDialog";
-import { InvitationLivePreview } from "./InvitationLivePreview";
+import { InvitationLivePreview, type InvitationPreviewFocus } from "./InvitationLivePreview";
 import { InvitationPublicLink } from "./InvitationPublicLink";
 import { InvitationPrivacySettings } from "./InvitationPrivacySettings";
 import { CustomInvitationLinkField } from "./CustomInvitationLinkField";
@@ -46,6 +46,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const [uploads, setUploads] = useState(0);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
+  const [focusedField, setFocusedField] = useState<(InvitationPreviewFocus & { context: string }) | null>(null);
   const form = useRef<HTMLFormElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const scrollToTop = useRef(false);
@@ -91,6 +92,17 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const contentKey = contentIds.includes(activeSection) ? activeSection : '__welcome';
   const contentIndex = contentIds.indexOf(contentKey);
   const currentSection = values.sections.find(section => section.id === contentKey);
+  const previewContext = `${step}:${contentKey}`;
+  const sectionTarget = currentSection?.enabled ? `section:${currentSection.id}` : undefined;
+  const defaultPreviewFocus: InvitationPreviewFocus | undefined = step === 0 ? { target: "w-hosts", label: "Protagonistas" }
+    : step === 1 ? { target: "w-date", label: "Fecha y lugar" }
+    : step === 2 ? { target: "cover-photo", label: "Foto de portada" }
+    : step === 3 && contentKey === "__welcome" ? { target: "w-message", label: "Mensaje de bienvenida" }
+    : step === 3 && sectionTarget && currentSection ? { target: sectionTarget, label: currentSection.title }
+    : undefined;
+  const previewFocus = step === 3 && currentSection && !currentSection.enabled ? undefined : focusedField?.context === previewContext
+    ? { target: focusedField.target, label: focusedField.label, fallback: focusedField.fallback ?? sectionTarget, sequence: focusedField.sequence }
+    : defaultPreviewFocus;
   const palette = invitationPalette(values.accent);
   const continuingDetail = step === 3 && contentIndex < contentIds.length - 1;
   const continueLabel = step === 4 && !appearanceExpanded ? 'Me gusta así' : 'Continuar';
@@ -203,7 +215,13 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
         {protection.localWarning && <p className="guided-alert" role="status">El navegador no permite guardar una copia local. Guarda tu borrador antes de salir.</p>}
         {(protection.error || error) && <div className="guided-alert" role="alert"><p>{protection.error || (error === "pendientes" ? "Completa los datos principales y los detalles activos antes de continuar al pago." : "Revisa tus datos e intenta guardar de nuevo.")}</p><div>{protection.conflictVersion !== undefined && <><button type="button" disabled={busy || uploads > 0} onClick={() => void save(false, true)}>Guardar mi versión</button><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${persistence.getEventId()}/show`} target="_blank">Revisar versión guardada</EditorProtectedLink></>}{protection.code === "unavailable" && <button type="button" disabled={busy || uploads > 0} onClick={() => void save()}>Reintentar guardado</button>}{protection.code === "auth" && <EditorProtectedLink guard={confirmNavigation} href={`/login?callbackUrl=${encodeURIComponent(creation ? "/crear" : `/dashboard/eventos/${event.id}`)}`}>Iniciar sesión</EditorProtectedLink>}</div></div>}
         {notice && <p className="guided-notice" role="status">{notice}</p>}
-        <form ref={form} onSubmit={submit} noValidate className="guided-form" aria-busy={saving}>
+        <form ref={form} onSubmit={submit} noValidate className="guided-form" aria-busy={saving} onFocusCapture={event => {
+          const field = event.target.closest<HTMLElement>("[data-preview-field]");
+          if (field?.dataset.previewField) {
+            const target = field.dataset.previewField;
+            setFocusedField(previous => ({ context: previewContext, target, label: field.dataset.previewLabel || "Sección", fallback: step === 3 ? sectionTarget : "cover", sequence: (previous?.sequence ?? 0) + 1 }));
+          }
+        }}>
           <fieldset disabled={busy} className="guided-fields">
             {step === 0 && <div className="guided-data-grid">
               <Field label="Tipo de evento" id="event-type" wide><select id="event-type" value={values.eventType} onChange={e => { patch(changeGuidedEventType(values, e.target.value)); setActiveSection('__welcome'); setAddingDetail(false); }}>{invitationEventTypes.map(type => <option key={type} value={type}>{getInvitationEventContent(type).label}</option>)}</select></Field>
@@ -220,8 +238,8 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
             </div>}
             {step === 2 && <>
               <div className="guided-photo-grid">
-                <section className="guided-photo-field" aria-labelledby="cover-upload-title" aria-describedby="guided-photo-formats"><h2 id="cover-upload-title">Foto de portada <span>Opcional</span></h2><p>La imagen principal de tu invitación.</p><CloudinaryImageUpload {...uploadProps} images={values.imageUrl ? [values.imageUrl] : []} multiple={false} onChange={images => patch({ imageUrl: images[0] ?? '' })} /></section>
-                <section className="guided-photo-field" aria-labelledby="background-upload-title" aria-describedby="guided-photo-formats"><h2 id="background-upload-title">Foto de fondo <span>Opcional</span></h2><p>Detrás de las secciones. También inspira tu paleta.</p><CloudinaryImageUpload {...uploadProps} images={values.backgroundImageUrl ? [values.backgroundImageUrl] : []} multiple={false} onChange={images => patch({ backgroundImageUrl: images[0] ?? '' })} /></section>
+                <section className="guided-photo-field" data-preview-field="cover-photo" data-preview-label="Foto de portada" aria-labelledby="cover-upload-title" aria-describedby="guided-photo-formats"><h2 id="cover-upload-title">Foto de portada <span>Opcional</span></h2><p>La imagen principal de tu invitación.</p><CloudinaryImageUpload {...uploadProps} images={values.imageUrl ? [values.imageUrl] : []} multiple={false} onChange={images => patch({ imageUrl: images[0] ?? '' })} /></section>
+                <section className="guided-photo-field" data-preview-field="cover" data-preview-label="Foto de fondo" aria-labelledby="background-upload-title" aria-describedby="guided-photo-formats"><h2 id="background-upload-title">Foto de fondo <span>Opcional</span></h2><p>Detrás de las secciones. También inspira tu paleta.</p><CloudinaryImageUpload {...uploadProps} images={values.backgroundImageUrl ? [values.backgroundImageUrl] : []} multiple={false} onChange={images => patch({ backgroundImageUrl: images[0] ?? '' })} /></section>
               </div>
               <p className="guided-help" id="guided-photo-formats">JPG, PNG, WebP o AVIF · máximo {ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB por imagen. Puedes continuar sin subir fotos.</p>
             </>}
@@ -236,7 +254,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                 {availableSections.length ? <div className="guided-more-options">{availableSections.map(section => <button type="button" key={section.id} onClick={() => { changeSection(section.id, { enabled: true }); setAddingDetail(true); setActiveSection(section.id); }}><span>{extraDetailLabel(section)}</span><FiPlus aria-hidden="true" /></button>)}</div> : <p>Ya incluiste todos los detalles disponibles.</p>}
               </section> : <>
                 <div className="guided-content-position"><span>{addingDetail ? 'Detalle adicional' : `Detalle ${contentIndex + 1} de ${contentIds.length - 1}`}</span><span>{contentIndex === 0 ? 'Una bienvenida para empezar' : 'Un detalle a la vez'}</span></div>
-                <div className="guided-single-detail" key={contentKey}>
+                <div className="guided-single-detail" key={contentKey} data-preview-field={sectionTarget} data-preview-label={currentSection?.title}>
                   {contentKey === '__welcome' ? <>
                     <h2>Un mensaje de bienvenida</h2><p>Ya preparamos unas palabras para tus invitados. Puedes dejarlas así o escribir las tuyas.</p>
                     <Field label="Un mensaje para tus invitados" id="w-message" help="Opcional. Si lo dejas vacío, usaremos una bienvenida breve."><textarea id="w-message" rows={5} maxLength={1200} value={values.message} onChange={e => patch({ message: e.target.value })} /></Field>
@@ -293,7 +311,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
           </div>
         </form>
       </div>
-      <aside className="guided-preview"><div className="guided-preview-heading"><span>ASÍ VA QUEDANDO</span><small>Se actualiza mientras editas</small></div><InvitationLivePreview initialDevice="mobile" fitViewport onExpand={() => void openPrivatePreview()} expandLabel={saving ? "Preparando vista previa…" : "Abrir vista previa privada"} expandDisabled={busy || uploads > 0} publicLink={<InvitationPublicLink event={event} dirty={dirty} />}><CelebrationInvitation {...values} date={date} eventDateKey={values.eventDate} /></InvitationLivePreview></aside>
+      <aside className="guided-preview"><div className="guided-preview-heading"><span>ASÍ VA QUEDANDO</span><small>Selecciona un campo para verlo resaltado aquí</small></div><InvitationLivePreview focus={previewFocus} initialDevice="mobile" fitViewport onExpand={() => void openPrivatePreview()} expandLabel={saving ? "Preparando vista previa…" : "Abrir vista previa privada"} expandDisabled={busy || uploads > 0} publicLink={<InvitationPublicLink event={event} dirty={dirty} />}><CelebrationInvitation {...values} preview showPlaceholders date={date} eventDateKey={values.eventDate} /></InvitationLivePreview></aside>
     </div>
     <button className="guided-mobile-preview" type="button" disabled={busy || uploads > 0} onClick={() => void openPrivatePreview()} aria-label={saving ? "Preparando vista previa…" : "Abrir vista previa privada"} title="Abrir vista previa privada"><FiEye aria-hidden="true" /></button>
   </main>;
@@ -304,7 +322,7 @@ function extraDetailLabel(section: InviteSection) {
 }
 
 function Field({ label, id, help, wide, children }: { label: string; id: string; help?: string; wide?: boolean; children: ReactNode }) {
-  return <div className={`guided-field${wide ? " guided-wide" : ""}`}><label htmlFor={id}>{label}</label>{children}{help && <small>{help}</small>}</div>;
+  return <div className={`guided-field${wide ? " guided-wide" : ""}`} data-preview-field={id} data-preview-label={label}><label htmlFor={id}>{label}</label>{children}{help && <small>{help}</small>}</div>;
 }
 
 function SectionFields({ section, onChange, uploadProps, allowSectionPhoto = false, globalPanelStyle = "auto" }: { globalPanelStyle?: InvitationPanelStyle; section: InviteSection; onChange(changes: Partial<InviteSection>): void; uploadProps: { eventId: string; ensureEvent?: () => Promise<string>; onBusyChange(active: boolean): void }; allowSectionPhoto?: boolean }) {
@@ -318,7 +336,7 @@ function SectionFields({ section, onChange, uploadProps, allowSectionPhoto = fal
     <Field label={({ story: "Cuenta la historia de tu celebración", ceremony: "Nombre del lugar de la ceremonia", reception: "Nombre del lugar de la recepción", program: "Horario y actividad, un momento por renglón", parents: "Nombres de las personas que quieres mencionar", dress_code: "¿Cómo deben vestir tus invitados?", gifts: "Mensaje sobre los regalos", rsvp: "Mensaje de confirmación (opcional)", music: "Mensaje para la playlist", custom: "Información adicional" } as Record<string, string>)[section.type]} id={`${prefix}-content`} help={section.type === "program" ? "Ejemplo: 17:00 — Ceremonia. Escribe únicamente los horarios reales de tu evento." : undefined}><textarea id={`${prefix}-content`} rows={section.type === "program" ? 5 : 3} value={section.content} maxLength={2000} placeholder={({ story: "Todo empezó cuando…", ceremony: "Ej. Parroquia San José", reception: "Ej. Jardín Las Rosas", dress_code: "Ej. Casual, con calzado cómodo.", gifts: "Tu compañía es nuestro mejor regalo…" } as Record<string, string>)[section.type]} onChange={e => onChange({ content: e.target.value })} /></Field>
     {(section.type === "ceremony" || section.type === "reception") && <><Field label="Horario" id={`${prefix}-time`}><input id={`${prefix}-time`} value={section.detail} maxLength={240} placeholder="Ej. 5:00 p. m." onChange={e => onChange({ detail: e.target.value })} /></Field><Field label="Dirección o enlace de Google Maps" id={`${prefix}-map`}><input id={`${prefix}-map`} value={section.link} maxLength={500} placeholder="Calle, número y ciudad, o enlace de Maps" onChange={e => onChange({ link: e.target.value })} /></Field></>}
     {(section.type === "gifts" || section.type === "music" || section.type === "custom" || (section.type === "rsvp" && section.rsvpMode === "external")) && <Field label={section.type === "gifts" ? "Enlace a la mesa de regalos (opcional)" : section.type === "music" ? "Enlace a la playlist" : section.type === "custom" ? "Enlace adicional (opcional)" : "Enlace de WhatsApp o confirmación"} id={`${prefix}-link`} help={section.type === "rsvp" ? "Por ejemplo: https://wa.me/521 seguido de tu número." : undefined}><input id={`${prefix}-link`} type="url" maxLength={500} value={section.link} placeholder="https://…" onChange={e => onChange({ link: e.target.value })} /></Field>}
-    {allowSectionPhoto && <section className="guided-section-media" aria-label="Fotografía y acabado de esta sección">{surfaceControl}<div className="guided-section-photo">
+    {allowSectionPhoto && <section className="guided-section-media" aria-label="Fotografía y acabado de esta sección">{surfaceControl}<div className="guided-section-photo" data-preview-field={`${prefix}-photo`} data-preview-label={`Foto de ${section.title}`}>
       <h3>Foto junto a esta sección <span>Opcional</span></h3>
       <p>En escritorio, las fotos alternan automáticamente entre izquierda y derecha. En móvil, elige si aparece antes o después de la sección.</p>
       <CloudinaryImageUpload {...uploadProps} multiple={false} images={section.imageUrl ? [section.imageUrl] : []} onChange={images => onChange({ imageUrl: images[0] ?? "", imagePosition: section.imagePosition ?? "after" })} />

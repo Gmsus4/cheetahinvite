@@ -1,5 +1,13 @@
 /* Full-width workspace for every event editor and private preview. */
 .editor-live-preview{width:100%;min-width:0}
+.editor-preview-focus{display:flex;align-items:center;gap:11px;min-height:58px;margin:0 0 16px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(120deg,var(--surface-muted),var(--surface));color:var(--muted);font-size:11px;line-height:1.5}
+.editor-preview-focus-icon{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:10px;background:var(--surface);color:var(--ink);box-shadow:0 2px 8px rgb(var(--shadow-rgb) / .05)}
+.editor-preview-focus-icon svg{width:15px;height:15px;stroke-width:1.5}
+.editor-preview-focus-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
+.editor-preview-focus-copy>small{color:var(--muted);font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+.editor-preview-focus-copy>strong{color:var(--ink);font-size:12px;font-weight:500;overflow-wrap:anywhere}
+.editor-preview-focus-live{display:flex;align-items:center;flex:none;gap:5px;align-self:flex-start;margin-top:3px;color:var(--muted);font-size:9px;white-space:nowrap}
+.editor-preview-focus-live i{width:5px;height:5px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px var(--success-soft)}
 .editor-live-preview.is-expanded{position:fixed;z-index:1000;inset:0;display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px clamp(16px,4vw,60px);overflow:auto;background:var(--app-background)}
 .editor-live-preview.is-expanded .editor-preview-devices{width:min(100%,420px);flex-shrink:0;margin:0}
 .editor-live-preview.is-expanded .editor-preview-viewport{width:min(100%,1280px);flex-shrink:0}
@@ -7,6 +15,8 @@
 .editor-expanded-preview-header button{min-height:42px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}
 .editor-preview-devices{display:flex;gap:6px;margin:0 0 14px;padding:4px;background:var(--surface-muted);border-radius:9px}
 .editor-preview-devices button{flex:1;min-height:36px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:500 12px var(--font-inter),Arial,sans-serif;cursor:pointer}
+.editor-preview-devices .editor-preview-device{display:flex;align-items:center;justify-content:center;gap:7px}
+.editor-preview-device>svg{width:15px;height:15px;stroke-width:1.5}
 .editor-preview-devices button[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:0 2px 6px rgb(var(--shadow-rgb) / 0.071)}
 .editor-preview-devices :is(button,a):focus-visible{outline:2px solid var(--orange);outline-offset:2px}
 .editor-preview-devices :is(.editor-preview-expand,.editor-preview-public){flex:0 0 40px;display:grid;place-items:center;align-self:center;width:40px;height:36px;min-height:36px;padding:0;border:0;color:var(--ink);line-height:1;border-radius:0 6px 6px 0;box-shadow:inset 1px 0 0 rgb(var(--shadow-rgb) / .12)}
