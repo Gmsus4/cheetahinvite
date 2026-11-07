@@ -53,7 +53,7 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
 }
 .celebration-invitation .wa-cover-heading { padding: 0 12px 28px; }
 .celebration-invitation .wa-cover h1 { margin: 20px auto 14px; font-size: clamp(44px,6vw,72px); line-height: 1.15; letter-spacing: -.035em; }
-.celebration-invitation .wa-ampersand { display: inline-block; margin: 0 .22em; font-family: 'Alex Brush',cursive; font-size: .7em; }
+.celebration-invitation .wa-ampersand { display: inline-block; margin: 0 .22em; font-family: inherit; font-size: .7em; }
 .celebration-invitation[data-long-names] .wa-cover h1 { font-size: clamp(35px,5vw,57px); }
 .celebration-invitation .wa-date { color: var(--wa-soft); font-size: 12px; letter-spacing: .025em; }
 .celebration-invitation .wa-portrait { overflow: hidden; border-radius: 13px; }

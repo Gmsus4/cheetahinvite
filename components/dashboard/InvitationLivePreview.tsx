@@ -16,6 +16,7 @@ export function InvitationLivePreview({ children, focus, expanded = false, onClo
   const [availableHeight, setAvailableHeight] = useState(0);
   const [device, setDevice] = useState<"desktop" | "mobile">(initialDevice);
   const closeButton = useRef<HTMLButtonElement>(null);
+  const focusMarker = useRef<HTMLDivElement>(null);
   const previewContainer = useRef<HTMLDivElement>(null);
   const width = device === "desktop" ? 1280 : 390;
   const scale = Math.min(1, availableWidth / width);
@@ -108,30 +109,58 @@ export function InvitationLivePreview({ children, focus, expanded = false, onClo
   const focusSequence = focus?.sequence;
   useEffect(() => {
     const view = root?.ownerDocument.defaultView;
-    if (!root || !view || !focusTarget) return;
+    const marker = focusMarker.current;
+    if (!root || !view || !focusTarget || !marker) return;
     let active: HTMLElement | undefined;
     let animationFrame = 0;
+    let markerFrame = 0;
+    const updateMarker = () => {
+      const rect = active?.getBoundingClientRect();
+      const viewportWidth = view.innerWidth * scale;
+      const viewportHeight = view.innerHeight * scale;
+      if (!rect?.width || !rect.height || scale <= 0 || rect.bottom <= 0 || rect.top >= view.innerHeight) {
+        marker.style.visibility = "hidden";
+        return;
+      }
+      const markerWidth = marker.offsetWidth;
+      const markerHeight = marker.offsetHeight;
+      const above = rect.top * scale - markerHeight - 8;
+      const below = rect.bottom * scale + 8;
+      const placement = above >= 8 ? "above" : below + markerHeight <= viewportHeight - 8 ? "below" : "inside";
+      const top = placement === "above" ? above : placement === "below" ? below : rect.top * scale + 8;
+      marker.style.left = `${Math.max(8, Math.min(rect.left * scale + 8, viewportWidth - markerWidth - 8))}px`;
+      marker.style.top = `${Math.max(8, Math.min(top, viewportHeight - markerHeight - 8))}px`;
+      marker.dataset.placement = placement;
+      marker.style.visibility = "visible";
+    };
+    const scheduleMarker = () => {
+      if (markerFrame) return;
+      markerFrame = view.requestAnimationFrame(() => { markerFrame = 0; updateMarker(); });
+    };
     const find = (key?: string) => key ? Array.from(root.querySelectorAll<HTMLElement>("[data-invitation-field]"))
       .find(element => element.dataset.invitationField?.split(" ").includes(key)) : undefined;
     const position = (smooth: boolean) => {
       if (!active || !active.getClientRects().length) return;
       const rect = active.getBoundingClientRect();
-      const top = view.scrollY + rect.top - Math.max(24, (view.innerHeight - rect.height) / 2);
+      const top = view.scrollY + rect.top - Math.max(36 / Math.max(scale, .01), (view.innerHeight - rect.height) / 2);
       // Scroll only the iframe document; never move the form or steal input focus.
       view.scrollTo({ top: Math.max(0, top), behavior: smooth && !view.matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "instant" });
+      scheduleMarker();
     };
     const resize = new ResizeObserver(() => {
       view.cancelAnimationFrame(animationFrame);
       animationFrame = view.requestAnimationFrame(() => {
         const rect = active?.getBoundingClientRect();
         if (rect && (rect.bottom < 24 || rect.top > view.innerHeight - 24)) position(false);
+        scheduleMarker();
       });
     });
     const sync = () => {
       const next = find(focusTarget) ?? find(focusFallback);
-      if (next === active) return;
+      if (next === active) { scheduleMarker(); return; }
       if (active) { active.removeAttribute("data-preview-active"); resize.unobserve(active); }
       active = next;
+      marker.style.visibility = "hidden";
       if (active) {
         active.setAttribute("data-preview-active", "true");
         resize.observe(active);
@@ -142,13 +171,19 @@ export function InvitationLivePreview({ children, focus, expanded = false, onClo
     sync();
     const mutations = new MutationObserver(sync);
     mutations.observe(root, { childList: true, subtree: true });
+    view.addEventListener("scroll", scheduleMarker, { passive: true });
+    view.addEventListener("resize", scheduleMarker);
     return () => {
       mutations.disconnect();
       resize.disconnect();
       view.cancelAnimationFrame(animationFrame);
+      view.cancelAnimationFrame(markerFrame);
+      view.removeEventListener("scroll", scheduleMarker);
+      view.removeEventListener("resize", scheduleMarker);
+      marker.style.visibility = "hidden";
       active?.removeAttribute("data-preview-active");
     };
-  }, [root, focusTarget, focusFallback, focusSequence, device, height]);
+  }, [root, focusTarget, focusFallback, focusSequence, device, height, scale]);
 
   return <div ref={previewContainer} className={`editor-live-preview${expanded ? " is-expanded" : ""}`} role={expanded ? "dialog" : undefined} aria-modal={expanded || undefined} aria-label={expanded ? "Vista previa completa" : undefined}>
     {expanded && <div className="editor-expanded-preview-header"><strong>Vista previa completa</strong><button ref={closeButton} type="button" onClick={onClose}>Cerrar vista previa ✕</button></div>}
@@ -167,6 +202,7 @@ export function InvitationLivePreview({ children, focus, expanded = false, onClo
       <div className="editor-preview-frame-space" style={{ width: width * scale, height: height * scale }}>
         {!root && <p className="editor-preview-loading" role="status">Preparando tu invitación…</p>}
         <iframe ref={frame} title="Vista previa interactiva de tu invitación" srcDoc={previewDocument} style={{ width, height, transform: `scale(${scale})`, visibility: availableWidth ? "visible" : "hidden" }} />
+        {focus && <div ref={focusMarker} className="editor-preview-marker" aria-hidden="true"><FiEdit3 />Editando</div>}
       </div>
     </div>
     {root && createPortal(<>{focus && <style>{`
