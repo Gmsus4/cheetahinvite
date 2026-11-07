@@ -1,12 +1,12 @@
 /* Full-width workspace for every event editor and private preview. */
 .editor-live-preview{width:100%;min-width:0}
-.editor-preview-focus{display:flex;align-items:center;gap:11px;min-height:58px;margin:0 0 16px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(120deg,var(--surface-muted),var(--surface));color:var(--muted);font-size:11px;line-height:1.5}
-.editor-preview-focus-icon{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:10px;background:var(--surface);color:var(--ink);box-shadow:0 2px 8px rgb(var(--shadow-rgb) / .05)}
-.editor-preview-focus-icon svg{width:15px;height:15px;stroke-width:1.5}
-.editor-preview-focus-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
-.editor-preview-focus-copy>small{color:var(--muted);font-size:9px;letter-spacing:.08em;text-transform:uppercase}
-.editor-preview-focus-copy>strong{color:var(--ink);font-size:12px;font-weight:500;overflow-wrap:anywhere}
-.editor-preview-focus-live{display:flex;align-items:center;flex:none;gap:5px;align-self:flex-start;margin-top:3px;color:var(--muted);font-size:9px;white-space:nowrap}
+.editor-preview-focus{display:flex;align-items:center;gap:8px;min-height:36px;margin:0 0 8px;padding:5px 9px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(120deg,var(--surface-muted),var(--surface));color:var(--muted);font-size:11px;line-height:1.5}
+.editor-preview-focus-icon{display:grid;place-items:center;flex:none;width:22px;height:22px;border-radius:7px;background:var(--surface);color:var(--ink);box-shadow:0 2px 8px rgb(var(--shadow-rgb) / .05)}
+.editor-preview-focus-icon svg{width:12px;height:12px;stroke-width:1.5}
+.editor-preview-focus-copy{display:flex;flex:1;min-width:0;align-items:baseline;gap:6px}
+.editor-preview-focus-copy>small{flex:none;color:var(--muted);font-size:8px;letter-spacing:.06em;text-transform:uppercase}
+.editor-preview-focus-copy>strong{min-width:0;color:var(--ink);font-size:11px;font-weight:500;overflow-wrap:anywhere}
+.editor-preview-focus-live{display:flex;align-items:center;flex:none;gap:5px;color:var(--muted);font-size:8px;white-space:nowrap}
 .editor-preview-focus-live i{width:5px;height:5px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px var(--success-soft)}
 .editor-live-preview.is-expanded{position:fixed;z-index:1000;inset:0;display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px clamp(16px,4vw,60px);overflow:auto;background:var(--app-background)}
 .editor-live-preview.is-expanded .editor-preview-devices{width:min(100%,420px);flex-shrink:0;margin:0}

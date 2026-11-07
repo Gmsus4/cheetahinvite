@@ -58,6 +58,92 @@ test('editor targets distinguish invitation name, hosts and individual detail fi
   assert.doesNotMatch(html, /section:hidden|data-preview-active/);
 });
 
+test('contextual edit controls require an owner callback and cover visible sections and their photos', () => {
+  const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
+  const values = {
+    eventType: 'wedding', name: 'La celebración', hostNames: 'Alex y Sam', date: '15 de enero', eventDateKey: '2027-01-15',
+    venue: 'El jardín', address: 'La dirección', message: 'Bienvenidos', imageUrl: '/cover.webp', accent: '#58664E',
+    sections: [
+      { id: 'story', type: 'story', title: 'Nuestra historia', content: 'Así empezó', detail: '', link: '', imageUrl: '/story.webp', enabled: true },
+      { id: 'gallery', type: 'gallery', title: 'Recuerdos', content: '', detail: '', link: '', imageUrl: '', imageUrls: ['/gallery.webp'], enabled: true },
+      { id: 'hidden', type: 'custom', title: 'Oculto', content: 'Texto', detail: '', link: '', imageUrl: '', enabled: false },
+    ],
+  };
+  const render = options => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...values, ...options }));
+  for (const options of [{}, { preview: true }]) assert.doesNotMatch(render(options), /wa-edit-button|data-editable|aria-haspopup="dialog"/);
+  const editable = render({ onEdit() {} });
+  for (const label of ['portada', 'foto de portada', 'fecha y hora', 'bienvenida', 'lugar', 'Nuestra historia', 'foto de Nuestra historia', 'Recuerdos', 'fotos de Recuerdos']) {
+    assert.ok(editable.includes(`aria-label="Editar ${label}"`), label);
+  }
+  assert.doesNotMatch(editable, /Editar Oculto/);
+  const withoutCover = render({ imageUrl: '', onEdit() {} });
+  assert.match(withoutCover, /class="wa-no-photo" data-editable="true"/);
+  assert.doesNotMatch(withoutCover, /class="wa-no-photo" aria-hidden="true"/);
+});
+
+test('shared gallery fields edit the heading and preserve legacy photos until explicitly changed', () => {
+  const { SectionFields } = loadComponents()('components/dashboard/InvitationSectionFields.tsx');
+  const html = renderToStaticMarkup(React.createElement(SectionFields, {
+    section: { id: 'gallery', type: 'gallery', title: 'Recuerdos', content: '', detail: '', link: '', imageUrl: '/legacy.webp', enabled: true },
+    onChange() {}, uploadProps: { eventId: 'event', onBusyChange() {} }, allowSectionPhoto: true,
+  }));
+  assert.match(html, /Título de la sección/);
+  assert.match(html, /value="Recuerdos"/);
+  assert.match(html, /src="\/legacy.webp"/);
+});
+
+test('owner preview offers photo uploads for every active detail, including an empty gallery', () => {
+  const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
+  const types = ['story', 'ceremony', 'reception', 'program', 'parents', 'dress_code', 'gifts', 'gallery', 'rsvp', 'music', 'custom'];
+  const values = {
+    eventType: 'wedding', name: 'Nuestra celebración', hostNames: 'Alex y Sam', date: '', venue: '', address: '', message: '', imageUrl: '', accent: '#58664E',
+    sections: types.map(type => ({ id: type, type, title: `Detalle ${type}`, content: type === 'gallery' ? '' : 'Nuestro contenido', detail: '', link: '', imageUrl: '', enabled: true })),
+  };
+  const render = options => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...values, ...options }));
+  const editable = render({ onEdit() {} });
+  for (const type of types) assert.ok(editable.includes(`aria-label="Agregar foto${type === 'gallery' ? 's' : ''} a Detalle ${type}"`), type);
+  assert.match(editable, /data-invitation-field="section:gallery"/);
+  assert.doesNotMatch(render({}), /Agregar foto|section:gallery|Agrega contenido|Agrega fotos/);
+  assert.doesNotMatch(render({ preview: true }), /Agregar foto|section:gallery|Agrega contenido|Agrega fotos/);
+  assert.doesNotMatch(render({ onEdit() {}, sections: values.sections.map(section => ({ ...section, enabled: false })) }), /Agregar foto a Detalle|Agregar fotos a Detalle/);
+});
+
+test('shared section photo fields add, replace and remove photos with the same controls in both editors', () => {
+  const { SectionPhotoFields } = loadComponents()('components/dashboard/InvitationSectionFields.tsx');
+  const section = { id: 'story', type: 'story', title: 'Historia', content: 'Texto', detail: '', link: '', imageUrl: '', enabled: true };
+  let changes;
+  const uploadProps = { eventId: 'event', onBusyChange() {} };
+  const render = current => SectionPhotoFields({ section: current, uploadProps, onChange: next => { changes = next; } });
+  function findUpload(node) {
+    if (!node || typeof node !== 'object') return undefined;
+    if (node.type?.name === 'CloudinaryImageUpload') return node;
+    for (const child of React.Children.toArray(node.props?.children)) {
+      const result = findUpload(child);
+      if (result) return result;
+    }
+  }
+  const empty = findUpload(render(section));
+  assert.equal(empty.props.eventId, 'event');
+  assert.equal(empty.props.multiple, false);
+  assert.deepEqual(empty.props.images, []);
+  empty.props.onChange(['/first.webp']);
+  assert.deepEqual(changes, { imageUrl: '/first.webp', imagePosition: 'after' });
+  const existing = { ...section, imageUrl: '/first.webp', imageUrls: ['/first.webp', '/extra.webp'], imagePosition: 'before' };
+  const upload = findUpload(render(existing));
+  upload.props.onChange(['/replacement.webp']);
+  assert.deepEqual(changes, { imageUrl: '/replacement.webp', imageUrls: ['/replacement.webp', '/extra.webp'], imagePosition: 'before' });
+  upload.props.onChange([]);
+  assert.deepEqual(changes, { imageUrl: '', imageUrls: ['/extra.webp'], imagePosition: 'before' });
+  const html = renderToStaticMarkup(React.createElement(SectionPhotoFields, { section: existing, uploadProps, onChange() {} }));
+  assert.match(html, /Antes de esta sección/);
+  assert.match(html, /Después de esta sección/);
+  const gallery = findUpload(render({ ...section, type: 'gallery', imageUrl: '/legacy.webp' }));
+  assert.equal(gallery.props.multiple, true);
+  assert.deepEqual(gallery.props.images, ['/legacy.webp']);
+  gallery.props.onChange(['/legacy.webp', '/new.webp']);
+  assert.deepEqual(changes, { imageUrl: '/legacy.webp', imageUrls: ['/legacy.webp', '/new.webp'] });
+});
+
 test('every occasion uses the same texture-free presentation with its own default copy', () => {
   const load = loadComponents();
   const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');

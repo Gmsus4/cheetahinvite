@@ -145,6 +145,50 @@ test('separate tabs keep independent local records; one save cannot delete anoth
   assert.equal(JSON.parse([...storage.data.values()][0]).snapshot, values('Pestaña dos'));
 });
 
+test('canceling contextual edits clears its conflict and backup while retaining the acknowledged values', async t => {
+  const { controller: c, storage, calls } = setup(t, { manualOnly: true });
+  c.update(values('Cambio cancelado'), false, { step: 0, activeExtra: null }, true);
+  c.acceptFailure({ ok: false, code: 'conflict', message: 'Otra versión', version: 7 });
+  assert.equal(c.discardChanges(), true);
+  assert.equal(c.getSnapshot().acknowledged, values('Inicial'));
+  assert.equal(c.getSnapshot().error, '');
+  assert.equal(c.getSnapshot().conflictVersion, undefined);
+  assert.equal(c.shouldWarn(), false);
+  assert.equal(storage.length, 0);
+  assert.equal(calls.length, 0);
+  c.update(values('Nuevo cambio'), false, { step: 0, activeExtra: null }, true);
+  await c.saveNow();
+  assert.equal(calls[0].version, 0, 'Discarding cannot silently accept a newer server version');
+});
+
+test('canceling recovered edits removes that recovery copy without touching another tab backup', t => {
+  const first = setup(t, { manualOnly: true });
+  first.controller.update(values('Copia recuperable'), false, { step: 0, activeExtra: null }, true);
+  first.controller.stop();
+  const next = setup(t, { storage: first.storage, manualOnly: true });
+  assert.equal(next.controller.discardChanges(), false, 'An unreviewed recovery must be handled first');
+  next.controller.recover();
+  const other = setup(t, { storage: first.storage, eventId: 'other-event', manualOnly: true });
+  other.controller.update(values('Otra pestaña'), false, { step: 0, activeExtra: null }, true);
+  assert.equal(next.controller.discardChanges(), true);
+  assert.equal(first.storage.length, 1);
+  assert.equal(JSON.parse([...first.storage.data.values()][0]).snapshot, values('Otra pestaña'));
+});
+
+test('canceling cannot discard an upload or a save in flight', async t => {
+  let resolve;
+  const { controller: c } = setup(t, { manualOnly: true, save: () => new Promise(done => { resolve = done; }) });
+  c.update(values('Con foto'), true, { step: 0, activeExtra: null }, true);
+  assert.equal(c.discardChanges(), false);
+  c.update(values('Con foto'), false, { step: 0, activeExtra: null }, true);
+  const flight = c.saveNow();
+  await flush();
+  assert.equal(c.discardChanges(), false);
+  resolve({ ok: true, eventId: 'event', version: 1 });
+  await flight;
+  assert.equal(c.getSnapshot().acknowledged, values('Con foto'));
+});
+
 test('blocked browser storage shows a warning, retains navigation protection and allows server saves', async t => {
   const storage = { length: 0, key() {}, getItem() {}, setItem() { throw Error('Quota'); }, removeItem() {} };
   const { controller: c } = setup(t, { storage });

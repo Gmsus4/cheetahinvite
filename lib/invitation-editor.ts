@@ -95,3 +95,7 @@ export type InvitationProps = {
   typography?: string; bodyTypography?: string; eventTime?: string; venue: string; address: string;
   message: string; imageUrl: string; backgroundImageUrl?: string; sections: InviteSection[]; publicEventId?: string;
 };
+
+export type InvitationEditTarget =
+  | { kind: "cover" | "date" | "location" | "welcome" | "cover-photo" | "background" | "appearance" }
+  | { kind: "section" | "section-photo"; sectionId: string };

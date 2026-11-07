@@ -5,10 +5,10 @@ import { useEffect, useRef } from "react";
 // Reveal content rather than containers so the gallery dialog stays fixed to
 // the viewport and long sections appear gradually as they are read.
 const revealSelector = [
-  ".wa-cover-heading > *",
+  ".wa-cover-heading > :not(.wa-edit-button)",
   ".wa-portrait",
-  ".wa-no-photo > *",
-  ".wa-panel > :not(.invite-countdown-clock):not(.wa-timeline)",
+  ".wa-no-photo > :not(.wa-edit-button)",
+  ".wa-panel > :not(.invite-countdown-clock):not(.wa-timeline):not(.wa-edit-button):not(.wa-edit-actions)",
   ".wa-timeline > li",
   ".wa-section-photo",
   ".wa-photo-grid > figure",

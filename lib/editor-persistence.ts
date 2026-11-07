@@ -120,6 +120,18 @@ export class EditorPersistence {
     catch { this.patch({ localWarning: true }); }
     this.patch({ recovery: null });
   }
+  discardChanges() {
+    if (this.flight || this.uploading || this.state.recovery) return false;
+    this.clearTimer();
+    this.snapshot = this.state.acknowledged;
+    this.failedSnapshot = "";
+    this.patch({ error: "", code: "", conflictVersion: undefined });
+    try { if (this.restoredKey) this.browser?.storage?.removeItem(this.restoredKey); }
+    catch { this.patch({ localWarning: true }); }
+    this.restoredKey = undefined;
+    this.backup();
+    return true;
+  }
   reportError(message: string) { this.patch({ error: message, code: "unavailable" }); this.backup(); }
   acceptFailure(result: Extract<EditorSaveResult, { ok: false }>) {
     this.patch({ error: result.message, code: result.code, conflictVersion: result.version }); this.backup();
