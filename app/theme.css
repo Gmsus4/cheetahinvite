@@ -1,3 +1,86 @@
-/* Shared page background for the application and its loading states. */
-:root { --app-background: #f8f8f6; }
-body { background: var(--app-background); }
+/* Shared interface palette. Invitation artwork has its own independent tokens. */
+:root {
+  color-scheme: light;
+  --app-background: #f8f8f6;
+  --paper: var(--app-background);
+  --surface: #ffffff;
+  --surface-muted: #f1f2ef;
+  --surface-hover: #e9ece8;
+  --ink: #0b1320;
+  --green: var(--ink);
+  --muted: #596575;
+  --faint: #6b7581;
+  --line: #d9dee5;
+  --orange: #e9560a;
+  --orange-hover: #c74606;
+  --orange-light: #f47b42;
+  --accent: #bc4308;
+  --accent-soft: #fff2e9;
+  --accent-line: #efc8b3;
+  --inverse-surface: #0b1320;
+  --on-inverse: #ffffff;
+  --inverse-muted: #c9d0d9;
+  --inverse-accent: #ff9a68;
+  --inverse-line: #ffffff24;
+  --success: #327447;
+  --success-soft: #edf7f0;
+  --success-line: #bedcc6;
+  --warning: #89600d;
+  --warning-soft: #fff6e8;
+  --warning-line: #e8d5a2;
+  --danger: #b42318;
+  --danger-solid: #b42318;
+  --danger-soft: #fff1f0;
+  --danger-line: #efcaca;
+  --lavender: #67519a;
+  --lavender-soft: #f1edfa;
+  --lavender-line: #d7ccea;
+  --shadow-rgb: 11 19 32;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --app-background: #10161e;
+  --surface: #19232f;
+  --surface-muted: #222e3c;
+  --surface-hover: #2b394a;
+  --ink: #f5f4f0;
+  --muted: #b4becb;
+  --faint: #95a2b3;
+  --line: #354254;
+  --accent: #ff9a68;
+  --accent-soft: #35271f;
+  --accent-line: #77472f;
+  --inverse-surface: #0b1119;
+  --success: #8ed6a4;
+  --success-soft: #1b3428;
+  --success-line: #365d46;
+  --warning: #edc56e;
+  --warning-soft: #352d1b;
+  --warning-line: #6b562c;
+  --danger: #ffaaa1;
+  --danger-soft: #3b2425;
+  --danger-line: #774244;
+  --lavender: #c9b6f3;
+  --lavender-soft: #2d273f;
+  --lavender-line: #514368;
+  --shadow-rgb: 0 0 0;
+}
+
+html, body { background: var(--app-background); color: var(--ink); }
+body { accent-color: var(--orange); }
+.brand-name > span { color: var(--orange); }
+::selection { background: var(--accent-line); color: var(--ink); }
+
+/* These designs are authored by the host and keep their own color scheme. */
+.celebration-invitation, .invitation-example-viewport iframe, .editor-preview-frame-space iframe { color-scheme: light; }
+
+.recovery-header-actions { display: flex; align-items: center; gap: 18px; }
+
+@media (max-width: 760px) {
+  .landing-home .home-navbar-shell { gap: 10px; }
+}
+@media (max-width: 520px) {
+  .recovery-header-actions { gap: 10px; }
+  .recovery-header-actions .login-back { max-width: 120px; font-size: 10px; }
+}

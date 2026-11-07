@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { BrandLoader } from "@/components/BrandLoader";
-import { FiArrowLeft, FiGift } from "react-icons/fi";
+import { FiGift } from "react-icons/fi";
 import { auth } from "@/auth";
-import { BrandEmblem } from "@/components/BrandEmblem";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { EventEditor } from "@/components/dashboard/InvitationEditor";
 import { prisma } from "@/prisma";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
@@ -48,5 +48,5 @@ async function CreateEventData({
     paidAt: null, expiresAt: null, status: "DRAFT", slug: null, venue: null, address: null, message: null,
     imageUrl: null, imageUploads: 0, accent: "#E9560A", typography: "default", bodyTypography: "inter", sections: [],
   }} saved={false} published={false} error={hasError ? "datos" : ""} />;
-  return <main className="create-event-page"><header className="create-event-header"><Link className="brand" href="/"><BrandEmblem size={38} /><span className="brand-name">Cheetah<span>Invite</span></span></Link><Link href="/dashboard"><FiArrowLeft /> Volver a mi panel</Link></header><section className="create-event-card create-event-limit-card"><span className="create-event-icon"><FiGift /></span><h1>Ya usaste tus {ACCOUNT_LIMITS.invitations} invitaciones disponibles</h1><p>Puedes editar tus invitaciones desde el panel.</p><CreationDraftResume ownerId={session.user.id} /><Link className="button" href="/dashboard">Volver a mi panel</Link></section></main>;
+  return <main className="create-event-page"><DashboardHeader name={account.name} email={account.email} image={account.image} /><section className="create-event-card create-event-limit-card"><span className="create-event-icon"><FiGift /></span><h1>Ya usaste tus {ACCOUNT_LIMITS.invitations} invitaciones disponibles</h1><p>Puedes editar tus invitaciones desde el panel.</p><CreationDraftResume ownerId={session.user.id} /><Link className="button" href="/dashboard">Volver a mi panel</Link></section></main>;
 }

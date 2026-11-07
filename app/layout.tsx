@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ThemeScript, ThemeSync } from "@/components/ThemeToggle";
 import "./globals.css";
 import "./invitation-fonts.css";
 import "./event-workspace.css";
@@ -19,8 +20,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="es" className="h-full antialiased" data-theme="light" suppressHydrationWarning>
+      <head><ThemeScript /></head>
+      <body className="min-h-full flex flex-col"><ThemeSync />{children}</body>
     </html>
   );
 }

@@ -6,17 +6,17 @@
   border-radius: inherit;
 }
 
-.login-forgot-password { margin-bottom: 8px; color: #c94708; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
-.recovery-password-help { margin-top: 8px; color: #697386; font-size: 11px; }
-.recovery-result { margin-top: 20px; padding: 16px; border: 1px solid #dce1e8; border-radius: 12px; background: #f2f4f7; color: #1e2a3a; font-size: 13px; line-height: 1.7; }
-.manual-recovery h3 { margin: 0 0 12px; color: #0b1320; font-size: 17px; }
-.manual-recovery > p, .manual-recovery ol { color: #596575; font-size: 12px; line-height: 1.8; }
+.login-forgot-password { margin-bottom: 8px; color: var(--accent); font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+.recovery-password-help { margin-top: 8px; color: var(--muted); font-size: 11px; }
+.recovery-result { margin-top: 20px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-muted); color: var(--ink); font-size: 13px; line-height: 1.7; }
+.manual-recovery h3 { margin: 0 0 12px; color: var(--ink); font-size: 17px; }
+.manual-recovery > p, .manual-recovery ol { color: var(--muted); font-size: 12px; line-height: 1.8; }
 .manual-recovery ol { margin: 18px 0 24px; padding-left: 20px; }
 .manual-recovery li + li { margin-top: 10px; }
-.manual-recovery a { color: #c94708; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
-.manual-recovery-note { margin: 12px 0 0; color: #697386; font-size: 11px; line-height: 1.7; }
-.recovery-automatic { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e8ebef; }
-.recovery-automatic summary { color: #c94708; font-size: 12px; line-height: 1.7; cursor: pointer; }
+.manual-recovery a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.manual-recovery-note { margin: 12px 0 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+.recovery-automatic { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); }
+.recovery-automatic summary { color: var(--accent); font-size: 12px; line-height: 1.7; cursor: pointer; }
 .recovery-automatic[open] > .manual-recovery-note { margin-bottom: 18px; }
 
 .login-illustration {
@@ -50,7 +50,7 @@
 }
 
 /* Match the homepage's floating navigation and softly outlined surfaces. */
-.login-home-style { background: #F2F4F7; }
+.login-home-style { background: var(--app-background); }
 .login-home-style .login-topbar {
   width: min(1080px, calc(100% - 40px));
   height: auto;
@@ -58,42 +58,42 @@
   margin: 16px auto 28px;
   padding: 10px 22px 10px 16px;
   gap: 20px;
-  border: 1px solid #fff;
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 10px 36px #0b13200b;
+  background: var(--surface);
+  box-shadow: 0 10px 36px rgb(var(--shadow-rgb) / 0.043);
 }
-.login-home-style .login-back { min-height: 40px; color: #1E2A3A; font-weight: 500; }
-.login-home-style .login-back:hover { color: #E9560A; }
+.login-home-style .login-back { min-height: 40px; color: var(--ink); font-weight: 500; }
+.login-home-style .login-back:hover { color: var(--accent); }
 .login-home-style .login-layout {
   width: min(1080px, calc(100% - 40px));
   flex: 1;
   min-height: 660px;
   margin: 0 auto 40px;
   overflow: hidden;
-  border: 1px solid #d9dee5;
+  border: 1px solid var(--line);
   border-radius: 26px;
-  background: #fff;
+  background: var(--surface);
 }
-.login-home-style .login-visual { padding: 54px 44px 90px; background: #0B1320; }
+.login-home-style .login-visual { padding: 54px 44px 90px; background: var(--inverse-surface); }
 .login-home-style .login-visual h1 { margin-top: 23px; font-size: clamp(36px, 4vw, 52px); line-height: 1.15; }
-.login-home-style .login-visual h1 em { color: #F47B42; }
-.login-home-style .login-visual > p { max-width: 350px; color: #c9d0d9; font-size: 14px; line-height: 1.85; }
+.login-home-style .login-visual h1 em { color: var(--accent); }
+.login-home-style .login-visual > p { max-width: 350px; color: var(--inverse-muted); font-size: 14px; line-height: 1.85; }
 .login-home-style .login-visual-footer { left: 44px; bottom: 32px; }
 .login-home-style .login-form-panel { padding: 48px 44px 90px; }
 .login-home-style .login-form-panel h2 { font-size: 36px; }
 .login-home-style .login-description { line-height: 1.8; }
-.login-home-style .login-input-wrap { height: 51px; border-color: #d9dee5; border-radius: 12px; }
-.login-home-style .login-input-wrap:focus-within { border-color: #E9560A; box-shadow: 0 0 0 3px #e9560a15; }
+.login-home-style .login-input-wrap { height: 51px; border-color: var(--line); border-radius: 12px; }
+.login-home-style .login-input-wrap:focus-within { border-color: var(--orange); box-shadow: 0 0 0 3px rgb(var(--shadow-rgb) / 0.082); }
 .login-home-style :is(.login-submit, .google-signin-button) { min-height: 50px; border-radius: 999px; font-size: 12px; }
-.login-home-style .login-submit { background: #E9560A; color: #fff; }
-.login-home-style .login-submit:hover:not(:disabled) { background: #c74606; }
-.login-home-style .google-signin-button { border-color: #d9dee5; background: #fff; color: #0B1320; }
-.login-home-style .google-signin-button:hover:not(:disabled) { background: #F2F4F7; border-color: #c3cad4; }
+.login-home-style .login-submit { background: var(--orange); color: var(--on-inverse); }
+.login-home-style .login-submit:hover:not(:disabled) { background: var(--orange-hover); }
+.login-home-style .google-signin-button { border-color: var(--line); background: var(--surface); color: var(--ink); }
+.login-home-style .google-signin-button:hover:not(:disabled) { background: var(--surface-muted); border-color: var(--line); }
 .login-home-style :is(.login-submit, .google-signin-button):disabled { cursor: wait; opacity: .65; }
-.login-home-style .login-legal { right: 44px; bottom: 25px; left: 44px; color: #667080; font-size: 10px; line-height: 1.7; text-align: center; }
+.login-home-style .login-legal { right: 44px; bottom: 25px; left: 44px; color: var(--muted); font-size: 10px; line-height: 1.7; text-align: center; }
 .login-home-style .login-legal a { text-decoration: underline; text-underline-offset: 3px; }
-.login-home-style :is(a, button):focus-visible { outline: 2px solid #E9560A; outline-offset: 4px; }
+.login-home-style :is(a, button):focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }
 @media (max-width: 760px) {
   .login-home-style .login-layout { grid-template-columns: minmax(0, 1fr); min-height: 0; }
   .login-home-style .login-form-panel { order: -1; padding: 38px 28px 92px; }
@@ -116,9 +116,9 @@
   .login-home-style :is(a, button) { transition: none; transform: none; }
 }
 
-.login-home-style .auth-account-switch { display: flex; align-items: center; gap: 13px; margin-left: auto; color: #1E2A3A; font-size: 12px; font-weight: 500; white-space: nowrap; }
-.login-home-style .auth-account-switch a { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 8px 15px; border: 1px solid #d9dee5; border-radius: 12px; background: #fff; color: #0B1320; font-size: 12px; font-weight: 600; transition: border-color .18s, background .18s, color .18s; }
-.login-home-style .auth-account-switch a:hover { border-color: #E9560A; background: #fff5ef; color: #c74606; }
+.login-home-style .auth-account-switch { display: flex; align-items: center; gap: 13px; margin-left: auto; color: var(--ink); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.login-home-style .auth-account-switch a { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 8px 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font-size: 12px; font-weight: 600; transition: border-color .18s, background .18s, color .18s; }
+.login-home-style .auth-account-switch a:hover { border-color: var(--orange); background: var(--accent-soft); color: var(--accent); }
 .login-home-style .login-notice:empty { display: none; }
 @media (max-width: 520px) {
   .login-home-style .auth-account-switch > span { display: none; }

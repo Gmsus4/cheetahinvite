@@ -2,12 +2,13 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import { BrandEmblem } from "@/components/BrandEmblem";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function RecoveryPage({ title, description, children }: { title: string; description: string; children: ReactNode }) {
   return <main className="login-page">
     <header className="login-topbar">
       <Link className="brand" href="/" aria-label="Cheetah Invite, inicio"><BrandEmblem size={40} priority /><span className="brand-name">Cheetah<span>Invite</span></span></Link>
-      <Link className="login-back" href="/login"><FiArrowLeft aria-hidden="true" /> Volver a iniciar sesión</Link>
+      <div className="recovery-header-actions"><ThemeToggle /><Link className="login-back" href="/login"><FiArrowLeft aria-hidden="true" /> Volver a iniciar sesión</Link></div>
     </header>
     <div className="login-layout">
       <section className="login-visual" aria-label="Recupera tu acceso">

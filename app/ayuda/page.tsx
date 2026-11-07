@@ -7,7 +7,6 @@ import { auth } from "@/auth";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { InvitationActionLink } from "@/components/dashboard/InvitationActionLink";
 import { BrandLoader } from "@/components/BrandLoader";
-import { BrandEmblem } from "@/components/BrandEmblem";
 import { SupportRequest } from "@/components/SupportRequest";
 import { SUPPORT_EMAIL } from "@/lib/support";
 import "./soporte.css";
@@ -23,7 +22,7 @@ async function HelpContent() {
   await connection();
   const session = await auth();
   return <main className={`support-page ${styles.page}`}>
-    {session?.user ? <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} active="help" /> : <header className={styles.guestHeader}><Link className="brand" href="/" aria-label="Cheetah Invite, inicio"><BrandEmblem size={40} priority /><span className="brand-name">Cheetah<span>Invite</span></span></Link><nav aria-label="Acceso a tu cuenta"><Link href="/login">Iniciar sesión</Link><Link href="/registro">Crear cuenta <FiArrowUpRight aria-hidden="true" /></Link></nav></header>}
+    <DashboardHeader name={session?.user?.name || "Usuario"} email={session?.user?.email || ""} image={session?.user?.image} active="help" guest={!session?.user} />
     <div className="support-shell">
       <div className="support-heading"><span className={styles.eyebrow}>ESTAMOS PARA AYUDARTE</span><h1>¿En qué podemos ayudarte?</h1><p>Encuentra respuestas sobre tu cuenta, tu invitación y tus compras. Si necesitas una mano, estamos a un correo de distancia.</p></div>
       <nav className={styles.shortcuts} aria-label="Opciones de ayuda">

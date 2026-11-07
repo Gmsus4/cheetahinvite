@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FiArrowUpRight, FiMenu, FiX } from "react-icons/fi";
 import { BrandEmblem } from "@/components/BrandEmblem";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navigation = [
   { id: "como-funciona", label: "Cómo funciona" },
@@ -101,16 +102,14 @@ export function Navbar() {
             aria-current={activeSection === id ? "location" : undefined}
             onClick={() => setMenuOpen(false)}
           >{label}</a>)}
-          <a className="home-mobile-login" href="/login">Iniciar sesión <FiArrowUpRight aria-hidden="true" /></a>
-          <a className="home-mobile-create" href="/crear">Crear invitación <FiArrowUpRight aria-hidden="true" /></a>
+          <div className="header-actions">
+            <a className="login-link" href="/login" onClick={() => setMenuOpen(false)}>
+              Iniciar sesión <FiArrowUpRight aria-hidden="true" />
+            </a>
+            <a className="button button-small" href="/crear" onClick={() => setMenuOpen(false)}>Crear invitación <FiArrowUpRight aria-hidden="true" /></a>
+            <ThemeToggle />
+          </div>
         </nav>
-
-        <div className="header-actions">
-          <a className="login-link" href="/login">
-            Iniciar sesión <FiArrowUpRight aria-hidden="true" />
-          </a>
-          <a className="button button-small" href="/crear">Crear invitación <FiArrowUpRight aria-hidden="true" /></a>
-        </div>
       </div>
     </header>
   );
