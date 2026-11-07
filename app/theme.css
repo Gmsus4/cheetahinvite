@@ -48,7 +48,9 @@
   --muted: #b4becb;
   --faint: #95a2b3;
   --line: #354254;
-  --accent: #ff9a68;
+  --accent: var(--orange);
+  --inverse-accent: var(--orange);
+  --orange-light: var(--orange);
   --accent-soft: #35271f;
   --accent-line: #77472f;
   --inverse-surface: #0b1119;

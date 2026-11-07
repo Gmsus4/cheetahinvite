@@ -50,7 +50,7 @@
 }
 
 /* Match the homepage's floating navigation and softly outlined surfaces. */
-.login-home-style { background: var(--app-background); }
+.login-home-style { --accent: var(--orange); --inverse-accent: var(--orange); background: var(--app-background); }
 .login-home-style .login-topbar {
   width: min(1080px, calc(100% - 40px));
   height: auto;

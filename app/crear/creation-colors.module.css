@@ -1,0 +1,5 @@
+.scope {
+  --accent: var(--orange);
+  --inverse-accent: var(--orange);
+  display: contents;
+}

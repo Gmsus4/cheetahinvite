@@ -153,6 +153,7 @@
 .workspace :global(.guided-back),
 .workspace :global(.guided-bottom-bar > span) { color: var(--muted); font-size: 13px; }
 .workspace :global(.button) { min-height: 50px; padding: 12px 23px; border-radius: 999px; font-size: 14px; background: var(--orange); border-color: var(--orange); }
+.workspace :global(.guided-bottom-bar > .button[type="submit"]) { border-radius: 999px; }
 .workspace :global(.button:hover:not(:disabled)) { background: var(--orange-hover); border-color: var(--orange); color: var(--on-inverse); }
 .workspace :global(.guided-bottom-bar .button[data-save-state="saved"]:disabled) { opacity: 1; border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
 .workspace :global(.guided-review > div) { border-color: var(--line); }
