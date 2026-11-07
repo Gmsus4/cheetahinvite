@@ -5,11 +5,15 @@ import { useRouter } from "next/navigation";
 import { FiArrowLeft, FiArrowRight, FiCamera, FiChevronDown, FiCheck, FiEye, FiList, FiLock, FiSave, FiSend, FiSliders, FiUsers, FiMapPin, FiPlus } from "react-icons/fi";
 import { prepareEvent } from "@/app/crear/actions";
 import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
+import { InvitationIconsPicker } from "./InvitationIconsPicker";
+import { InvitationCornersPicker } from "./InvitationCornersPicker";
 import { InvitationSurfacePicker } from "./InvitationSurfacePicker";
 import { InvitationPalettePicker } from "./InvitationPalettePicker";
 import { InvitationFontSelect } from "./InvitationFontSelect";
 import { CelebrationInvitation } from "@/components/invitation/CelebrationInvitation";
 import { initialGuidedValues, completeGuidedSections, changeGuidedEventType, guidedDetails, guidedPublicationIssues, guidedRecoveryStep, guidedRecoverySection, guidedRecoveryAppearance, guidedContentSectionIds } from "@/lib/guided-invitation";
+import { normalizeEventLocations } from "@/lib/invitation-locations";
+import { usesPrimaryLocation } from "@/lib/invitation-sections";
 import { getInvitationFont, recommendedInvitationFonts } from "@/lib/invitation-fonts";
 import { getInvitationEventContent, invitationEventTypes } from "@/lib/invitation-event-content";
 import { sharedInvitationDesign, invitationPalette } from "@/lib/shared-invitation";
@@ -18,7 +22,7 @@ import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { invitationPriceLabel, isInvitationPublished } from "@/lib/invitation-payment";
 import { invitationPath } from "@/lib/invitation-url";
 import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
-import { SectionFields } from "./InvitationSectionFields";
+import { SectionFields, SectionTextAlignmentFields, SectionSurfaceFields } from "./InvitationSectionFields";
 import { useEditorProtection } from "./useEditorProtection";
 import { EditorProtectedLink } from "./EditorProtectedLink";
 import { EditorLeaveDialog } from "./EditorLeaveDialog";
@@ -30,17 +34,17 @@ import { CustomInvitationLinkField } from "./CustomInvitationLinkField";
 import styles from "./EventWorkspace.module.css";
 import { DashboardHeader } from "./DashboardHeader";
 
-const steps = ["¿Quién celebra?", "¿Cuándo y dónde?", "¿Quieres agregar fotografías?", "¿Qué quieres compartir?", "¿Cómo quieres que se vea?", "Revisa tu invitación"];
+const steps = ["¿Quién celebra?", "¿Cuándo y dónde?", "¿Quieres agregar fotografías?", "Personaliza los bloques", "¿Cómo quieres que se vea?", "Revisa tu invitación"];
 const stepLabels = ["Quién celebra", "Fecha y lugar", "Fotografías", "Contenido", "Apariencia", "Revisión"];
 const stepIcons = [FiUsers, FiMapPin, FiCamera, FiList, FiSliders, FiSend];
-const descriptions = ["Empecemos por las personas que hacen especial esta celebración.", "Comparte los datos que ya tengas. Puedes completar el resto después.", "Una imagen puede contar mucho. Este paso es opcional.", "Preparamos los detalles según tu evento. Revísalos uno a uno, a tu ritmo.", "Puedes quedarte con esta combinación o darle tu propio toque.", "Así recibirán la invitación las personas que más quieres."];
+const descriptions = ["Empecemos por las personas que hacen especial esta celebración.", "Comparte los datos que ya tengas. Puedes completar el resto después.", "Una imagen puede contar mucho. Este paso es opcional.", "Empieza por la portada y el lugar del evento. Los datos anteriores ya están aquí; personaliza cada bloque a tu ritmo.", "Puedes quedarte con esta combinación o darle tu propio toque.", "Así recibirán la invitación las personas que más quieres."];
 const lastStep = steps.length - 1;
 
 export function GuidedInvitationEditor({ event, creation = false, error, account }: { event: EventData; creation?: boolean; saved: boolean; published: boolean; error: string; account?: { name: string; email: string; image?: string | null } }) {
   const router = useRouter();
   const [values, setValues] = useState(() => initialGuidedValues(event));
   const [step, setStep] = useState(0);
-  const [activeSection, setActiveSection] = useState("__welcome");
+  const [activeSection, setActiveSection] = useState("__cover");
   const [addingDetail, setAddingDetail] = useState(false);
   const [appearanceExpanded, setAppearanceExpanded] = useState(false);
   const [mobileStepsExpanded, setMobileStepsExpanded] = useState(false);
@@ -86,22 +90,25 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const design = sharedInvitationDesign;
   const content = getInvitationEventContent(values.eventType);
   const details = guidedDetails(values.eventType);
-  const editableSections = details.flatMap(detail => values.sections.filter(section => section.type === detail.type));
+  const editableSections = [...values.sections.filter(section => section.type === "countdown"), ...values.sections.filter(section => section.type === "location"), ...details.flatMap(detail => values.sections.filter(section => section.type === detail.type))];
   const contentIds = guidedContentSectionIds(values.eventType, values.sections, activeSection);
   const availableSections = editableSections.filter(section => !section.enabled);
-  const includedSections = editableSections.filter(section => section.enabled);
-  const contentKey = contentIds.includes(activeSection) ? activeSection : '__welcome';
+  const includedSections = [...values.sections.filter(section => section.type === "cover"), ...editableSections.filter(section => section.enabled)];
+  const contentKey = contentIds.includes(activeSection) ? activeSection : contentIds[0];
   const contentIndex = contentIds.indexOf(contentKey);
   const currentSection = values.sections.find(section => section.id === contentKey);
+  const primaryLocationVisible = usesPrimaryLocation(values.sections);
+  const primaryLocation = values.sections.find(section => section.type === "location");
   const previewContext = `${step}:${contentKey}`;
-  const sectionTarget = currentSection?.enabled ? `section:${currentSection.id}` : undefined;
+  const sectionTarget = currentSection?.enabled ? currentSection.type === "cover" ? "cover-block" : `section:${currentSection.id}` : undefined;
   const defaultPreviewFocus: InvitationPreviewFocus | undefined = step === 0 ? { target: "w-hosts", label: "Protagonistas" }
     : step === 1 ? { target: "w-date", label: "Fecha y lugar" }
     : step === 2 ? { target: "cover-photo", label: "Foto de portada" }
-    : step === 3 && contentKey === "__welcome" ? { target: "w-message", label: "Mensaje de bienvenida" }
+    : step === 3 && currentSection?.type === "cover" ? { target: "cover-block", label: "Portada" }
     : step === 3 && sectionTarget && currentSection ? { target: sectionTarget, label: currentSection.title }
     : undefined;
-  const previewFocus = step === 3 && currentSection && !currentSection.enabled ? undefined : focusedField?.context === previewContext
+  const hiddenLocationFocus = !primaryLocationVisible && ((step === 3 && currentSection?.type === "location") || (focusedField?.context === previewContext && ["w-venue", "w-address", "w-map"].includes(focusedField.target)));
+  const previewFocus = (step === 3 && currentSection?.type === "countdown" && !values.eventDate) || hiddenLocationFocus || (step === 3 && currentSection && !currentSection.enabled) ? undefined : focusedField?.context === previewContext
     ? { target: focusedField.target, label: focusedField.label, fallback: focusedField.fallback ?? sectionTarget, sequence: focusedField.sequence }
     : defaultPreviewFocus;
   const palette = invitationPalette(values.accent);
@@ -148,7 +155,8 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     const record = persistence.recover();
     if (!record) return;
     const recovered = JSON.parse(record.snapshot) as EditorValues;
-    const restored = { ...recovered, texture: "none", sections: completeGuidedSections(recovered.eventType, recovered.sections) };
+    const locations = normalizeEventLocations(recovered.venue, recovered.address, recovered.sections);
+    const restored = { ...recovered, ...locations, texture: "none", sections: completeGuidedSections(recovered.eventType, locations.sections) };
     setValues({ ...restored, texture: "none" });
     setStep(guidedRecoveryStep(record.wizard));
     setActiveSection(guidedRecoverySection(record.wizard, restored.sections));
@@ -220,12 +228,12 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
           const field = event.target.closest<HTMLElement>("[data-preview-field]");
           if (field?.dataset.previewField) {
             const target = field.dataset.previewField;
-            setFocusedField(previous => ({ context: previewContext, target, label: field.dataset.previewLabel || "Sección", fallback: step === 3 ? sectionTarget : "cover", sequence: (previous?.sequence ?? 0) + 1 }));
+            setFocusedField(previous => ({ context: previewContext, target, label: field.dataset.previewLabel || "Sección", fallback: step === 3 ? sectionTarget : step === 1 ? undefined : "cover", sequence: (previous?.sequence ?? 0) + 1 }));
           }
         }}>
           <fieldset disabled={busy} className="guided-fields">
             {step === 0 && <div className="guided-data-grid">
-              <Field label="Tipo de evento" id="event-type" wide><select id="event-type" value={values.eventType} onChange={e => { patch(changeGuidedEventType(values, e.target.value)); setActiveSection('__welcome'); setAddingDetail(false); }}>{invitationEventTypes.map(type => <option key={type} value={type}>{getInvitationEventContent(type).label}</option>)}</select></Field>
+              <Field label="Tipo de evento" id="event-type" wide><select id="event-type" value={values.eventType} onChange={e => { patch(changeGuidedEventType(values, e.target.value)); setActiveSection('__cover'); setAddingDetail(false); }}>{invitationEventTypes.map(type => <option key={type} value={type}>{getInvitationEventContent(type).label}</option>)}</select></Field>
               <Field label={values.eventType === 'wedding' || values.eventType === 'anniversary' ? '¿Cómo se llaman?' : '¿Quién celebra?'} id="w-hosts" wide help="Escribe los nombres tal como quieres que aparezcan."><input id="w-hosts" value={values.hostNames} maxLength={120} placeholder="Nombre de quien celebra o de los anfitriones" onChange={e => patch({ hostNames: e.target.value })} /></Field>
               <Field label="Nombre de la invitación" id="w-name" wide><input id="w-name" value={values.name} required minLength={2} maxLength={100} onChange={e => patch({ name: e.target.value })} /></Field>
               <p className="guided-help guided-wide">Empecemos por los protagonistas. Los demás detalles vienen después.</p>
@@ -233,8 +241,9 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
             {step === 1 && <div className="guided-data-grid">
               <Field label="Fecha" id="w-date"><input id="w-date" type="date" value={values.eventDate} onChange={e => patch({ eventDate: e.target.value, ...(!e.target.value ? { eventTime: '' } : {}) })} /></Field>
               <Field label="Hora" id="w-time" help={!values.eventDate ? 'Primero elige una fecha.' : undefined}><input id="w-time" type="time" disabled={!values.eventDate} value={values.eventTime} onChange={e => patch({ eventTime: e.target.value })} /></Field>
-              <Field label="¿Dónde será la celebración?" id="w-venue" wide><input id="w-venue" value={values.venue} maxLength={160} placeholder="Nombre del salón, jardín o lugar" onChange={e => patch({ venue: e.target.value })} /></Field>
-              <Field label="Dirección" id="w-address" wide help="Incluye calle, número y ciudad para que tus invitados puedan abrir el mapa."><input id="w-address" value={values.address} maxLength={240} placeholder="Calle, número, colonia y ciudad" onChange={e => patch({ address: e.target.value })} /></Field>
+              <Field label="Lugar del evento" id="w-venue" wide help="Donde será la fiesta o reunión principal. La iglesia o el acto formal se configuran en Ceremonia."><input id="w-venue" value={values.venue} maxLength={160} placeholder="Nombre del salón, jardín o lugar" onChange={e => patch({ venue: e.target.value })} /></Field>
+              <Field label="Dirección" id="w-address" wide help="Texto que aparecerá en la invitación: calle, número y ciudad."><input id="w-address" value={values.address} maxLength={240} placeholder="Calle, número, colonia y ciudad" onChange={e => patch({ address: e.target.value })} /></Field>
+              {primaryLocation && <Field label="Enlace de Google Maps (opcional)" id="w-map" wide help="Pega el enlace de la ubicación exacta. Si lo dejas vacío, buscaremos la dirección escrita."><input id="w-map" type="url" value={primaryLocation.link} maxLength={500} placeholder="https://maps.app.goo.gl/…" onChange={e => changeSection(primaryLocation.id, { link: e.target.value })} /></Field>}
               <p className="guided-help guided-wide">Si todavía no tienes todos los datos, continúa y complétalos antes de publicar.</p>
             </div>}
             {step === 2 && <>
@@ -246,26 +255,33 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
             </>}
             {step === 3 && <>
               <section className="guided-included-summary" aria-labelledby="included-sections-title">
-                <div className="guided-included-heading"><h2 id="included-sections-title">Tu invitación</h2><span role="status">{includedSections.length} {includedSections.length === 1 ? 'sección incluida' : 'secciones incluidas'}</span></div>
-                {includedSections.length ? <><p>Selecciona una sección para revisarla.</p><nav aria-label="Secciones incluidas en tu invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.title || extraDetailLabel(section)} aria-label={`Editar sección: ${section.title || extraDetailLabel(section)}`} aria-current={contentKey === section.id ? 'step' : undefined} disabled={busy || uploads > 0} onClick={() => goTo(3, section.id)}>{section.title || extraDetailLabel(section)}</button>)}</nav></> : <p>Aún no hay secciones incluidas. Puedes activarlas durante el recorrido o agregar un detalle al final.</p>}
+                <div className="guided-included-heading"><h2 id="included-sections-title">Bloques de tu invitación</h2><span role="status">{includedSections.length} {includedSections.length === 1 ? 'bloque incluido' : 'bloques incluidos'}</span></div>
+                {includedSections.length ? <><p>Revisa los bloques en el orden en que aparecerán.</p><nav aria-label="Secciones incluidas en tu invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.title || extraDetailLabel(section)} aria-label={`Editar sección: ${section.title || extraDetailLabel(section)}`} aria-current={contentKey === section.id ? 'step' : undefined} disabled={busy || uploads > 0} onClick={() => goTo(3, section.id)}>{section.title || extraDetailLabel(section)}</button>)}</nav></> : <p>Aún no hay secciones incluidas. Puedes activarlas durante el recorrido o agregar un detalle al final.</p>}
               </section>
               {contentKey === '__more' ? <section className="guided-more-details" aria-labelledby="more-details-title">
                 <h2 id="more-details-title">¿Quieres agregar algo más?</h2>
                 <p>Estos detalles son opcionales. Elige uno para completarlo o continúa con la apariencia de tu invitación.</p>
                 {availableSections.length ? <div className="guided-more-options">{availableSections.map(section => <button type="button" key={section.id} onClick={() => { changeSection(section.id, { enabled: true }); setAddingDetail(true); setActiveSection(section.id); }}><span>{extraDetailLabel(section)}</span><FiPlus aria-hidden="true" /></button>)}</div> : <p>Ya incluiste todos los detalles disponibles.</p>}
               </section> : <>
-                <div className="guided-content-position"><span>{addingDetail ? 'Detalle adicional' : `Detalle ${contentIndex + 1} de ${contentIds.length - 1}`}</span><span>{contentIndex === 0 ? 'Una bienvenida para empezar' : 'Un detalle a la vez'}</span></div>
+                <div className="guided-content-position"><span>{addingDetail ? 'Detalle adicional' : `Bloque ${contentIndex + 1} de ${contentIds.length - 1}`}</span><span>{contentIndex === 0 ? 'La portada de tu invitación' : 'Un detalle a la vez'}</span></div>
                 <div className="guided-single-detail" key={contentKey} data-preview-field={sectionTarget} data-preview-label={currentSection?.title}>
-                  {contentKey === '__welcome' ? <>
-                    <h2>Un mensaje de bienvenida</h2><p>Ya preparamos unas palabras para tus invitados. Puedes dejarlas así o escribir las tuyas.</p>
-                    <Field label="Un mensaje para tus invitados" id="w-message" help="Opcional. Si lo dejas vacío, usaremos una bienvenida breve."><textarea id="w-message" rows={5} maxLength={1200} value={values.message} onChange={e => patch({ message: e.target.value })} /></Field>
+                  {currentSection?.type === "cover" ? <>
+                    <h2>Portada</h2>
+                    <p>Ya contiene los datos de los pasos anteriores: nombres, nombre de la invitación, fecha, hora, y foto de portada. La cuenta regresiva se personaliza en el siguiente bloque.</p>
+                    <p><strong>{values.name}</strong><br />{values.hostNames}<br />{date}{values.eventTime && ` · ${values.eventTime}`}</p>
+                    <SectionTextAlignmentFields section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} />
+                    <SectionSurfaceFields section={currentSection} globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle} onChange={changes => changeSection(currentSection.id, changes)} />
                   </> : currentSection && <>
                     <h2>{currentSection.title}</h2>
                     <label className="guided-toggle guided-include-toggle" htmlFor={`include-${currentSection.id}`}>
                       <span><strong>Incluir en mi invitación</strong><small>{currentSection.enabled ? 'Este detalle aparecerá en tu invitación.' : 'Este detalle no aparecerá. Conservaremos lo que hayas escrito.'}</small></span>
                       <input id={`include-${currentSection.id}`} type="checkbox" role="switch" checked={currentSection.enabled} onChange={e => changeSection(currentSection.id, { enabled: e.target.checked })} /><span className="guided-switch" aria-hidden="true" />
                     </label>
-                    {currentSection.enabled ? <SectionFields globalPanelStyle={values.panelStyle ?? "auto"} section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} uploadProps={uploadProps} allowSectionPhoto /> : <p className="guided-excluded-note">Puedes continuar o volver a activarlo cuando quieras.</p>}
+                    {currentSection.enabled ? <SectionFields globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle ?? "auto"} section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} uploadProps={uploadProps} allowSectionPhoto locationFields={<>
+                      <Field label="Lugar del evento" id="w-venue" wide><input id="w-venue" value={values.venue} maxLength={160} onChange={e => patch({ venue: e.target.value })} /></Field>
+                      <Field label="Dirección" id="w-address" wide><input id="w-address" value={values.address} maxLength={240} onChange={e => patch({ address: e.target.value })} /></Field>
+                      <Field label="Enlace de Google Maps (opcional)" id="w-map" wide help="Se usará este enlace para «Cómo llegar». Si lo dejas vacío, buscaremos la dirección escrita."><input id="w-map" type="url" value={currentSection.link} maxLength={500} placeholder="https://maps.app.goo.gl/…" onChange={e => changeSection(currentSection.id, { link: e.target.value })} /></Field>
+                    </>} /> : <p className="guided-excluded-note">Puedes continuar o volver a activarlo cuando quieras.</p>}
                   </>}
                 </div>
               </>}
@@ -278,6 +294,8 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                 <p>{getInvitationFont(values.typography).label} para títulos · {getInvitationFont(values.bodyTypography).label} para textos.</p>
               </section>
               <InvitationSurfacePicker values={values} onBlurChange={blurIntensity => patch({ blurIntensity })} onChange={panelStyle => patch({ panelStyle })} />
+              <InvitationCornersPicker value={values.sectionCorners} onChange={sectionCorners => patch({ sectionCorners })} />
+              <InvitationIconsPicker value={values.showSectionIcons} onChange={showSectionIcons => patch({ showSectionIcons })} />
               <button className="guided-customize-look" type="button" aria-expanded={appearanceExpanded} aria-controls="guided-appearance-options" onClick={() => setAppearanceExpanded(current => !current)}><FiSliders />{appearanceExpanded ? 'Ocultar ajustes' : 'Personalizar colores y tipografías'}<FiChevronDown /></button>
               <div id="guided-appearance-options" className="guided-appearance-options" hidden={!appearanceExpanded}>
                 <InvitationPalettePicker palettes={design.palettes} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={accent => patch({ accent })} />
@@ -319,7 +337,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
 }
 
 function extraDetailLabel(section: InviteSection) {
-  return ({ gallery: 'Galería de fotos', dress_code: 'Código de vestimenta', gifts: 'Regalos', ceremony: 'Ceremonia o momento especial', reception: 'Celebración en otra sede', music: 'Playlist', custom: 'Información adicional', parents: 'Familia y personas especiales', program: 'Programa de actividades', story: 'Historia de la celebración', rsvp: 'Confirmación de asistencia' } as const)[section.type];
+  return ({ countdown: 'Cuenta regresiva', cover: 'Portada', location: 'Lugar principal de la celebración', gallery: 'Galería de fotos', dress_code: 'Código de vestimenta', gifts: 'Regalos', ceremony: 'Ceremonia', reception: 'Celebración en otra sede', music: 'Playlist', custom: 'Información adicional', parents: 'Familia y personas especiales', program: 'Programa de actividades', story: 'Historia de la celebración', rsvp: 'Confirmación de asistencia' } as const)[section.type];
 }
 
 function Field({ label, id, help, wide, children }: { label: string; id: string; help?: string; wide?: boolean; children: ReactNode }) {

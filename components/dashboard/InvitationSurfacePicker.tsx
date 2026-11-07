@@ -9,14 +9,15 @@ import { getInvitationFont } from "@/lib/invitation-fonts";
 import styles from "./InvitationSurfacePicker.module.css";
 
 const options = [
-  { value: "auto", label: "Por defecto", description: "Combina los acabados de cada sección." },
-  { value: "blur", label: "Blur", description: "Un fondo suave y translúcido." },
-  { value: "blur-color", label: "Blur color", description: "Transparencia con tu color temático." },
-  { value: "color", label: "Color", description: "Tu color temático, sin transparencia." },
+  { value: "auto", label: "Automático", description: "Combina los acabados de cada sección." },
+  { value: "blur", label: "Desenfoque", description: "Un fondo suave y translúcido." },
+  { value: "blur-color", label: "Desenfoque con color", description: "Transparencia con tu color temático." },
+  { value: "color", label: "Color sólido", description: "Tu color temático, sin transparencia." },
+  { value: "glass", label: "Cristal", description: "Transparencia ligera, desenfoque suave y reflejos discretos." },
 ] as const;
 
 export function InvitationSurfacePicker({ values, onChange, onBlurChange }: {
-  values: Pick<EditorValues, "blurIntensity" | "panelStyle" | "accent" | "backgroundImageUrl" | "hostNames" | "name" | "typography" | "bodyTypography">;
+  values: Pick<EditorValues, "blurIntensity" | "panelStyle" | "sectionCorners" | "accent" | "backgroundImageUrl" | "hostNames" | "name" | "typography" | "bodyTypography">;
   onChange(value: InvitationPanelStyle): void;
   onBlurChange(value: number): void;
 }) {
@@ -64,10 +65,10 @@ export function InvitationSurfacePicker({ values, onChange, onBlurChange }: {
         <span className={styles.blurIcon} aria-hidden="true"><FiCircle /></span>
       </div>
       <div className={styles.scale} aria-hidden="true"><span>Nítido</span><span>Suave</span><span>Difuminado</span></div>
-      <p className={styles.sliderHelp} id={sliderId + "-help"}>{selected === "color" ? "Elige Blur o Blur color para ajustar la intensidad." : "Muévelo y descubre el cambio en las muestras. Tus textos siempre se mantienen nítidos."}</p>
+      <p className={styles.sliderHelp} id={sliderId + "-help"}>{selected === "color" ? "Elige Desenfoque, Desenfoque con color o Cristal para ajustar la intensidad." : "Muévelo y descubre el cambio en las muestras. Tus textos siempre se mantienen nítidos."}</p>
     </div>
     <p className={styles.help} role="status"><FiInfo aria-hidden="true" /><span>{selected === "auto"
       ? "Se conservan los fondos originales y tus ajustes para cada sección."
-      : "Se aplica a todas las secciones. Vuelve a «Por defecto» para recuperar o modificar tus ajustes individuales."}</span></p>
+      : "Se aplica a todas las secciones. Vuelve a «Automático» para recuperar o modificar tus ajustes individuales."}</span></p>
   </fieldset>;
 }

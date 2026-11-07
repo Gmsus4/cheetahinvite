@@ -39,7 +39,7 @@ test('every occasion starts with editable presets without fictional personal fac
   assert.ok(v.message);
   assert.ok(v.sections.every(s=>!s.detail&&!s.link&&!s.imageUrl&&!s.imageUrls.length));
   assert.ok(v.sections.filter(s=>s.enabled).length>=4);
-  assert.ok(v.sections.filter(s=>s.enabled).every(s=>s.content));
+  assert.ok(v.sections.filter(s=>s.enabled).every(s=>s.type==='countdown'||s.type==='cover'||s.type==='location'||s.content));
   assert.equal(v.sections.find(s=>s.type==='gallery').enabled,false);
   assert.equal(v.sections.find(s=>s.type==='ceremony').enabled,false);
   assert.ok(guidedDetails(eventType).some(s=>s.type==='rsvp'));
@@ -47,18 +47,72 @@ test('every occasion starts with editable presets without fictional personal fac
  }
 });
 
+test('optional primary location is not required when hidden or replaced by another venue',()=>{
+ const {guidedPublicationIssues}=setup();
+ const base={eventType:'wedding',hostNames:'Alex y Sam',eventDate:'2027-01-15',eventTime:'17:00',venue:'',address:'',sections:[]};
+ const section={id:'main',type:'location',title:'La celebración',content:'',detail:'',link:'',imageUrl:'',enabled:false};
+ assert.deepEqual(guidedPublicationIssues({...base,sections:[section]}),[]);
+ const ceremony={...section,id:'ceremony',type:'ceremony',content:'La capilla',detail:'17:00',link:'Calle principal',enabled:true};
+ assert.deepEqual(guidedPublicationIssues({...base,sections:[section,ceremony]}),[]);
+ assert.equal(guidedPublicationIssues({...base,sections:[{...section,enabled:true},ceremony]}).length,2);
+ assert.equal(guidedPublicationIssues({...base,sections:[{...section,enabled:true}]}).length,2);
+});
+
+test('block journey starts with cover and location before the remaining wedding details',()=>{
+ const {guidedDetails,guidedSections,guidedContentSectionIds}=setup();
+ assert.equal(guidedDetails('wedding').length,8);
+ assert.ok(guidedDetails('wedding').every(section=>section.type!=='reception'));
+ assert.equal(guidedDetails('wedding').find(section=>section.type==='ceremony').title,'Ceremonia');
+ assert.ok(guidedDetails('wedding').every(section=>section.type!=='location'));
+ const sections=guidedSections('wedding');
+ const location=sections.find(section=>section.type==='location');
+ assert.ok(location);
+ assert.deepEqual(guidedContentSectionIds('wedding',sections).slice(0,3),[sections.find(section=>section.type==='cover').id,sections.find(section=>section.type==='countdown').id,location.id]);
+ assert.ok(!guidedContentSectionIds('wedding',sections).includes('__welcome'));
+ const {guidedRecoverySection}=setup();
+ assert.equal(guidedRecoverySection({step:3,activeExtra:'__welcome',flow:'content-v4'},sections),sections.find(section=>section.type==='cover').id);
+});
+
+test('Maps URLs pasted in the old address field move to the exact link without printing as an address',()=>{
+ const {initialGuidedValues,guidedPublicationIssues}=setup();
+ const values=initialGuidedValues({id:'saved',eventType:'wedding',name:'Boda',hostNames:'Alex y Sam',eventDate:new Date('2027-01-15T12:00:00Z'),eventTime:'17:00',venue:'Mercado',address:'https://maps.app.goo.gl/ExactPin',sections:[]});
+ assert.equal(values.address,'');
+ assert.equal(values.sections.find(section=>section.type==='location').link,'https://maps.app.goo.gl/ExactPin');
+ assert.deepEqual(guidedPublicationIssues(values),[]);
+});
+
 test('occasion presets enable relevant sections and use distinct celebration copy',()=>{
  const {guidedSections}=setup();
  const active=type=>guidedSections(type).filter(s=>s.enabled).map(s=>s.type);
- assert.deepEqual(active('wedding'),['story','program','parents','gifts','rsvp']);
+ assert.deepEqual(active('wedding'),['cover','countdown','location','story','program','parents','gifts','rsvp']);
  assert.match(guidedSections('wedding').find(s=>s.type==='program').content,/Ceremonia/);
- assert.deepEqual(active('birthday'),['story','program','parents','gifts','rsvp']);
- assert.deepEqual(active('baby_shower'),['story','program','parents','gifts','rsvp']);
- assert.deepEqual(active('graduation'),['story','program','parents','rsvp']);
- assert.deepEqual(active('anniversary'),['story','program','parents','gifts','rsvp']);
- assert.deepEqual(active('other'),['story','program','parents','rsvp']);
+ assert.deepEqual(active('birthday'),['cover','countdown','location','story','program','parents','gifts','rsvp']);
+ assert.deepEqual(active('baby_shower'),['cover','countdown','location','story','program','parents','gifts','rsvp']);
+ assert.deepEqual(active('graduation'),['cover','countdown','location','story','program','parents','rsvp']);
+ assert.deepEqual(active('anniversary'),['cover','countdown','location','story','program','parents','gifts','rsvp']);
+ assert.deepEqual(active('other'),['cover','countdown','location','story','program','parents','rsvp']);
  assert.match(guidedSections('birthday').find(s=>s.type==='program').content,/Pastel/);
  assert.match(guidedSections('baby_shower').find(s=>s.type==='gifts').content,/bebé/);
+});
+
+test('legacy reception becomes the event location and its original data remains saved',()=>{
+ const {initialGuidedValues,guidedDetails}=setup();
+ const reception={id:'old-reception',type:'reception',title:'La fiesta',content:'Salón del Lago',detail:'19:00',link:'https://maps.app.goo.gl/ExactPin',imageUrl:'https://example.com/venue.webp',enabled:true,panelStyle:'glass'};
+ const event={id:'saved',eventType:'wedding',venue:'',address:'',sections:[reception]};
+ const values=initialGuidedValues(event);
+ assert.equal(values.venue,'Salón del Lago');
+ const location=values.sections.find(section=>section.type==='location');
+ assert.equal(location.link,reception.link);
+ assert.equal(location.imageUrl,reception.imageUrl);
+ assert.equal(location.enabled,true);
+ assert.deepEqual(values.sections.find(section=>section.type==='reception'),{...reception,enabled:false});
+ const reopened=initialGuidedValues({...event,venue:values.venue,sections:values.sections.map(section=>section.type==='location'?{...section,enabled:false}:section)});
+ assert.equal(reopened.sections.find(section=>section.type==='location').enabled,false);
+ for(const type of ['wedding','birthday','graduation','baby_shower','anniversary','other']) assert.ok(guidedDetails(type).every(section=>section.type!=='reception'));
+ const existing=initialGuidedValues({...event,venue:'Mi jardín',address:'Mi dirección',sections:[{...location,link:'https://maps.app.goo.gl/ChosenPin'},reception]});
+ assert.equal(existing.venue,'Mi jardín');
+ assert.equal(existing.address,'Mi dirección');
+ assert.equal(existing.sections.find(section=>section.type==='location').link,'https://maps.app.goo.gl/ChosenPin');
 });
 
 test('changing occasion replaces untouched presets while preserving user data, edits and photos',()=>{
@@ -67,7 +121,7 @@ test('changing occasion replaces untouched presets while preserving user data, e
  const switched=changeGuidedEventType(initial,'baby_shower');
  assert.equal(switched.name,'Nuestro baby shower');
  assert.match(switched.message,/dulce espera/);
- assert.deepEqual(switched.sections.filter(s=>s.enabled).map(s=>s.type),['story','program','parents','gifts','rsvp']);
+ assert.deepEqual(switched.sections.filter(s=>s.enabled).map(s=>s.type),['cover','countdown','location','story','program','parents','gifts','rsvp']);
  const customized={...initial,name:'Mi fiesta propia',hostNames:'Alex',message:'Mis palabras',eventDate:'2027-01-15',venue:'Mi lugar',imageUrl:'https://example.com/cover.jpg',sections:initial.sections.map(s=>s.type==='story'?{...s,content:'Mi historia',imageUrl:'https://example.com/story.jpg'}:s.type==='rsvp'?{...s,enabled:false}:s)};
  const changed=changeGuidedEventType(customized,'graduation');
  for(const field of ['name','hostNames','message','eventDate','venue','imageUrl'])assert.equal(changed[field],customized[field]);
@@ -80,7 +134,8 @@ test('opening saved events does not seed messages, enable missing sections or re
  const stored={id:'saved',eventType:'baby_shower',message:'',sections:[{id:'own',type:'story',title:'Mi título',content:'',detail:'',link:'',imageUrl:'',enabled:false}]};
  const values=initialGuidedValues(stored);
  assert.equal(values.message,'');
- assert.ok(values.sections.every(s=>!s.enabled));
+ assert.ok(values.sections.filter(s=>s.type!=='location'&&s.type!=='cover'&&s.type!=='countdown').every(s=>!s.enabled));
+ assert.equal(values.sections.find(s=>s.type==='location').enabled,true);
  assert.ok(values.sections.every(s=>!s.content));
  assert.deepEqual(values.sections[0],stored.sections[0]);
 });
@@ -146,7 +201,7 @@ test('new occasions suggest their own font pairs and type changes preserve custo
 test('the detail journey keeps excluded recommendations stable and offers extra details only when added',()=>{
  const {guidedSections,guidedContentSectionIds}=setup();
  const sections=guidedSections('birthday');const story=sections.find(s=>s.type==='story');const gallery=sections.find(s=>s.type==='gallery');
- const before=guidedContentSectionIds('birthday',sections);assert.equal(before[0],'__welcome');assert.equal(before.at(-1),'__more');assert.ok(!before.includes(gallery.id));
+ const before=guidedContentSectionIds('birthday',sections);assert.equal(before[0],sections.find(s=>s.type==='cover').id);assert.equal(before[1],sections.find(s=>s.type==='countdown').id);assert.equal(before[2],sections.find(s=>s.type==='location').id);assert.equal(before.at(-1),'__more');assert.ok(!before.includes(gallery.id));
  story.enabled=false;assert.deepEqual(guidedContentSectionIds('birthday',sections),before);
  gallery.enabled=true;assert.ok(guidedContentSectionIds('birthday',sections).includes(gallery.id));
  gallery.enabled=false;assert.ok(guidedContentSectionIds('birthday',sections,gallery.id).includes(gallery.id));assert.ok(!guidedContentSectionIds('birthday',sections).includes(gallery.id));

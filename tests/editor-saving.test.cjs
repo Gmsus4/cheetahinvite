@@ -73,8 +73,8 @@ test('a save racing with publication returns the new version for an explicit con
 test('global finishes persist independently and restore per-section choices after reload', async () => {
   const f = createFixture();
   const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
-  const sections = [{ id: 'story', type: 'story', title: 'Historia', content: 'Nuestra historia', detail: '', link: '', imageUrl: '', enabled: true, panelStyle: 'color' }];
-  for (const panelStyle of ['blur', 'blur-color', 'color', 'auto']) {
+  const sections = [{ id: 'story', type: 'story', title: 'Historia', content: 'Nuestra historia', detail: '', link: '', imageUrl: '', enabled: true, panelStyle: 'glass' }];
+  for (const panelStyle of ['blur', 'blur-color', 'color', 'glass', 'auto']) {
     const form = f.saveForm();
     form.set('contentVersion', String(f.state.events.get('event').contentVersion));
     form.set('panelStyle', panelStyle);
@@ -82,16 +82,31 @@ test('global finishes persist independently and restore per-section choices afte
     assert.equal((await f.actions.updateEvent('event', form)).ok, true);
     const stored = f.state.events.get('event');
     assert.equal(stored.panelStyle, panelStyle);
-    assert.equal(stored.sections[0].panelStyle, 'color');
+    assert.equal(stored.sections[0].panelStyle, 'glass');
     const restored = initialGuidedValues(stored);
     assert.equal(restored.panelStyle, panelStyle);
-    assert.equal(restored.sections[0].panelStyle, 'color');
+    assert.equal(restored.sections[0].panelStyle, 'glass');
   }
   const legacy = f.saveForm();
   legacy.set('contentVersion', String(f.state.events.get('event').contentVersion));
   f.state.events.get('event').panelStyle = 'blur';
   assert.equal((await f.actions.updateEvent('event', legacy)).ok, true);
   assert.equal(f.state.events.get('event').panelStyle, 'blur');
+});
+
+test('primary location visibility, title and finish survive saving and reopening', async () => {
+  const f = createFixture();
+  const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
+  const location = { id: 'main-location', type: 'location', title: 'La celebración', titleCustomized: true, content: '', detail: '', link: 'https://maps.app.goo.gl/ExactPin', imageUrl: '', enabled: false, panelStyle: 'glass' };
+  const cover = { ...location, id: 'main-cover', type: 'cover', title: 'Portada', enabled: true, panelStyle: 'color' };
+  const countdown = { ...cover, id: 'main-countdown', type: 'countdown', title: 'Cada vez más cerca', panelStyle: 'blur-color' };
+  const form = f.saveForm();
+  form.set('sections', JSON.stringify([cover, countdown, location]));
+  assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+  const restored = initialGuidedValues(f.state.events.get('event'));
+  assert.deepEqual(restored.sections.find(section => section.type === 'location'), { ...location, layout: 'auto' });
+  assert.deepEqual(restored.sections.find(section => section.type === 'cover'), { ...cover, layout: 'auto' });
+  assert.deepEqual(restored.sections.find(section => section.type === 'countdown'), { ...countdown, layout: 'auto' });
 });
 
 test('invalid global finishes are rejected without changing the saved invitation', async () => {
@@ -130,4 +145,69 @@ test('invalid blur intensities cannot overwrite the saved invitation', async () 
     assert.equal((await f.actions.updateEvent('event', form)).code, 'validation');
     assert.deepEqual(f.state.events.get('event'), before);
   }
+});
+
+
+test('section text alignment survives saving and reopening while invalid alignments are rejected', async () => {
+  const f = createFixture();
+  const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
+  for (const textAlign of ['auto', 'left', 'center', 'right']) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('sections', JSON.stringify([{ id:'story', type:'story', title:'Historia', content:'Texto', detail:'', link:'', imageUrl:'', enabled:true, textAlign }]));
+    assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+    assert.equal(initialGuidedValues(f.state.events.get('event')).sections.find(s => s.id === 'story').textAlign, textAlign);
+  }
+  for (const textAlign of ['justify', '', null, 2]) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('sections', JSON.stringify([{ id:'story', type:'story', title:'Historia', content:'Texto', detail:'', link:'', imageUrl:'', enabled:true, textAlign }]));
+    assert.equal((await f.actions.updateEvent('event', form)).code, 'validation');
+  }
+});
+
+
+test('global section corners persist across saving and reopening and reject invalid choices', async () => {
+ const f=createFixture();const {initialGuidedValues}=f.load('lib/guided-invitation.ts');
+ for(const sectionCorners of ['square','soft','rounded']) {
+  const form=f.saveForm();form.set('contentVersion',String(f.state.events.get('event').contentVersion));form.set('sectionCorners',sectionCorners);
+  assert.equal((await f.actions.updateEvent('event',form)).ok,true);
+  assert.equal(initialGuidedValues(f.state.events.get('event')).sectionCorners,sectionCorners);
+ }
+ const before=structuredClone(f.state.events.get('event'));
+ for(const sectionCorners of ['invalid','', '18px']) {
+  const form=f.saveForm();form.set('contentVersion',String(before.contentVersion));form.set('sectionCorners',sectionCorners);
+  assert.equal((await f.actions.updateEvent('event',form)).code,'validation');
+  assert.deepEqual(f.state.events.get('event'),before);
+ }
+ const form=f.saveForm();form.set('contentVersion',String(before.contentVersion));assert.equal((await f.actions.updateEvent('event',form)).ok,true);
+ assert.equal(f.state.events.get('event').sectionCorners,'rounded');
+});
+
+
+test('per-section icon visibility survives saving and reopening and rejects nonboolean values',async()=>{
+ const f=createFixture();const {initialGuidedValues}=f.load('lib/guided-invitation.ts');
+ for(const showIcon of [false,true]) {
+  const form=f.saveForm();form.set('contentVersion',String(f.state.events.get('event').contentVersion));
+  form.set('sections',JSON.stringify([{id:'story',type:'story',title:'Historia',content:'Texto',detail:'',link:'',imageUrl:'',enabled:true,showIcon}]));
+  assert.equal((await f.actions.updateEvent('event',form)).ok,true);
+  assert.equal(initialGuidedValues(f.state.events.get('event')).sections.find(s=>s.id==='story').showIcon,showIcon);
+ }
+ for(const showIcon of ['false',0,null]) {
+  const form=f.saveForm();form.set('contentVersion',String(f.state.events.get('event').contentVersion));
+  form.set('sections',JSON.stringify([{id:'story',type:'story',title:'Historia',content:'Texto',detail:'',link:'',imageUrl:'',enabled:true,showIcon}]));
+  assert.equal((await f.actions.updateEvent('event',form)).code,'validation');
+ }
+});
+
+
+test('global icon visibility is saved independently from individual preferences',async()=>{
+ const f=createFixture();const {initialGuidedValues}=f.load('lib/guided-invitation.ts');
+ const section={id:'story',type:'story',title:'Historia',content:'Texto',detail:'',link:'',imageUrl:'',enabled:true,showIcon:false};
+ for(const showSectionIcons of [false,true]) {
+  const form=f.saveForm();form.set('contentVersion',String(f.state.events.get('event').contentVersion));form.set('showSectionIcons',String(showSectionIcons));form.set('sections',JSON.stringify([section]));
+  assert.equal((await f.actions.updateEvent('event',form)).ok,true);
+  const restored=initialGuidedValues(f.state.events.get('event'));assert.equal(restored.showSectionIcons,showSectionIcons);assert.equal(restored.sections.find(s=>s.id==='story').showIcon,false);
+ }
+ for(const value of ['0','yes','']) {const form=f.saveForm();form.set('contentVersion',String(f.state.events.get('event').contentVersion));form.set('showSectionIcons',value);assert.equal((await f.actions.updateEvent('event',form)).code,'validation');}
 });

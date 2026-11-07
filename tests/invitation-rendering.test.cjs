@@ -41,6 +41,78 @@ test('editor location placeholders are available before typing and stay out of p
   for (const options of [{}, { preview: true }]) assert.doesNotMatch(render(options), /wa-location|Dirección por definir/);
 });
 
+test('primary location respects its own selection alongside the optional ceremony', () => {
+  const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
+  const base = { id: 'main', type: 'location', title: 'Nos vemos aquí', content: '', detail: '', link: '', imageUrl: '', enabled: true, panelStyle: 'glass' };
+  const values = { name: 'Celebración', hostNames: 'Alex', date: '', venue: 'Jardín principal', address: 'Calle principal', message: '', imageUrl: '', accent: '#58664E' };
+  const render = sections => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...values, sections, onEdit() {} }));
+  const visible = render([base]);
+  const exactLocation = render([{ ...base, link: 'https://maps.app.goo.gl/ExactPin' }]);
+  assert.match(exactLocation, /href="https:\/\/maps.app.goo.gl\/ExactPin"/);
+  assert.match(exactLocation, /data-invitation-field="w-address">Calle principal/);
+  assert.doesNotMatch(exactLocation, /<p[^>]*>https:\/\/maps/);
+  assert.match(visible, /wa-location[^>]*data-surface="glass"/);
+  assert.match(visible, /id="invitation-location-title"[^>]*>Nos vemos aquí/);
+  assert.match(visible, /data-invitation-field="section:main"/);
+  assert.match(visible, /Editar estilo del lugar principal/);
+  const customTitle = render([{ ...base, title: 'La celebración', titleCustomized: true }]);
+  assert.match(customTitle, /id="invitation-location-title"[^>]*>La celebración/);
+  assert.match(render([{ ...base, title: 'La celebración' }]), /id="invitation-location-title"[^>]*>Lugar del evento/);
+  assert.equal((visible.match(/https:\/\/www.google.com\/maps/g) || []).length, 1);
+  assert.doesNotMatch(render([{ ...base, enabled: false }]), /wa-location|Jardín principal/);
+  for (const types of [['ceremony']]) {
+    const sections = types.map(type => ({ ...base, id: type, type, title: type, content: 'Otra sede', link: `Calle ${type}` }));
+    const html = render([base, ...sections]);
+    assert.match(html, /wa-location/);
+    assert.match(render(sections), /wa-location/);
+    assert.doesNotMatch(render([{ ...base, enabled: false }, ...sections]), /wa-location|Jardín principal/);
+    assert.equal((html.match(/https:\/\/www.google.com\/maps/g) || []).length, types.length + 1);
+    assert.match(render([base, ...sections.map(section => ({ ...section, enabled: false }))]), /wa-location/);
+  }
+});
+
+test('cover finish is independent and venue photos belong to the second block', () => {
+  const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
+  const section = { content: '', detail: '', link: '', imageUrl: '', enabled: true };
+  const values = { name: 'Nuestra invitación', hostNames: 'Alex y Sam', date: '15 de enero', eventDateKey: '2027-01-15', venue: 'El jardín', address: 'La dirección', message: 'Bienvenidos', imageUrl: '/cover.webp', accent: '#58664E', panelStyle: 'auto', sections: [
+    { ...section, id: 'cover', type: 'cover', title: 'Portada', panelStyle: 'glass' },
+    { ...section, id: 'countdown', type: 'countdown', title: 'Cuenta regresiva', panelStyle: 'blur-color' },
+    { ...section, id: 'venue', type: 'location', title: 'Lugar del evento', panelStyle: 'color', imageUrl: '/venue.webp' },
+  ] };
+  const html = renderToStaticMarkup(React.createElement(CelebrationInvitation, values));
+  assert.match(html, /data-cover-style="glass"/);
+  assert.match(html, /class="wa-intro"[^>]*data-surface="glass"/);
+  assert.match(html, /wa-countdown[^>]*data-surface="blur-color"/);
+  assert.match(html, /<\/header>\s*<section class="wa-panel wa-countdown"/);
+  assert.ok(html.indexOf('class="wa-panel wa-countdown"') < html.indexOf('data-section-type="location"'));
+  const disabledCountdown = renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...values, sections: values.sections.map(section => section.type === 'countdown' ? { ...section, enabled: false } : section) }));
+  assert.doesNotMatch(disabledCountdown, /class="wa-panel wa-countdown"/);
+  assert.match(html, /wa-location[^>]*data-surface="color"/);
+  const venue = html.slice(html.indexOf('data-section-type="location"'), html.indexOf('class="wa-footer"'));
+  assert.match(venue, /El jardín/);
+  assert.match(venue, /src="\/venue.webp"/);
+  assert.doesNotMatch(venue, /src="\/cover.webp"/);
+  assert.equal((html.match(/data-section-type="location"/g) || []).length, 1);
+  const editable = renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...values, onEdit() {} }));
+  assert.match(editable, /aria-label="Acciones de la portada"/);
+  assert.match(editable, /aria-label="Editar estilo de portada"/);
+  assert.match(editable, /aria-label="Editar estilo de la cuenta regresiva"/);
+});
+
+test('event location and ceremony are the only location blocks even in legacy invitations', () => {
+  const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
+  const base={content:'Sede',detail:'17:00',link:'Calle principal',imageUrl:'',enabled:true};
+  const html=renderToStaticMarkup(React.createElement(CelebrationInvitation, { name:'Boda',hostNames:'Alex y Sam',date:'',venue:'Jardín',address:'Calle del Jardín',message:'',imageUrl:'',accent:'#58664E',sections:[
+    {...base,id:'location',type:'location',title:'Lugar del evento'},
+    {...base,id:'ceremony',type:'ceremony',title:'Ceremonia'},
+    {...base,id:'reception',type:'reception',title:'Celebración en otra sede'},
+  ] }));
+  assert.equal((html.match(/https:\/\/www.google.com\/maps/g)||[]).length,2);
+  assert.match(html,/data-section-type="location"/);
+  assert.match(html,/data-section-type="ceremony"/);
+  assert.doesNotMatch(html,/data-section-type="reception"|Celebración en otra sede/);
+});
+
 test('editor targets distinguish invitation name, hosts and individual detail fields', () => {
   const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
   const html = renderToStaticMarkup(React.createElement(CelebrationInvitation, {
@@ -50,7 +122,7 @@ test('editor targets distinguish invitation name, hosts and individual detail fi
   }));
   assert.match(html, /data-invitation-field="w-name">Nuestra celebración/);
   assert.match(html, /<h1 aria-label="Alex y Sam" data-invitation-field="w-hosts">/);
-  assert.match(html, /data-invitation-field="w-message">Bienvenidos/);
+  assert.doesNotMatch(html, /wa-welcome|data-invitation-field="w-message"/);
   assert.match(html, /data-invitation-field="ceremony-title">Ceremonia/);
   assert.match(html, /data-invitation-field="ceremony-content">El jardín/);
   assert.match(html, /data-invitation-field="ceremony-time">17:00/);
@@ -72,7 +144,7 @@ test('contextual edit controls require an owner callback and cover visible secti
   const render = options => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...values, ...options }));
   for (const options of [{}, { preview: true }]) assert.doesNotMatch(render(options), /wa-edit-button|data-editable|aria-haspopup="dialog"/);
   const editable = render({ onEdit() {} });
-  for (const label of ['portada', 'foto de portada', 'fecha y hora', 'bienvenida', 'lugar', 'Nuestra historia', 'foto de Nuestra historia', 'Recuerdos', 'fotos de Recuerdos']) {
+  for (const label of ['portada', 'foto de portada', 'fecha y hora', 'lugar', 'Nuestra historia', 'foto de Nuestra historia', 'Recuerdos', 'fotos de Recuerdos']) {
     assert.ok(editable.includes(`aria-label="Editar ${label}"`), label);
   }
   assert.doesNotMatch(editable, /Editar Oculto/);
@@ -94,7 +166,7 @@ test('shared gallery fields edit the heading and preserve legacy photos until ex
 
 test('owner preview offers photo uploads for every active detail, including an empty gallery', () => {
   const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
-  const types = ['story', 'ceremony', 'reception', 'program', 'parents', 'dress_code', 'gifts', 'gallery', 'rsvp', 'music', 'custom'];
+  const types = ['story', 'ceremony', 'program', 'parents', 'dress_code', 'gifts', 'gallery', 'rsvp', 'music', 'custom'];
   const values = {
     eventType: 'wedding', name: 'Nuestra celebración', hostNames: 'Alex y Sam', date: '', venue: '', address: '', message: '', imageUrl: '', accent: '#58664E',
     sections: types.map(type => ({ id: type, type, title: `Detalle ${type}`, content: type === 'gallery' ? '' : 'Nuestro contenido', detail: '', link: '', imageUrl: '', enabled: true })),
@@ -171,7 +243,7 @@ test('retired birthday identities show the shared layout and preserve customer c
     date:'Mi fecha',venue:'Mi lugar',address:'Mi dirección',message:'Mis palabras',imageUrl:'/my-cover.webp',backgroundImageUrl:'/my-background.webp',
     sections:[{id:'own',type:'custom',title:'Mi apartado',content:'Mi información',detail:'',link:'',imageUrl:'/my-section.webp',enabled:true}],
   }));
-  for(const text of ['Mi fiesta','Alex','Mi lugar','Mi dirección','Mis palabras','Mi apartado','Mi información','/my-cover.webp','/my-background.webp','/my-section.webp'])assert.ok(html.includes(text),text);
+  for(const text of ['Mi fiesta','Alex','Mi lugar','Mi dirección','Mi apartado','Mi información','/my-cover.webp','/my-background.webp','/my-section.webp'])assert.ok(html.includes(text),text);
   assert.doesNotMatch(html,/birthday-neon|\/birthday\/|textures|Astronauta|Nuestra boda/);
 });
 
@@ -196,8 +268,8 @@ test('section surfaces alternate over visible panels and allow explicit override
   const base = { id: 'story', type: 'story', title: 'Historia', content: 'Texto', detail: '', link: '', imageUrl: '', enabled: true };
   const render = sections => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...weddingExample, templateId: 'wedding-minimal-v2', accent: '#736048', sections }));
   const html = render([base, { ...base, id: 'hidden', enabled: false }, { ...base, id: 'two' }, { ...base, id: 'three' }]);
-  assert.deepEqual([...html.matchAll(/data-surface="([^"]+)"/g)].map(match => match[1]), ['blur','blur-color','color','blur','blur-color','color','blur']);
-  for (const panelStyle of ['blur','blur-color','color']) {
+  assert.deepEqual([...html.matchAll(/data-surface="([^"]+)"/g)].map(match => match[1]), ['blur','blur-color','color','blur','blur-color','color']);
+  for (const panelStyle of ['blur','blur-color','color','glass']) {
     assert.ok(render([{ ...base, panelStyle }]).includes(`wa-story" data-surface="${panelStyle}"`));
   }
 });
@@ -367,7 +439,7 @@ test('global finishes cover every panel and switching back restores the original
   const original = structuredClone(sections);
   const render = panelStyle => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...example, sections, panelStyle }));
   const baseline = render('auto');
-  for (const style of ['blur', 'blur-color', 'color']) {
+  for (const style of ['blur', 'blur-color', 'color', 'glass']) {
     const html = render(style);
     const finishes = [...html.matchAll(/data-surface="([^"]+)"/g)].map(match => match[1]);
     assert.ok(finishes.length >= 5);
@@ -390,4 +462,124 @@ test('blur intensity controls all blur layers while preserving the original defa
     for (const [variable, radius] of [['--wa-blur', 16], ['--wa-blur-color', 24], ['--wa-blur-cover', 20], ['--wa-blur-panel', 18]]) assert.equal(style[variable], (radius * blurIntensity / 50) + 'px');
   }
   assert.equal(atmosphereStyle('#58664E', { blurIntensity: NaN })['--wa-blur'], '16px');
+});
+
+
+test('text alignment is independent for cover, countdown and sections with or without photos', () => {
+  const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
+  const section = {id:'story',type:'story',title:'Historia',content:'Texto',detail:'',link:'',imageUrl:'',enabled:true};
+  for (const textAlign of [undefined,'auto','left','center','right']) {
+    for (const imageUrl of ['', '/photo.webp']) {
+      const sections = [{...section,type:'cover',id:'cover',textAlign},{...section,type:'countdown',id:'countdown',textAlign},{...section,textAlign,imageUrl}];
+      const html = renderToStaticMarkup(React.createElement(CelebrationInvitation,{name:'Fiesta',hostNames:'Alex',date:'20 de noviembre',eventDateKey:'2027-11-20',venue:'',address:'',message:'',imageUrl:'/cover.webp',sections,accent:'#58664E'}));
+      assert.equal((html.match(/data-text-align=/g)||[]).length, textAlign ? 3 : 0);
+      if(textAlign) assert.equal((html.match(new RegExp('data-text-align="'+textAlign+'"','g'))||[]).length,3);
+      assert.equal(html.includes('src="/photo.webp"'),Boolean(imageUrl));
+      assert.ok(html.indexOf('wa-cover-heading') < html.indexOf('wa-portrait'));
+    }
+  }
+});
+
+
+test('program editing preserves legacy activities, optional times, midnight order and blank rows', () => {
+  const {parseInvitationProgram,serializeInvitationProgram}=loadComponents()('lib/invitation-program.ts');
+  const original='16:30 — Llegada de invitados\n17:00 - Ceremonia religiosa\n19:00 – Cóctel — bienvenida\n01:00 — Despedida\nUn momento sin hora';
+  const items=parseInvitationProgram(original);
+  assert.deepEqual(items.map(item=>item.time),['16:30','17:00','19:00','01:00','']);
+  assert.equal(items[2].activity,'Cóctel — bienvenida');
+  assert.deepEqual(parseInvitationProgram(serializeInvitationProgram(items)),items);
+  const blanks=[{time:'',activity:''},{time:'00:00',activity:''},{time:'',activity:''}];
+  assert.deepEqual(parseInvitationProgram(serializeInvitationProgram(blanks)),blanks);
+  assert.equal(parseInvitationProgram('5:30 p. m. — Brindis')[0].time,'17:30');
+  assert.equal(parseInvitationProgram('12:00 a.m. — Despedida')[0].time,'00:00');
+  for(const activity of ['99:00 — Una nota','24:00 — Una nota','12:99 — Una nota','Un texto - con guion']) assert.deepEqual(parseInvitationProgram(activity),[{time:'',activity}]);
+});
+
+test('program preview keeps descriptions intact and omits empty editing rows',()=>{
+ const {CelebrationInvitation}=loadComponents()('components/invitation/CelebrationInvitation.tsx');
+ const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,{name:'Fiesta',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'',accent:'#58664E',sections:[{id:'program',type:'program',title:'Itinerario',content:'19:00 — Cóctel — bienvenida\n\nSin horario - actividad\n01:00 — Despedida',detail:'',link:'',imageUrl:'',enabled:true}]}));
+ const timeline=html.slice(html.indexOf('<ol class="wa-timeline"'),html.indexOf('</ol>'));
+ assert.equal((timeline.match(/<li>/g)||[]).length,3);
+ assert.match(timeline,/Cóctel — bienvenida/);
+ assert.match(timeline,/<span>Sin horario - actividad<\/span>/);
+ assert.ok(timeline.indexOf('19:00')<timeline.indexOf('01:00'));
+});
+
+
+test('global corner options reach the shared invitation style for every block and media surface',()=>{
+ const load=loadComponents();const {CelebrationInvitation}=load('components/invitation/CelebrationInvitation.tsx');
+ const base={name:'Fiesta',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'',accent:'#58664E',sections:[]};
+ for(const [sectionCorners,radius] of [['square',0],['soft',8],['rounded',18],[undefined,18]]) {
+  const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,{...base,sectionCorners}));
+  assert.ok(html.includes('--wa-section-radius:'+radius+'px'));
+ }
+});
+
+
+test('alignment shortcuts belong to each editable block and stay out of public invitations',()=>{
+ const {CelebrationInvitation}=loadComponents()('components/invitation/CelebrationInvitation.tsx');
+ const blank={title:'',content:'',detail:'',link:'',imageUrl:'',enabled:true};
+ const sections=[{...blank,id:'cover',type:'cover',title:'Portada'},{...blank,id:'countdown',type:'countdown',title:'Cuenta regresiva'},{...blank,id:'location',type:'location',title:'Lugar del evento'},{...blank,id:'story',type:'story',title:'Nuestra historia',content:'Una historia'}];
+ const props={name:'Fiesta',hostNames:'Alex',date:'20 de noviembre',eventDateKey:'2027-11-20',venue:'Jardín',address:'',message:'',imageUrl:'',accent:'#58664E',sections};
+ const owner=renderToStaticMarkup(React.createElement(CelebrationInvitation,{...props,onEdit:()=>{}}));
+ for(const section of sections)assert.ok(owner.includes('aria-label="Editar alineación del texto de '+section.title+'"'));
+ assert.equal((owner.match(/wa-edit-alignment/g)||[]).length,4);
+ assert.doesNotMatch(renderToStaticMarkup(React.createElement(CelebrationInvitation,props)),/wa-edit-alignment/);
+});
+
+
+test('content dialogs omit surface and alignment controls while the guided editor keeps them',()=>{
+ const {SectionFields}=loadComponents()('components/dashboard/InvitationSectionFields.tsx');
+ for(const type of ['story','program','location','gallery']) {
+  const section={id:type,type,title:'Mi sección',content:'',detail:'',link:'',imageUrl:'',enabled:true};
+  const props={section,onChange:()=>{},uploadProps:{eventId:'event',onBusyChange:()=>{}},allowSectionPhoto:true};
+  const render=extra=>renderToStaticMarkup(React.createElement(SectionFields,{...props,...extra}));
+  const dialog=render({showStyleControls:false});
+  assert.doesNotMatch(dialog,/Alineación del texto|Estilo de esta sección/);
+  const guided=render({});
+  assert.match(guided,/Alineación del texto/);
+  assert.match(guided,/Estilo de esta sección/);
+ }
+});
+
+
+test('section icons default to visible and can be hidden independently without an empty icon element',()=>{
+ const load=loadComponents();const {CelebrationInvitation}=load('components/invitation/CelebrationInvitation.tsx');
+ const blank={detail:'',link:'',imageUrl:'',enabled:true};
+ const story={...blank,id:'story',type:'story',title:'Historia',content:'Un recuerdo'};
+ const program={...blank,id:'program',type:'program',title:'Itinerario',content:'17:00 — Llegada'};
+ const props={name:'Fiesta',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'',accent:'#58664E'};
+ for(const onEdit of [undefined,()=>{}]) {
+  const render=sections=>renderToStaticMarkup(React.createElement(CelebrationInvitation,{...props,sections,onEdit}));
+  assert.equal((render([story,program]).match(/class="wa-section-icon"/g)||[]).length,2);
+  const html=render([{...story,showIcon:false},program]);
+  assert.equal((html.match(/class="wa-section-icon"/g)||[]).length,1);
+  assert.match(html,/Historia/);
+  assert.equal((render([{...story,showIcon:false},{...program,showIcon:false}]).match(/class="wa-section-icon"/g)||[]).length,0);
+ }
+ const {SectionSurfaceFields}=load('components/dashboard/InvitationSectionFields.tsx');
+ const controls=renderToStaticMarkup(React.createElement(SectionSurfaceFields,{section:story,onChange:()=>{},globalPanelStyle:'color'}));
+ assert.match(controls,/Mostrar icono/);
+ assert.match(controls,/role="switch" checked=""/);
+ assert.doesNotMatch(controls,/<input[^>]*disabled/);
+});
+
+
+test('global icon switch hides all section icons and restores individual preferences without changing them',()=>{
+ const load=loadComponents();const {CelebrationInvitation}=load('components/invitation/CelebrationInvitation.tsx');
+ const blank={detail:'',link:'',imageUrl:'',enabled:true};
+ const sections=[{...blank,id:'story',type:'story',title:'Historia',content:'Un recuerdo',showIcon:false},{...blank,id:'program',type:'program',title:'Itinerario',content:'17:00 — Llegada'}];
+ const before=structuredClone(sections);
+ const props={name:'Fiesta',hostNames:'Alex',date:'',venue:'Jardín',address:'',message:'',imageUrl:'',accent:'#58664E',sections};
+ for(const onEdit of [undefined,()=>{}]) {
+  const render=showSectionIcons=>renderToStaticMarkup(React.createElement(CelebrationInvitation,{...props,onEdit,showSectionIcons}));
+  assert.equal((render(undefined).match(/class="wa-section-icon"/g)||[]).length,2);
+  assert.doesNotMatch(render(false),/class="wa-section-icon"/);
+  assert.equal((render(true).match(/class="wa-section-icon"/g)||[]).length,2);
+ }
+ assert.deepEqual(sections,before);
+ const {SectionSurfaceFields}=load('components/dashboard/InvitationSectionFields.tsx');
+ const html=renderToStaticMarkup(React.createElement(SectionSurfaceFields,{section:sections[1],globalShowIcons:false,onChange:()=>{}}));
+ assert.match(html,/Activa los iconos en Apariencia/);
+ assert.match(html,/<input[^>]*disabled/);
 });

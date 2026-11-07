@@ -1,5 +1,7 @@
-import { isInvitationPanelStyle, isInvitationBlurIntensity } from "./invitation-editor";
-import { weddingDetails } from "./invitation-sections";
+import { normalizeEventLocations } from "./invitation-locations";
+import { invitationGoogleMapsUrl } from "./invitation-links";
+import { isInvitationPanelStyle, isInvitationBlurIntensity, isInvitationSectionCorners } from "./invitation-editor";
+import { weddingDetails, usesPrimaryLocation, locationSectionTitle } from "./invitation-sections";
 import type { EventData, EditorValues, EditorWizard, InviteSection } from './invitation-editor';
 import { recommendedInvitationFonts } from './invitation-fonts';
 import { getInvitationEventContent } from './invitation-event-content';
@@ -9,34 +11,37 @@ import { sharedInvitationId, sharedInvitationDesign } from './shared-invitation'
 
 export function guidedDetails(eventType: string) {
   if (eventType === 'wedding') return weddingDetails;
-  return (['story', 'ceremony', 'reception', 'program', 'parents', 'dress_code', 'gifts', 'gallery', 'rsvp', 'music', 'custom'] as const).map(type => ({
+  return (['story', 'ceremony', 'program', 'parents', 'dress_code', 'gifts', 'gallery', 'rsvp', 'music', 'custom'] as const).map(type => ({
     type, title: invitationSectionPreset(eventType, type).title,
-    question: ({story:'¿Quieres compartir unas palabras?', ceremony:'¿Habrá una ceremonia o momento especial?', reception:'¿Habrá otra sede para la celebración?', program:'¿Quieres compartir el programa?', parents:'¿Quieres mencionar a personas especiales?', dress_code:'¿Habrá código de vestimenta?', gifts:'¿Quieres incluir información de regalos?', gallery:'¿Quieres incluir una galería?', rsvp:'¿Quieres recibir confirmaciones?', music:'¿Quieres compartir una playlist?', custom:'¿Hay algo más que deban saber?'} as const)[type],
+    question: ({location:'¿Mostrar el lugar principal?', story:'¿Quieres compartir unas palabras?', ceremony:'¿Habrá una ceremonia?', reception:'¿Habrá otra sede para la celebración?', program:'¿Quieres compartir el programa?', parents:'¿Quieres mencionar a personas especiales?', dress_code:'¿Habrá código de vestimenta?', gifts:'¿Quieres incluir información de regalos?', gallery:'¿Quieres incluir una galería?', rsvp:'¿Quieres recibir confirmaciones?', music:'¿Quieres compartir una playlist?', custom:'¿Hay algo más que deban saber?'} as const)[type],
     help: type === 'rsvp' ? 'Recibe respuestas en la invitación o mediante un enlace externo.' : 'Opcional. Activa esta sección para personalizarla.',
   }));
 }
 export function guidedSections(eventType: string): InviteSection[] {
-  return guidedDetails(eventType).map(d => ({ id: `${eventType}-${d.type}`, type:d.type, ...invitationSectionPreset(eventType, d.type), detail:'', link:'', imageUrl:'', imageUrls:[], ...(d.type === 'rsvp' ? { rsvpMode:'integrated' as const } : {}) }));
+  return [{ type: "cover" as const }, { type: "countdown" as const }, { type: "location" as const }, ...guidedDetails(eventType)].map(d => ({ id: `${eventType}-${d.type}`, type:d.type, ...invitationSectionPreset(eventType, d.type), detail:'', link:'', imageUrl:'', imageUrls:[], ...(d.type === 'rsvp' ? { rsvpMode:'integrated' as const } : {}) }));
 }
 export function guidedContentSectionIds(eventType: string, sections: InviteSection[], activeSection = '') {
   const recommended = new Set(guidedSections(eventType).filter(section => section.enabled).map(section => section.type));
   const ordered = guidedDetails(eventType).flatMap(detail => sections.filter(section => section.type === detail.type));
-  return ['__welcome', ...ordered.filter(section => recommended.has(section.type) || section.enabled || section.id === activeSection).map(section => section.id), '__more'];
+  return [sections.find(section => section.type === 'cover')?.id ?? '__cover', ...sections.filter(section => section.type === 'countdown').map(section => section.id), ...sections.filter(section => section.type === 'location').map(section => section.id), ...ordered.filter(section => recommended.has(section.type) || section.enabled || section.id === activeSection).map(section => section.id), '__more'];
 }
 
 
 export function completeGuidedSections(eventType: string, stored: InviteSection[]) {
-  const previous = stored.map(section => section.type === 'rsvp' && !section.rsvpMode ? {...section, rsvpMode:'external' as const} : section);
-  // Completing an existing draft must not activate sections the author never chose.
-  return [...previous, ...guidedSections(eventType).filter(section => !previous.some(old => old.type === section.type)).map(section => ({ ...section, enabled: false, content: '' }))];
+  const previous = stored.map(section => section.type === 'location' ? { ...section, title: locationSectionTitle(section) } : section.type === 'rsvp' && !section.rsvpMode ? {...section, rsvpMode:'external' as const} : section);
+  // Preserve the formerly automatic location block; other missing details stay disabled.
+  return [...previous, ...guidedSections(eventType).filter(section => !previous.some(old => old.type === section.type)).slice(0, Math.max(0, 15 - previous.length)).map(section => ({ ...section, enabled: section.type === 'location' ? usesPrimaryLocation(previous) : section.type === 'cover' || section.type === 'countdown', content: '' }))];
 }
 export function initialGuidedValues(event: EventData): EditorValues {
   const type = event.eventType;
   const content = getInvitationEventContent(type);
   const id = !event.id ? sharedInvitationId : event.templateId || sharedInvitationId;
   const stored = Array.isArray(event.sections) ? event.sections as InviteSection[] : [];
-  const sections = !event.id && stored.length === 0 ? guidedSections(type) : completeGuidedSections(type, stored);
-  const values: EditorValues = {name:event.name || content.defaultName, eventType:type, hostNames:event.hostNames || '', eventDate:event.eventDate ? new Date(event.eventDate).toISOString().slice(0,10) : '', eventTime:event.eventTime || '', venue:event.venue || '', address:event.address || '', message:event.message || '', imageUrl:event.imageUrl || '', blurIntensity:isInvitationBlurIntensity(event.blurIntensity) ? event.blurIntensity : 50, panelStyle:isInvitationPanelStyle(event.panelStyle) ? event.panelStyle : "auto", backgroundImageUrl:event.backgroundImageUrl || '', customSlug:event.customSlug || '', accent:event.accent, templateId:id, typography:event.typography, bodyTypography:event.bodyTypography, texture:event.texture || 'none', heroHorizontal:event.heroHorizontal || 'center', heroVertical:event.heroVertical || 'center', buttonAppearance:eventButtonAppearance(event), sections};
+  const locations = normalizeEventLocations(event.venue || "", event.address || "", stored);
+  let sections = !event.id && stored.length === 0 ? guidedSections(type) : completeGuidedSections(type, locations.sections);
+  const pastedMap = invitationGoogleMapsUrl(locations.address);
+  if (pastedMap) sections = sections.map(section => section.type === "location" && !section.link ? { ...section, link: pastedMap } : section);
+  const values: EditorValues = {showSectionIcons:event.showSectionIcons !== false,sectionCorners:isInvitationSectionCorners(event.sectionCorners) ? event.sectionCorners : "rounded",name:event.name || content.defaultName, eventType:type, hostNames:event.hostNames || '', eventDate:event.eventDate ? new Date(event.eventDate).toISOString().slice(0,10) : '', eventTime:event.eventTime || '', venue:locations.venue, address:pastedMap ? '' : locations.address, message:event.message || '', imageUrl:event.imageUrl || '', blurIntensity:isInvitationBlurIntensity(event.blurIntensity) ? event.blurIntensity : 50, panelStyle:isInvitationPanelStyle(event.panelStyle) ? event.panelStyle : "auto", backgroundImageUrl:event.backgroundImageUrl || '', customSlug:event.customSlug || '', accent:event.accent, templateId:id, typography:event.typography, bodyTypography:event.bodyTypography, texture:event.texture || 'none', heroHorizontal:event.heroHorizontal || 'center', heroVertical:event.heroVertical || 'center', buttonAppearance:eventButtonAppearance(event), sections};
   if (event.id) return { ...values, texture: 'none' };
   const initial = { ...values, templateId: sharedInvitationId, message: !stored.length ? event.message || invitationEventPreset(type).message : values.message,
     accent: sharedInvitationDesign.palettes[0].accent, typography: sharedInvitationDesign.typography, bodyTypography: sharedInvitationDesign.bodyTypography,
@@ -72,18 +77,21 @@ export function changeGuidedEventType(values: EditorValues, eventType: string): 
   };
 }
 export function guidedPublicationIssues(values: Pick<EditorValues, 'eventType' | 'hostNames' | 'eventDate' | 'eventTime' | 'venue' | 'address' | 'sections'>) {
+  values = { ...values, ...normalizeEventLocations(values.venue, values.address, values.sections) };
   const wedding = values.eventType === 'wedding';
   const issues: { step: number; message: string; sectionId?: string }[] = [];
   if (!values.hostNames.trim()) issues.push({ step: 0, message: wedding ? 'Agrega los nombres de la pareja.' : 'Agrega el nombre de quien celebra o de los anfitriones.' });
   if (!values.eventDate) issues.push({ step: 1, message: wedding ? 'Elige la fecha de la boda.' : 'Elige la fecha del evento.' });
   if (!values.eventTime) issues.push({ step: 1, message: 'Agrega la hora de la celebración.' });
-  if (!values.venue.trim()) issues.push({ step: 1, message: 'Agrega el lugar de la celebración.' });
-  if (!values.address.trim()) issues.push({ step: 1, message: 'Agrega la dirección para que tus invitados puedan llegar.' });
+  if (usesPrimaryLocation(values.sections)) {
+    if (!values.venue.trim()) issues.push({ step: 1, message: 'Agrega el lugar de la celebración.' });
+    if (!values.address.trim() && !values.sections.find(section => section.type === 'location')?.link.trim()) issues.push({ step: 1, message: 'Agrega la dirección o un enlace de Google Maps para que tus invitados puedan llegar.' });
+  }
   for (const section of values.sections.filter(section => section.enabled)) {
-    if (section.type === 'rsvp' && section.rsvpMode === 'integrated') continue;
+    if (section.type === 'reception' || section.type === 'countdown' || section.type === 'cover' || section.type === 'location' || (section.type === 'rsvp' && section.rsvpMode === 'integrated')) continue;
     const complete = section.type === 'gallery' ? Boolean(section.imageUrls?.length || section.imageUrl)
       : section.type === 'rsvp' ? Boolean(section.link.trim())
-      : section.type === 'ceremony' || section.type === 'reception' ? Boolean(section.content.trim() && section.detail.trim() && section.link.trim())
+      : section.type === 'ceremony' ? Boolean(section.content.trim() && section.detail.trim() && section.link.trim())
       : Boolean(section.content.trim() || section.link.trim());
     if (!complete) issues.push({ step: 3, message: `Completa «${section.title}» o desactívala.`, sectionId: section.id });
   }
@@ -96,9 +104,11 @@ export function guidedRecoveryStep(wizard: EditorWizard) {
   return [0, 0, 3, 5][Math.min(3, Math.max(0, wizard.step))];
 }
 export function guidedRecoverySection(wizard: EditorWizard, sections: InviteSection[]) {
-  if (wizard.flow !== 'content-v4') return '__welcome';
+  const cover = sections.find(section => section.type === 'cover')?.id ?? '__cover';
+  if (wizard.flow !== 'content-v4') return cover;
   const active = wizard.activeExtra?.replace(/^__add:/, '') ?? '';
-  return active === '__more' || sections.some(section => section.id === active) ? active : '__welcome';
+  if (active === '__cover' || active === '__welcome') return cover;
+  return active === '__more' || sections.some(section => section.id === active) ? active : cover;
 }
 export function guidedRecoveryAppearance(wizard: EditorWizard) {
   return wizard.flow === 'content-v4' ? wizard.activeExtra === 'appearance-custom' : (wizard.flow === 'content-v3' && wizard.step === 1 && wizard.activeExtra === 'appearance') || (wizard.flow === 'content-v2' && wizard.step === 3);

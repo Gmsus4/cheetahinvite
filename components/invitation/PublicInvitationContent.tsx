@@ -1,5 +1,5 @@
 import type { Event } from "@/generated/prisma/client";
-import { isInvitationPanelStyle, type InviteSection } from "@/lib/invitation-editor";
+import { isInvitationPanelStyle, isInvitationSectionCorners, type InviteSection } from "@/lib/invitation-editor";
 import { CelebrationInvitation } from "./CelebrationInvitation";
 
 export function PublicInvitationContent({ event }: { event: Omit<Event, "pinHash"> }) {
@@ -23,6 +23,8 @@ export function PublicInvitationContent({ event }: { event: Omit<Event, "pinHash
       accent={event.accent}
       typography={event.typography}
       bodyTypography={event.bodyTypography} blurIntensity={event.blurIntensity} panelStyle={isInvitationPanelStyle(event.panelStyle) ? event.panelStyle : "auto"}
+      showSectionIcons={event.showSectionIcons}
+      sectionCorners={isInvitationSectionCorners(event.sectionCorners) ? event.sectionCorners : "rounded"}
       sections={sections}
     />
   </main>;

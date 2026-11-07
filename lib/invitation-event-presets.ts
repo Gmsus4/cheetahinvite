@@ -76,7 +76,7 @@ const presets: Record<string, EventPreset> = {
 };
 
 const titles: Record<SectionType, string> = {
-  story: 'Nuestra celebración', ceremony: 'Momento especial', reception: 'Otra sede',
+  countdown: 'Cuenta regresiva', cover: 'Portada', location: 'Lugar del evento', story: 'Nuestra celebración', ceremony: 'Ceremonia', reception: 'Otra sede',
   program: 'Programa', parents: 'Personas especiales', dress_code: 'Código de vestimenta',
   gifts: 'Regalos', gallery: 'Galería', rsvp: 'Confirma tu asistencia', music: 'Nuestra playlist', custom: 'Información adicional',
 };
@@ -86,6 +86,10 @@ export function invitationEventPreset(eventType: string) {
 }
 
 export function invitationSectionPreset(eventType: string, type: SectionType) {
+  if (type === "countdown") return { title: "Cuenta regresiva", content: "", enabled: true };
+  if (type === "ceremony") return { title: "Ceremonia", content: "", enabled: false };
+  if (type === "cover") return { title: "Portada", content: "", enabled: true };
+  if (type === "location") return { title: "Lugar del evento", content: "", enabled: true };
   const preset = invitationEventPreset(eventType).sections[type];
   return {
     title: preset?.title ?? (eventType === 'wedding' ? getInvitationEventContent(eventType).sections[type].title : titles[type]),

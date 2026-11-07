@@ -1,4 +1,4 @@
-import { isInvitationBlurIntensity } from "./invitation-editor";
+import { isInvitationBlurIntensity, isInvitationSectionCorners } from "./invitation-editor";
 import type { CSSProperties } from "react";
 import type { InviteSection, InvitationPanelStyle } from "./invitation-editor";
 import { getInvitationFont } from "./invitation-fonts";
@@ -19,13 +19,18 @@ export function atmosphereSections(sections: InviteSection[]) {
   ));
 }
 
-export function atmosphereStyle(accent: string, fonts?: { typography?: string; bodyTypography?: string; blurIntensity?: number }): CSSProperties {
+export function atmosphereStyle(accent: string, fonts?: { typography?: string; bodyTypography?: string; blurIntensity?: number; sectionCorners?: string }): CSSProperties {
   const palette = invitationPalette(accent);
   const strength = (isInvitationBlurIntensity(fonts?.blurIntensity) ? fonts.blurIntensity : 50) / 50;
   return {
+    "--wa-section-radius": `${({square:0, soft:8, rounded:18})[isInvitationSectionCorners(fonts?.sectionCorners) ? fonts.sectionCorners : "rounded"]}px`,
     "--wa-blur": `${16 * strength}px`, "--wa-blur-color": `${24 * strength}px`,
     "--wa-blur-cover": `${20 * strength}px`, "--wa-blur-panel": `${18 * strength}px`,
     "--wa-base": palette.dark, "--wa-tint": palette.accent,
+    "--wa-glass-background": "linear-gradient(135deg,#ffffff18,transparent 45%,#ffffff08),#ffffff05",
+    "--wa-glass-shadow": "inset 0 1px 0 #ffffff70,inset 1px 0 0 #ffffff24,inset 0 -1px 0 #ffffff30,0 8px 24px #00000010",
+    "--wa-glass-filter": "blur(var(--wa-glass-blur)) saturate(115%)",
+    "--wa-glass-blur": `${8 * strength}px`,
     "--wa-heading": getInvitationFont(fonts?.typography || sharedInvitationDesign.typography).family,
     "--wa-body": getInvitationFont(fonts?.bodyTypography || sharedInvitationDesign.bodyTypography).family,
   } as CSSProperties;

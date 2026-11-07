@@ -138,7 +138,7 @@ export function InvitationLivePreview({ children, focus, expanded = false, onClo
       markerFrame = view.requestAnimationFrame(() => { markerFrame = 0; updateMarker(); });
     };
     const find = (key?: string) => key ? Array.from(root.querySelectorAll<HTMLElement>("[data-invitation-field]"))
-      .find(element => element.dataset.invitationField?.split(" ").includes(key)) : undefined;
+      .find(element => element.dataset.invitationField?.split(" ").includes(key === "cover-block" && device === "mobile" ? "cover" : key)) : undefined;
     const position = (smooth: boolean) => {
       if (!active || !active.getClientRects().length) return;
       const rect = active.getBoundingClientRect();

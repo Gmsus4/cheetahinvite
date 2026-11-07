@@ -25,6 +25,9 @@ const eventContent: Record<InvitationEventType, EventContent> = {
     recommendedSections: ["story", "ceremony", "reception", "program", "parents", "dress_code", "gifts", "rsvp"],
     demo: { name: "Nuestra boda", hostNames: "Sofía y Mateo", date: "12 de octubre de 2027", eventDateKey: "2027-10-12", eventTime: "17:00", venue: "Hacienda Las Nubes", address: "Oaxaca", accent: "#8c7258", typography: "great-vibes", bodyTypography: "inter" },
     sections: {
+      countdown: { title: "Cuenta regresiva", content: "" },
+      cover: { title: "Portada", content: "" },
+      location: { title: "Lugar del evento", content: "" },
       story: { title: "Nuestra historia", content: "Entre conversaciones que se alargaban, viajes improvisados y pequeños momentos cotidianos, fuimos construyendo un hogar el uno en el otro. Hoy damos el siguiente paso con la alegría de tenerte cerca." },
       ceremony: { title: "El sí de nuestras vidas", content: "Nos daremos el sí en el jardín de Hacienda Las Nubes. Acompáñanos a compartir las promesas con las que comienza nuestra vida de casados.", detail: "5:00 p. m. · Ceremonia en el jardín" },
       reception: { title: "Una noche para brindar", content: "Después de la ceremonia nos esperan la cena, los abrazos y nuestra primera pista de baile como esposos. Queremos que esta noche también sea uno de tus recuerdos favoritos.", detail: "7:00 p. m. · Salón principal" },
@@ -44,6 +47,9 @@ const eventContent: Record<InvitationEventType, EventContent> = {
     recommendedSections: ["story", "reception", "program", "dress_code", "gifts", "rsvp"],
     demo: { name: "Los 30 de Valeria", hostNames: "Valeria Pérez", date: "20 de noviembre de 2027", eventDateKey: "2027-11-20", eventTime: "18:00", venue: "Patio La Luna", address: "Puebla", accent: "#b33e63", typography: "fredoka", bodyTypography: "nunito" },
     sections: {
+      countdown: { title: "Cuenta regresiva", content: "" },
+      cover: { title: "Portada", content: "" },
+      location: { title: "Lugar del evento", content: "" },
       story: { title: "Treinta y tantas razones para celebrar", content: "Llego a los 30 con una colección de viajes, anécdotas y amistades que hacen más bonita la vida. Esta fiesta es para agradecer todo lo vivido y brindar por lo que viene." },
       ceremony: { title: "El momento de las velitas", content: "Guarda un poquito de voz para las mañanitas y acompáñame a pedir un deseo antes de partir el pastel.", detail: "8:00 p. m. · Mesa del pastel" },
       reception: { title: "La fiesta es aquí", content: "Nos vemos en Patio La Luna para disfrutar de botanas, una cena entre amigos y una playlist con canciones que todos nos sabemos.", detail: "6:00 p. m. · Bienvenida en el patio" },
@@ -63,6 +69,9 @@ const eventContent: Record<InvitationEventType, EventContent> = {
     recommendedSections: ["story", "ceremony", "reception", "program", "parents", "dress_code", "rsvp"],
     demo: { name: "Generación 2027", hostNames: "Camila y su generación", date: "17 de julio de 2027", eventDateKey: "2027-07-17", eventTime: "18:00", venue: "Centro Cultural Horizonte", address: "Guadalajara", accent: "#755820", typography: "cinzel", bodyTypography: "inter" },
     sections: {
+      countdown: { title: "Cuenta regresiva", content: "" },
+      cover: { title: "Portada", content: "" },
+      location: { title: "Lugar del evento", content: "" },
       story: { title: "De la primera clase a este día", content: "Compartimos desvelos, proyectos y amistades que se quedan para siempre. Hoy cambiamos los apuntes por nuevos sueños y celebramos todo lo que aprendimos en el camino." },
       ceremony: { title: "Entrega de reconocimientos", content: "Acompáñanos al acto de graduación en el auditorio del Centro Cultural Horizonte. Escucharemos nuestros nombres con el orgullo de saber que este logro también les pertenece a quienes nos apoyaron.", detail: "6:00 p. m. · Auditorio principal" },
       reception: { title: "El brindis de una nueva etapa", content: "Al terminar la ceremonia nos reuniremos en el salón del centro cultural para cenar, tomarnos muchas fotos y celebrar con nuestras familias y amigos.", detail: "8:00 p. m. · Salón Horizonte" },
@@ -82,6 +91,9 @@ const eventContent: Record<InvitationEventType, EventContent> = {
     recommendedSections: ["story", "reception", "program", "parents", "gifts", "dress_code", "rsvp"],
     demo: { name: "Esperando a Emilia", hostNames: "Lucía y Daniel", date: "14 de agosto de 2027", eventDateKey: "2027-08-14", eventTime: "12:00", venue: "Jardín Los Olivos", address: "Mérida", accent: "#526d56", typography: "comfortaa", bodyTypography: "nunito" },
     sections: {
+      countdown: { title: "Cuenta regresiva", content: "" },
+      cover: { title: "Portada", content: "" },
+      location: { title: "Lugar del evento", content: "" },
       story: { title: "Una dulce espera", content: "Desde que supimos que Emilia venía en camino, nuestros días se llenaron de planes, preguntas y mucho amor. Nos emociona imaginar todas las aventuras que viviremos en familia." },
       ceremony: { title: "Buenos deseos para Emilia", content: "Tendremos un momento para compartir consejos y escribirle a Emilia una carta que guardaremos para cuando sea mayor.", detail: "1:30 p. m. · Mesa de los buenos deseos" },
       reception: { title: "Una tarde para apapacharnos", content: "Te esperamos en Jardín Los Olivos para compartir comida rica, juegos y conversaciones sobre esta nueva aventura. Será una reunión para toda la familia.", detail: "12:00 p. m. · Bienvenida en el jardín" },
@@ -101,6 +113,9 @@ const eventContent: Record<InvitationEventType, EventContent> = {
     recommendedSections: ["story", "ceremony", "reception", "program", "dress_code", "gifts", "rsvp"],
     demo: { name: "25 años de nosotros", hostNames: "Elena y Gabriel", date: "18 de septiembre de 2027", eventDateKey: "2027-09-18", eventTime: "18:00", venue: "Hacienda Los Encinos", address: "Querétaro", accent: "#866137", typography: "playfair-display", bodyTypography: "lora" },
     sections: {
+      countdown: { title: "Cuenta regresiva", content: "" },
+      cover: { title: "Portada", content: "" },
+      location: { title: "Lugar del evento", content: "" },
       story: { title: "Veinticinco años después", content: "Lo que comenzó con una promesa se convirtió en mañanas compartidas, una familia y miles de recuerdos. Veinticinco años después seguimos encontrando razones para elegirnos." },
       ceremony: { title: "Renovamos nuestra promesa", content: "Compartiremos unas palabras y renovaremos los votos que nos han acompañado durante estos 25 años. Nos hará muy felices que estés presente en este nuevo sí.", detail: "6:00 p. m. · Terraza de la hacienda" },
       reception: { title: "La mesa de nuestra historia", content: "Nos espera una cena en Hacienda Los Encinos para brindar por lo vivido, recordar nuestras mejores anécdotas y volver a bailar las canciones de siempre.", detail: "7:30 p. m. · Cena de aniversario" },
@@ -120,6 +135,9 @@ const eventContent: Record<InvitationEventType, EventContent> = {
     recommendedSections: ["story", "reception", "program", "dress_code", "gifts", "rsvp"],
     demo: { name: "Volver a encontrarnos", hostNames: "Familia Rivera", date: "6 de junio de 2027", eventDateKey: "2027-06-06", eventTime: "13:00", venue: "Parque La Arboleda", address: "Ciudad de México", accent: "#31756c", typography: "outfit", bodyTypography: "dm-sans" },
     sections: {
+      countdown: { title: "Cuenta regresiva", content: "" },
+      cover: { title: "Portada", content: "" },
+      location: { title: "Lugar del evento", content: "" },
       story: { title: "Una mesa para todos", content: "Hace tiempo que queremos reunir a la familia sin prisas, agendas ni pantallas de por medio. Esta vez la invitación es sencilla: pasar un buen día juntos y recuperar esas conversaciones pendientes." },
       ceremony: { title: "El abrazo de bienvenida", content: "Comenzaremos con una fotografía de toda la familia y unas palabras para agradecer que, desde cerca o desde lejos, hayamos podido coincidir.", detail: "1:30 p. m. · Punto de reunión" },
       reception: { title: "Nos vemos bajo los árboles", content: "Prepararemos una comida compartida en Parque La Arboleda, con espacio para platicar, jugar y dejar que la tarde transcurra a su propio ritmo.", detail: "1:00 p. m. · Área de convivencia" },

@@ -1,5 +1,5 @@
 /* Shared brand styling for the private invitation workspace. */
-.workspace { min-height: 100svh; padding-top: 94px; background: var(--app-background); color: var(--ink); font-family: var(--font-body), Arial, sans-serif; }
+.workspace { min-height: 100svh; background: var(--app-background); color: var(--ink); font-family: var(--font-body), Arial, sans-serif; }
 .toolbar { position: fixed; z-index: 30; top: 14px; left: 50%; display: flex; align-items: center; justify-content: space-between; gap: 20px; width: min(1232px, calc(100% - 40px)); min-height: 64px; padding: 9px 14px; transform: translateX(-50%); border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 12px; box-shadow: 0 10px 36px rgb(var(--shadow-rgb) / .08); }
 .toolbar a, .toolbar button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; transition: border-color .18s, background .18s, color .18s; }
 .toolbar a:hover, .toolbar button:hover, .toolbar button[aria-expanded="true"] { border-color: var(--orange); background: var(--accent-soft); color: var(--accent); }
@@ -10,17 +10,19 @@
 .tools { display: flex; gap: 8px; }
 .workspace :global([data-editable]) { position: relative; outline: 1px solid transparent; outline-offset: -1px; transition: outline-color .18s; }
 .workspace :global([data-editable]):hover, .workspace :global([data-editable]):focus-within { outline-color: var(--orange); }
-.workspace :global(.wa-edit-button) { position: absolute; z-index: 5; top: 10px; right: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-width: 40px; min-height: 38px; max-width: calc(100% - 20px); margin: 0; padding: 9px 13px; border: 1px solid var(--orange); border-radius: 12px; background: var(--orange); color: var(--on-inverse); box-shadow: 0 4px 14px rgb(var(--shadow-rgb) / .16); font: 600 12px/1.4 var(--font-body), Arial, sans-serif; text-align: left; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .18s, background .18s, border-color .18s; }
-.workspace :global(.wa-edit-button):hover { border-color: var(--orange-hover); background: var(--orange-hover); }
+.workspace :global(.wa-edit-button) { position: absolute; z-index: 5; top: 10px; right: 10px; display: inline-flex; flex: 0 0 44px; align-items: center; justify-content: center; width: 44px; height: 44px; min-width: 44px; min-height: 44px; margin: 0; padding: 0; border: 0; border-radius: 50%; background: #191919; color: #fff; box-shadow: none; font: 500 12px/1.4 var(--font-body), Arial, sans-serif; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .18s, background .18s; }
+.workspace :global(.wa-edit-button):hover { background: #292929; }
+.workspace :global(.wa-edit-button) > span { position: absolute; z-index: 6; top: calc(100% + 8px); right: 0; width: max-content; padding: 7px 10px; border-radius: 8px; background: #191919; color: #fff; font: 500 12px/1.4 var(--font-body), Arial, sans-serif; white-space: nowrap; opacity: 0; visibility: hidden; pointer-events: none; }
+.workspace :global(.wa-edit-button):is(:hover, :focus-visible) > span { opacity: 1; visibility: visible; }
 .workspace :global([data-editable]):hover > :global(.wa-edit-button), .workspace :global([data-editable]):focus-within > :global(.wa-edit-button) { opacity: 1; pointer-events: auto; }
 .workspace :global(.wa-edit-actions) { position: absolute; z-index: 5; top: 10px; right: 10px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: calc(100% - 20px); opacity: 0; pointer-events: none; transition: opacity .18s; }
-.workspace :global(.wa-edit-actions) > :global(.wa-edit-button) { position: static; max-width: 100%; opacity: 1; pointer-events: inherit; }
+.workspace :global(.wa-edit-actions) > :global(.wa-edit-button) { position: relative; top: auto; right: auto; max-width: 100%; opacity: 1; pointer-events: inherit; }
 .workspace :global([data-editable]):hover > :global(.wa-edit-actions), .workspace :global([data-editable]):focus-within > :global(.wa-edit-actions) { opacity: 1; pointer-events: auto; }
 .workspace :global(.wa-panel[data-editable]):has(> :global(.wa-edit-actions)) { padding-top: 64px; }
-.workspace :global(.wa-edit-button):focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; box-shadow: 0 0 0 3px var(--surface); }
-.workspace :global(.wa-edit-button) svg { flex: 0 0 15px; width: 15px; height: 15px; }
-.workspace :global(.wa-cover-heading[data-editable]) { padding-top: 24px; border-radius: 12px; }
-.workspace :global(.wa-cover-heading) > :global(.wa-edit-button) { top: 0; right: 0; }
+.workspace :global(.wa-edit-button):focus-visible { outline: 2px solid #fff; outline-offset: 3px; box-shadow: none; }
+.workspace :global(.wa-edit-button) svg { flex: 0 0 20px; width: 20px; height: 20px; }
+.workspace :global(.wa-cover-heading[data-editable]), .workspace :global(.wa-intro) :global(.wa-cover-heading[data-editable]) { padding: 64px 24px 20px; border-radius: 12px; }
+.workspace :global(.wa-cover-heading) > :global(.wa-edit-actions) { top: 12px; right: 12px; max-width: calc(100% - 24px); }
 .notice { position: fixed; z-index: 40; bottom: 24px; left: 50%; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); transform: translateX(-50%); border-radius: 14px; background: var(--accent-soft); color: var(--ink); font-size: 14px; font-weight: 600; box-shadow: 0 8px 28px rgb(var(--shadow-rgb) / .12); }
 .notice:not(:empty) { padding: 14px 20px; border: 1px solid var(--accent-line); }
 .notice svg { flex: none; width: 18px; height: 18px; color: var(--accent); }
@@ -41,7 +43,8 @@
 .fields > * { min-width: 0; }
 .fields :global(.guided-field), .fields :global(.editor-field) { display: flex; min-width: 0; flex-direction: column; gap: 9px; margin: 0; }
 .fields :global(.guided-field) > label, .fields :global(.editor-field) > label { color: var(--ink); font-size: 14px; font-weight: 600; }
-.fields :is(input:not([type="file"]):not([type="radio"]):not([type="range"]), textarea, select) { width: 100%; min-width: 0; min-height: 49px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; line-height: 1.6; accent-color: var(--orange); transition: border-color .18s, box-shadow .18s; }
+.fields :is(input:not([type="file"]):not([type="radio"]):not([type="range"]):not([type="checkbox"]), textarea, select) { width: 100%; min-width: 0; min-height: 49px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; line-height: 1.6; accent-color: var(--orange); transition: border-color .18s, box-shadow .18s; }
+.fields input[type="checkbox"] { width: 22px; height: 22px; margin: 0; accent-color: var(--orange); cursor: pointer; }
 .fields textarea { resize: vertical; line-height: 1.7; }
 .fields :is(input, textarea, select):focus-visible { border-color: var(--orange); outline: 2px solid var(--orange); outline-offset: 2px; }
 .fields :is(input, select):disabled { background: var(--surface-muted); color: var(--muted); }
@@ -65,6 +68,9 @@
 .fields :global(.image-upload-preview) button { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--danger); box-shadow: 0 2px 8px rgb(var(--shadow-rgb) / .12); }
 .fields :global(.image-upload-preview) button:hover:not(:disabled) { background: var(--danger-soft); }
 .fields :global(.image-upload-error) { color: var(--danger); font-size: 13px; }
+.fields :global(.guided-include-toggle) { padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.fields :global(.guided-toggle) input[type="checkbox"] { width: 42px; height: 25px; min-height: 25px; padding: 0; }
+.fields :global(.guided-toggle) input:checked + :global(.guided-switch) { background: var(--orange); }
 .dateFields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .dialogFooter { position: sticky; z-index: 5; bottom: 0; display: flex; justify-content: flex-end; gap: 10px; padding: 18px 28px; border-top: 1px solid var(--line); background: var(--surface); }
 .dialogFooter button, .error button, .error a { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 12px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: 600 14px/1.5 var(--font-body), Arial, sans-serif; text-decoration: none; cursor: pointer; transition: border-color .18s, background .18s, color .18s; }
@@ -81,16 +87,40 @@
 .workspace :global(.editor-leave-dialog) button { min-height: 46px; border-radius: 12px; font-size: 14px; font-weight: 600; }
 .workspace :global(.editor-leave-dialog) button:first-child:hover { border-color: var(--orange-hover); background: var(--orange-hover); }
 .workspace :global(.editor-leave-dialog) button:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
-@media (max-width: 1020px) { .toolbar p { display: none; } }
-@media (max-width: 760px) {
-  .workspace { padding-top: 88px; }
-  .toolbar { top: 12px; gap: 8px; width: calc(100% - 24px); padding: 9px 12px; border-radius: 24px; }
-  .toolbar a, .toolbar button { gap: 6px; padding: 10px 12px; font-size: 12px; }
-  .tools { gap: 6px; }
+.toolbar a, .toolbar button, .toolbar .back { position: relative; display: grid; flex-shrink: 0; place-items: center; width: 52px; height: 52px; padding: 0; border: 0; border-radius: 50%; background: var(--wa-base); color: #fff; box-shadow: none; }
+.toolbar a:hover, .toolbar button:hover, .toolbar button[aria-expanded="true"] { background: var(--wa-base); color: #fff; box-shadow: none; }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .toolbar[data-surface="blur"] :is(a, button) { background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur,16px)) saturate(110%); backdrop-filter: blur(var(--wa-blur,16px)) saturate(110%); }
+  .toolbar[data-surface="blur-color"] :is(a, button) { background: linear-gradient(145deg,color-mix(in srgb,var(--wa-tint) 24%,transparent),transparent 70%),color-mix(in srgb,var(--wa-base) 76%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur-color,24px)); backdrop-filter: blur(var(--wa-blur-color,24px)); }
+}
+.toolbar svg { width: 23px; height: 23px; color: inherit; }
+.toolbar[data-surface="glass"] :is(a, button) { background: color-mix(in srgb,var(--wa-base) 88%,transparent); box-shadow: 0 4px 14px #00000018; }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .toolbar[data-surface="glass"] :is(a, button) { background: var(--wa-glass-background); -webkit-backdrop-filter: var(--wa-glass-filter); backdrop-filter: var(--wa-glass-filter); }
+}
+
+@media (min-width: 1021px) {
+  .sectionMedia { display: none; }
+  .workspace { padding-top: 0; padding-right: 96px; }
+  .toolbar { top: 50%; right: 20px; left: auto; flex-direction: column; align-items: center; justify-content: flex-start; gap: 24px; width: 52px; min-height: 0; max-height: calc(100svh - 40px); padding: 0; overflow: visible; transform: translateY(-50%); border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .toolbar :is(a, button):focus-visible { outline-color: #fff; outline-offset: -3px; }
+  .toolbar p { display: none; }
+  .back span, .tools span { position: absolute; top: 50%; right: calc(100% + 12px); width: max-content; height: auto; padding: 8px 12px; overflow: visible; clip-path: none; transform: translateY(-50%); border-radius: 10px; background: var(--wa-base); color: #fff; font-size: 12px; line-height: 1.4; white-space: nowrap; box-shadow: 0 4px 16px #0002; opacity: 0; visibility: hidden; pointer-events: none; }
+  .toolbar :is(a, button):is(:hover, :focus-visible) > span { opacity: 1; visibility: visible; }
+  .tools { flex-direction: column; gap: 12px; }
+}
+@media (max-width: 1020px) {
+  .toolbar { top: max(12px,env(safe-area-inset-top)); left: max(12px,env(safe-area-inset-left)); right: auto; width: 44px; min-height: 0; flex-direction: column; align-items: center; justify-content: flex-start; gap: 12px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; transform: none; pointer-events: none; }
+  .toolbar a, .toolbar button, .toolbar .back { width: 44px; height: 44px; }
+  .toolbar svg { width: 20px; height: 20px; }
+  .toolbar :is(a,button) { pointer-events: auto; }
+  .toolbar :is(a,button):focus-visible { outline-color: #fff; outline-offset: -3px; }
+  .toolbar p { display: none; }
+  .tools { flex-direction: column; gap: 6px; }
+  .back span, .tools span { position: absolute; z-index: 1; top: 50%; left: calc(100% + 8px); right: auto; transform: translateY(-50%); width: max-content; max-width: calc(100vw - 80px); padding: 8px 12px; border-radius: 10px; background: var(--wa-base); color: #fff; font-size: 12px; line-height: 1.4; white-space: nowrap; opacity: 0; visibility: hidden; pointer-events: none; }
+  .toolbar :is(a,button):is(:hover,:focus-visible) > span { opacity: 1; visibility: visible; }
 }
 @media (max-width: 460px) {
-  .toolbar .back, .tools button { width: 44px; padding: 10px; }
-  .back span, .tools span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .dialog { width: calc(100% - 16px); max-height: calc(100svh - 24px); border-radius: 20px; }
   .dialogHeader { gap: 10px; padding: 22px 20px; }
   .dialogHeading { gap: 10px; }

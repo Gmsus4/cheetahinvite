@@ -329,7 +329,7 @@ test('local backups retain section photo placement and reject unsupported positi
 });
 
 test('local backups retain section surfaces and reject unsupported finishes', () => {
-  for (const panelStyle of ['auto','blur','blur-color','color','invalid']) {
+  for (const panelStyle of ['auto','blur','blur-color','color','glass','invalid']) {
     const snapshot = JSON.parse(values('Mi boda'));
     snapshot.sections = [{id:'story',type:'story',title:'Historia',content:'',detail:'',link:'',imageUrl:'',enabled:true,panelStyle}];
     const record = {schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:Date.now(),wizard:{step:2,activeExtra:'story'},snapshot:JSON.stringify(snapshot)};
@@ -343,7 +343,7 @@ test('local backups retain section surfaces and reject unsupported finishes', ()
 test('local draft recovery retains the global finish and rejects unsupported finishes', () => {
   const now = Date.now();
   const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), version: 0, updatedAt: now, wizard: { step: 5, activeExtra: null, flow: 'content-v4' } };
-  for (const panelStyle of ['auto', 'blur', 'blur-color', 'color', undefined]) {
+  for (const panelStyle of ['auto', 'blur', 'blur-color', 'color', 'glass', undefined]) {
     const snapshot = JSON.stringify({ ...JSON.parse(values('Celebracion')), panelStyle });
     const recovered = parseEditorDraft(JSON.stringify({ ...record, snapshot }), 'owner', 'event', now);
     assert.ok(recovered);
@@ -369,4 +369,48 @@ test('draft recovery retains blur intensity and rejects unsupported values', () 
     const snapshot = JSON.stringify({ ...JSON.parse(values('Celebracion')), blurIntensity });
     assert.equal(parseEditorDraft(JSON.stringify({ ...record, snapshot }), 'owner', 'event', now), null);
   }
+});
+
+
+test('local backups retain text alignment and reject unsupported values', () => {
+  for (const textAlign of ['auto','left','center','right','justify',null]) {
+    const snapshot = JSON.parse(values('Mi boda'));
+    snapshot.sections = [{id:'story',type:'story',title:'Historia',content:'',detail:'',link:'',imageUrl:'',enabled:true,textAlign}];
+    const record = {schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:Date.now(),wizard:{step:2,activeExtra:'story'},snapshot:JSON.stringify(snapshot)};
+    const parsed = parseEditorDraft(JSON.stringify(record),'owner','event',Date.now());
+    if (textAlign === 'justify' || textAlign === null) assert.equal(parsed,null);
+    else assert.equal(JSON.parse(parsed.snapshot).sections[0].textAlign,textAlign);
+  }
+});
+
+
+test('local backups retain global section corners and accept older drafts without the option', () => {
+ for(const sectionCorners of [undefined,'square','soft','rounded','invalid',null]) {
+  const snapshot={...JSON.parse(values('Mi boda')),sectionCorners};
+  const record={schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:Date.now(),wizard:{step:4,activeExtra:null},snapshot:JSON.stringify(snapshot)};
+  const parsed=parseEditorDraft(JSON.stringify(record),'owner','event',Date.now());
+  if(sectionCorners==='invalid'||sectionCorners===null) assert.equal(parsed,null);
+  else assert.equal(JSON.parse(parsed.snapshot).sectionCorners,sectionCorners);
+ }
+});
+
+
+test('local backups retain icon preferences and allow legacy sections without the flag',()=>{
+ for(const showIcon of [undefined,true,false,'false',0,null]) {
+  const snapshot=JSON.parse(values('Fiesta'));snapshot.sections=[{id:'story',type:'story',title:'Historia',content:'',detail:'',link:'',imageUrl:'',enabled:true,showIcon}];
+  const record={schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:Date.now(),wizard:{step:3,activeExtra:'story'},snapshot:JSON.stringify(snapshot)};
+  const parsed=parseEditorDraft(JSON.stringify(record),'owner','event',Date.now());
+  if(showIcon===undefined||typeof showIcon==='boolean') assert.equal(JSON.parse(parsed.snapshot).sections[0].showIcon,showIcon);
+  else assert.equal(parsed,null);
+ }
+});
+
+
+test('global icon preference survives draft recovery and accepts older drafts',()=>{
+ for(const showSectionIcons of [undefined,true,false,'false',null]) {
+  const snapshot={...JSON.parse(values('Fiesta')),showSectionIcons};
+  const record={schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:Date.now(),wizard:{step:4,activeExtra:null},snapshot:JSON.stringify(snapshot)};
+  const parsed=parseEditorDraft(JSON.stringify(record),'owner','event',Date.now());
+  if(showSectionIcons===undefined||typeof showSectionIcons==='boolean')assert.equal(JSON.parse(parsed.snapshot).showSectionIcons,showSectionIcons);else assert.equal(parsed,null);
+ }
 });

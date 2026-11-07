@@ -255,3 +255,30 @@
 .guided-editor .guided-included-summary button:hover:not(:disabled) { border-color: var(--orange); background: var(--surface); color: var(--accent); }
 .guided-editor .guided-included-summary button[aria-current="step"] { border-color: var(--orange); background: var(--accent-soft); color: var(--accent); }
 @media(max-width:600px) { .guided-included-summary { padding: 16px; } .guided-included-summary nav { gap: 6px; } }
+
+/* Each itinerary moment has its own accessible time and activity fields. */
+.guided-program { min-width: 0; margin: 0; padding: 0; border: 0; }
+.guided-program > legend { padding: 0; font-size: 14px; font-weight: 600; }
+.guided-program > p { margin: 8px 0 18px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.guided-program > ol { display: grid; gap: 12px; margin: 0 0 16px; padding: 0; list-style: none; }
+.guided-program > ol > li { min-width: 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; }
+.guided-program-row-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.guided-program-row-heading > span { color: var(--muted); font-size: 12px; font-weight: 600; }
+.guided-program-row-heading > div { display: flex; gap: 4px; }
+.guided-program button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
+.guided-program button:hover:not(:disabled) { border-color: var(--orange); background: var(--accent-soft); color: var(--accent); }
+.guided-program button:disabled { opacity: .4; cursor: default; }
+.guided-program button:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+.guided-program button svg { width: 16px; height: 16px; flex-shrink: 0; }
+.guided-program-row-heading button { width: 44px; padding: 10px; }
+.guided-program-row-fields { display: grid; grid-template-columns: 150px minmax(0,1fr); gap: 14px; }
+.guided-program-row-fields label span { color: var(--muted); font-weight: 400; }
+.guided-program > .guided-program-add { color: var(--accent); }
+.guided-program > p[role="alert"] { color: var(--danger); }
+@media(max-width:600px) {
+  .guided-program > ol > li { padding: 12px; }
+  .guided-program-row-fields { grid-template-columns: minmax(0,1fr); }
+  .guided-program-row-fields input[type="time"] { max-width: 180px; }
+  .guided-program-row-fields .guided-field input { font-size: 16px; }
+  .guided-program > .guided-program-add { width: 100%; }
+}

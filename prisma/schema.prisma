@@ -57,6 +57,8 @@ model Event {
   typography   String      @default("default")
   bodyTypography String    @default("inter")
   panelStyle   String      @default("auto")
+  showSectionIcons Boolean @default(true)
+  sectionCorners String @default("rounded")
   blurIntensity Int        @default(50)
   sections     Json        @default("[]")
   slug         String?     @unique

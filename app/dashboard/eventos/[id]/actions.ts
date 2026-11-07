@@ -1,9 +1,9 @@
 "use server";
 import { eventPublicationIssues } from "@/lib/guided-invitation";
 
-import { isInvitationPanelStyle, isInvitationBlurIntensity } from "@/lib/invitation-editor";
+import { isInvitationPanelStyle, isInvitationBlurIntensity, isInvitationSectionCorners } from "@/lib/invitation-editor";
 import type { EditorSaveResult } from "@/lib/invitation-editor";
-import { invitationSectionUrl } from "@/lib/invitation-links";
+import { invitationSectionUrl, invitationExternalUrl } from "@/lib/invitation-links";
 import { parseButtonAppearance } from "@/lib/invitation-buttons";
 import { orderedInvitationSections } from "@/lib/invitation-sections";
 import type { InviteSection } from "@/lib/invitation-editor";
@@ -147,6 +147,11 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
   const rawBlurIntensity = formData.get("blurIntensity");
   const blurIntensity = rawBlurIntensity === null ? 50 : typeof rawBlurIntensity === "string" && /^\d{1,3}$/.test(rawBlurIntensity) ? Number(rawBlurIntensity) : NaN;
   if (!isInvitationBlurIntensity(blurIntensity)) return failure("validation", "Elige una intensidad de blur entre 0 y 100.");
+  const rawShowSectionIcons = formData.get("showSectionIcons") ?? "true";
+  if (rawShowSectionIcons !== "true" && rawShowSectionIcons !== "false") return failure("validation", "Elige si quieres mostrar los iconos de las secciones.");
+  const showSectionIcons = rawShowSectionIcons === "true";
+  const sectionCorners = formData.get("sectionCorners") ?? "rounded";
+  if (!isInvitationSectionCorners(sectionCorners)) return failure("validation", "Elige una forma válida para las esquinas de las secciones.");
   const panelStyle = formData.get("panelStyle") ?? "auto";
   if (!isInvitationPanelStyle(panelStyle)) return failure("validation", "Elige un fondo válido para las secciones.");
   const buttonAppearance = parseButtonAppearance(formData);
@@ -167,7 +172,7 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     message.length > 1200 || !/^#[0-9a-fA-F]{6}$/.test(accent) || !isInvitationFont(typography) || !isInvitationFont(bodyTypography) ||
     (eventDate && Number.isNaN(eventDate.getTime())) ||
     (eventTime && (!/^([01]\d|2[0-3]):[0-5]\d$/.test(eventTime) || !eventDate)) ||
-    !Array.isArray(sections) || sections.length > 12 ||
+    !Array.isArray(sections) || sections.length > 15 ||
     sections.some((section) => !isValidSection(section))
   ) return failure("validation", "Revisa los campos marcados antes de guardar. Tus cambios siguen en este dispositivo.");
 
@@ -186,6 +191,8 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
   const curated = {
     templateId: sharedInvitationId,
     accent: invitationPalette(accent).accent, typography, bodyTypography,
+    ...(formData.has("showSectionIcons") ? { showSectionIcons } : {}),
+    ...(formData.has("sectionCorners") ? { sectionCorners } : {}),
     ...(formData.has("panelStyle") ? { panelStyle } : {}),
     ...(formData.has("blurIntensity") ? { blurIntensity } : {}),
     texture: "none", heroHorizontal: "center", heroVertical: "center",
@@ -241,16 +248,20 @@ function isValidSection(value: unknown): value is {
 } {
   if (!value || typeof value !== "object") return false;
   const section = value as Record<string, unknown>;
-  const types = ["story", "ceremony", "reception", "program", "parents", "dress_code", "gifts", "rsvp", "gallery", "music", "custom"];
+  const types = ["countdown", "cover", "location", "story", "ceremony", "reception", "program", "parents", "dress_code", "gifts", "rsvp", "gallery", "music", "custom"];
   const strings = ["id", "type", "title", "content", "detail", "link", "imageUrl"] as const;
   if (!strings.every((key) => typeof section[key] === "string")) return false;
   if (typeof section.enabled !== "boolean" || !types.includes(section.type as string)) return false;
+  if (section.showIcon !== undefined && typeof section.showIcon !== "boolean") return false;
+  if (section.titleCustomized !== undefined && typeof section.titleCustomized !== "boolean") return false;
   if (section.rsvpMode !== undefined && (section.type !== "rsvp" || !["external", "integrated"].includes(section.rsvpMode as string))) return false;
   if ((section.id as string).length > 80 || (section.title as string).length > 100 || (section.content as string).length > 2000 || (section.detail as string).length > 240 || (section.link as string).length > 500 || (section.imageUrl as string).length > 1000) return false;
   if (section.layout !== undefined && !["auto", "split", "centered", "card"].includes(section.layout as string)) return false;
+  if (section.textAlign !== undefined && !["auto", "left", "center", "right"].includes(section.textAlign as string)) return false;
   if (section.imagePosition !== undefined && !["before", "after"].includes(section.imagePosition as string)) return false;
-  if (section.panelStyle !== undefined && !["auto", "blur", "blur-color", "color"].includes(section.panelStyle as string)) return false;
+  if (section.panelStyle !== undefined && !isInvitationPanelStyle(section.panelStyle)) return false;
   if (section.imageUrls !== undefined && (!Array.isArray(section.imageUrls) || section.imageUrls.length > ACCOUNT_LIMITS.imagesPerGallery || section.imageUrls.some((url) => typeof url !== "string" || url.length > 1000 || !isHttpUrl(url)))) return false;
+  if (section.type === "location" && section.link && !invitationExternalUrl(section.link as string)) return false;
   if (section.link && !invitationSectionUrl(section.type as string, section.link as string)) return false;
   for (const value of [section.imageUrl] as string[]) {
     if (!value) continue;

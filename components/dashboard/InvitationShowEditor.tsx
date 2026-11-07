@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition, type ReactNode } from "reac
 import { FiArrowLeft, FiCheck, FiEdit3, FiImage, FiMapPin, FiSave, FiSliders, FiX } from "react-icons/fi";
 import { updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 import { CelebrationInvitation } from "@/components/invitation/CelebrationInvitation";
+import { atmosphereStyle } from "@/lib/invitation-atmosphere";
 import { changeGuidedEventType, initialGuidedValues } from "@/lib/guided-invitation";
 import { getInvitationEventContent, invitationEventTypes } from "@/lib/invitation-event-content";
 import { editorFormData, type EditorValues, type EventData, type InvitationEditTarget, type InviteSection } from "@/lib/invitation-editor";
@@ -14,7 +15,9 @@ import { EditorProtectedLink } from "./EditorProtectedLink";
 import { EditorRecoveryDialog } from "./EditorRecoveryDialog";
 import { InvitationFontSelect } from "./InvitationFontSelect";
 import { InvitationPalettePicker } from "./InvitationPalettePicker";
-import { SectionFields, SectionPhotoFields } from "./InvitationSectionFields";
+import { SectionFields, SectionTextAlignmentFields, SectionPhotoFields, SectionSurfaceFields } from "./InvitationSectionFields";
+import { InvitationIconsPicker } from "./InvitationIconsPicker";
+import { InvitationCornersPicker } from "./InvitationCornersPicker";
 import { InvitationSurfacePicker } from "./InvitationSurfacePicker";
 import { useEditorProtection } from "./useEditorProtection";
 import styles from "./InvitationShowEditor.module.css";
@@ -43,6 +46,8 @@ export function InvitationShowEditor({ event }: { event: EventData }) {
   }, [notice]);
 
   const busy = pending || state.saving || uploads > 0;
+  const locationSection = values.sections.find(item => item.type === "location");
+  const countdownSection = values.sections.find(item => item.type === "countdown");
   const section = target && "sectionId" in target ? values.sections.find(item => item.id === target.sectionId) : undefined;
   const label = target ? editLabel(target, section) : "";
   const date = values.eventDate ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${values.eventDate}T12:00:00Z`)) : "La fecha";
@@ -77,7 +82,7 @@ export function InvitationShowEditor({ event }: { event: EventData }) {
   }
 
   return <div className={styles.workspace}>
-    <nav className={styles.toolbar} aria-label="Edición de la vista previa">
+    <nav className={styles.toolbar} aria-label="Edición de la vista previa" data-surface={values.panelStyle === "auto" ? "blur" : values.panelStyle} style={atmosphereStyle(values.accent, values)}>
       <EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${event.id}`} className={styles.back} title="Volver al editor completo"><FiArrowLeft aria-hidden="true" /><span>Editor completo</span></EditorProtectedLink>
       <p><FiEdit3 aria-hidden="true" /><span>Pasa sobre una sección para editarla</span></p>
       <div className={styles.tools}>
@@ -97,20 +102,32 @@ export function InvitationShowEditor({ event }: { event: EventData }) {
           <DateFields values={values} patch={patch} />
         </>}
         {(target.kind === "date" || target.kind === "location") && <DateFields values={values} patch={patch} />}
+        {target.kind === "date" && countdownSection && <>
+          <Field label="Mostrar cuenta regresiva" id="show-countdown-enabled"><input id="show-countdown-enabled" type="checkbox" checked={countdownSection.enabled} onChange={e => patch({ sections: values.sections.map(item => item.id === countdownSection.id ? { ...item, enabled: e.target.checked } : item) })} /></Field>
+          <Field label="Título de la sección" id="show-countdown-title"><input id="show-countdown-title" maxLength={100} value={countdownSection.title} onChange={e => patch({ sections: values.sections.map(item => item.id === countdownSection.id ? { ...item, title: e.target.value } : item) })} /></Field>
+        </>}
         {target.kind === "location" && <>
+          {locationSection && <>
+            <Field label="Título de la sección" id="show-location-title"><input id="show-location-title" maxLength={100} value={locationSection.title} onChange={e => patch({ sections: values.sections.map(item => item.id === locationSection.id ? { ...item, title: e.target.value, titleCustomized: true } : item) })} /></Field>
+          </>}
           <Field label="Lugar de la celebración" id="show-venue"><input id="show-venue" maxLength={160} value={values.venue} onChange={e => patch({ venue: e.target.value })} /></Field>
           <Field label="Dirección" id="show-address"><input id="show-address" maxLength={240} value={values.address} onChange={e => patch({ address: e.target.value })} /></Field>
+          {locationSection && <Field label="Enlace de Google Maps (opcional)" id="show-map"><input id="show-map" type="url" maxLength={500} placeholder="https://maps.app.goo.gl/…" value={locationSection.link} onChange={e => patch({ sections: values.sections.map(item => item.id === locationSection.id ? { ...item, link: e.target.value } : item) })} /><small>Si lo dejas vacío, «Cómo llegar» buscará la dirección escrita.</small></Field>}
+          {locationSection && <div className={styles.sectionMedia}><SectionPhotoFields section={locationSection} uploadProps={uploadProps} onChange={changes => patch({ sections: values.sections.map(item => item.id === locationSection.id ? { ...item, ...changes } : item) })} /></div>}
         </>}
-        {target.kind === "welcome" && <Field label="Mensaje para tus invitados" id="show-message"><textarea id="show-message" rows={6} maxLength={1200} value={values.message} onChange={e => patch({ message: e.target.value })} /></Field>}
         {(target.kind === "cover-photo" || target.kind === "background") && <CloudinaryImageUpload {...uploadProps} multiple={false} images={target.kind === "cover-photo" ? values.imageUrl ? [values.imageUrl] : [] : values.backgroundImageUrl ? [values.backgroundImageUrl] : []} onChange={images => patch(target.kind === "cover-photo" ? { imageUrl: images[0] ?? "" } : { backgroundImageUrl: images[0] ?? "" })} />}
         {target.kind === "appearance" && <>
           <InvitationSurfacePicker values={values} onChange={panelStyle => patch({ panelStyle })} onBlurChange={blurIntensity => patch({ blurIntensity })} />
+              <InvitationCornersPicker value={values.sectionCorners} onChange={sectionCorners => patch({ sectionCorners })} />
+              <InvitationIconsPicker value={values.showSectionIcons} onChange={showSectionIcons => patch({ showSectionIcons })} />
           <InvitationPalettePicker palettes={sharedInvitationDesign.palettes} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={accent => patch({ accent })} />
           <InvitationFontSelect role="heading" eventType={values.eventType} value={values.typography} onChange={typography => patch({ typography })} />
           <InvitationFontSelect role="body" eventType={values.eventType} value={values.bodyTypography} onChange={bodyTypography => patch({ bodyTypography })} />
         </>}
-        {section && target.kind === "section" && <SectionFields section={section} onChange={changeSection} uploadProps={uploadProps} allowSectionPhoto globalPanelStyle={values.panelStyle} />}
+        {section && target.kind === "section" && <SectionFields section={section} onChange={changeSection} uploadProps={uploadProps} allowSectionPhoto globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle} mediaClassName={styles.sectionMedia} showStyleControls={false} />}
         {section && target.kind === "section-photo" && <SectionPhotoFields section={section} onChange={changeSection} uploadProps={uploadProps} />}
+        {section && target.kind === "section-surface" && <SectionSurfaceFields section={section} onChange={changeSection} globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle} />}
+        {section && target.kind === "section-alignment" && <SectionTextAlignmentFields section={section} onChange={changeSection} />}
       </fieldset>
       {state.error && <div className={styles.error} role="alert"><p>{state.error}</p>
         {state.conflictVersion !== undefined && <button type="button" disabled={busy} onClick={() => save(true)}>Guardar mi versión</button>}
@@ -128,7 +145,9 @@ export function InvitationShowEditor({ event }: { event: EventData }) {
 function editLabel(target: InvitationEditTarget, section?: InviteSection) {
   if (target.kind === "section") return section?.title || "Sección";
   if (target.kind === "section-photo") return `${section?.type === "gallery" ? "Fotos" : "Foto"} de ${section?.title || "la sección"}`;
-  return ({ cover: "Portada", date: "Fecha y hora", location: "Fecha y lugar", welcome: "Mensaje de bienvenida", "cover-photo": "Foto de portada", background: "Foto de fondo", appearance: "Apariencia" })[target.kind];
+  if (target.kind === "section-surface") return `Estilo de ${section?.title || "la sección"}`;
+  if (target.kind === "section-alignment") return `Alineación de ${section?.title || "la sección"}`;
+  return ({ cover: "Portada", date: "Fecha y hora", location: "Fecha y lugar", "cover-photo": "Foto de portada", background: "Foto de fondo", appearance: "Apariencia" })[target.kind];
 }
 
 function Field({ label, id, children }: { label: string; id: string; children: ReactNode }) {

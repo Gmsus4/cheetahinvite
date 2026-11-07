@@ -6,7 +6,16 @@ const ts = require('typescript');
 require.extensions['.ts'] = (mod, filename) => mod._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText, filename);
-const { invitationExternalUrl, invitationLinkLabel, invitationMapUrl, invitationSectionUrl } = require('../lib/invitation-links.ts');
+const { invitationExternalUrl, invitationLinkLabel, invitationMapUrl, invitationSectionUrl, invitationLocationUrl } = require('../lib/invitation-links.ts');
+
+test('exact location links take precedence and plain addresses provide the fallback', () => {
+  const exact = 'https://maps.app.goo.gl/ExactPin';
+  assert.equal(invitationLocationUrl('Mercado', 'Calle Hidalgo 10', exact), exact);
+  assert.equal(new URL(invitationLocationUrl('Mercado', 'Calle Hidalgo 10')).searchParams.get('query'), 'Calle Hidalgo 10');
+  assert.equal(new URL(invitationLocationUrl('Mercado', '', '')).searchParams.get('query'), 'Mercado');
+  assert.equal(invitationLocationUrl('', '', ''), null);
+  assert.equal(invitationLocationUrl('', '', 'javascript:alert(1)'), null);
+});
 
 test('map sections accept addresses and preserve shared Maps links', () => {
   for (const type of ['ceremony', 'reception']) {

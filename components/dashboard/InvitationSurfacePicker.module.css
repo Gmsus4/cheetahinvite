@@ -14,12 +14,16 @@
 .preview { position: relative; display: block; height: 174px; overflow: hidden; isolation: isolate; border-radius: 10px; background: var(--surface-base); }
 .backdrop { position: absolute; inset: 0; background: radial-gradient(ellipse at 12% 8%,#fff4d8 0%,transparent 44%),radial-gradient(ellipse at 90% 90%,var(--surface-tint) 12%,transparent 58%),repeating-linear-gradient(125deg,transparent 0 28px,#fff3 29px 30px,transparent 31px 58px),linear-gradient(140deg,#556a56,var(--surface-base)); background-size: cover; background-position: center; }
 .samples { position: relative; display: grid; gap: 8px; width: 78%; margin: 14px auto; }
-.sample { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 8px; border: 1px solid #fffaf214; border-radius: 8px; background: var(--surface-base); color: #fffaf2; box-shadow: 0 4px 14px #0001; }
+.sample { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 8px; border: 1px solid #fffaf214; border-radius: var(--wa-section-radius,8px); background: var(--surface-base); color: #fffaf2; box-shadow: 0 4px 14px #0001; }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .sample[data-surface="blur"] { background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--surface-base) 64%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur,16px)) saturate(110%); backdrop-filter: blur(var(--wa-blur,16px)) saturate(110%); }
   .sample[data-surface="blur-color"] { background: linear-gradient(145deg,color-mix(in srgb,var(--surface-tint) 24%,transparent),transparent 70%),color-mix(in srgb,var(--surface-base) 76%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur-color,24px)); backdrop-filter: blur(var(--wa-blur-color,24px)); }
 }
 .kicker { font: 400 6px/1.5 var(--surface-body); letter-spacing: .16em; }
+.sample[data-surface="glass"] { border-color: #ffffff35; border-top-color: #ffffff70; border-bottom-color: #ffffff45; background: color-mix(in srgb,var(--surface-base) 88%,transparent); box-shadow: var(--wa-glass-shadow); }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .sample[data-surface="glass"] { background: var(--wa-glass-background); -webkit-backdrop-filter: var(--wa-glass-filter); backdrop-filter: var(--wa-glass-filter); }
+}
 .names { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font: 400 23px/1.15 var(--surface-heading); text-align: center; overflow-wrap: anywhere; }
 .line { width: 68%; height: 2px; border-radius: 2px; background: #fffaf270; }
 .line:last-child { width: 45%; opacity: .6; }
