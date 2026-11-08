@@ -17,6 +17,7 @@ function loadComponents(hooks) {
       module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true,
     } }).outputText;
     function localRequire(name) {
+      if (name.endsWith('.css')) return {};
       if (name === 'react' && hooks) return { ...React, ...hooks };
       if (!name.startsWith('@/') && !name.startsWith('.')) return require(name);
       const base = name.startsWith('@/') ? path.resolve(name.slice(2)) : path.resolve(path.dirname(full), name);
@@ -582,4 +583,50 @@ test('global icon switch hides all section icons and restores individual prefere
  const html=renderToStaticMarkup(React.createElement(SectionSurfaceFields,{section:sections[1],globalShowIcons:false,onChange:()=>{}}));
  assert.match(html,/Activa los iconos en Apariencia/);
  assert.match(html,/<input[^>]*disabled/);
+});
+
+
+test('visibility controls are available for optional blocks, never the cover or public invitation',()=>{
+ const load=loadComponents();const {CelebrationInvitation}=load('components/invitation/CelebrationInvitation.tsx');
+ const blank={content:'Texto',detail:'',link:'',imageUrl:'',enabled:true};
+ const sections=[{...blank,id:'cover',type:'cover',title:'Portada'},{...blank,id:'countdown',type:'countdown',title:'Cuenta regresiva'},{...blank,id:'location',type:'location',title:'Lugar del evento'},{...blank,id:'story',type:'story',title:'Historia'}];
+ const props={name:'Fiesta',hostNames:'Alex',date:'20 de noviembre',eventDateKey:'2027-11-20',venue:'Jardín',address:'',message:'',imageUrl:'',accent:'#58664E',sections};
+ const owner=renderToStaticMarkup(React.createElement(CelebrationInvitation,{...props,onEdit:()=>{}}));
+ for(const title of ['Cuenta regresiva','Lugar del evento','Historia'])assert.ok(owner.includes('aria-label="Cambiar visibilidad de '+title+'"'));
+ assert.doesNotMatch(owner,/Cambiar visibilidad de Portada/);
+ assert.doesNotMatch(renderToStaticMarkup(React.createElement(CelebrationInvitation,props)),/Cambiar visibilidad/);
+});
+
+
+test('each appearance substep has its own controls and a cumulative example; solid color omits intensity',()=>{
+ const load=loadComponents();const {InvitationStyleJourney}=load('components/dashboard/InvitationStyleJourney.tsx');
+ const values=load('lib/guided-invitation.ts').initialGuidedValues({id:'',eventType:'wedding',name:'Nuestra boda',hostNames:'Alex y Sam',accent:'#58664E',typography:'default',bodyTypography:'inter',sections:[]});
+ const render=(step,changes={})=>renderToStaticMarkup(React.createElement(InvitationStyleJourney,{values:{...values,...changes},step,onStepChange:()=>{},onChange:()=>{}}));
+ for(let step=0;step<5;step++) {const html=render(step);assert.match(html,/Ejemplo con tus elecciones/);assert.match(html,/Alex y Sam/);assert.ok(html.includes('Detalle '+(step+1)+' de 5'));}
+ assert.match(render(0),/Esquinas de la invitación/);assert.doesNotMatch(render(0),/Mostrar iconos en las secciones/);
+ assert.match(render(1),/Mostrar iconos en las secciones/);
+ assert.match(render(2),/Intensidad del desenfoque/);assert.doesNotMatch(render(2,{panelStyle:'color'}),/Intensidad del desenfoque/);
+ assert.match(render(3),/El color de tu celebración/);assert.match(render(4),/Usar letras recomendadas/);
+});
+
+
+test('compact palettes start with six choices, keep a selected extra color visible and offer the full list',()=>{
+ const load=loadComponents();const {InvitationPalettePicker}=load('components/dashboard/InvitationPalettePicker.tsx');const {sharedInvitationDesign}=load('lib/shared-invitation.ts');
+ const render=accent=>renderToStaticMarkup(React.createElement(InvitationPalettePicker,{compact:true,palettes:sharedInvitationDesign.palettes,accent,onChange:()=>{}}));
+ assert.equal((render(sharedInvitationDesign.palettes[0].accent).match(/type="radio"/g)||[]).length,6);
+ assert.match(render(sharedInvitationDesign.palettes[0].accent),/Ver más colores/);
+ assert.equal((render(sharedInvitationDesign.palettes.at(-1).accent).match(/type="radio"/g)||[]).length,7);
+});
+
+
+
+
+
+test('section quick actions start closed, keep controls available on demand and omit redundant photo actions',()=>{
+ const {SectionQuickActions}=loadComponents()('components/dashboard/SectionQuickActions.tsx');
+ const blank={id:'story',type:'story',title:'Historia',content:'',detail:'',link:'',imageUrl:'',enabled:true};
+ const render=type=>renderToStaticMarkup(React.createElement(SectionQuickActions,{section:{...blank,type},onChange:()=>{},uploadProps:{eventId:'event',onBusyChange:()=>{}}}));
+ const html=render('story');assert.equal((html.match(/aria-expanded="false"/g)||[]).length,3);
+ assert.doesNotMatch(html,/Fondo de esta sección|Mostrar icono|Foto junto a esta sección|Alineación del texto/);
+ for(const type of ['gallery','countdown']) assert.equal((render(type).match(/aria-expanded="false"/g)||[]).length,2);
 });

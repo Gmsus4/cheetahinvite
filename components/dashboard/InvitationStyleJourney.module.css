@@ -1,0 +1,46 @@
+.journey { display: grid; gap: 24px; min-width: 0; }
+.steps { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 6px; padding: 0; margin: 0; list-style: none; }
+.steps button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; width: 100%; min-height: 64px; padding: 8px 2px; border: 0; border-bottom: 2px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+.steps button > span { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--surface-muted); font-size: 11px; }
+.steps strong { font-size: 12px; font-weight: 500; }
+.steps button[aria-current="step"] { border-color: var(--orange); color: var(--accent); }
+.steps button[aria-current="step"] > span { background: var(--orange); color: #fff; }
+.position { margin: -10px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.finish h2, .fonts h2 { margin: 0 0 10px; font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
+.finish > p, .fonts > p { margin: 0 0 18px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.finishes { display: flex; flex-wrap: wrap; gap: 8px; }
+.finishes button, .suggestion { min-height: 44px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 12px; cursor: pointer; }
+.finishes button[aria-pressed="true"] { border-color: var(--orange); background: var(--accent-soft); color: var(--accent); }
+.finish > .help { margin: 14px 0 0; font-size: 12px; }
+.intensity { display: grid; gap: 10px; margin-top: 22px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.intensity label { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 13px; }
+.intensity output { display: inline-flex; align-items: baseline; gap: 2px; min-width: 58px; justify-content: center; padding: 6px 10px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-size: 19px; font-variant-numeric: tabular-nums; }
+.intensity output span { font-size: 11px; }
+.intensity input[type="range"] { appearance: none; -webkit-appearance: none; width: 100%; height: 36px; min-height: 36px; margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; cursor: pointer; }
+.intensity input[type="range"]::-webkit-slider-runnable-track { height: 6px; border-radius: 99px; background: linear-gradient(to right,var(--orange) var(--intensity-progress),var(--line) var(--intensity-progress)); }
+.intensity input[type="range"]::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; margin-top: -8px; border: 3px solid var(--orange); border-radius: 50%; background: var(--surface); box-shadow: 0 2px 8px #0003; }
+.intensity input[type="range"]::-moz-range-track { height: 6px; border-radius: 99px; background: var(--line); }
+.intensity input[type="range"]::-moz-range-progress { height: 6px; border-radius: 99px; background: var(--orange); }
+.intensity input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: 3px solid var(--orange); border-radius: 50%; background: var(--surface); box-shadow: 0 2px 8px #0003; }
+.intensity input[type="range"]:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; border-radius: 6px; }
+.scale { display: flex; justify-content: space-between; margin-top: -8px; color: var(--muted); font-size: 10px; }
+.intensity small { color: var(--muted); font-size: 11px; }
+.fontGrid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
+.fontGrid > * { min-width: 0; }
+.fontGrid label { font-size: 13px; }
+.fontGrid select { display: block; width: 100%; min-width: 0; min-height: 48px; margin-top: 9px; padding: 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--ink); font-size: 15px; }
+.suggestion { margin-top: 18px; color: var(--accent); }
+.example { min-width: 0; margin: 0; }
+.example figcaption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 10px; color: var(--muted); font-size: 11px; }
+.example figcaption span { font-size: 10px; }
+.scene { position: relative; isolation: isolate; overflow: hidden; padding: 26px; border: 1px solid var(--line); border-radius: 14px; }
+.backdrop { position: absolute; inset: 0; background-color: var(--wa-base); background-size: cover; background-position: center; }
+.examplePanel { position: relative; padding: 24px 18px; border-radius: var(--wa-section-radius); background: var(--wa-base); color: #fffaf2; text-align: center; font-family: var(--example-body-font); }
+.examplePanel[data-surface="blur"] { background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur)) saturate(110%); backdrop-filter: blur(var(--wa-blur)) saturate(110%); }
+.examplePanel[data-surface="blur-color"] { background: color-mix(in srgb,var(--wa-base) 76%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur-color)); backdrop-filter: blur(var(--wa-blur-color)); }
+.examplePanel[data-surface="glass"] { background: var(--wa-glass-background); box-shadow: var(--wa-glass-shadow); -webkit-backdrop-filter: var(--wa-glass-filter); backdrop-filter: var(--wa-glass-filter); }
+.exampleIcon { display: block; width: 28px; height: 28px; margin: 0 auto 14px; stroke-width: 1; }
+.examplePanel h3 { margin: 0 0 12px; font-family: var(--example-title-font); font-size: 30px; line-height: 1.25; font-weight: 400; overflow-wrap: anywhere; }
+.examplePanel p { margin: 0; font-family: var(--example-body-font); font-size: 13px; line-height: 1.7; }
+.exampleButton { display: inline-block; margin-top: 18px; padding: 8px 16px; border: 1px solid #fffaf245; border-radius: var(--wa-section-radius); background: #fffaf21a; font-size: 11px; }
+@media(max-width:600px) { .steps strong { font-size: 11px; } .fontGrid { grid-template-columns: minmax(0,1fr); } .scene { padding: 16px; } .journey { gap: 20px; } }

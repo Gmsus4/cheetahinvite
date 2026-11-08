@@ -1,0 +1,10 @@
+.actions { display: grid; gap: 14px; min-width: 0; margin-top: 8px; padding-top: 20px; border-top: 1px solid var(--line); }
+.actions > p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.buttons button, .close { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 12px; cursor: pointer; }
+.buttons button[aria-expanded="true"] { border-color: var(--orange); background: var(--accent-soft); color: var(--accent); }
+.buttons svg { width: 18px; height: 18px; }
+.panel { display: grid; gap: 20px; min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.close { justify-self: start; border: 0; padding-inline: 0; color: var(--accent); background: transparent; }
+.buttons button:disabled, .close:disabled { opacity: .5; cursor: default; }
+@media(max-width:600px) { .panel { padding: 16px; } .buttons { gap: 6px; } .buttons button { padding-inline: 10px; } }

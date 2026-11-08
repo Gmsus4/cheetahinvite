@@ -27,7 +27,8 @@
 .guided-field{display:flex;flex-direction:column;gap:9px;min-width:0}
 .guided-field>label{font-size:12px;font-weight:600;line-height:1.5}
 .guided-field :is(input,textarea,select){display:block;width:100%;max-width:100%;min-height:49px;padding:12px 14px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font-size:14px;line-height:1.6;min-width:0;accent-color:var(--orange);color-scheme:inherit}
-.guided-field textarea{resize:vertical;min-height:100px}
+.guided-field textarea{field-sizing:content;resize:vertical;min-height:200px;line-height:1.8;padding:16px}
+.guided-field textarea[data-short-content="true"]{min-height:104px}
 .guided-field :is(input,textarea)::placeholder{color:var(--faint);font-size:12px}
 .guided-field :is(input,select):disabled{background:var(--surface-muted);color:var(--faint)}
 .guided-field small,.guided-help{color:var(--muted);font-size:11px;line-height:1.8;margin:0}
@@ -203,7 +204,8 @@
 .guided-appearance-options { display: flex; flex-direction: column; gap: 28px; }
 .guided-appearance-options[hidden] { display: none; }
 .guided-editor .guided-bottom-bar .guided-progress.guided-journey-progress { position: relative; width: auto; justify-self: center; }
-.guided-editor .guided-bottom-bar .guided-progress.guided-journey-progress .guided-steps-toggle { display: flex; align-items: center; justify-content: center; gap: 8px; width: auto; min-width: 98px; height: 44px; padding: 8px 10px; border-radius: 12px; background: var(--surface-muted); color: var(--muted); font-size: 12px; }
+.guided-editor .guided-bottom-bar .guided-progress.guided-journey-progress .guided-steps-toggle { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; width: auto; min-width: 98px; height: 44px; padding: 8px 10px; border-radius: 12px; background: var(--surface-muted); color: var(--muted); font-size: 12px; }
+.guided-editor .guided-bottom-bar .guided-progress.guided-journey-progress .guided-steps-toggle > svg { flex-shrink: 0; }
 .guided-editor .guided-bottom-bar .guided-progress.guided-journey-progress .guided-steps-toggle > span { width: auto; height: auto; border: 0; background: none; white-space: nowrap; }
 .guided-editor .guided-bottom-bar .guided-progress.guided-journey-progress[data-grouped="true"] ol { display: none; }
 .guided-editor .guided-bottom-bar .guided-progress.guided-journey-progress[data-grouped="true"][data-expanded="true"] ol { display: flex; flex-direction: column; position: absolute; bottom: calc(100% + 18px); left: 50%; transform: translateX(-50%); width: 224px; max-height: 60vh; overflow: auto; gap: 2px; padding: 8px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: 0 10px 30px rgb(var(--shadow-rgb) / 0.094); }
@@ -282,3 +284,6 @@
   .guided-program-row-fields .guided-field input { font-size: 16px; }
   .guided-program > .guided-program-add { width: 100%; }
 }
+
+.guided-palettes > .guided-more-colors { min-height: 44px; margin-top: 12px; padding: 8px 0; border: 0; background: transparent; color: var(--accent); font: inherit; font-size: 12px; cursor: pointer; }
+.guided-palettes > .guided-more-colors:hover { text-decoration: underline; }

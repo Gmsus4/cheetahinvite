@@ -211,3 +211,17 @@ test('global icon visibility is saved independently from individual preferences'
  }
  for(const value of ['0','yes','']) {const form=f.saveForm();form.set('contentVersion',String(f.state.events.get('event').contentVersion));form.set('showSectionIcons',value);assert.equal((await f.actions.updateEvent('event',form)).code,'validation');}
 });
+
+
+test('disabled sections retain their content and settings, survive reopening and can be restored from the picker',async()=>{
+ const f=createFixture();const {initialGuidedValues,availableGuidedSections}=f.load('lib/guided-invitation.ts');
+ const section={id:'story',type:'story',title:'Nuestra historia',content:'Un recuerdo personal',detail:'',link:'',imageUrl:'',imagePosition:'before',panelStyle:'glass',textAlign:'right',showIcon:false,enabled:false};
+ const form=f.saveForm();form.set('sections',JSON.stringify([section]));assert.equal((await f.actions.updateEvent('event',form)).ok,true);
+ const restored=initialGuidedValues(f.state.events.get('event'));
+ assert.deepEqual(restored.sections.find(s=>s.id==='story'),{...section,layout:'auto'});
+ assert.ok(availableGuidedSections('wedding',restored.sections).some(s=>s.id==='story'));
+ const next=f.saveForm();next.set('contentVersion',String(f.state.events.get('event').contentVersion));next.set('sections',JSON.stringify(restored.sections.map(s=>s.id==='story'?{...s,enabled:true}:s)));
+ assert.equal((await f.actions.updateEvent('event',next)).ok,true);
+ const active=initialGuidedValues(f.state.events.get('event'));assert.deepEqual(active.sections.find(s=>s.id==='story'),{...section,layout:'auto',enabled:true});assert.ok(!availableGuidedSections('wedding',active.sections).some(s=>s.id==='story'));
+ const extra={...section,id:'custom',type:'custom'};assert.ok(availableGuidedSections('wedding',[extra]).some(s=>s.id==='custom'));
+});

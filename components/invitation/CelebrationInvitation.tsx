@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { parseInvitationProgram } from "@/lib/invitation-program";
 import { normalizeEventLocations } from "@/lib/invitation-locations";
-import { FiAlignCenter, FiArrowUpRight, FiClock, FiEdit3, FiGift, FiHeart, FiMapPin, FiMusic, FiUsers, FiLayers, FiImage } from "react-icons/fi";
+import { FiEyeOff, FiAlignCenter, FiArrowUpRight, FiClock, FiEdit3, FiGift, FiHeart, FiMapPin, FiMusic, FiUsers, FiLayers, FiImage } from "react-icons/fi";
 import type { InviteSection } from "@/lib/invitation-editor";
 import { getInvitationEventContent, invitationPresentation } from "@/lib/invitation-event-content";
 import { atmospherePanelStyle, atmosphereSections, atmosphereStyle, atmosphereTime } from "@/lib/invitation-atmosphere";
@@ -26,6 +26,10 @@ function EditControl({ target, label, text, onEdit }: { target: InvitationEditTa
 
 function AlignmentControl({ section, onEdit }: { section?: InviteSection; onEdit?: EditHandler }) {
   return section && onEdit ? <button type="button" className="wa-edit-button wa-edit-alignment" aria-label={`Editar alineación del texto de ${section.title}`} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-alignment", sectionId: section.id })}><FiAlignCenter aria-hidden="true" /><span>Alineación</span></button> : null;
+}
+
+function VisibilityControl({ section, onEdit }: { section?: InviteSection; onEdit?: EditHandler }) {
+  return section && section.type !== "cover" && onEdit ? <button type="button" className="wa-edit-button" aria-label={`Cambiar visibilidad de ${section.title}`} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-visibility", sectionId: section.id })}><FiEyeOff aria-hidden="true" /><span>Visibilidad</span></button> : null;
 }
 
 export function CelebrationInvitation(inputProps: InvitationProps & { preview?: boolean; showPlaceholders?: boolean; onEdit?: EditHandler }) {
@@ -79,6 +83,7 @@ export function CelebrationInvitation(inputProps: InvitationProps & { preview?: 
           <EditControl target={{ kind: "date" }} label="fecha y hora" onEdit={props.onEdit} />
           {countdownSection && <button type="button" className="wa-edit-button wa-edit-surface" aria-label="Editar estilo de la cuenta regresiva" aria-haspopup="dialog" onClick={() => props.onEdit?.({ kind: "section-surface", sectionId: countdownSection.id })}><FiLayers aria-hidden="true" /><span>Estilo</span></button>}
           <AlignmentControl section={countdownSection} onEdit={props.onEdit} />
+          <VisibilityControl section={countdownSection} onEdit={props.onEdit} />
         </div>}
         <span className="wa-kicker" data-invitation-field={countdownSection ? `${countdownSection.id}-title` : undefined}>{countdownSection?.title || "Cada vez más cerca"}</span><CountdownTimer date={props.eventDateKey!} time={props.eventTime || "00:00"} />
       </section>}
@@ -116,6 +121,7 @@ function AtmosphereSection({ section, eventId, surface, onEdit, locationDetails,
       <button type="button" className="wa-edit-button" aria-label={`${media ? "Editar" : "Agregar"} ${photoLabel} ${media ? "de" : "a"} ${section.title}`} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-photo", sectionId: section.id })}><FiImage aria-hidden="true" /><span>{media ? "Editar" : "Agregar"} {photoLabel}</span></button>
       <button type="button" className="wa-edit-button wa-edit-surface" aria-label={locationDetails ? "Editar estilo del lugar principal" : `Editar estilo de ${section.title}`} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-surface", sectionId: section.id })}><FiLayers aria-hidden="true" /><span>Estilo</span></button>
       <AlignmentControl section={section} onEdit={onEdit} />
+      <VisibilityControl section={section} onEdit={onEdit} />
     </div>}
     {showIcons && section.type !== "gallery" && section.showIcon !== false && <Icon className="wa-section-icon" aria-hidden="true" />}<h2 id={locationDetails ? "invitation-location-title" : undefined} data-invitation-field={`${section.id}-title`}>{locationDetails ? locationSectionTitle(section) : section.title}</h2>
     {locationDetails && <><h3 data-invitation-field="w-venue">{locationDetails.venue || "Nos vemos aquí"}</h3><p>{locationDetails.date}</p>{(locationDetails.address || locationDetails.showPlaceholders) && <p data-invitation-field="w-address">{locationDetails.address || "Dirección por definir"}</p>}</>}

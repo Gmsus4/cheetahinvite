@@ -414,3 +414,14 @@ test('global icon preference survives draft recovery and accepts older drafts',(
   if(showSectionIcons===undefined||typeof showSectionIcons==='boolean')assert.equal(JSON.parse(parsed.snapshot).showSectionIcons,showSectionIcons);else assert.equal(parsed,null);
  }
 });
+
+
+test('draft recovery preserves the new appearance substep and rejects unknown flow versions',()=>{
+ const now=Date.now();
+ for(const activeExtra of ['style:corners','style:icons','style:surface','style:colors','style:fonts']) {
+  const wizard={step:3,activeExtra,flow:'content-v5'};
+  const record={schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:now,wizard,snapshot:values('Fiesta')};
+  assert.deepEqual(parseEditorDraft(JSON.stringify(record),'owner','event',now).wizard,wizard);
+  assert.equal(parseEditorDraft(JSON.stringify({...record,wizard:{...wizard,flow:'unknown'}}),'owner','event',now),null);
+ }
+});

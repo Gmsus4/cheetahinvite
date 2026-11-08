@@ -1,3 +1,4 @@
+import { invitationStyleStepIndex } from "./invitation-style-journey";
 import { normalizeEventLocations } from "./invitation-locations";
 import { invitationGoogleMapsUrl } from "./invitation-links";
 import { isInvitationPanelStyle, isInvitationBlurIntensity, isInvitationSectionCorners } from "./invitation-editor";
@@ -19,6 +20,15 @@ export function guidedDetails(eventType: string) {
 }
 export function guidedSections(eventType: string): InviteSection[] {
   return [{ type: "cover" as const }, { type: "countdown" as const }, { type: "location" as const }, ...guidedDetails(eventType)].map(d => ({ id: `${eventType}-${d.type}`, type:d.type, ...invitationSectionPreset(eventType, d.type), detail:'', link:'', imageUrl:'', imageUrls:[], ...(d.type === 'rsvp' ? { rsvpMode:'integrated' as const } : {}) }));
+}
+export function availableGuidedSections(eventType: string, sections: InviteSection[]) {
+  const defaults = guidedSections(eventType);
+  const extras = sections.filter(section => section.type !== "cover" && section.type !== "reception" && !defaults.some(option => option.type === section.type));
+  return [...defaults, ...extras].filter(option => option.type !== "cover").filter((option, index, options) => options.findIndex(item => item.type === option.type) === index).flatMap(option => {
+    if (sections.some(section => section.type === option.type && section.enabled)) return [];
+    const section = sections.find(section => section.type === option.type && !section.enabled);
+    return section ? [section] : [];
+  });
 }
 export function guidedContentSectionIds(eventType: string, sections: InviteSection[], activeSection = '') {
   const recommended = new Set(guidedSections(eventType).filter(section => section.enabled).map(section => section.type));
@@ -93,25 +103,29 @@ export function guidedPublicationIssues(values: Pick<EditorValues, 'eventType' |
       : section.type === 'rsvp' ? Boolean(section.link.trim())
       : section.type === 'ceremony' ? Boolean(section.content.trim() && section.detail.trim() && section.link.trim())
       : Boolean(section.content.trim() || section.link.trim());
-    if (!complete) issues.push({ step: 3, message: `Completa «${section.title}» o desactívala.`, sectionId: section.id });
+    if (!complete) issues.push({ step: 4, message: `Completa «${section.title}» o desactívala.`, sectionId: section.id });
   }
   return issues;
 }
 export function guidedRecoveryStep(wizard: EditorWizard) {
-  if (wizard.flow === 'content-v4') return Math.min(5, Math.max(0, wizard.step));
-  if (wizard.flow === 'content-v3') return wizard.step <= 0 ? 0 : wizard.step >= 2 ? 5 : (({ photos: 2, content: 3, appearance: 4 } as Record<string, number>)[wizard.activeExtra ?? ''] ?? 2);
-  if (wizard.flow === 'content-v2') return [0, 2, 3, 4, 5][Math.min(4, Math.max(0, wizard.step))];
-  return [0, 0, 3, 5][Math.min(3, Math.max(0, wizard.step))];
+  if (wizard.flow === 'content-v5') return Math.min(5, Math.max(0, wizard.step));
+  if (wizard.flow === 'content-v4') return wizard.step === 3 ? 4 : wizard.step === 4 ? 3 : Math.min(5, Math.max(0, wizard.step));
+  if (wizard.flow === 'content-v3') return wizard.step <= 0 ? 0 : wizard.step >= 2 ? 5 : (({ photos: 2, content: 4, appearance: 3 } as Record<string, number>)[wizard.activeExtra ?? ''] ?? 2);
+  if (wizard.flow === 'content-v2') return [0, 2, 4, 3, 5][Math.min(4, Math.max(0, wizard.step))];
+  return [0, 0, 4, 5][Math.min(3, Math.max(0, wizard.step))];
 }
 export function guidedRecoverySection(wizard: EditorWizard, sections: InviteSection[]) {
   const cover = sections.find(section => section.type === 'cover')?.id ?? '__cover';
-  if (wizard.flow !== 'content-v4') return cover;
+  if (wizard.flow !== 'content-v4' && wizard.flow !== 'content-v5') return cover;
   const active = wizard.activeExtra?.replace(/^__add:/, '') ?? '';
   if (active === '__cover' || active === '__welcome') return cover;
   return active === '__more' || sections.some(section => section.id === active) ? active : cover;
 }
 export function guidedRecoveryAppearance(wizard: EditorWizard) {
   return wizard.flow === 'content-v4' ? wizard.activeExtra === 'appearance-custom' : (wizard.flow === 'content-v3' && wizard.step === 1 && wizard.activeExtra === 'appearance') || (wizard.flow === 'content-v2' && wizard.step === 3);
+}
+export function guidedRecoveryAppearanceStep(wizard: EditorWizard) {
+  return wizard.flow === 'content-v5' ? invitationStyleStepIndex(wizard.activeExtra) : guidedRecoveryAppearance(wizard) ? 3 : 0;
 }
 export function eventPublicationIssues(event: { privacy?: string; eventType?: string; hostNames?: string | null; eventDate?: Date | null; eventTime?: string | null; venue?: string | null; address?: string | null; sections?: unknown }) {
   const issues = guidedPublicationIssues({eventType:event.eventType || 'other',hostNames:event.hostNames || '',eventDate:event.eventDate?.toISOString().slice(0,10) || '',eventTime:event.eventTime || '',venue:event.venue || '',address:event.address || '',sections:(Array.isArray(event.sections) ? event.sections : []) as InviteSection[]});

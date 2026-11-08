@@ -1,5 +1,6 @@
 "use client";
 
+import { invitationSurfaceOptions as options } from "@/lib/invitation-style-journey";
 import { useId, type CSSProperties } from "react";
 import { atmosphereStyle } from "@/lib/invitation-atmosphere";
 import { FiCheck, FiLayers, FiSliders, FiInfo, FiCircle, FiRotateCcw } from "react-icons/fi";
@@ -8,13 +9,7 @@ import { invitationPalette } from "@/lib/shared-invitation";
 import { getInvitationFont } from "@/lib/invitation-fonts";
 import styles from "./InvitationSurfacePicker.module.css";
 
-const options = [
-  { value: "auto", label: "Automático", description: "Combina los acabados de cada sección." },
-  { value: "blur", label: "Desenfoque", description: "Un fondo suave y translúcido." },
-  { value: "blur-color", label: "Desenfoque con color", description: "Transparencia con tu color temático." },
-  { value: "color", label: "Color sólido", description: "Tu color temático, sin transparencia." },
-  { value: "glass", label: "Cristal", description: "Transparencia ligera, desenfoque suave y reflejos discretos." },
-] as const;
+
 
 export function InvitationSurfacePicker({ values, onChange, onBlurChange }: {
   values: Pick<EditorValues, "blurIntensity" | "panelStyle" | "sectionCorners" | "accent" | "backgroundImageUrl" | "hostNames" | "name" | "typography" | "bodyTypography">;

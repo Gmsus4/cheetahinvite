@@ -6,11 +6,11 @@ const {createFixture}=require('./helpers/cloudinary-fixture.cjs');
 function setup(){const f=createFixture();return {f,...f.load('lib/guided-invitation.ts')};}
 test('previous draft flows migrate to the gradual journey without losing the active detail',()=>{
  const {guidedRecoveryStep,guidedRecoverySection,guidedRecoveryAppearance}=setup();
- for(const [step,expected] of [[0,0],[1,0],[2,3],[3,5],[15,5]])assert.equal(guidedRecoveryStep({step,activeExtra:null}),expected);
- for(const [step,expected] of [[0,0],[1,2],[2,3],[3,4],[4,5]])assert.equal(guidedRecoveryStep({step,activeExtra:null,flow:'content-v2'}),expected);
- for(const [step,activeExtra,expected] of [[0,null,0],[1,null,2],[1,'photos',2],[1,'content',3],[1,'appearance',4],[2,null,5]])assert.equal(guidedRecoveryStep({step,activeExtra,flow:'content-v3'}),expected);
+ for(const [step,expected] of [[0,0],[1,0],[2,4],[3,5],[15,5]])assert.equal(guidedRecoveryStep({step,activeExtra:null}),expected);
+ for(const [step,expected] of [[0,0],[1,2],[2,4],[3,3],[4,5]])assert.equal(guidedRecoveryStep({step,activeExtra:null,flow:'content-v2'}),expected);
+ for(const [step,activeExtra,expected] of [[0,null,0],[1,null,2],[1,'photos',2],[1,'content',4],[1,'appearance',3],[2,null,5]])assert.equal(guidedRecoveryStep({step,activeExtra,flow:'content-v3'}),expected);
  const sections=[{id:'my-story',enabled:true},{id:'disabled',enabled:false}];
- for(let step=0;step<6;step++)assert.equal(guidedRecoveryStep({step,activeExtra:null,flow:'content-v4'}),step);
+ for(let step=0;step<6;step++)assert.equal(guidedRecoveryStep({step,activeExtra:null,flow:'content-v4'}),step===3?4:step===4?3:step);
  assert.equal(guidedRecoveryStep({step:20,activeExtra:null,flow:'content-v4'}),5);
  assert.equal(guidedRecoverySection({step:3,activeExtra:'my-story',flow:'content-v4'},sections),'my-story');
  assert.equal(guidedRecoverySection({step:3,activeExtra:'disabled',flow:'content-v4'},sections),'disabled');
@@ -28,7 +28,7 @@ test('publication corrections lead to event data or details in the flow without 
   const missing=guidedPublicationIssues(values);
   assert.equal(missing.length,5);assert.deepEqual(missing.map(issue=>issue.step),[0,1,1,1,1]);
   const rsvp=values.sections.find(s=>s.type==='rsvp');rsvp.rsvpMode='external';
-  assert.ok(guidedPublicationIssues(values).some(issue=>issue.step===3 && issue.sectionId===rsvp.id));
+  assert.ok(guidedPublicationIssues(values).some(issue=>issue.step===4 && issue.sectionId===rsvp.id));
  }
 });
 test('every occasion starts with editable presets without fictional personal facts',()=>{
@@ -206,4 +206,35 @@ test('the detail journey keeps excluded recommendations stable and offers extra 
  gallery.enabled=true;assert.ok(guidedContentSectionIds('birthday',sections).includes(gallery.id));
  gallery.enabled=false;assert.ok(guidedContentSectionIds('birthday',sections,gallery.id).includes(gallery.id));assert.ok(!guidedContentSectionIds('birthday',sections).includes(gallery.id));
  assert.ok(story.content);assert.equal(story.enabled,false);
+});
+
+
+test('preview section picker lists disabled supported blocks only and is exhausted when all are included',()=>{
+ const {f}=setup();const {guidedSections,availableGuidedSections}=f.load('lib/guided-invitation.ts');
+ for(const eventType of ['wedding','birthday','graduation','baby_shower','anniversary','other']) {
+  const sections=guidedSections(eventType).map(s=>({...s,enabled:false}));
+  const before=structuredClone(sections);
+  const available=availableGuidedSections(eventType,sections);
+  assert.equal(available.length,sections.length-1);
+  assert.ok(!available.some(s=>s.type==='cover'||s.type==='reception'));
+  assert.deepEqual(sections,before);
+  assert.equal(availableGuidedSections(eventType,sections.map(s=>({...s,enabled:true}))).length,0);
+  const ceremony=sections.find(s=>s.type==='ceremony');
+  assert.ok(!availableGuidedSections(eventType,[...sections,{...ceremony,id:'another',enabled:true}]).some(s=>s.type==='ceremony'));
+ }
+});
+
+
+test('new style journey restores each substep and keeps block recovery separate',()=>{
+ const {guidedRecoveryStep,guidedRecoverySection,guidedRecoveryAppearanceStep}=setup();
+ const ids=['corners','icons','surface','colors','fonts'];
+ for(const [index,id] of ids.entries()) {
+  const wizard={step:3,activeExtra:'style:'+id,flow:'content-v5'};
+  assert.equal(guidedRecoveryStep(wizard),3);assert.equal(guidedRecoveryAppearanceStep(wizard),index);
+ }
+ assert.equal(guidedRecoveryAppearanceStep({step:3,activeExtra:'style:unknown',flow:'content-v5'}),0);
+ assert.equal(guidedRecoveryAppearanceStep({step:4,activeExtra:'appearance-custom',flow:'content-v4'}),3);
+ const sections=[{id:'cover',type:'cover'},{id:'story',type:'story'}];
+ const wizard={step:4,activeExtra:'__add:story',flow:'content-v5'};
+ assert.equal(guidedRecoveryStep(wizard),4);assert.equal(guidedRecoverySection(wizard,sections),'story');
 });
