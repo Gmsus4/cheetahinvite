@@ -1,5 +1,6 @@
 import { FiArrowUpRight, FiCalendar, FiCheck } from "react-icons/fi";
-import { INVITATION_PRICE, invitationPriceLabel } from "@/lib/invitation-payment";
+import { Suspense } from "react";
+import { getCurrentPrice } from "@/lib/site-pricing";
 
 const features = [
   "Invitación personalizable",
@@ -11,6 +12,11 @@ const features = [
 ];
 
 export function Pricing() {
+  return <Suspense fallback={<section className="pricing-section" aria-busy="true" style={{ minHeight: 350 }} />}><PricingContent /></Suspense>;
+}
+
+async function PricingContent() {
+  const price = await getCurrentPrice();
   return (
     <section className="pricing-section" id="precios" aria-labelledby="home-pricing-title">
       <div className="pricing-copy">
@@ -30,9 +36,9 @@ export function Pricing() {
         <div className="price-purchase">
           <div className="price-overview">
             <span className="price-label">INVITACIÓN DIGITAL</span>
-            <div className="price">{invitationPriceLabel} <span>MXN</span></div>
+            <div className="price">{price.label} <span>MXN</span></div>
             <p>IVA incluido · Un pago por evento</p>
-            <span className="price-duration"><FiCalendar aria-hidden="true" /> {INVITATION_PRICE.months} meses activa</span>
+            <span className="price-duration"><FiCalendar aria-hidden="true" /> {price.months} meses activa</span>
           </div>
           <div className="price-action">
             <a className="button" href="/crear">

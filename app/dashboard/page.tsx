@@ -33,7 +33,7 @@ async function DashboardData() {
 
   const [events, account] = await Promise.all([
     prisma.event.findMany({
-      where: { ownerId: user.id },
+      where: { ownerId: user.id, isExample: false },
       orderBy: { updatedAt: "desc" },
       select: {
         id: true,
@@ -44,6 +44,7 @@ async function DashboardData() {
         eventDate: true,
         expiresAt: true,
         paidAt: true,
+        complimentaryAt: true,
         slug: true,
         ownerId: true,
         customSlug: true,

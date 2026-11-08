@@ -10,7 +10,7 @@ export function DesignCatalog({ events }: { events: CatalogEvent[] }) {
       {events.map(example => <article className="catalog-option" key={example.slug}>
         <div className="catalog-card catalog-event-card">
           <div className="catalog-event-preview" inert aria-hidden="true"><InvitationExampleFrame styleSlug={example.slug} label={example.label} viewportHeight={520} /></div>
-          <a className="catalog-caption" href={`/ejemplo-invitacion/${example.slug}`} target="_blank" rel="noopener noreferrer"><strong>{example.typeLabel}</strong><span className="catalog-open-icon"><FiArrowUpRight aria-hidden="true" /></span></a>
+          <a className="catalog-caption" href={`/ejemplo-invitacion/${example.slug}`} target="_blank" rel="noopener noreferrer"><strong>{events.filter(item => item.eventType === example.eventType).length > 1 ? example.label : example.typeLabel}</strong><span className="catalog-open-icon"><FiArrowUpRight aria-hidden="true" /></span></a>
         </div>
       </article>)}
     </div>

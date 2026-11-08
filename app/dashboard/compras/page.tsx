@@ -9,7 +9,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { PaymentReceipt } from "@/components/dashboard/PaymentReceipt";
 import { SupportRequest } from "@/components/SupportRequest";
-import { invitationPriceLabel } from "@/lib/invitation-payment";
+import { getCurrentPrice } from "@/lib/site-pricing";
 import { isPreviousPriceAttempt } from "@/lib/payment-status";
 import { refreshPurchase } from "./actions";
 import "@/app/ayuda/soporte.css";
@@ -24,6 +24,8 @@ async function PurchasesData({ searchParams }: PageProps<"/dashboard/compras">) 
   await connection();
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=%2Fdashboard%2Fcompras");
+  const currentPrice = await getCurrentPrice();
+  const invitationPriceLabel = currentPrice.label;
   const query = await searchParams;
   const page = typeof query.page === "string" && /^\d{1,4}$/.test(query.page) ? Math.max(1, Number(query.page)) : 1;
   const payments = await prisma.invitationPayment.findMany({ where: { ownerId: session.user.id }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip: (page - 1) * 20, take: 21 });
@@ -40,9 +42,9 @@ async function PurchasesData({ searchParams }: PageProps<"/dashboard/compras">) 
         {payments.slice(0, 20).map(payment => <article className={styles.card} key={payment.id}>
           <div className={styles.cardHeading}><span className={styles.icon}><FiCreditCard aria-hidden="true" /></span><div><span className={styles.eyebrow}>TU CELEBRACIÓN</span><h2>{payment.eventName}</h2></div></div>
           <PaymentReceipt payment={payment} />
-          {isPreviousPriceAttempt(payment) && <p className={styles.notice}>Este intento se inició antes del cambio de precio y aún no tiene un pago confirmado en la aplicación.{exists.has(payment.eventId) && <> El precio actual para publicar es <strong>{invitationPriceLabel} MXN, IVA incluido</strong>. Al continuar, comprobaremos el estado del intento anterior antes de abrir el pago con el precio vigente.</>}</p>}
+          {isPreviousPriceAttempt(payment, currentPrice) && <p className={styles.notice}>Este intento se inició antes del cambio de precio y aún no tiene un pago confirmado en la aplicación.{exists.has(payment.eventId) && <> El precio actual para publicar es <strong>{invitationPriceLabel} MXN, IVA incluido</strong>. Al continuar, comprobaremos el estado del intento anterior antes de abrir el pago con el precio vigente.</>}</p>}
           <div className={styles.actions}>
-            {exists.has(payment.eventId) ? <Link className={styles.primary} href={`/dashboard/eventos/${payment.eventId}/pago`}>{isPreviousPriceAttempt(payment) ? `Continuar con el precio actual · ${invitationPriceLabel} MXN` : "Ver invitación y pago"}<FiArrowUpRight aria-hidden="true" /></Link> : <p className={styles.removed}>Invitación eliminada. Su enlace público ya no está disponible. Si hay un cobro pendiente de resolver, contacta con soporte.</p>}
+            {exists.has(payment.eventId) ? <Link className={styles.primary} href={`/dashboard/eventos/${payment.eventId}/pago`}>{isPreviousPriceAttempt(payment, currentPrice) ? `Continuar con el precio actual · ${invitationPriceLabel} MXN` : "Ver invitación y pago"}<FiArrowUpRight aria-hidden="true" /></Link> : <p className={styles.removed}>Invitación eliminada. Su enlace público ya no está disponible. Si hay un cobro pendiente de resolver, contacta con soporte.</p>}
             {payment.stripeCheckoutSessionId && <form action={refreshPurchase.bind(null, payment.id)}><button className={styles.secondary} type="submit"><FiRefreshCw aria-hidden="true" /> Actualizar estado del pago</button></form>}
           </div>
           <details className={styles.support}><summary><FiHelpCircle aria-hidden="true" />Solicitar ayuda con esta compra<FiArrowRight aria-hidden="true" /></summary><SupportRequest initialEmail={session.user.email ?? ""} eventId={payment.eventId} eventName={payment.eventName} paymentId={payment.id} /></details>

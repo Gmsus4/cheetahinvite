@@ -5,11 +5,19 @@ import {
   FiStar,
 } from "react-icons/fi";
 import { HeroInvitationExamples } from "./HeroInvitationExamples";
-import { landingEventExamples } from "@/lib/landing-invitation-example";
+import { Suspense } from "react";
+import { getShowcaseExamples } from "@/lib/showcase";
+import { LandingAnalytics } from "./LandingAnalytics";
+
+async function HeroExamples() {
+  const examples = await getShowcaseExamples("hero");
+  return <HeroInvitationExamples examples={examples.map(({ slug, label, typeLabel, invitation, available }) => ({ slug, label, typeLabel, eventType: invitation.eventType, available }))} />;
+}
 
 export function Hero() {
   return (
     <section className="hero" id="inicio">
+      <LandingAnalytics />
       <div className="hero-copy">
         <div className="eyebrow">
           <span className="eyebrow-dot" /> TUS MOMENTOS, EN UN SOLO LUGAR
@@ -38,9 +46,7 @@ export function Hero() {
         <div className="floating-note note-top">
           <span><FiStar aria-hidden="true" /></span> Tu historia, tu estilo
         </div>
-        <HeroInvitationExamples
-          examples={landingEventExamples.map(({ slug, label, typeLabel, invitation, available }) => ({ slug, label, typeLabel, eventType: invitation.eventType, available }))}
-        />
+        <Suspense fallback={<div className="hero-example-phone" aria-busy="true" style={{ minHeight: 500 }} />}><HeroExamples /></Suspense>
         <div className="floating-note note-bottom">
           <span className="note-check"><FiEdit3 aria-hidden="true" /></span>
           <span>

@@ -15,6 +15,7 @@ export async function saveInvitationPrivacy(eventId: string, privacy: string, pi
       await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${eventId} AND "ownerId" = ${session.user.id} FOR UPDATE`);
       const event = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
       if (!event) return { ok: false, error: "No encontramos esta invitación." } as const;
+      if (event.isExample) return { ok: false, error: "Gestiona los ejemplos desde Administración." } as const;
       if (event.privacyVersion !== version) return { ok: false, error: "Los ajustes cambiaron en otra pestaña. Vuelve a abrir Ajustes para consultar la versión actual." } as const;
       const pinHash = privacy === "PRIVATE" ? newHash || event.pinHash : null;
       if (privacy === "PRIVATE" && !pinHash) return { ok: false, error: "Elige un PIN de seis dígitos para proteger la invitación." } as const;

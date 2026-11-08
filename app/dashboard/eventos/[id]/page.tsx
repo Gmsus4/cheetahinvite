@@ -6,6 +6,7 @@ import { BrandLoader } from "@/components/BrandLoader";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { EventEditor } from "@/components/dashboard/InvitationEditor";
+import { getCurrentPrice } from "@/lib/site-pricing";
 
 export const metadata: Metadata = { title: "Editar invitación | Cheetah Invite" };
 
@@ -24,6 +25,12 @@ async function EditorData({ params, searchParams }: PageProps<"/dashboard/evento
 
   const event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id }, omit: { pinHash: true } });
   if (!event) notFound();
+  if (event.isExample) {
+    const example = await prisma.showcaseExample.findUnique({ where: { eventId: id } });
+    if (example) redirect(`/admin/disenos/${example.id}/editar`);
+    notFound();
+  }
+  const price = await getCurrentPrice();
 
-  return <EventEditor key={`${event.ownerId}:${event.id}`} event={event} account={{ name: session.user.name || "Usuario", email: session.user.email || "", image: session.user.image }} saved={query.saved === "1"} published={query.published === "1"} error={typeof query.error === "string" ? query.error : ""} />;
+  return <EventEditor key={`${event.ownerId}:${event.id}`} event={event} priceLabel={price.label} account={{ name: session.user.name || "Usuario", email: session.user.email || "", image: session.user.image }} saved={query.saved === "1"} published={query.published === "1"} error={typeof query.error === "string" ? query.error : ""} />;
 }

@@ -2,21 +2,22 @@ import "server-only";
 import { prisma } from "@/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { getStripe } from "@/lib/stripe";
-import { INVITATION_PRICE } from "@/lib/invitation-payment";
+import { getCurrentPrice } from "@/lib/site-pricing";
 import { stripeLiveMode } from "@/lib/payment-fulfillment";
 import { eventPublicationIssues } from "@/lib/guided-invitation";
 
 export async function prepareInvitationCheckout(eventId: string, ownerId: string): Promise<string | null> {
+  const currentPrice = await getCurrentPrice();
   // Reserve a durable attempt before contacting Stripe. Concurrent tabs reuse
   // its ID as the idempotency key, even if the first HTTP response is lost.
   const payment = await prisma.$transaction(async tx => {
     await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${eventId} AND "ownerId" = ${ownerId} FOR UPDATE`);
     const event = await tx.event.findFirst({ where: { id: eventId, ownerId } });
-    if (!event || event.paidAt) return null;
+    if (!event || event.paidAt || event.complimentaryAt || event.isExample) return null;
     if (eventPublicationIssues(event).length) throw new Error("Complete the invitation before checkout");
     const pending = await tx.invitationPayment.findFirst({ where: { eventId, ownerId, status: "PENDING" }, orderBy: { createdAt: "desc" } });
     if (pending) return pending;
-    return tx.invitationPayment.create({ data: { eventId, ownerId, eventName: event.name, amount: INVITATION_PRICE.amount, currency: INVITATION_PRICE.currency,
+    return tx.invitationPayment.create({ data: { eventId, ownerId, eventName: event.name, amount: currentPrice.amount, currency: currentPrice.currency,
       // Explicit expiry prevents an ambiguous create retry after Stripe's
       // idempotency retention from opening another payable session.
       checkoutExpiresAt: new Date(Math.floor(Date.now() / 1000) * 1000 + 60 * 60 * 1000), livemode: stripeLiveMode(),
@@ -25,7 +26,7 @@ export async function prepareInvitationCheckout(eventId: string, ownerId: string
   if (!payment) return null;
   if (payment.livemode !== stripeLiveMode() && !payment.id.startsWith("legacy:")) throw new Error("Checkout environment mismatch");
   const stripe = getStripe();
-  const priceChanged = payment.amount !== INVITATION_PRICE.amount || payment.currency !== INVITATION_PRICE.currency;
+  const priceChanged = payment.amount !== currentPrice.amount || payment.currency !== currentPrice.currency;
   if (payment.stripeCheckoutSessionId) {
     const previous = await stripe.checkout.sessions.retrieve(payment.stripeCheckoutSessionId);
     if (previous.livemode !== stripeLiveMode()) throw new Error("Checkout environment mismatch");
@@ -66,7 +67,7 @@ export async function prepareInvitationCheckout(eventId: string, ownerId: string
     cancel_url: `${origin}/dashboard/eventos/${eventId}/pago?payment=cancelled`, locale: "es",
   }, { idempotencyKey: `invitation-payment:${payment.id}` });
   await prisma.invitationPayment.update({ where: { id: payment.id }, data: { stripeCheckoutSessionId: checkout.id } });
-  await prisma.event.updateMany({ where: { id: eventId, ownerId, paidAt: null }, data: { stripeCheckoutSessionId: checkout.id, status: "PENDING_PAYMENT" } });
+  await prisma.event.updateMany({ where: { id: eventId, ownerId, paidAt: null, complimentaryAt: null, isExample: false }, data: { stripeCheckoutSessionId: checkout.id, status: "PENDING_PAYMENT" } });
   // Recover an ambiguous older create with its original idempotent parameters,
   // then retire that checkout before returning a link at the current price.
   if (priceChanged) return prepareInvitationCheckout(eventId, ownerId);

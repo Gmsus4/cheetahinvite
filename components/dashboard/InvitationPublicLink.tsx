@@ -8,7 +8,7 @@ type Props = {
     customSlug: string | null;
     slug: string | null;
     status: string;
-    paidAt: Date | null;
+    paidAt: Date | null; complimentaryAt?: Date | null;
     expiresAt: Date | null;
   };
   dirty?: boolean;
@@ -26,7 +26,7 @@ export function InvitationPublicLink({ event, dirty = false }: Props) {
     title={dirty ? "Abrir invitación pública. Muestra la última versión guardada; guarda tus cambios para actualizarla." : "Abrir invitación pública con su enlace para compartir"}
   ><FiExternalLink aria-hidden="true" /></a>;
 
-  const reason = !event.paidAt ? "El enlace público se habilita al confirmar el pago."
+  const reason = !event.paidAt && !event.complimentaryAt ? "El enlace público se habilita al confirmar el pago."
     : event.status === "SUSPENDED" ? "El enlace público está suspendido."
     : event.status === "REFUNDED" ? "El enlace público fue retirado por reembolso."
     : event.status === "ARCHIVED" ? "Esta invitación está archivada."

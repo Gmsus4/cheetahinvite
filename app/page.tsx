@@ -8,17 +8,19 @@ import { TrustStrip } from "@/components/landing/TrustStrip";
 import { Benefits } from "@/components/landing/Benefits";
 import "./landing-home.css";
 
-export default function Home() {
+export default function Home({ searchParams }: PageProps<"/">) {
   return (
     <Suspense fallback={<LandingContent />}>
-      <AuthenticatedHome />
+      <AuthenticatedHome searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function AuthenticatedHome() {
+async function AuthenticatedHome({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
   await connection();
   const session = await auth();
+  const query = await searchParams;
+  if (session?.user?.role === "ADMIN" && query.vista === "publica") return <LandingContent />;
   if (session?.user?.id) redirect("/dashboard");
 
   return <LandingContent />;

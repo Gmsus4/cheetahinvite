@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CelebrationInvitation } from "@/components/invitation/CelebrationInvitation";
 import { landingEventExamples } from "@/lib/landing-invitation-example";
-import { heroExampleWithImages } from "@/lib/hero-invitation-example";
+import { getShowcaseInvitation, showcasePreview } from "@/lib/showcase";
 import { BrandLoader } from "@/components/BrandLoader";
 import "./hero-preview.css";
 
@@ -19,7 +19,7 @@ export default function HeroPreviewPage({ params }: { params: Promise<{ style: s
 
 async function HeroPreview({ params }: { params: Promise<{ style: string }> }) {
   const { style } = await params;
-  const example = landingEventExamples.find(example => example.slug === style);
-  if (!example) notFound();
-  return <main className="public-invitation-page"><CelebrationInvitation {...heroExampleWithImages(example)} preview /></main>;
+  const invitation = await getShowcaseInvitation(style);
+  if (!invitation) notFound();
+  return <main className="public-invitation-page"><CelebrationInvitation {...showcasePreview(invitation)} preview /></main>;
 }

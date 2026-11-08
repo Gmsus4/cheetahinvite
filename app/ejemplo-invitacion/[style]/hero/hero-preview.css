@@ -1,15 +1,6 @@
-/* The small embedded demo avoids repeatedly filtering the photo on scroll. */
+/* Keep the published surfaces intact; only disable motion in the small demo. */
 html { scrollbar-width: none; scroll-behavior: auto; }
 html::-webkit-scrollbar { display: none; }
-.celebration-invitation[data-preview] :is(.wa-cover, .wa-panel, .wa-intro),
-.celebration-invitation[data-preview] .wa-section-row::before {
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
-.celebration-invitation[data-preview] :is(.wa-cover, .wa-panel) {
-  background: color-mix(in srgb, var(--wa-base) 92%, transparent);
-  box-shadow: none;
-}
 .celebration-invitation[data-preview] *,
 .celebration-invitation[data-preview] *::before,
 .celebration-invitation[data-preview] *::after {

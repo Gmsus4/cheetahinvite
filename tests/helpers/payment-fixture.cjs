@@ -12,7 +12,7 @@ function matches(row, where = {}) {
 function createPaymentFixture(options = {}) {
   process.env.STRIPE_SECRET_KEY = 'sk_test_fixture'; process.env.STRIPE_WEBHOOK_SECRET = 'whsec_fixture'; process.env.APP_URL = 'http://localhost:3000';
   const f = { ownerId: options.ownerId ?? 'owner-fixture', payments: new Map(), events: new Map(), links: new Map(), calls: [], invalidations: [], refunds: [], disputes: [], sessions: new Map(), intents: new Map() };
-  f.eventDetails = { eventType: 'wedding', templateId: 'celebration-v1', hostNames: 'Alex y Sam', eventDate: new Date('2027-01-15T12:00:00Z'), eventTime: '18:00', venue: 'Salón', address: 'Calle', sections: [] };
+  f.eventDetails = { isExample: false, complimentaryAt: null, eventType: 'wedding', templateId: 'celebration-v1', hostNames: 'Alex y Sam', eventDate: new Date('2027-01-15T12:00:00Z'), eventTime: '18:00', venue: 'Salón', address: 'Calle', sections: [] };
   function table(rows, defaults = {}) {
     return {
       async findUnique({ where }) { return this.findFirst({ where }); },
@@ -24,7 +24,7 @@ function createPaymentFixture(options = {}) {
   }
   let tail = Promise.resolve();
   f.prisma = options.prisma ?? {
-    invitationPayment: table(f.payments), event: table(f.events),
+    invitationPayment: table(f.payments), event: table(f.events), priceRevision: { findFirst: async () => f.currentPrice ?? null },
     invitationLink: {
       async createMany({ data }) { for (const row of data) if (!f.links.has(row.path)) f.links.set(row.path, structuredClone(row)); },
       async findUnique({ where }) { return structuredClone(f.links.get(where.path) ?? null); },
@@ -69,6 +69,7 @@ function createPaymentFixture(options = {}) {
     const code = ts.transpileModule(fs.readFileSync(absolute, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true } }).outputText;
     function requireMock(name) {
       if (name === 'server-only') return {};
+      if (name === 'next/server') return { connection: async () => {} };
       if (name === 'next/headers') return { cookies: async () => ({ get: () => undefined }) };
       if (name === 'next/cache') return { revalidatePath: value => f.invalidations.push(value) };
       if (name === 'next/navigation') return { redirect: url => { throw Object.assign(Error('redirect'), { url }); } };

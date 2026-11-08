@@ -1,7 +1,8 @@
-import { landingEventExamples } from "@/lib/landing-invitation-example";
+import { getShowcaseExamples } from "@/lib/showcase";
 import { DesignCatalog } from "./DesignCatalog";
 
-export function TemplateGallery() {
+export async function TemplateGallery() {
+  const examples = await getShowcaseExamples("catalog");
   return (
     <section className="templates-section" id="personalizacion">
       <div className="section-heading">
@@ -19,7 +20,7 @@ export function TemplateGallery() {
         </p>
       </div>
 
-      <DesignCatalog events={landingEventExamples.map(({ slug, label, typeLabel, invitation, available }) => ({
+      <DesignCatalog events={examples.map(({ slug, label, typeLabel, invitation, available }) => ({
         slug, label, typeLabel, eventType: invitation.eventType, available,
       }))} />
     </section>

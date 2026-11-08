@@ -26,7 +26,7 @@ function matches(row, where = {}) {
 }
 
 function createFixture() {
-  const state = { users: new Map([['owner', { id: 'owner', invitationCount: 1 }]]), events: new Map([['event', { id: 'event', ownerId: 'owner', contentVersion: 0, status: 'DRAFT', privacy: 'PUBLIC', privacyVersion: 0, pinHash: null, paidAt: null, name: 'Celebración', imageUrl: '', sections: [] }]]), accessSessions: new Map(), pinBudgets: new Map(), links: new Map(), assets: new Map(), budgets: new Map() };
+  const state = { users: new Map([['owner', { id: 'owner', role: 'USER', invitationCount: 1 }]]), events: new Map([['event', { id: 'event', ownerId: 'owner', isExample: false, complimentaryAt: null, contentVersion: 0, status: 'DRAFT', privacy: 'PUBLIC', privacyVersion: 0, pinHash: null, paidAt: null, name: 'Celebración', imageUrl: '', sections: [] }]]), accessSessions: new Map(), pinBudgets: new Map(), links: new Map(), assets: new Map(), budgets: new Map(), prices: new Map(), examples: new Map(), settings: new Map(), courtesy: new Map(), audit: new Map(), payments: new Map(), analytics: new Map(), analyticsBudgets: new Map() };
   const jobs = [], requests = [];
   let tail = Promise.resolve();
   const fixture = { state, jobs, requests, clientCalls: [], providerAssets: new Map(), owner: 'owner', cookies: new Map(), failure: null, responseOverride: null, locks: 0,
@@ -41,14 +41,15 @@ function createFixture() {
     const api = {
       async findMany({ where, orderBy, take } = {}) {
         const found = values().filter(row => matches(row, where));
-        if (orderBy) { const [key, dir] = Object.entries(orderBy)[0]; found.sort((a, b) => (a[key] - b[key]) * (dir === 'asc' ? 1 : -1)); }
+        if (orderBy) found.sort((a, b) => { for (const item of Array.isArray(orderBy) ? orderBy : [orderBy]) { const [key, dir] = Object.entries(item)[0]; if (a[key] !== b[key]) return (a[key] > b[key] ? 1 : -1) * (dir === 'asc' ? 1 : -1); } return 0; });
         return structuredClone(take ? found.slice(0, take) : found);
       },
-      async findFirst({ where } = {}) { return structuredClone(values().find(row => matches(row, where)) ?? null); },
+      async findFirst({ where, orderBy } = {}) { return (await api.findMany({ where, orderBy, take: 1 }))[0] ?? null; },
       async findUnique({ where }) { return api.findFirst({ where }); },
       async create({ data }) {
         if (state[name].has(data[primaryKey])) throw Object.assign(Error('Duplicate key'), { code: 'P2002' });
-        const row = { ...defaults, createdAt: new Date(), updatedAt: new Date(), ...data };
+        const row = { id: require('node:crypto').randomUUID(), ...defaults, createdAt: new Date(), updatedAt: new Date(), ...data };
+        if (state[name].has(row[primaryKey])) throw Object.assign(Error('Duplicate key'), { code: 'P2002' });
         state[name].set(row[primaryKey], row);
         return structuredClone(row);
       },
@@ -58,6 +59,8 @@ function createFixture() {
       async update({ where, data }) { const row = values().find(row => matches(row, where)); assert.ok(row, 'Row must exist'); return change(row, data); },
       async updateMany({ where, data }) { const found = values().filter(row => matches(row, where)); for (const row of found) change(row, data); return { count: found.length }; },
       async deleteMany({ where }) { const found = values().filter(row => matches(row, where)); for (const row of found) state[name].delete(row[primaryKey]); return { count: found.length }; },
+      async delete({ where }) { const row = values().find(row => matches(row, where)); assert.ok(row); state[name].delete(row[primaryKey]); return structuredClone(row); },
+      async count({ where } = {}) { return values().filter(row => matches(row, where)).length; },
       async upsert({ where, create, update }) { return values().some(row => matches(row, where)) ? api.update({ where, data: update }) : api.create({ data: create }); },
       async aggregate({ where }) { const found = values().filter(row => matches(row, where)); return { _count: found.length, _sum: { bytes: found.reduce((sum, row) => sum + row.bytes, 0) } }; },
     };
@@ -65,14 +68,18 @@ function createFixture() {
   }
   const prisma = {
     invitationAccessSession: table('accessSessions', 'tokenHash'), invitationPinBudget: table('pinBudgets', 'key', { count: 1 }),
-    invitationLink: table('links', 'path'), event: table('events', 'id', { contentVersion: 0, status: 'DRAFT', privacy: 'PUBLIC', privacyVersion: 0, pinHash: null, paidAt: null }), user: table('users', 'id'),
+    invitationLink: table('links', 'path'), event: table('events', 'id', { isExample: false, complimentaryAt: null, contentVersion: 0, status: 'DRAFT', privacy: 'PUBLIC', privacyVersion: 0, pinHash: null, paidAt: null }), user: table('users', 'id'),
+    priceRevision: table('prices', 'id', { cancelledAt: null, currency: 'mxn' }), showcaseExample: table('examples', 'id', { publishedAt: null }), siteSettings: table('settings', 'id'),
+    courtesyGrant: table('courtesy', 'id', { revokedAt: null, grantedAt: new Date() }), adminAudit: table('audit', 'id'), invitationPayment: table('payments', 'id'),
+    analyticsEvent: table('analytics', 'id'), analyticsBudget: table('analyticsBudgets', 'key', { count: 1 }),
     cloudinaryAsset: table('assets', 'publicId', { state: 'UPLOADING', expiresAt: null, nextAttemptAt: null, attempts: 0, url: null }),
     imageUploadBudget: table('budgets', 'key', { count: 1 }),
     async $queryRaw(query) {
       const sql = query.strings.join('?');
       if (sql.includes('FOR UPDATE')) { fixture.locks++; return (sql.includes('FROM "Event"') ? state.events : state.users).has(query.values[0]) ? [{ id: query.values[0] }] : []; }
+      if (sql.includes('pg_advisory_xact_lock')) return [];
       assert.match(sql, /SELECT EXISTS/);
-      return [{ used: [...state.events.values()].some(event => JSON.stringify([
+      return [{ used: [...state.events.values(), ...[...state.examples.values()].filter(e => e.publishedAt).map(e => e.publishedContent ?? {})].some(event => JSON.stringify([
         event.imageUrl, event.backgroundImageUrl, ...(event.sections ?? []).flatMap(section => [section.imageUrl, ...(section.imageUrls ?? [])]),
       ]).includes(query.values[0])) }];
     },
@@ -95,8 +102,8 @@ function createFixture() {
       if (name === 'next/server') return { NextResponse: Response, connection: async () => {}, after: job => jobs.push(job) };
       if (name === 'next/headers') return { cookies: async () => ({ get: key => fixture.cookies.has(key) ? { value: fixture.cookies.get(key) } : undefined, set: (key, value) => fixture.cookies.set(key, value) }) };
       if (name === 'next/cache') return { revalidatePath() {} };
-      if (name === 'next/navigation') return { redirect: url => { throw Object.assign(Error('redirect'), { url }); } };
-      if (name === '@/auth') return { auth: async () => fixture.owner ? { user: { id: fixture.owner } } : null };
+      if (name === 'next/navigation') return { redirect: url => { throw Object.assign(Error('redirect'), { url }); }, notFound: () => { throw Object.assign(Error('not-found'), { status: 404 }); } };
+      if (name === '@/auth') return { auth: async () => fixture.owner ? { user: { id: fixture.owner, role: state.users.get(fixture.owner)?.role } } : null };
       if (name === '@/prisma') return { prisma };
       if (name === '@/generated/prisma/client') return { Prisma: { sql: (strings, ...values) => ({ strings, values }) } };
       if (name.startsWith('@/')) return load(path.resolve(name.slice(2)) + '.ts');

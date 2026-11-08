@@ -25,8 +25,13 @@ async function ShowInvitationData({ params }: ShowPageProps) {
 
   const event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id }, omit: { pinHash: true } });
   if (!event) notFound();
+  if (event.isExample) {
+    const example = await prisma.showcaseExample.findUnique({ where: { eventId: id } });
+    if (example) redirect(`/admin/disenos/${example.id}/vista-previa`);
+    notFound();
+  }
 
   return <main className="public-invitation-page">
-    <InvitationShowEditor key={event.id} event={event} />
+    <InvitationShowEditor key={`invitation:${event.id}`} event={event} returnLink={{ href: `/dashboard/eventos/${event.id}`, title: "Volver al editor completo", label: "Editor completo" }} />
   </main>;
 }

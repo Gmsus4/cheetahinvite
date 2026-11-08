@@ -10,7 +10,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { getStripe, stripeIsConfigured } from "@/lib/stripe";
 import { fulfillInvitationPayment } from "@/lib/payment-fulfillment";
-import { INVITATION_PRICE, invitationPriceLabel, isInvitationPublished } from "@/lib/invitation-payment";
+import { isInvitationPublished } from "@/lib/invitation-payment";
+import { getCurrentPrice } from "@/lib/site-pricing";
 import { PaymentRefresh } from "@/components/dashboard/PaymentRefresh";
 import { startCheckout } from "./actions";
 import { SupportRequest } from "@/components/SupportRequest";
@@ -34,6 +35,9 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
   if (!session?.user?.id) redirect(`/login?callbackUrl=${encodeURIComponent(`/dashboard/eventos/${id}/pago`)}`);
   let event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id } });
   if (!event) notFound();
+  if (event.isExample) notFound();
+  const currentPrice = await getCurrentPrice();
+  const invitationPriceLabel = currentPrice.label;
   // Recover a missed webhook using the stored session, never URL payment claims.
   if (!event.paidAt && event.stripeCheckoutSessionId && query.payment === "received" && stripeIsConfigured()) {
     try {
@@ -48,6 +52,10 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
   }
   if (!event) notFound();
   const published = isInvitationPublished(event);
+  if (event.complimentaryAt && !event.paidAt) return <main className={styles.page}>
+    <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} />
+    <div className={styles.content}><div className={styles.heading}><span className={styles.eyebrow}>UN DETALLE PARA TU CELEBRACIÓN</span><h1>Tu invitación tiene una cortesía.</h1><p className={styles.eventName}>{event.name}</p></div><section className={styles.card}><h2>{published ? "Lista para compartir" : event.expiresAt && event.expiresAt > new Date() ? "Publica cuando esté lista" : "La cortesía ha vencido"}</h2><p>Recibiste una publicación sin cobro. {event.expiresAt && <>Vigencia hasta el {new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "America/Mexico_City" }).format(event.expiresAt)}.</>}</p><p>{published ? "Tu invitación está publicada y puedes compartir el enlace." : "Completa los datos y elige la privacidad desde el editor. Si necesitas ayuda con la vigencia, contacta con soporte."}</p><div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>{published && <Link className={styles.primary} href={invitationPath(event)!} target="_blank" rel="noopener noreferrer">Abrir invitación<FiExternalLink /></Link>}<Link className={styles.primary} href={`/dashboard/eventos/${id}`}>Ir al editor<FiArrowRight /></Link></div></section></div>
+  </main>;
   const ready = stripeIsConfigured();
   const payment = await prisma.invitationPayment.findFirst({ where: { eventId: id, ownerId: session.user.id,
     ...(event.stripePaymentIntentId ? { stripePaymentIntentId: event.stripePaymentIntentId } : {}) }, orderBy: { createdAt: "desc" } });
@@ -73,7 +81,7 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
             </>}
             <div className={styles.reference}><span>Referencia de tu invitación</span><strong>{event.id}</strong></div>
           </section>
-          {payment && (payment.status !== "PENDING" || payment.amount === INVITATION_PRICE.amount) && <section className={styles.card} aria-labelledby="receipt-heading"><div className={styles.sectionTitle}><FiFileText aria-hidden="true" /><h2 id="receipt-heading">Detalle de tu compra</h2></div><PaymentReceipt payment={payment} /></section>}
+          {payment && (payment.status !== "PENDING" || payment.amount === currentPrice.amount) && <section className={styles.card} aria-labelledby="receipt-heading"><div className={styles.sectionTitle}><FiFileText aria-hidden="true" /><h2 id="receipt-heading">Detalle de tu compra</h2></div><PaymentReceipt payment={payment} /></section>}
           <div className={styles.quickLinksContainer}>
             <nav className={styles.quickLinks} aria-label="Más opciones de tu invitación">
               <InvitationActionLink href="/dashboard/compras" title="Historial de compras" description="Consulta y actualiza el estado." icon={<FiCreditCard />} />

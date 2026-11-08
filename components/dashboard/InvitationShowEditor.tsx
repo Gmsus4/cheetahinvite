@@ -22,7 +22,7 @@ import { InvitationSurfacePicker } from "./InvitationSurfacePicker";
 import { useEditorProtection } from "./useEditorProtection";
 import styles from "./InvitationShowEditor.module.css";
 
-export function InvitationShowEditor({ event }: { event: EventData }) {
+export function InvitationShowEditor({ event, returnLink }: { event: EventData; returnLink: { href: string; title: string; label: string } }) {
   const [values, setValues] = useState(() => initialGuidedValues(event));
   const [target, setTarget] = useState<InvitationEditTarget | null>(null);
   const [uploads, setUploads] = useState(0);
@@ -90,7 +90,7 @@ export function InvitationShowEditor({ event }: { event: EventData }) {
 
   return <div className={styles.workspace}>
     <nav className={styles.toolbar} aria-label="Edición de la vista previa" data-surface={values.panelStyle === "auto" ? "blur" : values.panelStyle} style={atmosphereStyle(values.accent, values)}>
-      <EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${event.id}`} className={styles.back} title="Volver al editor completo"><FiArrowLeft aria-hidden="true" /><span>Editor completo</span></EditorProtectedLink>
+      <EditorProtectedLink guard={confirmNavigation} href={returnLink.href} className={styles.back} title={returnLink.title}><FiArrowLeft aria-hidden="true" /><span>{returnLink.label}</span></EditorProtectedLink>
       <p><FiEdit3 aria-hidden="true" /><span>Pasa sobre una sección para editarla</span></p>
       <div className={styles.tools}>
         <button type="button" onClick={() => open({ kind: "location" })} aria-haspopup="dialog" aria-expanded={target?.kind === "location"} title="Fecha y lugar"><FiMapPin aria-hidden="true" /><span>Fecha y lugar</span></button>

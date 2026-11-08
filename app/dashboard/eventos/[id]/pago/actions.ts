@@ -12,7 +12,7 @@ export async function startCheckout(eventId: string) {
   if (!session?.user?.id) redirect("/login?callbackUrl=%2Fdashboard");
   const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
   if (!event) redirect("/dashboard?error=evento");
-  if (event.paidAt) redirect(`/dashboard/eventos/${eventId}/pago`);
+  if (event.paidAt || event.complimentaryAt || event.isExample) redirect(`/dashboard/eventos/${eventId}/pago`);
   if (event.privacy === "UNSET") redirect(`/dashboard/eventos/${eventId}/ajustes`);
   if (eventPublicationIssues(event).length) redirect(`/dashboard/eventos/${eventId}?error=pendientes`);
   if (!stripeIsConfigured()) redirect(`/dashboard/eventos/${eventId}/pago?error=disponibilidad`);

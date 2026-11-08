@@ -1,5 +1,8 @@
 "use server";
 import { eventPublicationIssues } from "@/lib/guided-invitation";
+import { hasPublicationGrant } from "@/lib/invitation-payment";
+import { publishCourtesy } from "@/lib/courtesy";
+import { Prisma } from "@/generated/prisma/client";
 
 import { isInvitationPanelStyle, isInvitationBlurIntensity, isInvitationSectionCorners } from "@/lib/invitation-editor";
 import type { EditorSaveResult } from "@/lib/invitation-editor";
@@ -26,7 +29,8 @@ export async function deleteEvent(eventId: string) {
 
   try {
     await withImageLock(session.user.id, async (tx) => {
-      const event = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, backgroundImageUrl: true, sections: true } });
+      const event = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, isExample: true } });
+      if (event?.isExample) throw new Error("Examples must be deleted from administration");
       if (event) await queueEventImages(tx, session.user.id, eventId, event);
       const deleted = await tx.event.deleteMany({ where: { id: eventId, ownerId: session.user.id } });
       if (deleted.count) {
@@ -58,6 +62,7 @@ export async function updateEvent(eventId: string, formData: FormData, mode: "ma
   revalidatePath(`/dashboard/eventos/${eventId}`);
   revalidatePath(`/dashboard/eventos/${eventId}/show`);
   revalidatePath("/dashboard/eventos");
+  revalidatePath("/admin", "layout");
   if (mode === "manual") {
     revalidatePath("/event/[slug]", "page");
     revalidatePath("/invitacion/[slug]", "page");
@@ -71,9 +76,9 @@ export async function checkInvitationSlug(eventId: string, value: string) {
   if (!session?.user?.id) return { available: false };
   const customSlug = normalizeInvitationSlug(value);
   if (!isValidInvitationSlug(customSlug)) return { available: false };
-  const owned = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { id: true, customSlug: true, paidAt: true } });
+  const owned = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { id: true, customSlug: true, paidAt: true, complimentaryAt: true, isExample: true } });
   if (!owned) return { available: false };
-  if (!owned.paidAt) return { available: false, paymentRequired: true };
+  if (!hasPublicationGrant(owned) || owned.isExample) return { available: false, paymentRequired: true };
   if (!await invitationLinkRegistryReady(prisma)) return { available: customSlug === owned.customSlug, migrationPending: true };
   const existing = await prisma.invitationLink.findUnique({ where: { path: `/event/${customSlug}` } });
   const available = !existing || existing.eventId === eventId;
@@ -94,10 +99,25 @@ export async function publishEvent(eventId: string, version: number): Promise<Ed
   if (!Number.isInteger(version) || version < 0) return failure("validation", "Guarda tus cambios antes de continuar.");
   const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
   if (!event) return failure("not-found", "No encontramos esta invitación. Tu copia local sigue disponible.");
+  if (event.isExample) return failure("validation", "Publica este ejemplo desde Administración.");
   if (event.privacy === "UNSET") return failure("validation", "Elige si tu invitación será pública o protegida con PIN antes de continuar al pago.");
   if (event.contentVersion !== version) return { ...failure("conflict", "La invitación cambió en otra pestaña. Revisa tus cambios antes de continuar."), version: event.contentVersion };
   const issues = eventPublicationIssues(event);
   if (issues.length) return failure("validation", issues[0].message);
+  if (event.complimentaryAt && !event.paidAt) {
+    try {
+      const published = await prisma.$transaction(async tx => {
+        await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${eventId} FOR UPDATE`);
+        const current = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
+        if (!current || current.contentVersion !== version) return false;
+        return publishCourtesy(tx, eventId, session.user.id);
+      });
+      if (!published) return failure("validation", "Revisa los datos, la privacidad y la vigencia de tu cortesía antes de publicar.");
+      revalidatePath("/dashboard", "layout");
+      revalidatePath("/event/[slug]", "page");
+      return { ok: true, eventId, version };
+    } catch { return failure("validation", "No pudimos publicar con esta cortesía. Revisa su vigencia y tus ajustes."); }
+  }
   if (!event.paidAt) {
     const changed = await prisma.event.updateMany({ where: { id: event.id, ownerId: session.user.id, paidAt: null, contentVersion: version }, data: { status: "PENDING_PAYMENT" } });
     if (!changed.count) {
@@ -204,13 +224,14 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     // Probe outside the transaction: a missing table aborts a PostgreSQL transaction.
     const registryReady = !hasCustomSlug || await invitationLinkRegistryReady(prisma);
     const result = await withImageLock(session.user.id, async tx => {
-      const previous = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, contentVersion: true, status: true, paidAt: true, customSlug: true } });
+      const previous = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, contentVersion: true, status: true, paidAt: true, complimentaryAt: true, isExample: true, customSlug: true } });
       if (!previous) throw new EditorWriteError(failure("not-found", "No encontramos esta invitación. Tu copia local sigue disponible."));
+      if (previous.isExample && (await tx.user.findUnique({ where: { id: session.user.id }, select: { role: true } }))?.role !== "ADMIN") throw new EditorWriteError(failure("auth", "Esta cuenta no tiene permisos para editar ejemplos del sitio."));
       if (previous.contentVersion !== version) throw new EditorWriteError({ ...failure("conflict", "Hay cambios guardados desde otra pestaña o dispositivo. Tu versión se conserva; revísala antes de reemplazarlos."), version: previous.contentVersion });
-      if (automatic && (previous.paidAt || !["DRAFT", "PENDING_PAYMENT"].includes(previous.status))) {
+      if (automatic && (hasPublicationGrant(previous) || !["DRAFT", "PENDING_PAYMENT"].includes(previous.status))) {
         throw new EditorWriteError(failure("published", "Los cambios de esta invitación se guardan en este dispositivo. Usa Guardar cambios para aplicarlos."));
       }
-      if (!previous.paidAt && hasCustomSlug && customSlug !== (previous.customSlug || "")) {
+      if (!hasPublicationGrant(previous) && hasCustomSlug && customSlug !== (previous.customSlug || "")) {
         throw new EditorWriteError(failure("validation", "Podrás personalizar tu enlace cuando se confirme el pago."));
       }
       if (!registryReady && hasCustomSlug && customSlug !== (previous.customSlug || "")) {
@@ -220,7 +241,7 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
         throw new EditorWriteError(failure("validation", "Este enlace ya está ocupado. Elige otro nombre."));
       }
       const changed = await tx.event.updateMany({
-        where: { id: eventId, ownerId: session.user.id, contentVersion: version, ...(automatic ? { paidAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] } } : {}) },
+        where: { id: eventId, ownerId: session.user.id, contentVersion: version, ...(automatic ? { paidAt: null, complimentaryAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] } } : {}) },
         data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, ...(hasBackgroundImage ? { backgroundImageUrl: backgroundImageUrl || null } : {}), ...curated, contentVersion: { increment: 1 }, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
       });
       if (!changed.count) {
@@ -228,7 +249,7 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
         if (automatic && latest && (latest.paidAt || !["DRAFT", "PENDING_PAYMENT"].includes(latest.status))) throw new EditorWriteError(failure("published", "Tu invitación se publicó. Usa Guardar cambios para aplicar las modificaciones pendientes."));
         throw new EditorWriteError({ ...failure("conflict", "La invitación cambió mientras guardabas. Tu copia local sigue disponible."), version: latest?.contentVersion });
       }
-      await syncCloudinaryImages(tx, session.user.id, eventId, previous, { imageUrl, backgroundImageUrl: hasBackgroundImage ? backgroundImageUrl : previous.backgroundImageUrl, sections: curated.sections ?? sections });
+      await syncCloudinaryImages(tx, session.user.id, eventId, previous, { imageUrl, backgroundImageUrl: hasBackgroundImage ? backgroundImageUrl : previous.backgroundImageUrl, sections: curated.sections ?? sections, isExample: previous.isExample });
       return { ok: true as const, eventId, version: version + 1 };
     });
     scheduleCloudinaryCleanup(session.user.id);

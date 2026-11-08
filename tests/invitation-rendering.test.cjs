@@ -432,6 +432,25 @@ test('catalog displays six occasions and the hero selects their single example w
 });
 
 
+test('hero offers every design within one occasion and handles an empty custom collection', () => {
+  const examples = ['primero', 'segundo'].map((slug, index) => ({ slug, label: `Diseño ${index + 1}`, eventType: 'wedding', typeLabel: 'Boda', available: true }));
+  let selected = examples[0].slug;
+  function find(node, predicate) {
+    if (!node || typeof node !== 'object') return null;
+    if (predicate(node)) return node;
+    let result = null;
+    React.Children.forEach(node.props?.children, child => { result ||= find(child, predicate); });
+    return result;
+  }
+  const Hero = loadComponents({ useState: () => [selected, value => { selected = value; }] })('components/landing/HeroInvitationExamples.tsx').HeroInvitationExamples;
+  const tree = Hero({ examples });
+  const selector = find(tree, node => node.type === 'select');
+  assert.equal(React.Children.count(selector.props.children), 2);
+  selector.props.onChange({ target: { value: 'segundo' } });
+  assert.equal(find(Hero({ examples }), node => node.props?.styleSlug).props.styleSlug, 'segundo');
+  assert.equal(find(Hero({ examples: [] }), node => node.props?.styleSlug), null);
+});
+
 test('global finishes cover every panel and switching back restores the original mix without mutating sections', () => {
   const load = loadComponents();
   const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');

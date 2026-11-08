@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { CelebrationInvitation } from "@/components/invitation/CelebrationInvitation";
 import { landingEventExamples } from "@/lib/landing-invitation-example";
-import { exampleWithImages } from "@/lib/invitation-example-images";
+import { getShowcaseInvitation, getShowcaseExamples } from "@/lib/showcase";
 import { getInvitationEventContent, invitationEventTypes } from "@/lib/invitation-event-content";
 
 export const metadata: Metadata = { title: "Invitación de ejemplo | Cheetah Invite", robots: { index: false, follow: false } };
@@ -18,11 +18,12 @@ export default function InvitationExamplePage({ params }: { params: Promise<{ st
 
 async function InvitationExampleData({ params }: { params: Promise<{ style: string }> }) {
   const { style } = await params;
-  const example = landingEventExamples.find(({ slug }) => slug === style);
-  if (example) return <main className="public-invitation-page"><CelebrationInvitation {...exampleWithImages(example)} /></main>;
+  const invitation = await getShowcaseInvitation(style);
+  if (invitation) return <main className="public-invitation-page"><CelebrationInvitation {...invitation} /></main>;
+  const examples = [...await getShowcaseExamples("catalog"), ...await getShowcaseExamples("hero")];
   const occasion = invitationEventTypes.find(type => getInvitationEventContent(type).slug === style);
-  if (occasion) redirect(`/ejemplo-invitacion/${landingEventExamples.find(item => item.invitation.eventType === occasion)!.slug}`);
-  if (style.startsWith("cumpleanos-")) redirect("/ejemplo-invitacion/cumpleanos");
-  if (style.startsWith("boda-") || ["flores-blancas", "bugambilias", "flores-amarillas"].includes(style)) redirect("/ejemplo-invitacion/boda");
+  const match = occasion && examples.find(item => item.invitation.eventType === occasion);
+  if (match) redirect(`/ejemplo-invitacion/${match.slug}`);
+  if (["flores-blancas", "bugambilias", "flores-amarillas"].includes(style)) redirect("/ejemplo-invitacion/boda");
   notFound();
 }

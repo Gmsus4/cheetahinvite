@@ -42,6 +42,7 @@ Se retiraron las colecciones temáticas, sus imágenes, los editores y selectore
 
 ## Documentación
 
+- [Administración: acceso, ejemplos, precio, clientes, ventas, estadísticas y cortesías](docs/admin-workspace.md).
 - [Presentación común](docs/shared-invitation.md) y [asistente de edición](docs/guided-invitation.md).
 - [Guardado y recuperación](docs/editor-protection.md).
 - [Fotografías y limpieza de Cloudinary](docs/cloudinary-storage.md).

@@ -34,6 +34,7 @@ type DashboardEvent = {
   eventDate: Date | null;
   expiresAt: Date | null;
   paidAt: Date | null;
+  complimentaryAt?: Date | null;
   slug: string | null;
   ownerId: string;
   customSlug: string | null;

@@ -9,6 +9,7 @@ datasource db {
 
 model User {
   id              String    @id @default(cuid())
+  role            String    @default("USER")
   name            String?
   email           String?   @unique
   emailVerified   DateTime?
@@ -35,6 +36,8 @@ enum EventStatus {
 
 model Event {
   id           String      @id @default(cuid())
+  isExample    Boolean     @default(false)
+  complimentaryAt DateTime?
   ownerId      String
   name         String
   eventType    String
@@ -83,9 +86,86 @@ model Event {
   invitationLinks InvitationLink[]
   accessSessions InvitationAccessSession[]
   pinBudgets InvitationPinBudget[]
+  showcaseExample ShowcaseExample?
 
   @@index([ownerId, status])
   @@unique([ownerId, customSlug])
+}
+
+// Editing an example never changes its public snapshot until explicitly published.
+model ShowcaseExample {
+  id String @id @default(cuid())
+  eventId String @unique
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  slug String @unique @db.VarChar(80)
+  label String @db.VarChar(100)
+  position Int @default(0)
+  showInHero Boolean @default(true)
+  showInCatalog Boolean @default(true)
+  publishedContent Json?
+  publishedAt DateTime?
+  publishedVersion Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSettings {
+  id String @id @default("site")
+  useCustomExamples Boolean @default(false)
+}
+
+// Immutable price history: purchases retain their own reserved amount.
+model PriceRevision {
+  id String @id @default(cuid())
+  amount Int
+  currency String @default("mxn")
+  effectiveAt DateTime @unique
+  createdAt DateTime @default(now())
+  actorId String
+  reason String @db.VarChar(240)
+  cancelledAt DateTime?
+  @@index([effectiveAt])
+}
+
+// A courtesy is an access grant, never a simulated Stripe payment.
+model CourtesyGrant {
+  id String @id @default(cuid())
+  eventId String
+  ownerId String
+  actorId String
+  reason String @db.VarChar(500)
+  grantedAt DateTime @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+  @@index([eventId, revokedAt])
+  @@index([ownerId])
+}
+
+model AdminAudit {
+  id String @id @default(cuid())
+  actorId String
+  action String
+  targetId String
+  detail Json
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+}
+
+// Anonymous, short-lived deduplication keys. No IPs, emails or raw identifiers.
+model AnalyticsEvent {
+  id String @id @default(cuid())
+  kind String
+  exampleSlug String @default("") @db.VarChar(80)
+  dedupeKey String @unique
+  createdAt DateTime @default(now())
+  @@index([createdAt, kind])
+}
+
+model AnalyticsBudget {
+  key String @id
+  count Int @default(1)
+  expiresAt DateTime
+  @@index([expiresAt])
 }
 
 // Keeps previous URLs reserved for the same invitation after a rename.

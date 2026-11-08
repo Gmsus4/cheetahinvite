@@ -4,8 +4,8 @@ export type PaymentSummary = {
   status: string; amount: number; refundedAmount: number; refundPendingAmount: number; disputeStatus: string | null;
 };
 
-export function isPreviousPriceAttempt(payment: { status: string; amount: number; currency: string }) {
-  return payment.status === "PENDING" && (payment.amount !== INVITATION_PRICE.amount || payment.currency !== INVITATION_PRICE.currency);
+export function isPreviousPriceAttempt(payment: { status: string; amount: number; currency: string }, price: { amount: number; currency: string } = INVITATION_PRICE) {
+  return payment.status === "PENDING" && (payment.amount !== price.amount || payment.currency !== price.currency);
 }
 
 export function paymentAccess(payment: PaymentSummary) {

@@ -8,7 +8,7 @@ import { destroyCloudinaryImage, destroyCloudinaryUploadVariants, isOwnCloudinar
 import { invitationImageUrls } from "@/lib/invitation-images";
 
 type Transaction = Prisma.TransactionClient;
-type Images = { imageUrl?: string | null; backgroundImageUrl?: string | null; sections?: unknown };
+type Images = { imageUrl?: string | null; backgroundImageUrl?: string | null; sections?: unknown; isExample?: boolean };
 const HOUR = 60 * 60 * 1000;
 const UPLOAD_LEASE = 10 * 60 * 1000;
 
@@ -38,8 +38,10 @@ async function adoptSavedImages(tx: Transaction, ownerId: string, eventId: strin
 
 export async function reserveCloudinaryImage(ownerId: string, eventId: string, signedUntil?: Date) {
   return withImageLock(ownerId, async tx => {
-    const event = await tx.event.findFirst({ where: { id: eventId, ownerId }, select: { imageUrl: true, backgroundImageUrl: true, sections: true } });
+    const event = await tx.event.findFirst({ where: { id: eventId, ownerId }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, isExample: true } });
     if (!event) throw new ImageStorageError("No encontramos este evento.", 404);
+    const operator = await tx.user.findUnique({ where: { id: ownerId }, select: { role: true } });
+    if (event.isExample && operator?.role !== "ADMIN") throw new ImageStorageError("No tienes permiso para editar este ejemplo.", 403);
     await adoptSavedImages(tx, ownerId, eventId, event);
     const usage = await tx.cloudinaryAsset.aggregate({ where: { eventId, ownerId }, _count: true, _sum: { bytes: true } });
     if (usage._count >= ACCOUNT_LIMITS.storedImagesPerEvent || (usage._sum.bytes ?? 0) + ACCOUNT_LIMITS.imageSizeBytes > ACCOUNT_LIMITS.imageStorageBytesPerEvent) {
@@ -48,8 +50,9 @@ export async function reserveCloudinaryImage(ownerId: string, eventId: string, s
     // Deleted events retain cleanup debt. Recreating events must not bypass storage
     // budgets when provider deletion is failing or still in progress.
     const accountUsage = await tx.cloudinaryAsset.aggregate({ where: { ownerId }, _count: true, _sum: { bytes: true } });
-    if (accountUsage._count >= ACCOUNT_LIMITS.invitations * ACCOUNT_LIMITS.storedImagesPerEvent
-      || (accountUsage._sum.bytes ?? 0) + ACCOUNT_LIMITS.imageSizeBytes > ACCOUNT_LIMITS.invitations * ACCOUNT_LIMITS.imageStorageBytesPerEvent) {
+    const accountEvents = operator?.role === "ADMIN" ? 100 : ACCOUNT_LIMITS.invitations;
+    if (accountUsage._count >= accountEvents * ACCOUNT_LIMITS.storedImagesPerEvent
+      || (accountUsage._sum.bytes ?? 0) + ACCOUNT_LIMITS.imageSizeBytes > accountEvents * ACCOUNT_LIMITS.imageStorageBytesPerEvent) {
       throw new ImageStorageError("Tu cuenta alcanzó el límite de imágenes almacenadas. Guarda las fotos que quieras conservar y espera a que termine la limpieza antes de subir más.");
     }
     const now = new Date();
@@ -76,7 +79,8 @@ export async function reserveCloudinaryImage(ownerId: string, eventId: string, s
 
 export async function finishCloudinaryImage(ownerId: string, eventId: string, publicId: string, url: string, bytes: number) {
   const accepted = await withImageLock(ownerId, async tx => {
-    const event = await tx.event.findFirst({ where: { id: eventId, ownerId }, select: { id: true } });
+    const event = await tx.event.findFirst({ where: { id: eventId, ownerId }, select: { id: true, isExample: true } });
+    if (event?.isExample && (await tx.user.findUnique({ where: { id: ownerId }, select: { role: true } }))?.role !== "ADMIN") throw new ImageStorageError("No tienes permiso para editar este ejemplo.", 403);
     if (!event) {
       const asset = await tx.cloudinaryAsset.findFirst({ where: { publicId, ownerId } });
       if (asset) await tx.cloudinaryAsset.updateMany({ where: { publicId, ownerId }, data: { state: "DELETE_PENDING",
@@ -117,6 +121,15 @@ export async function syncCloudinaryImages(tx: Transaction, ownerId: string, eve
     managed.push({ publicId, url });
   }
   const ids = [...new Set(managed.map(image => image.publicId))];
+  if (next.isExample) {
+    const published = await tx.showcaseExample.findUnique({ where: { eventId } });
+    if (published?.publishedAt && published.publishedContent && typeof published.publishedContent === "object") {
+      for (const url of invitationImageUrls(published.publishedContent as Images)) {
+        const id = ownedCloudinaryPublicId(url, ownerId, eventId);
+        if (id && !ids.includes(id)) ids.push(id);
+      }
+    }
+  }
   const assets = await tx.cloudinaryAsset.findMany({ where: { publicId: { in: ids }, ownerId, eventId } });
   for (const image of managed) {
     const asset = assets.find(candidate => candidate.publicId === image.publicId);
@@ -173,6 +186,12 @@ export async function runCloudinaryCleanup(ownerId?: string, limit = 5) {
           OR position(${asset.publicId} in COALESCE("backgroundImageUrl", '')) > 0
           OR position(${asset.publicId} in jsonb_path_query_array("sections", '$[*].imageUrl')::text) > 0
           OR position(${asset.publicId} in jsonb_path_query_array("sections", '$[*].imageUrls[*]')::text) > 0
+        UNION ALL SELECT 1 FROM "ShowcaseExample" WHERE "publishedAt" IS NOT NULL AND (
+          position(${asset.publicId} in COALESCE("publishedContent"->>'imageUrl', '')) > 0
+          OR position(${asset.publicId} in COALESCE("publishedContent"->>'backgroundImageUrl', '')) > 0
+          OR position(${asset.publicId} in jsonb_path_query_array("publishedContent", '$.sections[*].imageUrl')::text) > 0
+          OR position(${asset.publicId} in jsonb_path_query_array("publishedContent", '$.sections[*].imageUrls[*]')::text) > 0
+        )
       ) AS "used"`);
       if (references[0]?.used) {
         await tx.cloudinaryAsset.update({ where: { publicId: asset.publicId }, data: asset.state === "READY"

@@ -23,7 +23,7 @@ export const getPublicInvitation = cache(async (slug: string, customSlug?: strin
   if (global && !registryReady) {
     const matches = await prisma.event.findMany({ where: {
       OR: [{ customSlug: slug }, { slug }],
-      status: "PUBLISHED", paidAt: { not: null }, expiresAt: { gt: new Date() },
+      status: "PUBLISHED", isExample: false, AND: [{ OR: [{ paidAt: { not: null } }, { complimentaryAt: { not: null } }] }], expiresAt: { gt: new Date() },
     }, take: 2, omit: { pinHash: true } });
     // Never choose an arbitrary organizer when old account-scoped names collide.
     return matches.length === 1 ? visibleInvitation(matches[0]) : null;
@@ -31,7 +31,7 @@ export const getPublicInvitation = cache(async (slug: string, customSlug?: strin
   const event = await prisma.event.findFirst({
     where: {
       ...(link ? { id: link.eventId } : customSlug === undefined ? { slug } : { ownerId: slug, customSlug }),
-      status: "PUBLISHED", paidAt: { not: null }, expiresAt: { gt: new Date() },
+      status: "PUBLISHED", isExample: false, AND: [{ OR: [{ paidAt: { not: null } }, { complimentaryAt: { not: null } }] }], expiresAt: { gt: new Date() },
     }, omit: { pinHash: true },
   });
   return visibleInvitation(event);
@@ -43,6 +43,6 @@ async function visibleInvitation(event: Omit<Event, "pinHash"> | null) {
   // Locked responses never carry personal content into rendering or metadata.
   return { ...event, pinHash: undefined, ownerId: "", name: "Invitación protegida", hostNames: null,
     venue: null, address: null, message: null, imageUrl: null, backgroundImageUrl: null,
-    eventDate: null, eventTime: null, sections: [], paidAt: null, expiresAt: null,
+    eventDate: null, eventTime: null, sections: [], paidAt: null, complimentaryAt: null, expiresAt: null,
     stripeCheckoutSessionId: null, stripePaymentIntentId: null };
 }

@@ -11,6 +11,7 @@ import { EventEditor } from "@/components/dashboard/InvitationEditor";
 import { prisma } from "@/prisma";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { CreationDraftResume } from "@/components/dashboard/CreationDraftResume";
+import { getCurrentPrice } from "@/lib/site-pricing";
 
 export const metadata: Metadata = {
   title: "Nueva invitación | Cheetah Invite",
@@ -33,16 +34,17 @@ async function CreateEventData({
   if (!session?.user?.id) redirect("/login?callbackUrl=%2Fcrear");
 
   const account = { name: session.user.name || "Usuario", email: session.user.email || "", image: session.user.image };
+  const price = await getCurrentPrice();
   const params = await searchParams;
   const initialType = typeof params.tipo === "string" ? params.tipo : "";
   const hasError = typeof params.error === "string";
   const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { invitationCount: true } });
   const invitationLimitReached = (user?.invitationCount ?? 0) >= ACCOUNT_LIMITS.invitations;
   const resumeId = typeof params.resume === "string" && /^[a-zA-Z0-9_-]{1,80}$/.test(params.resume) ? params.resume : "";
-  const resumed = resumeId ? await prisma.event.findFirst({ where: { id: resumeId, ownerId: session.user.id, paidAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] } }, omit: { pinHash: true } }) : null;
-  if (resumed) return <EventEditor key={`${session.user.id}:new`} creation account={account} event={resumed} saved={false} published={false} error="" />;
+  const resumed = resumeId ? await prisma.event.findFirst({ where: { id: resumeId, ownerId: session.user.id, isExample: false, paidAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] } }, omit: { pinHash: true } }) : null;
+  if (resumed) return <EventEditor key={`${session.user.id}:new`} creation account={account} priceLabel={price.label} event={resumed} saved={false} published={false} error="" />;
 
-  if (!invitationLimitReached) return <EventEditor key={`${session.user.id}:new`} creation account={account} event={{
+  if (!invitationLimitReached) return <EventEditor key={`${session.user.id}:new`} creation account={account} priceLabel={price.label} event={{
     id: "", ownerId: session.user.id, name: "", eventType: ["wedding", "birthday", "graduation", "baby_shower", "anniversary", "other"].includes(initialType) ? initialType : "wedding",
     contentVersion: 0, customSlug: null, templateId: "none", texture: "none", eventDate: null, eventTime: null, hostNames: null,
     paidAt: null, expiresAt: null, status: "DRAFT", slug: null, venue: null, address: null, message: null,

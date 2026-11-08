@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { FiArrowUpRight, FiMessageCircle, FiPlus } from "react-icons/fi";
-import { INVITATION_PRICE, invitationPriceLabel } from "@/lib/invitation-payment";
+import { Suspense } from "react";
+import { getCurrentPrice } from "@/lib/site-pricing";
+
+async function PriceAnswer() {
+  const price = await getCurrentPrice();
+  return <>La publicación cuesta {price.label} MXN por evento, con IVA incluido. Tu invitación estará activa durante {price.months} meses desde la confirmación del pago. Es un solo pago, sin mensualidades ni renovación automática.</>;
+}
 
 const questions = [
   {
@@ -9,7 +15,7 @@ const questions = [
   },
   {
     question: "¿Cuánto cuesta y cuánto tiempo estará activa?",
-    answer: `La publicación cuesta ${invitationPriceLabel} MXN por evento, con IVA incluido. Tu invitación estará activa durante ${INVITATION_PRICE.months} meses desde la confirmación del pago. Es un solo pago, sin mensualidades ni renovación automática.`,
+    answer: <Suspense fallback="Consultando precio vigente…"><PriceAnswer /></Suspense>,
   },
   {
     question: "¿Qué puedo personalizar?",
