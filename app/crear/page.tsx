@@ -12,6 +12,7 @@ import { prisma } from "@/prisma";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { CreationDraftResume } from "@/components/dashboard/CreationDraftResume";
 import { getCurrentPrice } from "@/lib/site-pricing";
+import { authPageHref } from "@/lib/auth-destination";
 
 export const metadata: Metadata = {
   title: "Nueva invitación | Cheetah Invite",
@@ -30,12 +31,18 @@ async function CreateEventData({
   searchParams,
 }: PageProps<"/crear">) {
   await connection();
+  const params = await searchParams;
   const session = await auth();
-  if (!session?.user?.id) redirect("/login?callbackUrl=%2Fcrear");
+  if (!session?.user?.id) {
+    const query = new URLSearchParams();
+    for (const key of ["tipo", "resume"] as const) {
+      if (typeof params[key] === "string") query.set(key, params[key]);
+    }
+    redirect(authPageHref("/login", `/crear${query.size ? `?${query}` : ""}`));
+  }
 
   const account = { name: session.user.name || "Usuario", email: session.user.email || "", image: session.user.image };
   const price = await getCurrentPrice();
-  const params = await searchParams;
   const initialType = typeof params.tipo === "string" ? params.tipo : "";
   const hasError = typeof params.error === "string";
   const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { invitationCount: true } });

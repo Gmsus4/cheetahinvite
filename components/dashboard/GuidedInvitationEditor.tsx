@@ -20,6 +20,8 @@ import { EditorSaveFailure, editorFormData, type EventData, type EditorValues, t
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { invitationPriceLabel, isInvitationPublished, hasPublicationGrant } from "@/lib/invitation-payment";
 import { invitationPath } from "@/lib/invitation-url";
+import { authPageHref } from "@/lib/auth-destination";
+import { invitationPrivacyIssue, isInvitationPrivacy } from "@/lib/invitation-privacy";
 import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
 import { SectionFields } from "./InvitationSectionFields";
 import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
@@ -30,7 +32,7 @@ import { EditorLeaveDialog } from "./EditorLeaveDialog";
 import { EditorRecoveryDialog } from "./EditorRecoveryDialog";
 
 
-import { InvitationPrivacySettings } from "./InvitationPrivacySettings";
+import { InvitationPrivacyFields } from "./InvitationPrivacyFields";
 import { CustomInvitationLinkField } from "./CustomInvitationLinkField";
 import styles from "./EventWorkspace.module.css";
 import { DashboardHeader } from "./DashboardHeader";
@@ -44,7 +46,7 @@ const introTitles = [<>¿Quién <em>celebra?</em></>, <>¿Cuándo <em>y dónde?<
 
 export function GuidedInvitationEditor({ event, creation = false, error, account, exampleId, priceLabel = invitationPriceLabel }: { event: EventData; creation?: boolean; exampleId?: string; priceLabel?: string; saved: boolean; published: boolean; error: string; account?: { name: string; email: string; image?: string | null } }) {
   const router = useRouter();
-  const [values, setValues] = useState(() => initialGuidedValues(event));
+  const [values, setValues] = useState<EditorValues>(() => ({ ...initialGuidedValues(event), privacy: isInvitationPrivacy(event.privacy) ? event.privacy : "UNSET", pin: "", pinPending: false }));
   const [step, setStep] = useState(0);
   const [activeSection, setActiveSection] = useState("__cover");
   const [addingDetail, setAddingDetail] = useState(false);
@@ -53,10 +55,12 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const [uploads, setUploads] = useState(0);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
+  const [initiallySaved] = useState(Boolean(event.id));
   const form = useRef<HTMLFormElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const scrollToTop = useRef(false);
   const draftPromise = useRef<Promise<string> | null>(null);
+  const exitInFlight = useRef(false);
   const snapshot = JSON.stringify(values);
   const granted = hasPublicationGrant(event);
   const manualOnly = granted || !["DRAFT", "PENDING_PAYMENT"].includes(event.status);
@@ -71,9 +75,21 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     return draftPromise.current;
   }
   const { controller: persistence, state: protection, confirmNavigation, navigation } = useEditorProtection({
-    ownerId: event.ownerId, eventId: event.id, snapshot, version: event.contentVersion, creation, manualOnly,
-    save: async (submitted, version, automatic) => {
+    ownerId: event.ownerId, eventId: event.id, snapshot, version: event.contentVersion, privacyVersion: event.privacyVersion ?? 0, creation, manualOnly,
+    save: async (submitted, version, automatic, privacyVersion) => {
       const formData = editorFormData(submitted, version);
+      const submittedValues = JSON.parse(submitted) as EditorValues;
+      const acknowledged = JSON.parse(persistence.getSnapshot().acknowledged) as EditorValues;
+      if (exampleId) { formData.delete("privacy"); formData.delete("pin"); formData.delete("pinPending"); }
+      else {
+        const configuredPin = acknowledged.privacy === "PRIVATE" && (event.privacy === "PRIVATE" || persistence.getSnapshot().lastSaved);
+        const pinIssue = submittedValues.privacy === "PRIVATE" ? invitationPrivacyIssue("PRIVATE", submittedValues.pin ?? "", Boolean(submittedValues.pinPending), configuredPin) : null;
+        if (pinIssue) return { ok: false, code: "validation", message: pinIssue };
+        formData.set("privacyVersion", String(privacyVersion));
+        if (submittedValues.pin === acknowledged.pin && !(submittedValues.pinPending && !submittedValues.pin)) {
+          formData.delete("pin"); formData.delete("pinPending");
+        }
+      }
       // Older device backups may contain a link chosen before payment.
       if (!granted || exampleId) formData.delete("customSlug");
       return updateEvent(await ensureEvent(submitted), formData, automatic ? "auto" : "manual");
@@ -88,6 +104,9 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     }
   }, [step, activeSection, appearanceStep]);
   const busy = saving || !protection.ready || Boolean(protection.recovery);
+  const signInHref = authPageHref("/login", creation
+    ? persistence.getEventId() ? `/crear?resume=${encodeURIComponent(persistence.getEventId())}` : "/crear"
+    : `/dashboard/eventos/${event.id}`);
   const dirty = snapshot !== protection.acknowledged || protection.code === "conflict";
   const design = sharedInvitationDesign;
   const content = getInvitationEventContent(values.eventType);
@@ -102,10 +121,14 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const primaryLocation = values.sections.find(section => section.type === "location");
   const continuingDetail = step === 4 && contentIndex < contentIds.length - 1;
   const continueLabel = step === 3 ? appearanceStep < invitationStyleSteps.length - 1 ? "Siguiente" : "Personalizar bloques" : "Continuar";
-  const issues = guidedPublicationIssues(values);
+  const acknowledgedValues = JSON.parse(protection.acknowledged) as EditorValues;
+  const hasPin = protection.lastSaved ? acknowledgedValues.privacy === "PRIVATE" : event.privacy === "PRIVATE";
+  const privacyIssue = !exampleId ? invitationPrivacyIssue(values.privacy ?? "UNSET", values.pin ?? "", Boolean(values.pinPending), hasPin) : null;
+  const issues: ReturnType<typeof guidedPublicationIssues> = [...guidedPublicationIssues(values), ...(privacyIssue ? [{ step: lastStep, message: privacyIssue }] : [])];
   const published = isInvitationPublished(event);
-  const changesSaved = protection.ready && !protection.recovery && !protection.error && !dirty && !saving && !protection.saving && uploads === 0 && (!creation || protection.lastSaved);
+  const changesSaved = protection.ready && !protection.recovery && !protection.error && !dirty && !saving && !protection.saving && uploads === 0 && (!creation || initiallySaved || protection.lastSaved);
   const saveLabel = uploads > 0 ? "Subiendo fotografías…" : saving || protection.saving ? "Guardando…" : changesSaved ? "Cambios guardados" : published ? "Guardar cambios" : "Guardar borrador";
+  const saveStatus = !protection.ready ? "Preparando guardado…" : saving || protection.saving ? "Guardando en tu cuenta…" : uploads > 0 ? "Subiendo fotografías…" : changesSaved ? "Guardado en tu cuenta" : protection.local ? "Copia en este dispositivo" : "Cambios pendientes de guardar";
   const date = values.eventDate ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${values.eventDate}T12:00:00Z`)) : "Fecha por definir";
   function patch(changes: Partial<EditorValues>) { setNotice(""); setValues(current => ({ ...current, ...changes })); }
   function changeSection(id: string, changes: Partial<InviteSection>) { setNotice(""); setValues(current => ({ ...current, sections: current.sections.map(section => section.id === id ? { ...section, ...changes } : section) })); }
@@ -153,7 +176,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     const recovered = JSON.parse(record.snapshot) as EditorValues;
     const locations = normalizeEventLocations(recovered.venue, recovered.address, recovered.sections);
     const restored = { ...recovered, ...locations, texture: "none", sections: completeGuidedSections(recovered.eventType, locations.sections) };
-    setValues({ ...restored, texture: "none" });
+    setValues({ privacy: isInvitationPrivacy(event.privacy) ? event.privacy : "UNSET", pin: "", pinPending: false, ...restored, texture: "none" });
     setStep(guidedRecoveryStep(record.wizard));
     setActiveSection(guidedRecoverySection(record.wizard, restored.sections));
     setAddingDetail((record.wizard.flow === "content-v4" || record.wizard.flow === "content-v5") && Boolean(record.wizard.activeExtra?.startsWith("__add:")));
@@ -166,10 +189,10 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     if (!form.current?.reportValidity()) return;
     setSaving(true); setNotice("");
     try {
-      const result = await persistence.saveNow(false, overwrite ? protection.conflictVersion : undefined);
+      const result = await persistence.saveNow(false, overwrite ? protection.conflictVersion : undefined, overwrite ? protection.conflictPrivacyVersion : undefined);
       if (!result.ok) return;
       if (forPublication) {
-        const next = await publishEvent(result.eventId, result.version);
+        const next = await publishEvent(result.eventId, result.version, result.privacyVersion);
         if (!next.ok) { persistence.acceptFailure(next); return; }
         if (creation) router.replace(`/dashboard/eventos/${result.eventId}/pago`);
         else router.push(`/dashboard/eventos/${result.eventId}/pago`);
@@ -177,6 +200,21 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
       else setNotice("Tus cambios están guardados.");
     } catch { persistence.reportError("No pudimos completar la operación. Tu borrador sigue protegido; intenta de nuevo."); }
     finally { setSaving(false); }
+  }
+  async function saveAndExit(destination = exampleId ? `/admin/disenos/${exampleId}` : "/dashboard") {
+    if (busy || uploads > 0 || exitInFlight.current) return;
+    exitInFlight.current = true;
+    setSaving(true); setNotice("");
+    try {
+      // Drafts may be incomplete. Server validation and version checks still apply.
+      const result = await persistence.saveNow(false);
+      if (!result.ok) return;
+      navigation.stay();
+      if (creation) router.replace(destination);
+      else router.push(destination);
+    } catch {
+      persistence.reportError("No pudimos guardar tu invitación. Tus cambios siguen abiertos; intenta de nuevo antes de salir.");
+    } finally { exitInFlight.current = false; setSaving(false); }
   }
   async function openPrivatePreview() {
     if (busy || uploads > 0 || !validateCurrent()) return;
@@ -217,6 +255,10 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
               <button className={`button${!exampleId && !event.paidAt && !published ? " guided-save-compact" : ""}`} type="button" aria-label={saveLabel} title={saveLabel} data-save-state={changesSaved ? "saved" : undefined} disabled={busy || uploads > 0 || changesSaved || (!creation && !dirty)} onClick={() => void save()}>{changesSaved ? <FiCheck aria-hidden="true" /> : <FiSave aria-hidden="true" />}<span className="guided-bottom-label" role="status">{saveLabel}</span></button>
               {!exampleId && !event.paidAt && !published && <button className="button guided-publish" type="button" aria-label={event.complimentaryAt ? "Publicar con mi cortesía" : "Guardar y continuar al pago"} title={issues.length ? "Completa los datos indicados antes de publicar" : undefined} disabled={busy || uploads > 0 || issues.length > 0} onClick={() => void save(true)}><span className="guided-bottom-label">{saving ? "Guardando…" : event.complimentaryAt ? "Publicar cortesía" : "Continuar al pago"}</span><span className="guided-mobile-payment-label">{event.complimentaryAt ? "Publicar" : "Pagar"}</span><FiArrowRight aria-hidden="true" /></button>}
             </div>}
+            <div className={styles.saveAndExit}>
+              <p className={styles.saveAndExitStatus} role="status" aria-live="polite">{changesSaved && <FiCheck aria-hidden="true" />}{saveStatus}</p>
+              <button className={styles.saveAndExitButton} type="button" disabled={busy || uploads > 0} onClick={() => void saveAndExit()}><FiSave aria-hidden="true" />{saving ? "Guardando…" : "Guardar y salir"}</button>
+            </div>
             {exampleId && <div className={styles.exampleReturn}>
               <EditorProtectedLink className={styles.exampleReturnLink} guard={confirmNavigation} href={`/admin/disenos/${exampleId}`}>
                 <FiArrowLeft aria-hidden="true" />Volver a gestionar este ejemplo
@@ -227,14 +269,14 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
 
   return <main className={`guided-editor ${styles.workspace}`} data-intro-layout="true" data-example-editor={exampleId ? "true" : undefined} data-short-step={step === 0 || step === 1 || step === 2 || step === 3}>
     {protection.recovery && <EditorRecoveryDialog onRecover={recover} onDiscard={() => persistence.discardRecovery()} />}
-    {navigation.destination && <EditorLeaveDialog onStay={navigation.stay} onLeave={navigation.leave} />}
+    {navigation.destination && <EditorLeaveDialog onStay={navigation.stay} onLeave={navigation.leave} onSaveAndLeave={() => void saveAndExit(navigation.destination!)} saving={saving} saveDisabled={busy || uploads > 0} uploading={uploads > 0} error={protection.error} />}
     <DashboardHeader name={account?.name || "Usuario"} email={account?.email || ""} image={account?.image} guard={confirmNavigation} />
     <div className="guided-layout">
       <div className="guided-workspace">
         <div className="guided-heading"><span className="guided-eyebrow">{creation ? "CREA ALGO ESPECIAL" : "TU INVITACIÓN"} · PASO {step + 1} DE {steps.length}</span><h1 ref={heading} tabIndex={-1}>{introTitles[step]}</h1><p>{descriptions[step]}</p>{journeyNavigation}{step === 0 && <div className={styles.introNote}><span><FiCheck aria-hidden="true" /></span><p>Puedes empezar ahora y completar los detalles después.</p></div>}</div>
         <div className={styles.formArea}>
         {protection.localWarning && <p className="guided-alert" role="status">El navegador no permite guardar una copia local. Guarda tu borrador antes de salir.</p>}
-        {(protection.error || error) && <div className="guided-alert" role="alert"><p>{protection.error || (error === "pendientes" ? "Completa los datos principales y los detalles activos antes de continuar al pago." : "Revisa tus datos e intenta guardar de nuevo.")}</p><div>{protection.conflictVersion !== undefined && <><button type="button" disabled={busy || uploads > 0} onClick={() => void save(false, true)}>Guardar mi versión</button><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${persistence.getEventId()}/show`} target="_blank">Revisar versión guardada</EditorProtectedLink></>}{protection.code === "unavailable" && <button type="button" disabled={busy || uploads > 0} onClick={() => void save()}>Reintentar guardado</button>}{protection.code === "auth" && <EditorProtectedLink guard={confirmNavigation} href={`/login?callbackUrl=${encodeURIComponent(creation ? "/crear" : `/dashboard/eventos/${event.id}`)}`}>Iniciar sesión</EditorProtectedLink>}</div></div>}
+        {(protection.error || error) && <div className="guided-alert" role="alert"><p>{protection.error || (error === "pendientes" ? "Completa los datos principales y los detalles activos antes de continuar al pago." : "Revisa tus datos e intenta guardar de nuevo.")}</p><div>{protection.conflictVersion !== undefined && <><button type="button" disabled={busy || uploads > 0} onClick={() => void save(false, true)}>Guardar mi versión</button><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${persistence.getEventId()}/show`} target="_blank">Revisar versión guardada</EditorProtectedLink></>}{protection.code === "unavailable" && <button type="button" disabled={busy || uploads > 0} onClick={() => void save()}>Reintentar guardado</button>}{protection.code === "auth" && <EditorProtectedLink guard={confirmNavigation} href={signInHref}>Iniciar sesión</EditorProtectedLink>}</div></div>}
         {notice && <p className="guided-notice" role="status">{notice}</p>}
         <form id="guided-invitation-form" ref={form} onSubmit={submit} noValidate className="guided-form" aria-busy={saving}>
           <fieldset disabled={busy} className="guided-fields">
@@ -309,7 +351,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                 <nav aria-label="Secciones elegidas para la invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.title || extraDetailLabel(section)} aria-label={`Revisar sección: ${section.title || extraDetailLabel(section)}`} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}>{section.title || extraDetailLabel(section)}</button>)}{!includedSections.length && <button type="button" disabled={busy || uploads > 0} onClick={() => goTo(4, '__more')}>Agregar detalles</button>}</nav>
               </section>
               <div className="guided-checklist"><h2>{issues.length ? "Antes de publicar" : "Todo listo para compartir"}</h2>{issues.length ? <><p>Puedes guardar el borrador ahora. Para publicar, completa lo siguiente:</p><ul>{issues.map(issue => <li key={issue.message}><button type="button" data-target-step={issue.step} data-target-section={issue.sectionId} onClick={() => goTo(issue.step, issue.sectionId)}>{issue.message}<FiArrowRight /></button></li>)}</ul></> : <p>Los datos principales están completos. Revisa la vista previa antes de continuar.</p>}</div>
-              {!exampleId && !event.paidAt && <InvitationPrivacySettings eventId={event.id} initialPrivacy={event.privacy} initialVersion={event.privacyVersion} hasPin={event.privacy === "PRIVATE"} ensureEvent={() => ensureEvent()} />}
+              {!exampleId && <InvitationPrivacyFields privacy={values.privacy ?? "UNSET"} pin={values.pin ?? ""} pinPending={Boolean(values.pinPending)} hasPin={hasPin} disabled={busy || uploads > 0} onChange={patch} />}
               {!exampleId && !creation && granted && <CustomInvitationLinkField eventId={event.id} value={values.customSlug} savedValue={event.customSlug} suggestion={content.slug} onChange={customSlug => patch({ customSlug })} />}
               {!exampleId && !granted && <p className="guided-payment"><FiLock />{priceLabel} MXN · IVA incluido · 12 meses activa. Podrás personalizar y compartir tu enlace cuando se confirme el pago.</p>}
               {!exampleId && event.complimentaryAt && <p className="guided-payment">Tienes una cortesía de publicación. Completa los datos y publica sin realizar un pago.</p>}

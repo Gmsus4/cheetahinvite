@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { BrandLoader } from "@/components/BrandLoader";
+import { authDestinationFromRequest } from "@/lib/auth-destination-server";
 // import Image from "next/image";
 import Link from "next/link";
 import { AuthAccountSwitch } from "@/components/login/AuthAccountSwitch";
@@ -13,7 +16,12 @@ export const metadata: Metadata = {
   description: "Accede a tu espacio de Cheetah Invite.",
 };
 
-export default function LoginPage() {
+export default function LoginPage(props: PageProps<"/login">) {
+  return <Suspense fallback={<BrandLoader message="Preparando el acceso…" />}><LoginContent {...props} /></Suspense>;
+}
+
+async function LoginContent({ searchParams }: PageProps<"/login">) {
+  const redirectTo = await authDestinationFromRequest((await searchParams).callbackUrl);
   return (
     <main className="login-page login-home-style">
       <header className="login-topbar">
@@ -23,7 +31,7 @@ export default function LoginPage() {
             Cheetah<span>Invite</span>
           </span>
         </Link>
-        <AuthAccountSwitch mode="login" />
+        <AuthAccountSwitch mode="login" redirectTo={redirectTo} />
       </header>
 
       <div className="login-layout">
@@ -57,9 +65,9 @@ export default function LoginPage() {
             <p className="login-description">
               Ingresa tus datos para volver a tus invitaciones.
             </p>
-            <GoogleSignInButton />
+            <GoogleSignInButton redirectTo={redirectTo} />
             <div className="auth-divider"><span>o inicia con tu correo</span></div>
-            <LoginForm />
+            <LoginForm redirectTo={redirectTo} />
           </div>
           <small className="login-legal">
             Al continuar, aceptas nuestros <Link href="/terminos">Términos y condiciones</Link> y <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>.

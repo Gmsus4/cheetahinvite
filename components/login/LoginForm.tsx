@@ -4,8 +4,10 @@ import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { FiArrowUpRight, FiEye, FiEyeOff, FiLock, FiMail } from "react-icons/fi";
+import { safeAuthDestination } from "@/lib/auth-destination";
 
-export function LoginForm() {
+export function LoginForm({ redirectTo = "/dashboard" }: { redirectTo?: string }) {
+  const destination = safeAuthDestination(redirectTo);
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,7 +22,7 @@ export function LoginForm() {
         email: formData.get("email"),
         password: formData.get("password"),
         redirect: false,
-        redirectTo: "/dashboard",
+        redirectTo: destination,
       });
 
       if (result?.error) {
@@ -28,7 +30,7 @@ export function LoginForm() {
         return;
       }
 
-      window.location.assign(result?.url ?? "/");
+      window.location.assign(destination);
     } catch {
       setMessage("No pudimos conectar con el servicio. Intenta de nuevo.");
     } finally {

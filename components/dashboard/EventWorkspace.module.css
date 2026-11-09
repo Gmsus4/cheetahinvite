@@ -349,6 +349,14 @@
 .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-mobile-payment-label) { display: none; }
 .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-progress.guided-journey-progress[data-grouped="true"][data-expanded="true"] ol) { top: calc(100% + 8px); bottom: auto; left: auto; right: 0; transform: none; max-height: min(360px,50svh); }
 .workspace[data-intro-layout="true"] .journeyNavigation > .exampleReturn { grid-column: 1 / -1; display: grid; gap: 8px; width: 100%; min-width: 0; }
+.workspace[data-intro-layout="true"] .journeyNavigation > .saveAndExit { grid-column: 1 / -1; display: grid; gap: 8px; width: 100%; min-width: 0; }
+.workspace[data-intro-layout="true"] .saveAndExitStatus { display: flex; align-items: center; gap: 6px; min-width: 0; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.saveAndExitStatus svg { flex: none; color: var(--accent); }
+.saveAndExitButton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.saveAndExitButton svg { flex: none; }
+.saveAndExitButton:hover { border-color: var(--accent-line); background: var(--surface-muted); }
+.saveAndExitButton:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.saveAndExitButton:disabled { opacity: .6; cursor: wait; }
 .exampleReturnLink { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 46px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 13px; font-weight: 500; line-height: 1.5; text-align: center; text-decoration: none; }
 .exampleReturnLink svg { flex: 0 0 15px; width: 15px; height: 15px; }
 .exampleReturnLink:hover { border-color: var(--accent-line); background: var(--surface-muted); color: var(--ink); }
@@ -367,16 +375,27 @@
   .workspace[data-intro-layout="true"] .journeyNavigation > :global(.button[type="submit"]) { min-width: 0; padding-inline: 14px; }
   .workspace[data-intro-layout="true"] .journeyNavigation > :global(.guided-back) { width: 36px; }
   .workspace[data-intro-layout="true"] .journeyNavigation > :global(.guided-back .guided-bottom-label) { display: none; }
-  .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions) { flex-direction: row; flex-wrap: wrap; }
+  .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions) { flex-direction: row; flex-wrap: nowrap; }
   .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions .button) { width: auto; min-width: 0; padding: 10px 12px; font-size: 12px; }
   .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions .button.guided-save-compact) { flex: 0 0 48px; width: 48px; min-width: 48px; height: 48px; padding: 0; border-radius: 50%; }
   .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-save-compact > svg) { flex: 0 0 20px; width: 20px; height: 20px; }
   .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-save-compact .guided-bottom-label),
   .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-publish .guided-bottom-label) { display: none; }
   .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-mobile-payment-label) { display: inline; }
+  .workspace[data-intro-layout="true"] .journeyNavigation > .saveAndExit { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 8px; border-top: 1px solid var(--line); }
+  .workspace[data-intro-layout="true"] .saveAndExitStatus { max-width: 180px; }
+  .saveAndExitButton { flex: none; padding-inline: 12px; font-size: 12px; }
   .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-progress.guided-journey-progress[data-grouped="true"][data-expanded="true"] ol) { top: auto; bottom: calc(100% + 16px); right: auto; left: 0; }
-  .workspace[data-intro-layout="true"] :global(.guided-layout) { padding-bottom: calc(140px + env(safe-area-inset-bottom,0px)); }
-  .workspace[data-intro-layout="true"] :global(.guided-mobile-preview) { bottom: calc(96px + env(safe-area-inset-bottom,0px)); }
-  .workspace[data-intro-layout="true"][data-example-editor="true"] :global(.guided-layout) { padding-bottom: calc(210px + env(safe-area-inset-bottom,0px)); }
-  .workspace[data-intro-layout="true"][data-example-editor="true"] :global(.guided-mobile-preview) { bottom: calc(174px + env(safe-area-inset-bottom,0px)); }
+  .workspace[data-intro-layout="true"] :global(.guided-layout) { padding-bottom: calc(200px + env(safe-area-inset-bottom,0px)); }
+  .workspace[data-intro-layout="true"] :global(.guided-mobile-preview) { bottom: calc(156px + env(safe-area-inset-bottom,0px)); }
+  .workspace[data-intro-layout="true"][data-example-editor="true"] :global(.guided-layout) { padding-bottom: calc(270px + env(safe-area-inset-bottom,0px)); }
+  .workspace[data-intro-layout="true"][data-example-editor="true"] :global(.guided-mobile-preview) { bottom: calc(234px + env(safe-area-inset-bottom,0px)); }
+}
+@media(max-width:380px) {
+  .workspace[data-intro-layout="true"] .journeyNavigation { grid-template-columns: 32px 64px minmax(0,1fr); gap: 6px; padding-inline: 12px; }
+  .workspace[data-intro-layout="true"] .journeyNavigation > :global(.guided-back) { width: 32px; }
+  .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-progress[data-grouped="true"]) { width: 64px; }
+  .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-progress .guided-steps-toggle) { width: 64px; min-width: 64px; gap: 4px; padding: 6px; }
+  .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions) { gap: 6px; }
+  .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions .button.guided-save-compact) { flex-basis: 40px; width: 40px; min-width: 40px; height: 44px; }
 }

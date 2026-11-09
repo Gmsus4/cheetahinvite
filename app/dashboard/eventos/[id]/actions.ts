@@ -18,6 +18,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { revalidatePath } from "next/cache";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
+import { isInvitationPrivacy } from "@/lib/invitation-privacy";
+import { hashInvitationPin, validInvitationPin } from "@/lib/invitation-pin";
 import { isInvitationFont } from "@/lib/invitation-fonts";
 import { isValidInvitationSlug, normalizeInvitationSlug } from "@/lib/invitation-url";
 import { isInvitationTemplate } from "@/lib/invitation-templates";
@@ -95,13 +97,15 @@ export async function checkInvitationSlug(eventId: string, value: string) {
   return { available, suggestion };
 }
 
-export async function publishEvent(eventId: string, version: number): Promise<EditorSaveResult> {
+export async function publishEvent(eventId: string, version: number, privacyVersion?: number): Promise<EditorSaveResult> {
   const session = await auth();
   if (!session?.user?.id) return failure("auth", "Tu sesión expiró. Tus cambios se conservan en este dispositivo; inicia sesión de nuevo.");
   if (!Number.isInteger(version) || version < 0) return failure("validation", "Guarda tus cambios antes de continuar.");
+  if (privacyVersion !== undefined && (!Number.isSafeInteger(privacyVersion) || privacyVersion < 0)) return failure("validation", "Revisa la privacidad antes de continuar.");
   const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
   if (!event) return failure("not-found", "No encontramos esta invitación. Tu copia local sigue disponible.");
   if (event.isExample) return failure("validation", "Publica este ejemplo desde Administración.");
+  if (privacyVersion !== undefined && event.privacyVersion !== privacyVersion) return { ...failure("conflict", "La privacidad cambió en otra pestaña. Revisa el acceso guardado antes de continuar al pago."), version: event.contentVersion, privacyVersion: event.privacyVersion };
   if (event.privacy === "UNSET") return failure("validation", "Elige si tu invitación será pública o protegida con PIN antes de continuar al pago.");
   if (event.contentVersion !== version) return { ...failure("conflict", "La invitación cambió en otra pestaña. Revisa tus cambios antes de continuar."), version: event.contentVersion };
   const issues = eventPublicationIssues(event);
@@ -111,7 +115,7 @@ export async function publishEvent(eventId: string, version: number): Promise<Ed
       const published = await prisma.$transaction(async tx => {
         await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${eventId} FOR UPDATE`);
         const current = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
-        if (!current || current.contentVersion !== version) return false;
+        if (!current || current.contentVersion !== version || current.privacyVersion !== event.privacyVersion) return false;
         return publishCourtesy(tx, eventId, session.user.id);
       });
       if (!published) return failure("validation", "Revisa los datos, la privacidad y la vigencia de tu cortesía antes de publicar.");
@@ -121,11 +125,11 @@ export async function publishEvent(eventId: string, version: number): Promise<Ed
     } catch { return failure("validation", "No pudimos publicar con esta cortesía. Revisa su vigencia y tus ajustes."); }
   }
   if (!event.paidAt) {
-    const changed = await prisma.event.updateMany({ where: { id: event.id, ownerId: session.user.id, paidAt: null, contentVersion: version }, data: { status: "PENDING_PAYMENT" } });
+    const changed = await prisma.event.updateMany({ where: { id: event.id, ownerId: session.user.id, paidAt: null, contentVersion: version, privacyVersion: event.privacyVersion }, data: { status: "PENDING_PAYMENT" } });
     if (!changed.count) {
-      const latest = await prisma.event.findFirst({ where: { id: event.id, ownerId: session.user.id }, select: { contentVersion: true } });
+      const latest = await prisma.event.findFirst({ where: { id: event.id, ownerId: session.user.id }, select: { contentVersion: true, privacyVersion: true } });
       if (!latest) return failure("not-found", "No encontramos esta invitación. Tu copia local sigue disponible.");
-      return { ...failure("conflict", "La invitación cambió. Revisa tus cambios antes de continuar."), version: latest.contentVersion };
+      return { ...failure("conflict", "La invitación cambió. Revisa tus cambios antes de continuar."), version: latest.contentVersion, privacyVersion: latest.privacyVersion };
     }
     revalidatePath("/dashboard");
   }
@@ -146,6 +150,17 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
   const rawVersion = formData.get("contentVersion");
   if (typeof rawVersion !== "string" || !/^\d+$/.test(rawVersion) || Number(rawVersion) > 2147483646) return failure("validation", "Recarga el editor para guardar de forma segura.");
   const version = Number(rawVersion);
+  const hasPrivacy = formData.has("privacy");
+  const privacy = formData.get("privacy");
+  const rawPrivacyVersion = formData.get("privacyVersion");
+  const privacyVersion = typeof rawPrivacyVersion === "string" && /^\d+$/.test(rawPrivacyVersion) ? Number(rawPrivacyVersion) : NaN;
+  const pin = String(formData.get("pin") ?? "");
+  const pinPending = formData.get("pinPending");
+  if (hasPrivacy && (!isInvitationPrivacy(privacy) || !Number.isSafeInteger(privacyVersion) || privacyVersion < 0 || privacyVersion > 2147483646
+    || (pinPending !== null && pinPending !== "true" && pinPending !== "false")
+    || (privacy === "PRIVATE" && ((pin && !validInvitationPin(pin)) || (pinPending === "true" && !validInvitationPin(pin)))))) {
+    return failure("validation", "Revisa la privacidad y escribe un PIN de seis dígitos si elegiste proteger la invitación.");
+  }
 
   const name = String(formData.get("name") ?? "").trim();
   const hasCustomSlug = formData.has("customSlug");
@@ -238,14 +253,20 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     sections: orderedSections.map(section => ({ ...section, layout: "auto" as const })),
   };
   try {
+    const newPinHash = hasPrivacy && privacy === "PRIVATE" && pin ? await hashInvitationPin(pin) : null;
     // Probe outside the transaction: a missing table aborts a PostgreSQL transaction.
     const registryReady = !hasCustomSlug || await invitationLinkRegistryReady(prisma);
     const result = await withImageLock(session.user.id, async tx => {
       await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${eventId} FOR UPDATE`);
-      const previous = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, contentVersion: true, status: true, paidAt: true, complimentaryAt: true, expiresAt: true, isExample: true, customSlug: true } });
+      const previous = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, contentVersion: true, status: true, paidAt: true, complimentaryAt: true, expiresAt: true, isExample: true, customSlug: true, privacy: true, privacyVersion: true, pinHash: true } });
       if (!previous) throw new EditorWriteError(failure("not-found", "No encontramos esta invitación. Tu copia local sigue disponible."));
       if (previous.isExample && (await tx.user.findUnique({ where: { id: session.user.id }, select: { role: true } }))?.role !== "ADMIN") throw new EditorWriteError(failure("auth", "Esta cuenta no tiene permisos para editar ejemplos del sitio."));
-      if (previous.contentVersion !== version) throw new EditorWriteError({ ...failure("conflict", "Hay cambios guardados desde otra pestaña o dispositivo. Tu versión se conserva; revísala antes de reemplazarlos."), version: previous.contentVersion });
+      if (previous.contentVersion !== version || (hasPrivacy && previous.privacyVersion !== privacyVersion)) throw new EditorWriteError({ ...failure("conflict", "El contenido o la privacidad cambiaron desde otra pestaña o dispositivo. Revisa la versión guardada antes de reemplazarlos."), version: previous.contentVersion, ...(hasPrivacy ? { privacyVersion: previous.privacyVersion } : {}) });
+      if (hasPrivacy && previous.isExample) throw new EditorWriteError(failure("validation", "Los ejemplos no tienen ajustes de privacidad."));
+      if (hasPrivacy && privacy === "UNSET" && previous.privacy !== "UNSET") throw new EditorWriteError(failure("validation", "Elige acceso público o protegido con PIN para cambiar la privacidad."));
+      const privacyChanged = hasPrivacy && (privacy !== previous.privacy || Boolean(newPinHash));
+      const pinHash = privacy === "PRIVATE" ? newPinHash || previous.pinHash : null;
+      if (hasPrivacy && privacy === "PRIVATE" && !pinHash) throw new EditorWriteError(failure("validation", "Escribe o genera un PIN de seis dígitos para proteger la invitación."));
       if (!canEditInvitation(previous)) throw new EditorWriteError(failure("validation", "La edición está desactivada. Revisa la vigencia y renueva desde Pago y soporte."));
       if (automatic && (hasPublicationGrant(previous) || !["DRAFT", "PENDING_PAYMENT"].includes(previous.status))) {
         throw new EditorWriteError(failure("published", "Los cambios de esta invitación se guardan en este dispositivo. Usa Guardar cambios para aplicarlos."));
@@ -261,15 +282,16 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
       }
       const changed = await tx.event.updateMany({
         where: { id: eventId, ownerId: session.user.id, contentVersion: version, ...(automatic ? { paidAt: null, complimentaryAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] } } : {}) },
-        data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, ...(hasBackgroundImage ? { backgroundImageUrl: backgroundImageUrl || null } : {}), ...curated, contentVersion: { increment: 1 }, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}) },
+        data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, ...(hasBackgroundImage ? { backgroundImageUrl: backgroundImageUrl || null } : {}), ...curated, contentVersion: { increment: 1 }, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}), ...(privacyChanged ? { privacy: privacy as string, pinHash, privacyVersion: { increment: 1 } } : {}) },
       });
       if (!changed.count) {
         const latest = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { contentVersion: true, paidAt: true, status: true } });
         if (automatic && latest && (latest.paidAt || !["DRAFT", "PENDING_PAYMENT"].includes(latest.status))) throw new EditorWriteError(failure("published", "Tu invitación se publicó. Usa Guardar cambios para aplicar las modificaciones pendientes."));
         throw new EditorWriteError({ ...failure("conflict", "La invitación cambió mientras guardabas. Tu copia local sigue disponible."), version: latest?.contentVersion });
       }
+      if (privacyChanged) await tx.invitationAccessSession.deleteMany({ where: { eventId } });
       await syncCloudinaryImages(tx, session.user.id, eventId, previous, { imageUrl, backgroundImageUrl: hasBackgroundImage ? backgroundImageUrl : previous.backgroundImageUrl, sections: curated.sections ?? sections, isExample: previous.isExample });
-      return { ok: true as const, eventId, version: version + 1 };
+      return { ok: true as const, eventId, version: version + 1, ...(hasPrivacy ? { privacyVersion: previous.privacyVersion + (privacyChanged ? 1 : 0) } : {}) };
     });
     scheduleCloudinaryCleanup(session.user.id);
     return result;

@@ -126,6 +126,9 @@
   .dashboard-home-style *, .dashboard-home-style *::before, .dashboard-home-style *::after { scroll-behavior: auto !important; transition: none !important; }
 }
 .dashboard-home-style .dashboard-courtesy-notices { display: grid; gap: 12px; margin-bottom: 28px; }
+.dashboard-home-style .dashboard-draft-recovery:empty { display: none; }
+.dashboard-home-style .dashboard-draft-recovery .editor-recovery { margin-bottom: 24px; border-radius: 16px; }
+.dashboard-home-style .dashboard-draft-recovery .editor-resume-link { display: flex; justify-content: space-between; width: 100%; min-height: 36px; font-size: 13px; text-decoration: none; }
 .dashboard-home-style .dashboard-courtesy-notice { display: grid; grid-template-columns: 44px minmax(0,1fr) auto; align-items: center; gap: 16px; padding: 20px 24px; border: 1px solid var(--accent-line); border-radius: 20px; background: var(--accent-soft); }
 .dashboard-home-style .dashboard-courtesy-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: var(--surface); color: var(--accent); font-size: 23px; }
 .dashboard-home-style .dashboard-courtesy-copy { min-width: 0; overflow-wrap: anywhere; }

@@ -1,13 +1,15 @@
 import { EDITOR_AUTOSAVE_DELAY, EditorSaveFailure, editorDraftPrefix, parseEditorDraft, type EditorDraftRecord, type EditorSaveResult, type EditorWizard } from "@/lib/invitation-editor";
+import { redactEditorPin } from "@/lib/invitation-privacy";
 
 type Options = {
   ownerId: string; eventId: string; snapshot: string; version: number; creation: boolean; manualOnly: boolean;
-  save(snapshot: string, version: number, automatic: boolean): Promise<EditorSaveResult>;
+  privacyVersion?: number;
+  save(snapshot: string, version: number, automatic: boolean, privacyVersion: number): Promise<EditorSaveResult>;
 };
 type Browser = { storage: Storage | null; uuid(): string; now(): number; online(): boolean };
 export type EditorPersistenceState = {
   ready: boolean; acknowledged: string; saving: boolean; local: boolean; localWarning: boolean; lastSaved: boolean;
-  recovery: EditorDraftRecord | null; error: string; code: string; conflictVersion?: number; manualOnly: boolean;
+  recovery: EditorDraftRecord | null; error: string; code: string; conflictVersion?: number; conflictPrivacyVersion?: number; manualOnly: boolean;
 };
 const unavailable = (): EditorSaveResult => ({ ok: false, code: "unavailable", message: "No pudimos guardar en el servidor. Tu copia local sigue disponible; intenta de nuevo." });
 
@@ -22,6 +24,7 @@ export class EditorPersistence {
   private initialized = false;
   private snapshot: string;
   private version: number;
+  private privacyVersion: number;
   private eventId: string;
   private creationKey = "";
   private recordKey = "";
@@ -36,6 +39,7 @@ export class EditorPersistence {
 
   constructor(private options: Options) {
     this.snapshot = options.snapshot; this.version = options.version; this.eventId = options.eventId;
+    this.privacyVersion = options.privacyVersion ?? 0;
     this.state = { ready: false, acknowledged: options.snapshot, saving: false, local: false, localWarning: false, lastSaved: false, recovery: null, error: "", code: "", manualOnly: options.manualOnly };
     this.serverState = this.state;
   }
@@ -71,7 +75,7 @@ export class EditorPersistence {
           if (record && (!this.options.creation || !this.options.eventId || (record.eventId || record.creationKey) === this.options.eventId)) records.push({ ...record, key });
         }
         records.sort((a, b) => b.updatedAt - a.updatedAt);
-        const recovery = records.find(record => record.snapshot !== this.state.acknowledged || (this.options.creation && record.eventId));
+        const recovery = records.find(record => record.snapshot !== redactEditorPin(this.state.acknowledged, this.state.acknowledged) || (this.options.creation && record.eventId));
         this.patch({ ready: true, recovery: recovery ?? null });
       } catch { this.patch({ ready: true, localWarning: true }); }
     }
@@ -95,7 +99,7 @@ export class EditorPersistence {
     try {
       if (!this.browser.storage) throw new Error("Storage unavailable");
       if (needed) {
-        const record: EditorDraftRecord = { schema: 1, ownerId: this.options.ownerId, eventId: this.eventId, creationKey: this.creationKey, snapshot: this.snapshot, version: this.version, wizard: this.wizard, updatedAt: this.browser.now() };
+        const record: EditorDraftRecord = { schema: 1, ownerId: this.options.ownerId, eventId: this.eventId, creationKey: this.creationKey, snapshot: redactEditorPin(this.snapshot, this.state.acknowledged), version: this.version, privacyVersion: this.privacyVersion, wizard: this.wizard, updatedAt: this.browser.now() };
         this.browser.storage.setItem(this.recordKey, JSON.stringify(record));
         if (!this.state.local) this.patch({ local: true });
       } else {
@@ -109,9 +113,12 @@ export class EditorPersistence {
     if (!record) return null;
     this.restoredKey = record.key;
     this.snapshot = record.snapshot; this.eventId = record.eventId; this.creationKey = record.creationKey; this.wizard = record.wizard;
-    const conflictVersion = record.version !== this.version ? this.version : undefined;
+    const privacyConflict = record.privacyVersion !== undefined && record.privacyVersion !== this.privacyVersion;
+    const conflictVersion = record.version !== this.version || privacyConflict ? this.version : undefined;
+    const conflictPrivacyVersion = privacyConflict ? this.privacyVersion : undefined;
     this.version = record.version;
-    this.patch({ recovery: null, conflictVersion, code: conflictVersion === undefined ? "" : "conflict", error: conflictVersion === undefined ? "" : "Hay una versión más reciente guardada. Revisa tu copia antes de reemplazarla." });
+    this.privacyVersion = record.privacyVersion ?? this.privacyVersion;
+    this.patch({ recovery: null, conflictVersion, conflictPrivacyVersion, code: conflictVersion === undefined ? "" : "conflict", error: conflictVersion === undefined ? "" : "Hay una versión más reciente guardada. Revisa tu copia antes de reemplazarla." });
     this.backup(); this.schedule();
     return record;
   }
@@ -125,7 +132,7 @@ export class EditorPersistence {
     this.clearTimer();
     this.snapshot = this.state.acknowledged;
     this.failedSnapshot = "";
-    this.patch({ error: "", code: "", conflictVersion: undefined });
+    this.patch({ error: "", code: "", conflictVersion: undefined, conflictPrivacyVersion: undefined });
     try { if (this.restoredKey) this.browser?.storage?.removeItem(this.restoredKey); }
     catch { this.patch({ localWarning: true }); }
     this.restoredKey = undefined;
@@ -134,7 +141,7 @@ export class EditorPersistence {
   }
   reportError(message: string) { this.patch({ error: message, code: "unavailable" }); this.backup(); }
   acceptFailure(result: Extract<EditorSaveResult, { ok: false }>) {
-    this.patch({ error: result.message, code: result.code, conflictVersion: result.version }); this.backup();
+    this.patch({ error: result.message, code: result.code, conflictVersion: result.version, conflictPrivacyVersion: result.privacyVersion }); this.backup();
   }
 
   private schedule() {
@@ -146,32 +153,34 @@ export class EditorPersistence {
   }
   retry = () => { this.failedSnapshot = ""; this.retryDelay = 10_000; this.schedule(); };
 
-  async saveNow(automatic = false, replaceVersion?: number): Promise<EditorSaveResult> {
+  async saveNow(automatic = false, replaceVersion?: number, replacePrivacyVersion?: number): Promise<EditorSaveResult> {
     this.clearTimer();
     if (this.state.recovery || this.uploading) return { ok: false, code: "validation", message: "Espera a que terminen las fotos y revisa la copia recuperada antes de guardar." };
     if (this.flight) {
       const previous = await this.flight;
       if (!previous.ok || automatic) return previous;
-      return this.saveNow(false, replaceVersion);
+      return this.saveNow(false, replaceVersion, replacePrivacyVersion);
     }
-    if (this.state.code === "conflict" && replaceVersion === undefined) return { ok: false, code: "conflict", message: this.state.error, version: this.state.conflictVersion };
-    if (replaceVersion !== undefined) { this.version = replaceVersion; this.patch({ code: "", error: "", conflictVersion: undefined }); }
+    if (this.state.code === "conflict" && replaceVersion === undefined) return { ok: false, code: "conflict", message: this.state.error, version: this.state.conflictVersion, privacyVersion: this.state.conflictPrivacyVersion };
+    if (replaceVersion !== undefined) { this.version = replaceVersion; if (replacePrivacyVersion !== undefined) this.privacyVersion = replacePrivacyVersion; this.patch({ code: "", error: "", conflictVersion: undefined, conflictPrivacyVersion: undefined }); }
     if (automatic && (this.options.creation || this.state.manualOnly)) return { ok: false, code: "published", message: "Guarda los cambios para aplicarlos." };
-    if (!this.isDirty() && this.eventId && !this.options.creation && replaceVersion === undefined) return { ok: true, eventId: this.eventId, version: this.version };
+    if (!this.isDirty() && this.eventId && !this.options.creation && replaceVersion === undefined) return { ok: true, eventId: this.eventId, version: this.version, privacyVersion: this.privacyVersion };
     if (this.browser && !this.browser.online()) {
       this.patch({ code: "unavailable", error: "Estás sin conexión. Tus cambios se conservan en este dispositivo y volveremos a intentar al conectar." });
       this.backup(); return unavailable();
     }
     const submitted = this.snapshot;
     const version = this.version;
+    const privacyVersion = this.privacyVersion;
     this.backup(); this.patch({ saving: true, error: "" });
     const flight = Promise.resolve().then(async () => {
       let result: EditorSaveResult;
-      try { result = await this.options.save(submitted, version, automatic); }
+      try { result = await this.options.save(submitted, version, automatic, privacyVersion); }
       catch (error) { result = error instanceof EditorSaveFailure ? error.result : unavailable(); }
       if (result.ok) {
         this.version = result.version; this.eventId = result.eventId; this.retryDelay = 10_000;
-        this.patch({ acknowledged: submitted, lastSaved: true, code: "", error: "", conflictVersion: undefined });
+        this.privacyVersion = result.privacyVersion ?? this.privacyVersion;
+        this.patch({ acknowledged: submitted, lastSaved: true, code: "", error: "", conflictVersion: undefined, conflictPrivacyVersion: undefined });
         // Remove only this controller's recovered copy, never another tab's backup.
         try { if (this.restoredKey) this.browser?.storage?.removeItem(this.restoredKey); }
         catch { this.patch({ localWarning: true }); }
@@ -184,7 +193,7 @@ export class EditorPersistence {
         }
       } else {
         this.failedSnapshot = submitted;
-        this.patch({ error: result.message, code: result.code, conflictVersion: result.version, ...(result.code === "published" ? { manualOnly: true } : {}) });
+        this.patch({ error: result.message, code: result.code, conflictVersion: result.version, conflictPrivacyVersion: result.privacyVersion, ...(result.code === "published" ? { manualOnly: true } : {}) });
         if (result.code === "unavailable") this.retryDelay = Math.min(60_000, this.retryDelay * 2);
         this.backup();
       }

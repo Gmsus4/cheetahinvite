@@ -24,6 +24,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { CopyInvitationLink } from "@/components/dashboard/CopyInvitationLink";
 import { DeleteInvitationButton } from "@/components/dashboard/DeleteInvitationButton";
 import { CourtesyNotice } from "@/components/dashboard/CourtesyNotice";
+import { CreationDraftResume } from "@/components/dashboard/CreationDraftResume";
 
 type EventStatus = "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED" | "SUSPENDED" | "REFUNDED";
 
@@ -46,6 +47,7 @@ type DashboardEvent = {
 };
 
 type DashboardContentProps = {
+  ownerId: string;
   now: number;
   userName: string;
   userEmail: string;
@@ -81,7 +83,7 @@ function formatDate(date: Date | null) {
   }).format(date);
 }
 
-export function DashboardContent({ userName, userEmail, userImage, events, now }: DashboardContentProps) {
+export function DashboardContent({ ownerId, userName, userEmail, userImage, events, now }: DashboardContentProps) {
   const availableSlots = Math.max(0, ACCOUNT_LIMITS.invitations - events.length);
   const firstName = userName.trim().split(/\s+/)[0] || "bienvenido";
   const activeEvents = events.filter((event) => isInvitationPublished(event, new Date(now))).length;
@@ -115,6 +117,7 @@ export function DashboardContent({ userName, userEmail, userImage, events, now }
               Nueva invitación <FiArrowUpRight aria-hidden="true" />
             </Link> : <span className="dashboard-capacity-full">Tus {ACCOUNT_LIMITS.invitations} espacios están ocupados</span>}
           </div>
+          <div className="dashboard-draft-recovery"><CreationDraftResume ownerId={ownerId} /></div>
           {unreadCourtesyEvents.length > 0 && <section className="dashboard-courtesy-notices" aria-label="Cortesías recibidas">
             {unreadCourtesyEvents.map((event) => <CourtesyNotice key={event.courtesyNoticeId} grantId={event.courtesyNoticeId!} eventId={event.id} name={event.name} expiresAt={event.expiresAt!} published={isInvitationPublished(event, new Date(now))} />)}
           </section>}
@@ -143,7 +146,7 @@ export function DashboardContent({ userName, userEmail, userImage, events, now }
                         {event.privacy === "PRIVATE" && <span className="dashboard-invitation-privacy"><FiLock aria-hidden="true" /> Protegida con PIN</span>}
                       </div>
                       <div className="dashboard-invitation-actions">
-                        <Link className="dashboard-card-edit" href={`/dashboard/eventos/${event.id}${canEditInvitation(event, new Date(now)) ? "" : "/pago"}`} aria-label={`Administrar invitación: ${event.name}`}><FiEdit2 aria-hidden="true" /> {canEditInvitation(event, new Date(now)) ? "Editar" : "Ver vigencia"}</Link>
+                        <Link className="dashboard-card-edit" href={`/dashboard/eventos/${event.id}${canEditInvitation(event, new Date(now)) ? "" : "/pago"}`} aria-label={`${["DRAFT", "PENDING_PAYMENT"].includes(event.status) ? "Continuar invitación" : "Administrar invitación"}: ${event.name}`}><FiEdit2 aria-hidden="true" /> {canEditInvitation(event, new Date(now)) ? ["DRAFT", "PENDING_PAYMENT"].includes(event.status) ? "Continuar" : "Editar" : "Ver vigencia"}</Link>
                         <Link className="dashboard-card-payment" href={`/dashboard/eventos/${event.id}/ajustes`} aria-label={`Ajustes de ${event.name}`}><FiSettings aria-hidden="true" /> Ajustes</Link>
                         <div className="dashboard-card-share">
                           {isInvitationPublished(event, new Date(now)) && event.slug ? <CopyInvitationLink path={invitationPath(event)!} /> : <>

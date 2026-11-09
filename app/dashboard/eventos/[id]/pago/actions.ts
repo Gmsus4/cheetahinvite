@@ -7,10 +7,11 @@ import { prepareInvitationCheckout } from "@/lib/payment-checkout";
 import { redirect } from "next/navigation";
 import { eventPublicationIssues } from "@/lib/guided-invitation";
 import { canRenewInvitation } from "@/lib/invitation-lifecycle";
+import { authPageHref } from "@/lib/auth-destination";
 
 export async function startCheckout(eventId: string) {
   const session = await auth();
-  if (!session?.user?.id) redirect("/login?callbackUrl=%2Fdashboard");
+  if (!session?.user?.id) redirect(authPageHref("/login", `/dashboard/eventos/${eventId}/pago`));
   const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
   if (!event) redirect("/dashboard?error=evento");
   if (event.isExample || ((event.paidAt || event.complimentaryAt) && !canRenewInvitation(event))) redirect(`/dashboard/eventos/${eventId}/pago`);

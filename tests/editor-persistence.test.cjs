@@ -488,3 +488,35 @@ test('draft recovery keeps independent mobile and desktop image framing and acce
   } else assert.equal(parsed, null);
  }
 });
+
+test('device recovery retains privacy edits without storing the pending PIN', async t => {
+  const initial = JSON.stringify({ ...JSON.parse(values('Inicial')), privacy: 'PUBLIC', pin: '', pinPending: false });
+  const first = setup(t, { snapshot: initial, privacyVersion: 4, manualOnly: true });
+  first.controller.update(JSON.stringify({ ...JSON.parse(initial), privacy: 'PRIVATE', pin: '001234', pinPending: true }), false, { step: 5, activeExtra: null }, true);
+  const raw = [...first.storage.data.values()][0];
+  assert.equal(raw.includes('001234'), false);
+  const backup = JSON.parse(raw); assert.equal(backup.privacyVersion, 4);
+  assert.equal(JSON.parse(backup.snapshot).pinPending, true);
+  first.controller.stop();
+  const next = setup(t, { snapshot: initial, storage: first.storage, privacyVersion: 5, manualOnly: true });
+  const recovered = next.controller.recover();
+  assert.equal(JSON.parse(recovered.snapshot).privacy, 'PRIVATE'); assert.equal(JSON.parse(recovered.snapshot).pin, '');
+  assert.equal(next.controller.getSnapshot().code, 'conflict');
+  assert.equal(next.controller.getSnapshot().conflictPrivacyVersion, 5);
+});
+
+test('privacy revisions advance with saves and an explicit conflict decision updates both revisions', async t => {
+  const calls = []; let conflict = false;
+  const f = setup(t, { privacyVersion: 2, manualOnly: true, save: async (snapshot, version, automatic, privacyVersion) => {
+    calls.push([version, privacyVersion]);
+    if (conflict) return { ok: false, code: 'conflict', message: 'Privacy changed', version: 1, privacyVersion: 8 };
+    return { ok: true, eventId: 'event', version: version + 1, privacyVersion: privacyVersion + 1 };
+  } });
+  edit(f.controller, 'Primero'); await f.controller.saveNow();
+  edit(f.controller, 'Segundo'); conflict = true; await f.controller.saveNow();
+  assert.equal(f.controller.getSnapshot().conflictPrivacyVersion, 8);
+  assert.equal((await f.controller.saveNow()).code, 'conflict');
+  conflict = false; await f.controller.saveNow(false, 1, 8);
+  assert.deepEqual(calls, [[0, 2], [1, 3], [1, 8]]);
+  assert.equal(f.controller.getSnapshot().conflictPrivacyVersion, undefined);
+});

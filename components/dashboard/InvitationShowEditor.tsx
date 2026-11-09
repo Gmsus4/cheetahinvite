@@ -36,10 +36,11 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
   const snapshot = JSON.stringify(values);
   const wizard = { step: 0, activeExtra: null };
   const { controller, state, confirmNavigation, navigation } = useEditorProtection({
-    ownerId: event.ownerId, eventId: event.id, snapshot, version: event.contentVersion, creation: false, manualOnly: true,
+    ownerId: event.ownerId, eventId: event.id, snapshot, version: event.contentVersion, privacyVersion: event.privacyVersion ?? 0, creation: false, manualOnly: true,
     save: async (submitted, version) => {
       const data = editorFormData(submitted, version);
       data.delete("customSlug");
+      data.delete("privacy"); data.delete("pin"); data.delete("pinPending");
       return updateEvent(event.id, data);
     },
   });

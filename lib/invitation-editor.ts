@@ -1,5 +1,6 @@
 import type { InvitationButtonAppearance } from "@/lib/invitation-buttons";
 import { isInvitationCoverLayout, type InvitationCoverLayout } from "@/lib/invitation-cover-layout";
+import { isInvitationPrivacy, type InvitationPrivacy } from "@/lib/invitation-privacy";
 
 export type InvitationSectionCorners = "square" | "soft" | "rounded";
 export function isInvitationSectionCorners(value: unknown): value is InvitationSectionCorners {
@@ -25,13 +26,14 @@ export function isSectionTextAlign(value: unknown): value is SectionTextAlign {
 }
 export type InviteSection = { id: string; type: SectionType; title: string; titleCustomized?: boolean; showIcon?: boolean; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; mobileImageFocus?: MobileImageFocus; desktopImageFocus?: MobileImageFocus; panelStyle?: InvitationPanelStyle; textAlign?: SectionTextAlign; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; enabled: boolean };
 export type EditorValues = {
+  privacy?: InvitationPrivacy; pin?: string; pinPending?: boolean;
   name: string; eventType: string; eventDate: string; eventTime: string; hostNames: string; venue: string; address: string;
   message: string; imageUrl: string; backgroundImageUrl?: string; panelStyle?: InvitationPanelStyle; coverLayout?: InvitationCoverLayout; glassBorder?: boolean; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; showSectionIcons?: boolean; sectionCorners?: InvitationSectionCorners; accent: string; typography: string; bodyTypography: string; sections: InviteSection[];
   customSlug: string; templateId: string; texture: string; heroHorizontal: string; heroVertical: string; buttonAppearance: InvitationButtonAppearance;
 };
-export type EditorSaveResult = { ok: true; eventId: string; version: number } | {
+export type EditorSaveResult = { ok: true; eventId: string; version: number; privacyVersion?: number } | {
   ok: false; code: "validation" | "auth" | "conflict" | "published" | "not-found" | "unavailable";
-  message: string; version?: number;
+  message: string; version?: number; privacyVersion?: number;
 };
 export type EditorWizard = { step: number; activeExtra: string | null; flow?: "content-v2" | "content-v3" | "content-v4" | "content-v5" };
 export class EditorSaveFailure extends Error {
@@ -62,7 +64,7 @@ export function editorFormData(snapshot: string, version: number, creationKey = 
 
 export type EditorDraftRecord = {
   schema: 1; ownerId: string; eventId: string; creationKey: string; snapshot: string; version: number;
-  updatedAt: number; wizard: EditorWizard; key?: string;
+  updatedAt: number; wizard: EditorWizard; key?: string; privacyVersion?: number;
 };
 
 // Local storage is untrusted and may contain obsolete or partially written records.
@@ -74,6 +76,7 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
     if (record.schema !== 1 || record.ownerId !== ownerId || (scope && record.eventId !== scope)
       || typeof record.eventId !== "string" || (record.eventId && !/^[a-zA-Z0-9_-]{1,80}$/.test(record.eventId))
       || !validCreationKey(record.creationKey) || !Number.isSafeInteger(record.version) || record.version < 0
+      || (record.privacyVersion !== undefined && (!Number.isSafeInteger(record.privacyVersion) || record.privacyVersion < 0))
       || !Number.isFinite(record.updatedAt) || record.updatedAt > now + 60_000 || record.updatedAt < now - EDITOR_DRAFT_LIFETIME
       || typeof record.snapshot !== "string" || !record.wizard || !Number.isInteger(record.wizard.step)
       || record.wizard.step < 0 || record.wizard.step > 15 || !(record.wizard.activeExtra === null || typeof record.wizard.activeExtra === "string")
@@ -81,6 +84,9 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
     const values = JSON.parse(record.snapshot) as EditorValues;
     const strings = ["name", "eventType", "eventDate", "eventTime", "hostNames", "venue", "address", "message", "imageUrl", "accent", "typography", "bodyTypography", "customSlug", "templateId", "texture", "heroHorizontal", "heroVertical"] as const;
     if (!values || !strings.every(key => typeof values[key] === "string")
+      || (values.privacy !== undefined && !isInvitationPrivacy(values.privacy))
+      || (values.pin !== undefined && (typeof values.pin !== "string" || !/^\d{0,6}$/.test(values.pin)))
+      || (values.pinPending !== undefined && typeof values.pinPending !== "boolean")
       || (values.showSectionIcons !== undefined && typeof values.showSectionIcons !== "boolean")
       || (values.glassBorder !== undefined && typeof values.glassBorder !== "boolean")
       || (values.sectionCorners !== undefined && !isInvitationSectionCorners(values.sectionCorners))

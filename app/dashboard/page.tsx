@@ -64,6 +64,7 @@ async function DashboardData() {
 
   return (
     <DashboardContent
+      ownerId={user.id}
       now={now}
       userName={account?.name || user.name || "Usuario"}
       userEmail={account?.email || user.email || ""}

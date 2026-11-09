@@ -4,8 +4,10 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { FiArrowUpRight, FiLock, FiMail, FiUser } from "react-icons/fi";
+import { authPageHref, safeAuthDestination } from "@/lib/auth-destination";
 
-export function RegisterForm() {
+export function RegisterForm({ redirectTo = "/dashboard" }: { redirectTo?: string }) {
+  const destination = safeAuthDestination(redirectTo);
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,14 +48,14 @@ export function RegisterForm() {
         email: data.get("email"),
         password,
         redirect: false,
-        redirectTo: "/dashboard",
+        redirectTo: destination,
       });
 
       if (login?.error) {
-        router.push("/login?registered=1");
+        router.push(`${authPageHref("/login", destination)}&registered=1`);
         return;
       }
-      window.location.assign(login?.url ?? "/dashboard");
+      window.location.assign(destination);
     } catch {
       setMessage("No pudimos conectar con el servicio. Intenta de nuevo.");
       setIsSubmitting(false);

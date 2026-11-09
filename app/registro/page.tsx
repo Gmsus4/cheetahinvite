@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { BrandLoader } from "@/components/BrandLoader";
+import { authDestinationFromRequest } from "@/lib/auth-destination-server";
 import Link from "next/link";
 import { AuthAccountSwitch } from "@/components/login/AuthAccountSwitch";
 import { BrandEmblem } from "@/components/BrandEmblem";
@@ -11,7 +14,12 @@ export const metadata: Metadata = {
   description: "Crea tu cuenta para diseñar y administrar invitaciones digitales.",
 };
 
-export default function RegisterPage() {
+export default function RegisterPage(props: PageProps<"/registro">) {
+  return <Suspense fallback={<BrandLoader message="Preparando el registro…" />}><RegisterContent {...props} /></Suspense>;
+}
+
+async function RegisterContent({ searchParams }: PageProps<"/registro">) {
+  const redirectTo = await authDestinationFromRequest((await searchParams).callbackUrl);
   return (
     <main className="login-page login-home-style">
       <header className="login-topbar">
@@ -19,7 +27,7 @@ export default function RegisterPage() {
           <BrandEmblem size={40} priority />
           <span className="brand-name">Cheetah<span>Invite</span></span>
         </Link>
-        <AuthAccountSwitch mode="register" />
+        <AuthAccountSwitch mode="register" redirectTo={redirectTo} />
       </header>
 
       <div className="login-layout register-layout">
@@ -45,9 +53,9 @@ export default function RegisterPage() {
             <span className="login-kicker">TU ESPACIO CHEETAH INVITE</span>
             <h2 id="register-title">Crea tu cuenta</h2>
             <p className="login-description">Regístrate con Google o con tu correo para comenzar a crear.</p>
-            <GoogleSignInButton />
+            <GoogleSignInButton redirectTo={redirectTo} />
             <div className="auth-divider"><span>o regístrate con tu correo</span></div>
-            <RegisterForm />
+            <RegisterForm redirectTo={redirectTo} />
           </div>
           <small className="login-legal">Al continuar, aceptas nuestros <Link href="/terminos">Términos y condiciones</Link> y <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>.</small>
         </section>
