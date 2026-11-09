@@ -16,10 +16,14 @@ export function isInvitationBlurIntensity(value: unknown): value is number {
 }
 export type SectionType = "countdown" | "cover" | "location" | "story" | "ceremony" | "reception" | "program" | "parents" | "dress_code" | "gifts" | "rsvp" | "gallery" | "music" | "custom";
 export type SectionTextAlign = "auto" | "left" | "center" | "right";
+export type MobileImageFocus = "top" | "center" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
+export function isMobileImageFocus(value: unknown): value is MobileImageFocus {
+  return typeof value === "string" && ["top", "center", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right"].includes(value);
+}
 export function isSectionTextAlign(value: unknown): value is SectionTextAlign {
   return typeof value === "string" && ["auto", "left", "center", "right"].includes(value);
 }
-export type InviteSection = { id: string; type: SectionType; title: string; titleCustomized?: boolean; showIcon?: boolean; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; panelStyle?: InvitationPanelStyle; textAlign?: SectionTextAlign; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; enabled: boolean };
+export type InviteSection = { id: string; type: SectionType; title: string; titleCustomized?: boolean; showIcon?: boolean; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; mobileImageFocus?: MobileImageFocus; desktopImageFocus?: MobileImageFocus; panelStyle?: InvitationPanelStyle; textAlign?: SectionTextAlign; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; enabled: boolean };
 export type EditorValues = {
   name: string; eventType: string; eventDate: string; eventTime: string; hostNames: string; venue: string; address: string;
   message: string; imageUrl: string; backgroundImageUrl?: string; panelStyle?: InvitationPanelStyle; coverLayout?: InvitationCoverLayout; glassBorder?: boolean; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; showSectionIcons?: boolean; sectionCorners?: InvitationSectionCorners; accent: string; typography: string; bodyTypography: string; sections: InviteSection[];
@@ -93,6 +97,8 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
       || (section.titleCustomized !== undefined && typeof section.titleCustomized !== 'boolean')
       || (section.showIcon !== undefined && typeof section.showIcon !== 'boolean')
       || (section.rsvpMode !== undefined && (section.type !== "rsvp" || !["external", "integrated"].includes(section.rsvpMode)))
+      || (section.desktopImageFocus !== undefined && !isMobileImageFocus(section.desktopImageFocus))
+      || (section.mobileImageFocus !== undefined && !isMobileImageFocus(section.mobileImageFocus))
       || (section.imagePosition !== undefined && !["before", "after"].includes(section.imagePosition))
       || (section.panelStyle !== undefined && !isInvitationPanelStyle(section.panelStyle))
       || (section.textAlign !== undefined && !isSectionTextAlign(section.textAlign))

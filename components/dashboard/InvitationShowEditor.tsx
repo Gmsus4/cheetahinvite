@@ -22,6 +22,8 @@ import { InvitationSurfacePicker } from "./InvitationSurfacePicker";
 import { InvitationBackgroundBlurControl } from "./InvitationBackgroundBlurControl";
 import { InvitationBackgroundDimControl } from "./InvitationBackgroundDimControl";
 import { InvitationCoverLayoutPicker } from "./InvitationCoverLayoutPicker";
+import { InvitationSectionStyleMenu } from "./InvitationSectionStyleMenu";
+import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
 import { useEditorProtection } from "./useEditorProtection";
 import styles from "./InvitationShowEditor.module.css";
 
@@ -49,9 +51,12 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
   }, [notice]);
 
   const busy = pending || state.saving || uploads > 0;
+  const editingDisabled = busy || !state.ready || Boolean(state.recovery);
+  const dirty = snapshot !== state.acknowledged || state.code === "conflict";
   const availableSections = availableGuidedSections(values.eventType, values.sections);
   const locationSection = values.sections.find(item => item.type === "location");
   const countdownSection = values.sections.find(item => item.type === "countdown");
+  const coverSection = values.sections.find(item => item.type === "cover");
   const section = target && "sectionId" in target ? values.sections.find(item => item.id === target.sectionId) : undefined;
   const label = target ? editLabel(target, section) : "";
   const date = values.eventDate ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${values.eventDate}T12:00:00Z`)) : "La fecha";
@@ -73,6 +78,11 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
     if (!section) return;
     setValues(current => ({ ...current, sections: current.sections.map(item => item.id === section.id ? { ...item, ...changes } : item) }));
   }
+  function changePreviewSection(id: string, changes: Partial<InviteSection>) {
+    if (editingDisabled) return;
+    setNotice("");
+    setValues(current => ({ ...current, sections: current.sections.map(item => item.id === id ? { ...item, ...changes } : item) }));
+  }
   function cancel() {
     if (busy) return;
     if (!controller.discardChanges()) return;
@@ -81,7 +91,7 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
     setTarget(null);
   }
   function save(overwrite = false) {
-    if (busy) return;
+    if (editingDisabled) return;
     startTransition(async () => {
       controller.update(snapshot, false, wizard, true);
       const result = await controller.saveNow(false, overwrite ? state.conflictVersion : undefined);
@@ -100,10 +110,18 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
         <button type="button" onClick={() => open({ kind: "background" })} aria-haspopup="dialog" aria-expanded={target?.kind === "background"} title="Foto de fondo"><FiImage aria-hidden="true" /><span>Fondo</span></button>
         <button type="button" onClick={() => open({ kind: "appearance" })} aria-haspopup="dialog" aria-expanded={target?.kind === "appearance"} title="Apariencia"><FiSliders aria-hidden="true" /><span>Apariencia</span></button>
         <button type="button" onClick={() => open({ kind: "add-section" })} aria-label="Agregar secciones" aria-haspopup="dialog" aria-expanded={target?.kind === "add-section"} disabled={!availableSections.length || busy || !state.ready || Boolean(state.recovery)} title={availableSections.length ? "Agregar secciones" : "Todas las secciones están incluidas"}><FiPlus aria-hidden="true" /><span>{availableSections.length ? "Agregar secciones" : "Todas las secciones están incluidas"}</span></button>
+        <button type="button" className={styles.toolbarSave} onClick={() => save()} disabled={editingDisabled || !dirty} aria-label={pending || state.saving ? "Guardando cambios" : "Guardar cambios"} aria-busy={pending || state.saving} title={pending || state.saving ? "Guardando cambios…" : dirty ? "Guardar cambios" : "Sin cambios pendientes"}><FiSave aria-hidden="true" /><span>{pending || state.saving ? "Guardando…" : "Guardar cambios"}</span></button>
       </div>
     </nav>
-    <CelebrationInvitation {...values} date={date} eventDateKey={values.eventDate} onEdit={open} />
+    <CelebrationInvitation {...values} date={date} eventDateKey={values.eventDate} onEdit={open}
+      renderStyleControl={(item, styleLabel) => <InvitationSectionStyleMenu section={item} label={styleLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
+      renderAlignmentControl={(item, alignmentLabel) => <InvitationSectionStyleMenu mode="alignment" section={item} label={alignmentLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
+    />
     <div className={styles.notice} role="status">{notice && <><FiCheck aria-hidden="true" />{notice}</>}</div>
+    {!target && state.error && <div className={`${styles.error} ${styles.saveError}`} role="alert"><p>{state.error}</p>
+      {state.conflictVersion !== undefined && <button type="button" disabled={editingDisabled} onClick={() => save(true)}>Guardar mi versión</button>}
+      {state.code === "auth" && <EditorProtectedLink guard={confirmNavigation} href={`/login?callbackUrl=${encodeURIComponent(`/dashboard/eventos/${event.id}/show`)}`}>Iniciar sesión</EditorProtectedLink>}
+    </div>}
     {target && <EditDialog key={target.kind} selectionOnly={target.kind === "add-section"} title={label} busy={busy} uploading={uploads > 0} onCancel={cancel} onSave={() => save()}>
       <fieldset className={styles.fields} disabled={busy}>
         {target.kind === "add-section" && <>
@@ -133,6 +151,7 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
           {locationSection && <div className={styles.sectionMedia}><SectionPhotoFields section={locationSection} uploadProps={uploadProps} onChange={changes => patch({ sections: values.sections.map(item => item.id === locationSection.id ? { ...item, ...changes } : item) })} /></div>}
         </>}
         {(target.kind === "cover-photo" || target.kind === "background") && <CloudinaryImageUpload {...uploadProps} multiple={false} images={target.kind === "cover-photo" ? values.imageUrl ? [values.imageUrl] : [] : values.backgroundImageUrl ? [values.backgroundImageUrl] : []} onChange={images => patch(target.kind === "cover-photo" ? { imageUrl: images[0] ?? "" } : { backgroundImageUrl: images[0] ?? "" })} />}
+        {target.kind === "cover-photo" && values.imageUrl && coverSection && <InvitationImageFocusFields section={coverSection} onChange={changes => changePreviewSection(coverSection.id, changes)} />}
         {target.kind === "background" && <>
           <InvitationBackgroundBlurControl value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
           <InvitationBackgroundDimControl value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => patch({ backgroundDimIntensity })} />

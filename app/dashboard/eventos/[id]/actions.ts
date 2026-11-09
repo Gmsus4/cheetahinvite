@@ -5,7 +5,7 @@ import { canEditInvitation } from "@/lib/invitation-lifecycle";
 import { publishCourtesy } from "@/lib/courtesy";
 import { Prisma } from "@/generated/prisma/client";
 
-import { isInvitationPanelStyle, isInvitationBlurIntensity, isInvitationSectionCorners } from "@/lib/invitation-editor";
+import { isMobileImageFocus, isInvitationPanelStyle, isInvitationBlurIntensity, isInvitationSectionCorners } from "@/lib/invitation-editor";
 import { isInvitationCoverLayout } from "@/lib/invitation-cover-layout";
 import type { EditorSaveResult } from "@/lib/invitation-editor";
 import { invitationSectionUrl, invitationExternalUrl } from "@/lib/invitation-links";
@@ -298,6 +298,8 @@ function isValidSection(value: unknown): value is {
   if ((section.id as string).length > 80 || (section.title as string).length > 100 || (section.content as string).length > 2000 || (section.detail as string).length > 240 || (section.link as string).length > 500 || (section.imageUrl as string).length > 1000) return false;
   if (section.layout !== undefined && !["auto", "split", "centered", "card"].includes(section.layout as string)) return false;
   if (section.textAlign !== undefined && !["auto", "left", "center", "right"].includes(section.textAlign as string)) return false;
+  if (section.desktopImageFocus !== undefined && !isMobileImageFocus(section.desktopImageFocus)) return false;
+  if (section.mobileImageFocus !== undefined && !isMobileImageFocus(section.mobileImageFocus)) return false;
   if (section.imagePosition !== undefined && !["before", "after"].includes(section.imagePosition as string)) return false;
   if (section.panelStyle !== undefined && !isInvitationPanelStyle(section.panelStyle)) return false;
   if (section.imageUrls !== undefined && (!Array.isArray(section.imageUrls) || section.imageUrls.length > ACCOUNT_LIMITS.imagesPerGallery || section.imageUrls.some((url) => typeof url !== "string" || url.length > 1000 || !isHttpUrl(url)))) return false;

@@ -818,3 +818,39 @@ test('section quick actions start closed, keep controls available on demand and 
  assert.doesNotMatch(html,/Fondo de esta sección|Mostrar icono|Foto junto a esta sección|Alineación del texto/);
  for(const type of ['gallery','countdown']) assert.equal((render(type).match(/aria-expanded="false"/g)||[]).length,2);
 });
+
+
+test('mobile framing reaches the cover, attached photos and carousel without changing section placement', () => {
+ const load = loadComponents();
+ const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');
+ const { SectionPhotoFields } = load('components/dashboard/InvitationSectionFields.tsx');
+ const { InvitationMobileImageFocus } = load('components/dashboard/InvitationMobileImageFocus.tsx');
+ const blank = { title:'Foto', content:'Texto', detail:'', link:'', enabled:true, imageUrl:'https://example.com/photo.jpg', mobileImageFocus:'bottom', desktopImageFocus:'top' };
+ const sections = [{...blank,id:'cover',type:'cover',mobileImageFocus:'top',desktopImageFocus:'bottom'}, {...blank,id:'story',type:'story',imagePosition:'before'}, {...blank,id:'gallery',type:'gallery',imageUrls:['https://example.com/photo.jpg']}];
+ const props = { name:'Fiesta',eventType:'wedding',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'https://example.com/cover.jpg',accent:'#58664E',sections };
+ for (const coverLayout of ['split', 'split-reverse', 'stacked', 'overlay']) {
+  const html = renderToStaticMarkup(React.createElement(CelebrationInvitation, {...props,coverLayout}));
+  assert.match(html, /class="wa-portrait" data-mobile-image-focus="top" data-desktop-image-focus="bottom"/);
+  assert.equal((html.match(/class="wa-section-media" data-mobile-image-focus="bottom"/g) || []).length, 2);
+  assert.match(html, /data-photo-position="before"/);
+  assert.equal((html.match(/data-mobile-image-focus="bottom" data-desktop-image-focus="top"/g) || []).length, 2);
+  assert.match(html, /wa-carousel-slide/);
+ }
+ const changes = [];
+ const control = InvitationMobileImageFocus({value:'center',onChange:value=>changes.push(value)});
+ const choices = control.props.children[1].props.children;
+ assert.equal(choices[4].props['aria-pressed'], true);
+ choices.forEach(choice => choice.props.onClick());
+ assert.deepEqual(changes, ['top-left', 'top', 'top-right', 'left', 'center', 'right', 'bottom-left', 'bottom', 'bottom-right']);
+ for (const section of sections.slice(1)) {
+  const html = renderToStaticMarkup(React.createElement(SectionPhotoFields, { section, onChange(){}, uploadProps:{eventId:'event',onBusyChange(){}} }));
+  assert.match(html, /Encuadre de la foto en móvil/);
+  assert.match(html, /Encuadre de la foto en escritorio/);
+ }
+ const { InvitationImageFocusFields } = load('components/dashboard/InvitationMobileImageFocus.tsx');
+ const updates = [];
+ const fields = InvitationImageFocusFields({ section:sections[0], onChange:patch=>updates.push(patch) }).props.children;
+ fields[0].props.onChange('top-left');
+ fields[1].props.onChange('bottom-right');
+ assert.deepEqual(updates, [{mobileImageFocus:'top-left'}, {desktopImageFocus:'bottom-right'}]);
+});

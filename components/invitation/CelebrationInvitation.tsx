@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import type { ReactNode } from "react";
 import { isInvitationCoverLayout } from "@/lib/invitation-cover-layout";
 import { parseInvitationProgram } from "@/lib/invitation-program";
 import { normalizeEventLocations } from "@/lib/invitation-locations";
@@ -19,13 +20,20 @@ import { orderedInvitationSections, usesPrimaryLocation, locationSectionTitle } 
 const sectionIcons = { countdown: FiClock, cover: FiImage, location: FiMapPin, story: FiHeart, ceremony: FiHeart, reception: FiMapPin, program: FiClock, parents: FiUsers, dress_code: FiUsers, gifts: FiGift, gallery: FiImage, rsvp: FiHeart, music: FiMusic, custom: FiHeart };
 
 type EditHandler = (target: InvitationEditTarget) => void;
+type StyleControlRenderer = (section: InviteSection, label: string) => ReactNode;
+
+function SurfaceControl({ section, label, onEdit, renderStyleControl }: { section?: InviteSection; label: string; onEdit?: EditHandler; renderStyleControl?: StyleControlRenderer }) {
+  if (!section || !onEdit) return null;
+  return renderStyleControl ? renderStyleControl(section, label) : <button type="button" className="wa-edit-button wa-edit-surface" aria-label={label} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-surface", sectionId: section.id })}><FiLayers aria-hidden="true" /><span>Estilo</span></button>;
+}
 
 function EditControl({ target, label, text, onEdit }: { target: InvitationEditTarget; label: string; text?: string; onEdit?: EditHandler }) {
   const Icon = target.kind === "cover-photo" || target.kind === "section-photo" ? FiImage : FiEdit3;
   return onEdit ? <button type="button" className="wa-edit-button" aria-label={`Editar ${label}`} aria-haspopup="dialog" onClick={() => onEdit(target)}><Icon aria-hidden="true" /><span>{text ?? `Editar ${label}`}</span></button> : null;
 }
 
-function AlignmentControl({ section, onEdit }: { section?: InviteSection; onEdit?: EditHandler }) {
+function AlignmentControl({ section, onEdit, renderAlignmentControl }: { section?: InviteSection; onEdit?: EditHandler; renderAlignmentControl?: StyleControlRenderer }) {
+  if (section && onEdit && renderAlignmentControl) return renderAlignmentControl(section, `Editar alineación del texto de ${section.title}`);
   return section && onEdit ? <button type="button" className="wa-edit-button wa-edit-alignment" aria-label={`Editar alineación del texto de ${section.title}`} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-alignment", sectionId: section.id })}><FiAlignCenter aria-hidden="true" /><span>Alineación</span></button> : null;
 }
 
@@ -33,7 +41,7 @@ function VisibilityControl({ section, onEdit }: { section?: InviteSection; onEdi
   return section && section.type !== "cover" && onEdit ? <button type="button" className="wa-edit-button" aria-label={`Cambiar visibilidad de ${section.title}`} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-visibility", sectionId: section.id })}><FiEyeOff aria-hidden="true" /><span>Visibilidad</span></button> : null;
 }
 
-export function CelebrationInvitation(inputProps: InvitationProps & { preview?: boolean; showPlaceholders?: boolean; onEdit?: EditHandler }) {
+export function CelebrationInvitation(inputProps: InvitationProps & { preview?: boolean; showPlaceholders?: boolean; onEdit?: EditHandler; renderStyleControl?: StyleControlRenderer; renderAlignmentControl?: StyleControlRenderer }) {
   const motion = useInvitationMotion(!inputProps.preview);
   const props = { ...inputProps, ...normalizeEventLocations(inputProps.venue, inputProps.address, inputProps.sections) };
   const panelStyle = props.panelStyle ?? "auto";
@@ -72,37 +80,37 @@ export function CelebrationInvitation(inputProps: InvitationProps & { preview?: 
         <div className="wa-cover-heading" data-text-align={coverSection?.textAlign} data-editable={Boolean(props.onEdit) || undefined}>
           {props.onEdit && <div className="wa-edit-actions" role="group" aria-label="Acciones de la portada">
             <EditControl target={{ kind: "cover" }} label="portada" onEdit={props.onEdit} />
-            {coverSection && <button type="button" className="wa-edit-button wa-edit-surface" aria-label="Editar estilo de portada" aria-haspopup="dialog" onClick={() => props.onEdit?.({ kind: "section-surface", sectionId: coverSection.id })}><FiLayers aria-hidden="true" /><span>Estilo</span></button>}
-            <AlignmentControl section={coverSection} onEdit={props.onEdit} />
+            <SurfaceControl section={coverSection} label="Editar estilo de portada" onEdit={props.onEdit} renderStyleControl={props.renderStyleControl} />
+            <AlignmentControl section={coverSection} onEdit={props.onEdit} renderAlignmentControl={props.renderAlignmentControl} />
           </div>}
           <span className="wa-kicker" data-invitation-field="w-name">{props.name.trim() || content.defaultName}</span>
           <h1 aria-label={title} data-invitation-field="w-hosts">{names.length === 2 ? <><span className="wa-couple-name">{names[0]}</span><span className="wa-ampersand" aria-hidden="true">&amp;</span><span className="wa-couple-name">{names[1]}</span></> : title}</h1>
           <p className="wa-date" data-invitation-field="w-date w-time">{date}{time && <><span aria-hidden="true"> · </span>{time}</>}</p>
         </div>
-        {props.imageUrl ? <div className="wa-portrait" data-editable={Boolean(props.onEdit) || undefined} data-invitation-field="cover-photo"><EditControl target={{ kind: "cover-photo" }} label="foto de portada" onEdit={props.onEdit} /><Image src={props.imageUrl} alt={`${copy.photoLabel}: ${title}`} width={900} height={1000} sizes="(max-width:600px) 94vw, 540px" preload unoptimized /></div>
+        {props.imageUrl ? <div className="wa-portrait" data-mobile-image-focus={coverSection?.mobileImageFocus} data-desktop-image-focus={coverSection?.desktopImageFocus} data-editable={Boolean(props.onEdit) || undefined} data-invitation-field="cover-photo"><EditControl target={{ kind: "cover-photo" }} label="foto de portada" onEdit={props.onEdit} /><Image src={props.imageUrl} alt={`${copy.photoLabel}: ${title}`} width={900} height={1000} sizes="(max-width:600px) 94vw, 540px" preload unoptimized /></div>
           : <div className="wa-no-photo" aria-hidden={props.onEdit ? undefined : true} data-editable={Boolean(props.onEdit) || undefined} data-invitation-field="cover-photo"><EditControl target={{ kind: "cover-photo" }} label="foto de portada" onEdit={props.onEdit} /><span>{initials}</span><i>{copy.caption}</i></div>}
       </header>
       {hasCountdown && <section className="wa-panel wa-countdown" data-text-align={countdownSection?.textAlign} data-editable={Boolean(props.onEdit) || undefined} data-invitation-field={`countdown${countdownSection ? ` section:${countdownSection.id}` : ""}`} data-surface={atmospherePanelStyle(countdownSection, 1, panelStyle)} aria-label="Cuenta regresiva">
         {props.onEdit && <div className="wa-edit-actions" role="group" aria-label="Acciones de la cuenta regresiva">
           <EditControl target={{ kind: "date" }} label="fecha y hora" onEdit={props.onEdit} />
-          {countdownSection && <button type="button" className="wa-edit-button wa-edit-surface" aria-label="Editar estilo de la cuenta regresiva" aria-haspopup="dialog" onClick={() => props.onEdit?.({ kind: "section-surface", sectionId: countdownSection.id })}><FiLayers aria-hidden="true" /><span>Estilo</span></button>}
-          <AlignmentControl section={countdownSection} onEdit={props.onEdit} />
+          <SurfaceControl section={countdownSection} label="Editar estilo de la cuenta regresiva" onEdit={props.onEdit} renderStyleControl={props.renderStyleControl} />
+          <AlignmentControl section={countdownSection} onEdit={props.onEdit} renderAlignmentControl={props.renderAlignmentControl} />
           <VisibilityControl section={countdownSection} onEdit={props.onEdit} />
         </div>}
         <span className="wa-kicker" data-invitation-field={countdownSection ? `${countdownSection.id}-title` : undefined}>{countdownSection?.title || "Cada vez más cerca"}</span><CountdownTimer date={props.eventDateKey!} time={props.eventTime || "00:00"} />
       </section>}
       </div>
-      {hasLocation && <AtmosphereSection showIcons={props.showSectionIcons !== false} section={locationSection ?? { id: "primary-location", type: "location", title: "Lugar del evento", content: "", detail: "", link: "", imageUrl: "", enabled: true }} surface={atmospherePanelStyle(locationSection, 1 + Number(hasCountdown), panelStyle)} onEdit={props.onEdit} locationDetails={{ venue: props.venue, address: props.address, showPlaceholders: props.showPlaceholders, date: date + (time ? ` · ${time}` : "") }} />}
+      {hasLocation && <AtmosphereSection showIcons={props.showSectionIcons !== false} section={locationSection ?? { id: "primary-location", type: "location", title: "Lugar del evento", content: "", detail: "", link: "", imageUrl: "", enabled: true }} surface={atmospherePanelStyle(locationSection, 1 + Number(hasCountdown), panelStyle)} onEdit={props.onEdit} renderStyleControl={props.renderStyleControl} renderAlignmentControl={props.renderAlignmentControl} locationDetails={{ venue: props.venue, address: props.address, showPlaceholders: props.showPlaceholders, date: date + (time ? ` · ${time}` : "") }} />}
 
 
-      {sections.map((section, index) => <AtmosphereSection showIcons={props.showSectionIcons !== false} key={section.id} section={section} surface={atmospherePanelStyle(section, firstDetailIndex + index, panelStyle)} eventId={props.publicEventId} onEdit={props.onEdit} />)}
+      {sections.map((section, index) => <AtmosphereSection showIcons={props.showSectionIcons !== false} key={section.id} section={section} surface={atmospherePanelStyle(section, firstDetailIndex + index, panelStyle)} eventId={props.publicEventId} onEdit={props.onEdit} renderStyleControl={props.renderStyleControl} renderAlignmentControl={props.renderAlignmentControl} />)}
       </div>
       <footer className="wa-footer"><span className="wa-kicker">{copy.closingKicker}</span><strong>{title}</strong><p>{copy.closingMessage}</p><small>Cheetah Invite</small></footer>
     </div>
   </article>;
 }
 
-function AtmosphereSection({ section, eventId, surface, onEdit, locationDetails, showIcons = true }: { showIcons?: boolean; locationDetails?: { venue: string; address: string; date: string; showPlaceholders?: boolean }; section: InviteSection; eventId?: string; surface: Exclude<InvitationProps["panelStyle"], "auto" | undefined>; onEdit?: EditHandler }) {
+function AtmosphereSection({ section, eventId, surface, onEdit, renderStyleControl, renderAlignmentControl, locationDetails, showIcons = true }: { showIcons?: boolean; locationDetails?: { venue: string; address: string; date: string; showPlaceholders?: boolean }; section: InviteSection; eventId?: string; surface: Exclude<InvitationProps["panelStyle"], "auto" | undefined>; onEdit?: EditHandler; renderStyleControl?: StyleControlRenderer; renderAlignmentControl?: StyleControlRenderer }) {
   const Icon = sectionIcons[section.type];
   const photoLabel = section.type === "gallery" ? "fotos" : "foto";
   const sectionPhoto = section.type !== "gallery" ? section.imageUrl : "";
@@ -113,7 +121,7 @@ function AtmosphereSection({ section, eventId, surface, onEdit, locationDetails,
     <Image src={sectionPhoto} alt={`Foto que acompaña ${section.title}`} width={1200} height={800} sizes="(max-width:600px) calc(100vw - 24px), 560px" unoptimized />
   </figure> : null;
   const url = locationDetails ? invitationLocationUrl(locationDetails.venue, locationDetails.address, section.link) : invitationSectionUrl(section.type, section.link);
-  const media = (photo || images.length > 0) ? <div className="wa-section-media" data-editable={Boolean(onEdit) || undefined}>
+  const media = (photo || images.length > 0) ? <div className="wa-section-media" data-mobile-image-focus={section.mobileImageFocus} data-desktop-image-focus={section.desktopImageFocus} data-editable={Boolean(onEdit) || undefined}>
     <EditControl target={{ kind: "section-photo", sectionId: section.id }} label={`${photoLabel} de ${section.title}`} text={`Editar ${photoLabel}`} onEdit={onEdit} />
     {photo}
     {images.length > 0 && (section.type === "gallery" ? <InvitationPhotoCarousel images={images} title={section.title} /> : <div className="wa-photo-grid">{images.map((src, index) => <figure key={`${src}-${index}`}><Image src={src} alt={`${section.title} · fotografía ${index + 1}`} width={800} height={1000} sizes="(max-width:600px) 88vw, 500px" unoptimized /></figure>)}</div>)}
@@ -123,8 +131,8 @@ function AtmosphereSection({ section, eventId, surface, onEdit, locationDetails,
     {onEdit && <div className="wa-edit-actions" role="group" aria-label={`Acciones de ${section.title}`}>
       <EditControl target={locationDetails ? { kind: "location" } : { kind: "section", sectionId: section.id }} label={locationDetails ? "lugar" : section.title} text="Editar" onEdit={onEdit} />
       <button type="button" className="wa-edit-button" aria-label={`${media ? "Editar" : "Agregar"} ${photoLabel} ${media ? "de" : "a"} ${section.title}`} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-photo", sectionId: section.id })}><FiImage aria-hidden="true" /><span>{media ? "Editar" : "Agregar"} {photoLabel}</span></button>
-      <button type="button" className="wa-edit-button wa-edit-surface" aria-label={locationDetails ? "Editar estilo del lugar principal" : `Editar estilo de ${section.title}`} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-surface", sectionId: section.id })}><FiLayers aria-hidden="true" /><span>Estilo</span></button>
-      <AlignmentControl section={section} onEdit={onEdit} />
+      <SurfaceControl section={section} label={locationDetails ? "Editar estilo del lugar principal" : `Editar estilo de ${section.title}`} onEdit={onEdit} renderStyleControl={renderStyleControl} />
+      <AlignmentControl section={section} onEdit={onEdit} renderAlignmentControl={renderAlignmentControl} />
       <VisibilityControl section={section} onEdit={onEdit} />
     </div>}
     {showIcons && section.type !== "gallery" && section.showIcon !== false && <Icon className="wa-section-icon" aria-hidden="true" />}<h2 id={locationDetails ? "invitation-location-title" : undefined} data-invitation-field={`${section.id}-title`}>{locationDetails ? locationSectionTitle(section) : section.title}</h2>

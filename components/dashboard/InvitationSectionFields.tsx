@@ -6,6 +6,7 @@ import type { InviteSection, InvitationPanelStyle } from "@/lib/invitation-edito
 import { invitationSurfaceOptions } from "@/lib/invitation-style-journey";
 import { InvitationProgramFields } from "./InvitationProgramFields";
 import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
+import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
 
 type SectionFieldsProps = { globalPanelStyle?: InvitationPanelStyle; globalShowIcons?: boolean; section: InviteSection; onChange(changes: Partial<InviteSection>): void; uploadProps: { eventId: string; ensureEvent?: () => Promise<string>; onBusyChange(active: boolean): void }; allowSectionPhoto?: boolean; showStyleControls?: boolean; mediaClassName?: string; locationFields?: ReactNode };
 
@@ -79,7 +80,7 @@ export function SectionSurfaceFields({ section, onChange, globalPanelStyle = "au
 }
 
 export function SectionPhotoFields({ section, onChange, uploadProps }: Pick<SectionFieldsProps, "section" | "onChange" | "uploadProps">) {
-  if (section.type === "gallery") return <CloudinaryImageUpload {...uploadProps} multiple images={section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : []} onChange={imageUrls => onChange({ imageUrls, imageUrl: imageUrls[0] ?? "" })} />;
+  if (section.type === "gallery") return <><CloudinaryImageUpload {...uploadProps} multiple images={section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : []} onChange={imageUrls => onChange({ imageUrls, imageUrl: imageUrls[0] ?? "" })} />{(section.imageUrl || Boolean(section.imageUrls?.length)) && <InvitationImageFocusFields section={section} onChange={onChange} />}</>;
   return <div className="guided-section-photo" data-preview-field={`${section.id}-photo`} data-preview-label={`Foto de ${section.title}`}>
     <h3>Foto junto a esta sección <span>Opcional</span></h3>
     <p>En escritorio, las fotos alternan automáticamente entre izquierda y derecha. En móvil, elige si aparece antes o después de la sección.</p>
@@ -88,6 +89,7 @@ export function SectionPhotoFields({ section, onChange, uploadProps }: Pick<Sect
       const additional = section.imageUrls?.filter(url => url !== section.imageUrl && url !== imageUrl) ?? [];
       onChange({ imageUrl, ...(section.imageUrls?.length ? { imageUrls: [imageUrl, ...additional].filter(Boolean) } : {}), imagePosition: section.imagePosition ?? "after" });
     }} />
+    {section.imageUrl && <InvitationImageFocusFields section={section} onChange={onChange} />}
     {section.imageUrl && <Field label="¿Dónde quieres mostrar la foto en móvil?" id={`${section.id}-photo-position`}><select id={`${section.id}-photo-position`} value={section.imagePosition ?? "after"} onChange={event => onChange({ imagePosition: event.target.value as "before" | "after" })}><option value="before">Antes de esta sección</option><option value="after">Después de esta sección</option></select></Field>}
   </div>;
 }

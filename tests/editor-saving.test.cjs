@@ -339,3 +339,29 @@ test('disabled sections retain their content and settings, survive reopening and
  const active=initialGuidedValues(f.state.events.get('event'));assert.deepEqual(active.sections.find(s=>s.id==='story'),{...section,layout:'auto',enabled:true});assert.ok(!availableGuidedSections('wedding',active.sections).some(s=>s.id==='story'));
  const extra={...section,id:'custom',type:'custom'};assert.ok(availableGuidedSections('wedding',[extra]).some(s=>s.id==='custom'));
 });
+
+
+test('mobile and desktop framing persist independently for cover and section photos and reject invalid positions', async () => {
+ const f = createFixture();
+ const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
+ for (const mobileImageFocus of ['top', 'center', 'bottom', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right']) {
+  const desktopImageFocus = { top:'bottom', center:'top', bottom:'center', left:'right', right:'left', 'top-left':'bottom-right', 'top-right':'bottom-left', 'bottom-left':'top-right', 'bottom-right':'top-left' }[mobileImageFocus];
+  const form = f.saveForm();
+  form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+  form.set('sections', JSON.stringify(['cover', 'story', 'gallery'].map(type => ({ id:type, type, title:type, content:'Texto', detail:'', link:'', imageUrl:'', enabled:true, mobileImageFocus, desktopImageFocus }))));
+  assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+  const restored = initialGuidedValues(f.state.events.get('event'));
+  for (const type of ['cover', 'story', 'gallery']) {
+   assert.equal(restored.sections.find(section => section.type === type).mobileImageFocus, mobileImageFocus);
+   assert.equal(restored.sections.find(section => section.type === type).desktopImageFocus, desktopImageFocus);
+  }
+ }
+ const before = structuredClone(f.state.events.get('event'));
+ for (const key of ['mobileImageFocus', 'desktopImageFocus']) for (const value of ['', 'diagonal', 'TOP', null, 50]) {
+  const form = f.saveForm();
+  form.set('contentVersion', String(before.contentVersion));
+  form.set('sections', JSON.stringify([{ id:'story', type:'story', title:'Historia', content:'Texto', detail:'', link:'', imageUrl:'', enabled:true, [key]:value }]));
+  assert.equal((await f.actions.updateEvent('event', form)).code, 'validation');
+  assert.deepEqual(f.state.events.get('event'), before);
+ }
+});

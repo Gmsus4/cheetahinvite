@@ -1,0 +1,26 @@
+.page { display: flex; flex: 1; flex-direction: column; min-height: 100svh; background: var(--app-background); color: var(--ink); font-family: var(--font-body), Arial, sans-serif; }
+.page * { box-sizing: border-box; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: min(1120px, calc(100% - 40px)); margin: 20px auto 0; padding: 14px 20px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-family: var(--font-poppins), Arial, sans-serif; font-size: 20px; font-weight: 600; letter-spacing: -.04em; text-decoration: none; }
+.brand > span > span { color: var(--orange); }
+.main { display: grid; flex: 1; place-items: center; padding: 64px 24px; }
+.content { width: min(100%, 640px); text-align: center; }
+.code { margin: 0 0 24px; color: var(--orange); font-family: var(--font-poppins), Arial, sans-serif; font-size: clamp(100px, 18vw, 160px); font-weight: 600; line-height: 1; letter-spacing: -.07em; }
+.content h1 { margin: 0; font-family: var(--font-poppins), Arial, sans-serif; font-size: clamp(28px, 4vw, 44px); font-weight: 600; line-height: 1.2; letter-spacing: -.045em; text-wrap: balance; }
+.description { max-width: 460px; margin: 22px auto 0; color: var(--muted); font-size: 16px; line-height: 1.85; text-wrap: pretty; }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 32px; }
+.actions a { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 14px 20px; border: 1px solid var(--line); border-radius: 12px; font-size: 14px; font-weight: 600; line-height: 1.5; text-decoration: none; }
+.actions .primary { border-color: var(--orange); background: var(--orange); color: var(--on-inverse); }
+.actions .primary:hover { border-color: var(--orange-hover); background: var(--orange-hover); }
+.actions svg { flex: none; width: 18px; height: 18px; }
+.note { max-width: 460px; margin: 36px auto 0; padding-top: 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; line-height: 1.85; }
+.footer { padding: 0 24px 28px; color: var(--faint); font-size: 12px; line-height: 1.6; text-align: center; }
+.page a:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }
+@media (max-width: 480px) {
+  .header { width: calc(100% - 24px); margin-top: 12px; padding: 10px 12px; gap: 12px; border-radius: 16px; }
+  .brand { gap: 8px; font-size: 17px; }
+  .main { padding: 48px 24px; }
+  .description { font-size: 14px; }
+  .actions { flex-direction: column; }
+  .actions a { width: 100%; }
+}

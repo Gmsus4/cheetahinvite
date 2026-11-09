@@ -473,3 +473,18 @@ test('draft recovery preserves the new appearance substep and rejects unknown fl
   assert.equal(parseEditorDraft(JSON.stringify({...record,wizard:{...wizard,flow:'unknown'}}),'owner','event',now),null);
  }
 });
+
+
+test('draft recovery keeps independent mobile and desktop image framing and accepts legacy photos', () => {
+ const now = Date.now();
+ const record = { schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:now,wizard:{step:0,activeExtra:null} };
+ for (const key of ['mobileImageFocus', 'desktopImageFocus']) for (const focus of [undefined, 'top', 'center', 'bottom', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right', 'diagonal', null, 0]) {
+  const section = {id:'cover',type:'cover',title:'Portada',content:'',detail:'',link:'',imageUrl:'',enabled:true,[key]:focus};
+  const snapshot = JSON.stringify({...JSON.parse(values('Fiesta')),sections:[section]});
+  const parsed = parseEditorDraft(JSON.stringify({...record,snapshot}), 'owner', 'event', now);
+  if (focus === undefined || ['top','center','bottom','left','right','top-left','top-right','bottom-left','bottom-right'].includes(focus)) {
+   assert.ok(parsed);
+   assert.deepEqual(JSON.parse(parsed.snapshot).sections, JSON.parse(snapshot).sections);
+  } else assert.equal(parsed, null);
+ }
+});

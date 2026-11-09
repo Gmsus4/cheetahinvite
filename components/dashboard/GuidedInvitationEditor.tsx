@@ -22,6 +22,7 @@ import { invitationPriceLabel, isInvitationPublished, hasPublicationGrant } from
 import { invitationPath } from "@/lib/invitation-url";
 import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
 import { SectionFields } from "./InvitationSectionFields";
+import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
 import { SectionQuickActions } from "./SectionQuickActions";
 import { useEditorProtection } from "./useEditorProtection";
 import { EditorProtectedLink } from "./EditorProtectedLink";
@@ -279,7 +280,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                     <p>Ya contiene los datos de los pasos anteriores: nombres, nombre de la invitación, fecha, hora, y foto de portada. La cuenta regresiva se personaliza en el siguiente bloque.</p>
                     <p><strong>{values.name}</strong><br />{values.hostNames}<br />{date}{values.eventTime && ` · ${values.eventTime}`}</p>
                     <div className={styles.blockLinks}><button type="button" onClick={() => goTo(0)}>Editar nombres</button><button type="button" onClick={() => goTo(1)}>Editar fecha y hora</button></div>
-                    <SectionQuickActions section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} globalPanelStyle={values.panelStyle} globalShowIcons={values.showSectionIcons} uploadProps={uploadProps} disabled={busy || uploads > 0} photoFields={<><h3>Foto de portada</h3><CloudinaryImageUpload {...uploadProps} images={values.imageUrl ? [values.imageUrl] : []} multiple={false} onChange={images => patch({ imageUrl: images[0] ?? '' })} /></>} />
+                    <SectionQuickActions section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} globalPanelStyle={values.panelStyle} globalShowIcons={values.showSectionIcons} uploadProps={uploadProps} disabled={busy || uploads > 0} photoFields={<><h3>Foto de portada</h3><CloudinaryImageUpload {...uploadProps} images={values.imageUrl ? [values.imageUrl] : []} multiple={false} onChange={images => patch({ imageUrl: images[0] ?? '' })} />{values.imageUrl && <InvitationImageFocusFields section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} />}</>} />
                   </> : currentSection && <>
                     <div className={styles.blockHeader}><h2>{currentSection.title}</h2>
                     <label className="guided-toggle" htmlFor={`include-${currentSection.id}`}>

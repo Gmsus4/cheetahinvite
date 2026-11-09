@@ -312,3 +312,29 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
   .celebration-invitation .wa-intro[data-cover-layout="stacked"] .wa-portrait img { aspect-ratio: 4/5; }
   .celebration-invitation .wa-intro[data-cover-layout="overlay"] { min-height: 680px; padding: 24px 20px; }
 }
+@media(max-width:959px) {
+  .celebration-invitation [data-mobile-image-focus="top"] { --mobile-image-position: center top; }
+  .celebration-invitation [data-mobile-image-focus="center"] { --mobile-image-position: center center; }
+  .celebration-invitation [data-mobile-image-focus="bottom"] { --mobile-image-position: center bottom; }
+  .celebration-invitation [data-mobile-image-focus="left"] { --mobile-image-position: left center; }
+  .celebration-invitation [data-mobile-image-focus="right"] { --mobile-image-position: right center; }
+  .celebration-invitation [data-mobile-image-focus="top-left"] { --mobile-image-position: left top; }
+  .celebration-invitation [data-mobile-image-focus="top-right"] { --mobile-image-position: right top; }
+  .celebration-invitation [data-mobile-image-focus="bottom-left"] { --mobile-image-position: left bottom; }
+  .celebration-invitation [data-mobile-image-focus="bottom-right"] { --mobile-image-position: right bottom; }
+  .celebration-invitation .wa-shell .wa-intro .wa-portrait[data-mobile-image-focus] img,
+  .celebration-invitation .wa-shell .wa-section-media[data-mobile-image-focus] img { object-position: var(--mobile-image-position); }
+}
+@media(min-width:960px) {
+  .celebration-invitation [data-desktop-image-focus="top"] { --desktop-image-position: center top; }
+  .celebration-invitation [data-desktop-image-focus="center"] { --desktop-image-position: center center; }
+  .celebration-invitation [data-desktop-image-focus="bottom"] { --desktop-image-position: center bottom; }
+  .celebration-invitation [data-desktop-image-focus="left"] { --desktop-image-position: left center; }
+  .celebration-invitation [data-desktop-image-focus="right"] { --desktop-image-position: right center; }
+  .celebration-invitation [data-desktop-image-focus="top-left"] { --desktop-image-position: left top; }
+  .celebration-invitation [data-desktop-image-focus="top-right"] { --desktop-image-position: right top; }
+  .celebration-invitation [data-desktop-image-focus="bottom-left"] { --desktop-image-position: left bottom; }
+  .celebration-invitation [data-desktop-image-focus="bottom-right"] { --desktop-image-position: right bottom; }
+  .celebration-invitation .wa-shell .wa-intro .wa-portrait[data-desktop-image-focus] img,
+  .celebration-invitation .wa-shell .wa-section-media[data-desktop-image-focus] img { object-position: var(--desktop-image-position); }
+}
