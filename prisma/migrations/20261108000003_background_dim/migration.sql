@@ -1,0 +1,1 @@
+ALTER TABLE "Event" ADD COLUMN "backgroundDimIntensity" INTEGER NOT NULL DEFAULT 0;

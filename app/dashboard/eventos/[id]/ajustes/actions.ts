@@ -4,6 +4,7 @@ import { prisma } from "@/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { hashInvitationPin, validInvitationPin } from "@/lib/invitation-pin";
 import { revalidatePath } from "next/cache";
+import { canEditInvitation } from "@/lib/invitation-lifecycle";
 
 export async function saveInvitationPrivacy(eventId: string, privacy: string, pin: string, version: number) {
   const session = await auth();
@@ -15,6 +16,7 @@ export async function saveInvitationPrivacy(eventId: string, privacy: string, pi
       await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${eventId} AND "ownerId" = ${session.user.id} FOR UPDATE`);
       const event = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
       if (!event) return { ok: false, error: "No encontramos esta invitación." } as const;
+      if (!canEditInvitation(event)) return { ok: false, error: "La edición está desactivada. Revisa la vigencia en Pago y soporte." } as const;
       if (event.isExample) return { ok: false, error: "Gestiona los ejemplos desde Administración." } as const;
       if (event.privacyVersion !== version) return { ok: false, error: "Los ajustes cambiaron en otra pestaña. Vuelve a abrir Ajustes para consultar la versión actual." } as const;
       const pinHash = privacy === "PRIVATE" ? newHash || event.pinHash : null;

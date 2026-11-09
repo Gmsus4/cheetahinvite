@@ -11,3 +11,8 @@
 .card:focus-visible { outline: 3px solid var(--orange); outline-offset: 4px; }
 @media(max-width:700px) { .card { padding: 22px 18px; gap: 12px; } }
 @media(prefers-reduced-motion:reduce) { .card,.arrow { transition: none; } .card:hover { transform: none; } }
+.card.compact { padding: 15px 18px; gap: 12px; border-radius: 16px; }
+.compact .icon { flex-basis: 36px; width: 36px; height: 36px; border-radius: 11px; font-size: 18px; }
+.card.compact .copy h2 { font-size: 13px; }
+.card.compact .copy p { margin-top: 3px; font-size: 11px; line-height: 1.5; }
+.compact .arrow { flex-basis: 28px; width: 28px; height: 28px; font-size: 14px; }

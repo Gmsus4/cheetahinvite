@@ -1,0 +1,1 @@
+ALTER TABLE "Event" ADD COLUMN "coverLayout" TEXT NOT NULL DEFAULT 'split';

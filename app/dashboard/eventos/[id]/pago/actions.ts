@@ -6,13 +6,14 @@ import { stripeIsConfigured } from "@/lib/stripe";
 import { prepareInvitationCheckout } from "@/lib/payment-checkout";
 import { redirect } from "next/navigation";
 import { eventPublicationIssues } from "@/lib/guided-invitation";
+import { canRenewInvitation } from "@/lib/invitation-lifecycle";
 
 export async function startCheckout(eventId: string) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login?callbackUrl=%2Fdashboard");
   const event = await prisma.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
   if (!event) redirect("/dashboard?error=evento");
-  if (event.paidAt || event.complimentaryAt || event.isExample) redirect(`/dashboard/eventos/${eventId}/pago`);
+  if (event.isExample || ((event.paidAt || event.complimentaryAt) && !canRenewInvitation(event))) redirect(`/dashboard/eventos/${eventId}/pago`);
   if (event.privacy === "UNSET") redirect(`/dashboard/eventos/${eventId}/ajustes`);
   if (eventPublicationIssues(event).length) redirect(`/dashboard/eventos/${eventId}?error=pendientes`);
   if (!stripeIsConfigured()) redirect(`/dashboard/eventos/${eventId}/pago?error=disponibilidad`);

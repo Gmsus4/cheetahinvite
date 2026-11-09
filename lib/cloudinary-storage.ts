@@ -6,6 +6,7 @@ import { prisma } from "@/prisma";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { destroyCloudinaryImage, destroyCloudinaryUploadVariants, isOwnCloudinaryUrl, ownedCloudinaryPublicId } from "@/lib/cloudinary";
 import { invitationImageUrls } from "@/lib/invitation-images";
+import { canEditInvitation } from "@/lib/invitation-lifecycle";
 
 type Transaction = Prisma.TransactionClient;
 type Images = { imageUrl?: string | null; backgroundImageUrl?: string | null; sections?: unknown; isExample?: boolean };
@@ -38,8 +39,9 @@ async function adoptSavedImages(tx: Transaction, ownerId: string, eventId: strin
 
 export async function reserveCloudinaryImage(ownerId: string, eventId: string, signedUntil?: Date) {
   return withImageLock(ownerId, async tx => {
-    const event = await tx.event.findFirst({ where: { id: eventId, ownerId }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, isExample: true } });
+    const event = await tx.event.findFirst({ where: { id: eventId, ownerId }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, isExample: true, status: true, paidAt: true, complimentaryAt: true, expiresAt: true } });
     if (!event) throw new ImageStorageError("No encontramos este evento.", 404);
+    if (!canEditInvitation(event)) throw new ImageStorageError("La edición está desactivada. Revisa la vigencia de tu invitación.", 403);
     const operator = await tx.user.findUnique({ where: { id: ownerId }, select: { role: true } });
     if (event.isExample && operator?.role !== "ADMIN") throw new ImageStorageError("No tienes permiso para editar este ejemplo.", 403);
     await adoptSavedImages(tx, ownerId, eventId, event);

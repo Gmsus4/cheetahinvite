@@ -11,6 +11,9 @@ import { InvitationCornersPicker } from "./InvitationCornersPicker";
 import { InvitationIconsPicker } from "./InvitationIconsPicker";
 import { InvitationPalettePicker } from "./InvitationPalettePicker";
 import { InvitationFontSelect } from "./InvitationFontSelect";
+import { InvitationGlassBorderToggle } from "./InvitationGlassBorderToggle";
+import { InvitationBackgroundBlurControl } from "./InvitationBackgroundBlurControl";
+import { InvitationBackgroundDimControl } from "./InvitationBackgroundDimControl";
 import styles from "./InvitationStyleJourney.module.css";
 
 export function InvitationStyleJourney({ values, step, onStepChange, onChange }: { values: EditorValues; step: number; onStepChange(step: number): void; onChange(changes: Partial<EditorValues>): void }) {
@@ -28,12 +31,15 @@ export function InvitationStyleJourney({ values, step, onStepChange, onChange }:
       <p>Elige cómo se verá el fondo de los bloques. El texto siempre queda nítido.</p>
       <div className={styles.finishes} role="group" aria-label="Acabado de todas las secciones">{invitationSurfaceOptions.map(item => <button type="button" key={item.value} aria-pressed={surface === item.value} onClick={() => onChange({ panelStyle: item.value })}>{item.label}</button>)}</div>
       <p className={styles.help} role="status">{option.description}</p>
-      {surface !== "color" && <div className={styles.intensity} style={{ "--intensity-progress": `${intensity}%` } as CSSProperties}>
+      {(surface === "glass" || surface === "auto") && <InvitationGlassBorderToggle value={values.glassBorder} onChange={glassBorder => onChange({ glassBorder })} />}
+      {surface !== "color" && surface !== "none" && <div className={styles.intensity} style={{ "--intensity-progress": `${intensity}%` } as CSSProperties}>
         <label htmlFor={`${id}-intensity`}>Intensidad del desenfoque <output htmlFor={`${id}-intensity`}>{intensity}<span>%</span></output></label>
         <input id={`${id}-intensity`} type="range" min={0} max={100} step={1} value={intensity} aria-valuetext={`${intensity}% de intensidad`} aria-describedby={`${id}-intensity-help`} onChange={event => onChange({ blurIntensity: Number(event.target.value) })} />
         <div className={styles.scale} aria-hidden="true"><span>Más detalle</span><span>Más suave</span></div>
         <small id={`${id}-intensity-help`}>Mueve la barra y observa el cambio en la tarjeta de abajo.</small>
       </div>}
+      <InvitationBackgroundBlurControl value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => onChange({ backgroundBlurIntensity })} />
+      <InvitationBackgroundDimControl value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => onChange({ backgroundDimIntensity })} />
     </section>}
     {step === 3 && <InvitationPalettePicker compact palettes={sharedInvitationDesign.palettes} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={accent => onChange({ accent })} />}
     {step === 4 && <section className={styles.fonts} aria-labelledby={`${id}-fonts`}>
@@ -45,6 +51,7 @@ export function InvitationStyleJourney({ values, step, onStepChange, onChange }:
       <figcaption>Ejemplo con tus elecciones{!values.backgroundImageUrl && <span>Imagen de muestra · Puedes usar tu propio fondo</span>}</figcaption>
       <div className={styles.scene}>
         <div className={styles.backdrop} style={{ backgroundImage: `url(${JSON.stringify(values.backgroundImageUrl || "/demo/babyshower/jardin.webp")})` }} />
+        <div className={styles.backgroundDim} aria-hidden="true" />
         <div className={styles.examplePanel} data-surface={surface === "auto" ? "blur" : surface}>
           {values.showSectionIcons !== false && <FiHeart className={styles.exampleIcon} aria-hidden="true" />}
           <h3>{values.hostNames || values.name || "Tu celebración"}</h3><p>Nos encantará compartir este día contigo.</p><span className={styles.exampleButton}>Cómo llegar</span>

@@ -329,7 +329,7 @@ test('local backups retain section photo placement and reject unsupported positi
 });
 
 test('local backups retain section surfaces and reject unsupported finishes', () => {
-  for (const panelStyle of ['auto','blur','blur-color','color','glass','invalid']) {
+  for (const panelStyle of ['auto','blur','blur-color','color','glass','none','invalid']) {
     const snapshot = JSON.parse(values('Mi boda'));
     snapshot.sections = [{id:'story',type:'story',title:'Historia',content:'',detail:'',link:'',imageUrl:'',enabled:true,panelStyle}];
     const record = {schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:Date.now(),wizard:{step:2,activeExtra:'story'},snapshot:JSON.stringify(snapshot)};
@@ -343,7 +343,7 @@ test('local backups retain section surfaces and reject unsupported finishes', ()
 test('local draft recovery retains the global finish and rejects unsupported finishes', () => {
   const now = Date.now();
   const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), version: 0, updatedAt: now, wizard: { step: 5, activeExtra: null, flow: 'content-v4' } };
-  for (const panelStyle of ['auto', 'blur', 'blur-color', 'color', 'glass', undefined]) {
+  for (const panelStyle of ['auto', 'blur', 'blur-color', 'color', 'glass', 'none', undefined]) {
     const snapshot = JSON.stringify({ ...JSON.parse(values('Celebracion')), panelStyle });
     const recovered = parseEditorDraft(JSON.stringify({ ...record, snapshot }), 'owner', 'event', now);
     assert.ok(recovered);
@@ -405,6 +405,54 @@ test('local backups retain icon preferences and allow legacy sections without th
  }
 });
 
+
+test('glass border preference survives form serialization and draft recovery', () => {
+  for (const glassBorder of [undefined, true, false, 'false', null]) {
+    const snapshot = JSON.stringify({ ...JSON.parse(values('Fiesta')), glassBorder });
+    const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), version: 0, updatedAt: Date.now(), wizard: { step: 4, activeExtra: null }, snapshot };
+    const parsed = parseEditorDraft(JSON.stringify(record), 'owner', 'event', Date.now());
+    if (glassBorder === undefined || typeof glassBorder === 'boolean') {
+      assert.equal(JSON.parse(parsed.snapshot).glassBorder, glassBorder);
+      assert.equal(editorFormData(snapshot, 0).get('glassBorder'), glassBorder === undefined ? null : String(glassBorder));
+    } else assert.equal(parsed, null);
+  }
+});
+
+test('page background blur survives form serialization and draft recovery with a legacy default', () => {
+  for (const backgroundBlurIntensity of [undefined, 0, 35, 100, -1, 101, 1.5, '50', null]) {
+    const snapshot = JSON.stringify({ ...JSON.parse(values('Fiesta')), backgroundBlurIntensity });
+    const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), version: 0, updatedAt: Date.now(), wizard: { step: 3, activeExtra: null }, snapshot };
+    const parsed = parseEditorDraft(JSON.stringify(record), 'owner', 'event', Date.now());
+    if (backgroundBlurIntensity === undefined || [0, 35, 100].includes(backgroundBlurIntensity)) {
+      assert.equal(JSON.parse(parsed.snapshot).backgroundBlurIntensity, backgroundBlurIntensity);
+      assert.equal(editorFormData(snapshot, 0).get('backgroundBlurIntensity'), backgroundBlurIntensity === undefined ? null : String(backgroundBlurIntensity));
+    } else assert.equal(parsed, null);
+  }
+});
+
+test('page background dimming survives serialization and draft recovery and accepts older drafts', () => {
+  for (const backgroundDimIntensity of [undefined, 0, 30, 100, -1, 101, 1.5, '50', null]) {
+    const snapshot = JSON.stringify({ ...JSON.parse(values('Fiesta')), backgroundDimIntensity });
+    const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), version: 0, updatedAt: Date.now(), wizard: { step: 3, activeExtra: null }, snapshot };
+    const parsed = parseEditorDraft(JSON.stringify(record), 'owner', 'event', Date.now());
+    if (backgroundDimIntensity === undefined || [0, 30, 100].includes(backgroundDimIntensity)) {
+      assert.equal(JSON.parse(parsed.snapshot).backgroundDimIntensity, backgroundDimIntensity);
+      assert.equal(editorFormData(snapshot, 0).get('backgroundDimIntensity'), backgroundDimIntensity === undefined ? null : String(backgroundDimIntensity));
+    } else assert.equal(parsed, null);
+  }
+});
+
+test('cover layouts survive form serialization and draft recovery without invalidating older drafts', () => {
+  for (const coverLayout of [undefined, 'split', 'split-reverse', 'stacked', 'overlay', 'invalid', null, false]) {
+    const snapshot = JSON.stringify({ ...JSON.parse(values('Fiesta')), coverLayout });
+    const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), version: 0, updatedAt: Date.now(), wizard: { step: 3, activeExtra: null }, snapshot };
+    const parsed = parseEditorDraft(JSON.stringify(record), 'owner', 'event', Date.now());
+    if (coverLayout === undefined || ['split', 'split-reverse', 'stacked', 'overlay'].includes(coverLayout)) {
+      assert.equal(JSON.parse(parsed.snapshot).coverLayout, coverLayout);
+      assert.equal(editorFormData(snapshot, 0).get('coverLayout'), coverLayout ?? null);
+    } else assert.equal(parsed, null);
+  }
+});
 
 test('global icon preference survives draft recovery and accepts older drafts',()=>{
  for(const showSectionIcons of [undefined,true,false,'false',null]) {

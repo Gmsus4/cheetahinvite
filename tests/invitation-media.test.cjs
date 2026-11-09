@@ -35,7 +35,7 @@ test('background saves independently, survives reopening and legacy saves, and k
 
 test('section surface selections survive saving and reopening, with invalid values rejected', async () => {
   const { f } = setup();
-  for (const panelStyle of ['auto','blur','blur-color','color','invalid']) {
+  for (const panelStyle of ['auto','blur','blur-color','color','glass','none','invalid']) {
     const section = { id:'story',type:'story',title:'Historia',content:'Nuestro texto',detail:'',link:'',imageUrl:'',enabled:true,panelStyle };
     const form = f.saveForm('', [section]); form.set('templateId','wedding-floral-v1');
     const result = await f.actions.updateEvent('event',form);

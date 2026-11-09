@@ -10,6 +10,9 @@ import { initialGuidedValues, completeGuidedSections, changeGuidedEventType, gui
 import { normalizeEventLocations } from "@/lib/invitation-locations";
 
 import { InvitationStyleJourney } from "./InvitationStyleJourney";
+import { InvitationBackgroundBlurControl } from "./InvitationBackgroundBlurControl";
+import { InvitationBackgroundDimControl } from "./InvitationBackgroundDimControl";
+import { InvitationCoverLayoutPicker } from "./InvitationCoverLayoutPicker";
 import { invitationStyleSteps, invitationStyleStepIndex } from "@/lib/invitation-style-journey";
 import { getInvitationEventContent, invitationEventTypes } from "@/lib/invitation-event-content";
 import { sharedInvitationDesign } from "@/lib/shared-invitation";
@@ -252,7 +255,10 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
               <div className="guided-photo-grid">
                 <section className="guided-photo-field" data-preview-field="cover-photo" data-preview-label="Foto de portada" aria-labelledby="cover-upload-title" aria-describedby="guided-photo-formats"><h2 id="cover-upload-title">Foto de portada <span>Opcional</span></h2><p>La imagen principal de tu invitación.</p><CloudinaryImageUpload {...uploadProps} images={values.imageUrl ? [values.imageUrl] : []} multiple={false} onChange={images => patch({ imageUrl: images[0] ?? '' })} /></section>
                 <section className="guided-photo-field" data-preview-field="cover" data-preview-label="Foto de fondo" aria-labelledby="background-upload-title" aria-describedby="guided-photo-formats"><h2 id="background-upload-title">Foto de fondo <span>Opcional</span></h2><p>Detrás de las secciones. También inspira tu paleta.</p><CloudinaryImageUpload {...uploadProps} images={values.backgroundImageUrl ? [values.backgroundImageUrl] : []} multiple={false} onChange={images => patch({ backgroundImageUrl: images[0] ?? '' })} /></section>
+                <InvitationBackgroundBlurControl value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
+                <InvitationBackgroundDimControl value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => patch({ backgroundDimIntensity })} />
               </div>
+              <InvitationCoverLayoutPicker value={values.coverLayout} imageUrl={values.imageUrl} onChange={coverLayout => patch({ coverLayout })} />
               <p className="guided-help" id="guided-photo-formats">JPG, PNG, WebP o AVIF · máximo {ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB por imagen. Puedes continuar sin subir fotos.</p>
             </>}
             {step === 4 && <>
@@ -269,6 +275,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                 <div className="guided-single-detail" key={contentKey} data-preview-label={currentSection?.title}>
                   {currentSection?.type === "cover" ? <>
                     <h2>Portada</h2>
+                    <InvitationCoverLayoutPicker value={values.coverLayout} imageUrl={values.imageUrl} onChange={coverLayout => patch({ coverLayout })} />
                     <p>Ya contiene los datos de los pasos anteriores: nombres, nombre de la invitación, fecha, hora, y foto de portada. La cuenta regresiva se personaliza en el siguiente bloque.</p>
                     <p><strong>{values.name}</strong><br />{values.hostNames}<br />{date}{values.eventTime && ` · ${values.eventTime}`}</p>
                     <div className={styles.blockLinks}><button type="button" onClick={() => goTo(0)}>Editar nombres</button><button type="button" onClick={() => goTo(1)}>Editar fecha y hora</button></div>

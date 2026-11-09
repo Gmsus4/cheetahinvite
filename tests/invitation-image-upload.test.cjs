@@ -376,7 +376,7 @@ test('cleanup endpoint requires its own secret and does not leak per-asset detai
   assert.equal((await GET(new Request('http://localhost/cleanup', { headers: { authorization: 'Bearer wrong' } }))).status, 401);
   const response = await GET(new Request('http://localhost/cleanup', { headers: { authorization: 'Bearer cron-test-secret' } }));
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { deleted: 0, retained: 0, failed: 0 });
+  assert.deepEqual(await response.json(), { deleted: 0, retained: 0, failed: 0, invitations: { archived: 0, deleted: 0, retained: 0, failed: 0 } });
   delete process.env.CRON_SECRET;
   assert.equal((await GET(new Request('http://localhost/cleanup'))).status, 503);
 });

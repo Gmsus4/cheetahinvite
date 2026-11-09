@@ -8,13 +8,15 @@ import type { EditorValues, InvitationPanelStyle } from "@/lib/invitation-editor
 import { invitationPalette } from "@/lib/shared-invitation";
 import { getInvitationFont } from "@/lib/invitation-fonts";
 import styles from "./InvitationSurfacePicker.module.css";
+import { InvitationGlassBorderToggle } from "./InvitationGlassBorderToggle";
 
 
 
-export function InvitationSurfacePicker({ values, onChange, onBlurChange }: {
-  values: Pick<EditorValues, "blurIntensity" | "panelStyle" | "sectionCorners" | "accent" | "backgroundImageUrl" | "hostNames" | "name" | "typography" | "bodyTypography">;
+export function InvitationSurfacePicker({ values, onChange, onBlurChange, onGlassBorderChange }: {
+  values: Pick<EditorValues, "blurIntensity" | "backgroundBlurIntensity" | "backgroundDimIntensity" | "panelStyle" | "glassBorder" | "sectionCorners" | "accent" | "backgroundImageUrl" | "hostNames" | "name" | "typography" | "bodyTypography">;
   onChange(value: InvitationPanelStyle): void;
   onBlurChange(value: number): void;
+  onGlassBorderChange(value: boolean): void;
 }) {
   const sliderId = useId();
   const intensity = values.blurIntensity ?? 50;
@@ -36,6 +38,7 @@ export function InvitationSurfacePicker({ values, onChange, onBlurChange }: {
       {options.map(option => <button className={styles.option} key={option.value} type="button" aria-pressed={selected === option.value} onClick={() => onChange(option.value)}>
         <span className={styles.preview} aria-hidden="true">
           <span className={styles.backdrop} style={values.backgroundImageUrl ? { backgroundImage: `url(${JSON.stringify(values.backgroundImageUrl)})` } : undefined} />
+          <span className={styles.backgroundDim} />
           <span className={styles.samples}>
             {(["blur", "blur-color", "color"] as const).map((surface, index) => <span key={surface} className={styles.sample} data-surface={option.value === "auto" ? surface : option.value}>
               {index === 0 ? <><span className={styles.kicker}>UN DÍA ESPECIAL</span><span className={styles.names}>{values.hostNames || values.name || "Tu celebración"}</span></> : <><span className={styles.line} /><span className={styles.line} /></>}
@@ -46,7 +49,8 @@ export function InvitationSurfacePicker({ values, onChange, onBlurChange }: {
         <span className={styles.description}>{option.description}</span>
       </button>)}
     </div>
-    <div className={styles.intensity} data-disabled={selected === "color"}>
+    {(selected === "glass" || selected === "auto") && <InvitationGlassBorderToggle value={values.glassBorder} onChange={onGlassBorderChange} />}
+    {selected !== "none" && <div className={styles.intensity} data-disabled={selected === "color"}>
       <div className={styles.intensityHeading}>
         <div className={styles.intensityTitle}><span className={styles.sliderIcon} aria-hidden="true"><FiSliders /></span><div><label htmlFor={sliderId}>Intensidad del blur</label><span className={styles.intensitySubtitle}>El equilibrio entre detalle y suavidad</span></div></div>
         <div className={styles.valueActions}>
@@ -61,7 +65,7 @@ export function InvitationSurfacePicker({ values, onChange, onBlurChange }: {
       </div>
       <div className={styles.scale} aria-hidden="true"><span>Nítido</span><span>Suave</span><span>Difuminado</span></div>
       <p className={styles.sliderHelp} id={sliderId + "-help"}>{selected === "color" ? "Elige Desenfoque, Desenfoque con color o Cristal para ajustar la intensidad." : "Muévelo y descubre el cambio en las muestras. Tus textos siempre se mantienen nítidos."}</p>
-    </div>
+    </div>}
     <p className={styles.help} role="status"><FiInfo aria-hidden="true" /><span>{selected === "auto"
       ? "Se conservan los fondos originales y tus ajustes para cada sección."
       : "Se aplica a todas las secciones. Vuelve a «Automático» para recuperar o modificar tus ajustes individuales."}</span></p>

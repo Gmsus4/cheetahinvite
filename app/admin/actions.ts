@@ -94,9 +94,9 @@ export async function duplicateExample(id: string) {
     const copy = await tx.event.create({ data: {
       ownerId: actor.id, isExample: true, privacy: "PUBLIC", name: label, eventType: event.eventType,
       hostNames: event.hostNames, eventDate: event.eventDate, eventTime: event.eventTime, venue: event.venue, address: event.address,
-      message: event.message, imageUrl: event.imageUrl, backgroundImageUrl: event.backgroundImageUrl,
+      message: event.message, imageUrl: event.imageUrl, backgroundImageUrl: event.backgroundImageUrl, backgroundBlurIntensity: event.backgroundBlurIntensity, backgroundDimIntensity: event.backgroundDimIntensity,
       accent: event.accent, typography: event.typography, bodyTypography: event.bodyTypography,
-      panelStyle: event.panelStyle, blurIntensity: event.blurIntensity, showSectionIcons: event.showSectionIcons,
+      coverLayout: event.coverLayout, panelStyle: event.panelStyle, blurIntensity: event.blurIntensity, showSectionIcons: event.showSectionIcons, glassBorder: event.glassBorder,
       sectionCorners: event.sectionCorners, sections: event.sections as Prisma.InputJsonValue,
     } });
     const example = await tx.showcaseExample.create({ data: { eventId: copy.id, label, slug: `${source.slug.slice(0, 65)}-${randomUUID().slice(0, 8)}` } });

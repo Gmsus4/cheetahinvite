@@ -53,11 +53,11 @@ export function DashboardAccountMenu({ name, email, image, onDashboard = false, 
     </button>
     {open && <nav id={id} ref={panel} className="dashboard-account-panel" aria-label="Opciones de mi cuenta">
       <div className="dashboard-account-identity"><strong>{name}</strong><small>{email}</small></div>
-      <Link href={onDashboard ? "#mis-invitaciones" : "/dashboard#mis-invitaciones"} onNavigate={event => guard?.(event, onDashboard ? "#mis-invitaciones" : "/dashboard#mis-invitaciones")} onClick={() => setOpen(false)} aria-current={onDashboard ? "location" : undefined}><FiMail aria-hidden="true" /> Mis invitaciones</Link>
-      <Link aria-current={active === "purchases" ? "page" : undefined} href="/dashboard/compras" onNavigate={event => guard?.(event, "/dashboard/compras")} onClick={() => setOpen(false)}><FiCreditCard aria-hidden="true" /> Mis compras</Link>
-      <Link href="/dashboard/ajustes" onNavigate={event => guard?.(event, "/dashboard/ajustes")} onClick={() => setOpen(false)}><FiSettings aria-hidden="true" /> Ajustes de cuenta</Link>
-      {admin && <Link href="/admin" onNavigate={event => guard?.(event, "/admin")} onClick={() => setOpen(false)}><FiGrid aria-hidden="true" /> Administración</Link>}
-      <Link aria-current={active === "help" ? "page" : undefined} href="/ayuda" onNavigate={event => guard?.(event, "/ayuda")} onClick={() => setOpen(false)}><FiHelpCircle aria-hidden="true" /> Ayuda y soporte</Link>
+      <Link href={onDashboard ? "#mis-invitaciones" : "/dashboard#mis-invitaciones"} onNavigate={event => guard?.(event, onDashboard ? "#mis-invitaciones" : "/dashboard#mis-invitaciones")} onClick={() => setOpen(false)} aria-current={onDashboard ? "location" : undefined}><FiMail aria-hidden="true" /><span className="dashboard-account-label">Mis invitaciones</span></Link>
+      <Link aria-current={active === "purchases" ? "page" : undefined} href="/dashboard/compras" onNavigate={event => guard?.(event, "/dashboard/compras")} onClick={() => setOpen(false)}><FiCreditCard aria-hidden="true" /><span className="dashboard-account-label">Mis compras</span></Link>
+      <Link href="/dashboard/ajustes" onNavigate={event => guard?.(event, "/dashboard/ajustes")} onClick={() => setOpen(false)}><FiSettings aria-hidden="true" /><span className="dashboard-account-label">Ajustes de cuenta</span></Link>
+      {admin && <Link href="/admin" onNavigate={event => guard?.(event, "/admin")} onClick={() => setOpen(false)}><FiGrid aria-hidden="true" /><span className="dashboard-account-label">Administración</span></Link>}
+      <Link aria-current={active === "help" ? "page" : undefined} href="/ayuda" onNavigate={event => guard?.(event, "/ayuda")} onClick={() => setOpen(false)}><FiHelpCircle aria-hidden="true" /><span className="dashboard-account-label">Ayuda y soporte</span></Link>
       <DashboardSignOut className="dashboard-account-signout" />
     </nav>}
   </div>;

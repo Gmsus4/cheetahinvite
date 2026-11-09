@@ -1,0 +1,1 @@
+ALTER TABLE "Event" ADD COLUMN "glassBorder" BOOLEAN NOT NULL DEFAULT true;

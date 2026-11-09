@@ -7,7 +7,7 @@ const assert = require('node:assert/strict');
 function matches(row, where = {}) {
   return Object.entries(where).every(([key, value]) => key === 'OR' ? value.some(w => matches(row, w))
     : value && typeof value === 'object' && !(value instanceof Date) ? !value.notIn?.includes(row[key])
-    : row[key] === value);
+    : (row[key] ?? null) === value);
 }
 function createPaymentFixture(options = {}) {
   process.env.STRIPE_SECRET_KEY = 'sk_test_fixture'; process.env.STRIPE_WEBHOOK_SECRET = 'whsec_fixture'; process.env.APP_URL = 'http://localhost:3000';
@@ -84,7 +84,7 @@ function createPaymentFixture(options = {}) {
     new Function('require', 'module', 'exports', code)(requireMock, mod, mod.exports); return mod.exports;
   };
   f.addPurchase = (overrides = {}) => {
-    const payment = { id: 'payment-fixture', eventId: 'event-fixture', ownerId: f.ownerId, eventName: 'Celebración', amount: 49900, currency: 'mxn', status: 'PENDING', livemode: false, stripeCheckoutSessionId: 'cs_fixture', stripePaymentIntentId: null, paidAt: null, expiresAt: null, refundedAmount: 0, refundPendingAmount: 0, disputeStatus: null, checkoutExpiresAt: new Date(Date.now() + 3600000), ...overrides };
+    const payment = { id: 'payment-fixture', eventId: 'event-fixture', ownerId: f.ownerId, eventName: 'Celebración', amount: 49900, currency: 'mxn', status: 'PENDING', livemode: false, stripeCheckoutSessionId: 'cs_fixture', stripePaymentIntentId: null, renewalOfPaymentIntentId: null, paidAt: null, expiresAt: null, refundedAmount: 0, refundPendingAmount: 0, disputeStatus: null, checkoutExpiresAt: new Date(Date.now() + 3600000), ...overrides };
     f.payments.set(payment.id, payment);
     f.events.set(payment.eventId, { ...f.eventDetails, id: payment.eventId, ownerId: payment.ownerId, name: payment.eventName, paidAt: null, slug: null, status: 'PENDING_PAYMENT', stripePaymentIntentId: null });
     const session = { id: payment.stripeCheckoutSessionId, mode: 'payment', status: 'complete', payment_status: 'paid', amount_total: payment.amount, currency: payment.currency, livemode: false, client_reference_id: payment.eventId, payment_intent: 'pi_fixture', metadata: { eventId: payment.eventId, ownerId: payment.ownerId, paymentId: payment.id, product: 'invitation-12-months' } };

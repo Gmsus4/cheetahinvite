@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { isInvitationCoverLayout } from "@/lib/invitation-cover-layout";
 import { parseInvitationProgram } from "@/lib/invitation-program";
 import { normalizeEventLocations } from "@/lib/invitation-locations";
 import { FiEyeOff, FiAlignCenter, FiArrowUpRight, FiClock, FiEdit3, FiGift, FiHeart, FiMapPin, FiMusic, FiUsers, FiLayers, FiImage } from "react-icons/fi";
@@ -36,6 +37,8 @@ export function CelebrationInvitation(inputProps: InvitationProps & { preview?: 
   const motion = useInvitationMotion(!inputProps.preview);
   const props = { ...inputProps, ...normalizeEventLocations(inputProps.venue, inputProps.address, inputProps.sections) };
   const panelStyle = props.panelStyle ?? "auto";
+  const selectedCoverLayout = isInvitationCoverLayout(props.coverLayout) ? props.coverLayout : "split";
+  const coverLayout = selectedCoverLayout === "overlay" && !props.imageUrl ? "stacked" : selectedCoverLayout;
   const eventType = props.eventType ?? "wedding";
   const content = getInvitationEventContent(eventType);
   const copy = invitationPresentation(eventType);
@@ -60,10 +63,11 @@ export function CelebrationInvitation(inputProps: InvitationProps & { preview?: 
     <div className="wa-backdrop" aria-hidden="true">
       {props.backgroundImageUrl && <div className="wa-backdrop-image"><Image src={props.backgroundImageUrl} alt="" fill sizes="100vw" unoptimized loading="eager" /></div>}
       {!props.backgroundImageUrl && <div className="wa-backdrop-shade" />}
+      <div className="wa-backdrop-dim" />
     </div>
     <div className="wa-column">
       <div className="wa-shell">
-      <div className="wa-intro" data-invitation-field={`cover-block${coverSection ? ` section:${coverSection.id}` : ""}`} data-surface={panelStyle === "auto" && !explicitCoverStyle ? undefined : coverSurface}>
+      <div className="wa-intro" data-cover-layout={coverLayout} data-invitation-field={`cover-block${coverSection ? ` section:${coverSection.id}` : ""}`} data-surface={panelStyle === "auto" && !explicitCoverStyle ? undefined : coverSurface}>
       <header className="wa-cover" data-surface={coverSurface} data-has-media={Boolean(props.imageUrl)} data-invitation-field="cover event-type">
         <div className="wa-cover-heading" data-text-align={coverSection?.textAlign} data-editable={Boolean(props.onEdit) || undefined}>
           {props.onEdit && <div className="wa-edit-actions" role="group" aria-label="Acciones de la portada">

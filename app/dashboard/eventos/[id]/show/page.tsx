@@ -6,6 +6,7 @@ import { BrandLoader } from "@/components/BrandLoader";
 import { auth } from "@/auth";
 import { InvitationShowEditor } from "@/components/dashboard/InvitationShowEditor";
 import { prisma } from "@/prisma";
+import { canEditInvitation } from "@/lib/invitation-lifecycle";
 
 export const metadata: Metadata = { title: "Vista previa privada | Cheetah Invite" };
 
@@ -25,6 +26,7 @@ async function ShowInvitationData({ params }: ShowPageProps) {
 
   const event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id }, omit: { pinHash: true } });
   if (!event) notFound();
+  if (!canEditInvitation(event)) redirect(`/dashboard/eventos/${id}/pago`);
   if (event.isExample) {
     const example = await prisma.showcaseExample.findUnique({ where: { eventId: id } });
     if (example) redirect(`/admin/disenos/${example.id}/vista-previa`);

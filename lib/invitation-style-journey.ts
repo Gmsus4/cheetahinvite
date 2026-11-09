@@ -16,4 +16,5 @@ export const invitationSurfaceOptions = [
   { value: "blur-color", label: "Desenfoque con color", description: "Transparencia con tu color temático." },
   { value: "color", label: "Color sólido", description: "Tu color temático, sin transparencia." },
   { value: "glass", label: "Cristal", description: "Transparencia ligera y reflejos discretos." },
+  { value: "none", label: "Sin fondo", description: "El contenido directamente sobre el fondo de la invitación, sin tarjeta, bordes, sombras ni desenfoque." },
 ] as const;

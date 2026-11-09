@@ -7,6 +7,7 @@ import { invitationSlug, isPaidInvitationSession } from "@/lib/stripe-payment";
 import { invitationLinkRegistryReady, reserveInvitationPath } from "@/lib/invitation-link-storage";
 import { invitationPath, legacyInvitationPath } from "@/lib/invitation-url";
 import { paymentAccess } from "@/lib/payment-status";
+import { addCalendarMonths, invitationLifecycle } from "@/lib/invitation-lifecycle";
 
 export function stripeLiveMode() {
   return /^(sk|rk)_live_/.test(process.env.STRIPE_SECRET_KEY ?? "");
@@ -62,11 +63,12 @@ export async function reconcileInvitationPayment(paymentId: string, minimumAgeMs
     const disputeStatus = disputes.find(d => d.status === "lost")?.status
       ?? disputes.find(d => !["won", "warning_closed"].includes(d.status))?.status ?? disputes[0]?.status ?? null;
     const paidAt = payment.paidAt ?? new Date(charge.created * 1000);
-    const expiresAt = payment.expiresAt ?? new Date(new Date(paidAt).setUTCFullYear(paidAt.getUTCFullYear() + 1));
+    const expiresAt = payment.expiresAt ?? addCalendarMonths(paidAt, 12);
     const updated = await tx.invitationPayment.update({ where: { id: payment.id }, data: {
       status: "PAID", livemode: checkout.livemode, stripePaymentIntentId: intent.id, stripeChargeId: charge.id,
       paidAt, expiresAt, refundedAmount, refundPendingAmount, refunds, disputes, disputeStatus, lastSyncedAt: new Date(),
     } });
+    await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${payment.eventId} FOR UPDATE`);
     const invitation = await tx.event.findFirst({ where: { id: payment.eventId, ownerId: payment.ownerId } });
     if (!invitation) return { paymentId: payment.id, invitation: null };
     let slug = invitation.slug || invitationSlug(invitation.name, invitation.id);
@@ -76,13 +78,21 @@ export async function reconcileInvitationPayment(paymentId: string, minimumAgeMs
       while (!await reserveInvitationPath(tx, `/event/${slug}`, invitation.id)) slug = `${baseSlug}-${suffix++}`;
       if (invitation.customSlug && !await reserveInvitationPath(tx, `/event/${invitation.customSlug}`, invitation.id)) throw new Error("Invitation URL is already reserved");
     }
-    // A second charge is retained for support; it cannot replace the purchase
-    // that controls access or extend its original term.
-    if ((!invitation.paidAt || invitation.stripePaymentIntentId === intent.id)
-      && !["ARCHIVED", "EXPIRED"].includes(invitation.status)) {
+    // Only an explicitly reserved renewal may replace the previous purchase.
+    // Old webhooks and accidental second charges cannot change the current term.
+    const previousTerm = invitationLifecycle(invitation, paidAt);
+    const renewal = Boolean(payment.renewalOfPaymentIntentId
+      && payment.renewalOfPaymentIntentId === invitation.stripePaymentIntentId
+      && ["PUBLISHED", "EXPIRED", "ARCHIVED"].includes(invitation.status)
+      && previousTerm?.phase === "archived");
+    const currentPurchase = invitation.stripePaymentIntentId === intent.id;
+    if (renewal || ((!invitation.paidAt || currentPurchase)
+      && !["ARCHIVED", "EXPIRED"].includes(invitation.status))) {
       const access = paymentAccess(updated);
       await tx.event.updateMany({ where: { id: invitation.id, ownerId: invitation.ownerId,
-        status: { notIn: ["ARCHIVED", "EXPIRED"] }, OR: [{ paidAt: null }, { stripePaymentIntentId: intent.id }] }, data: {
+        ...(renewal ? { stripePaymentIntentId: payment.renewalOfPaymentIntentId } : {
+          status: { notIn: ["ARCHIVED", "EXPIRED"] }, OR: [{ paidAt: null }, { stripePaymentIntentId: intent.id }],
+        }) }, data: {
         paidAt, expiresAt, slug, status: access === "PUBLISHED" && expiresAt <= new Date() ? "EXPIRED" : access,
         stripeCheckoutSessionId: checkout.id, stripePaymentIntentId: intent.id,
       } });

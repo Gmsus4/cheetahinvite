@@ -19,16 +19,19 @@ export function atmosphereSections(sections: InviteSection[]) {
   ));
 }
 
-export function atmosphereStyle(accent: string, fonts?: { typography?: string; bodyTypography?: string; blurIntensity?: number; sectionCorners?: string }): CSSProperties {
+export function atmosphereStyle(accent: string, fonts?: { typography?: string; bodyTypography?: string; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; sectionCorners?: string; glassBorder?: boolean }): CSSProperties {
   const palette = invitationPalette(accent);
   const strength = (isInvitationBlurIntensity(fonts?.blurIntensity) ? fonts.blurIntensity : 50) / 50;
   return {
     "--wa-section-radius": `${({square:0, soft:8, rounded:18})[isInvitationSectionCorners(fonts?.sectionCorners) ? fonts.sectionCorners : "rounded"]}px`,
+    "--wa-background-dim": (isInvitationBlurIntensity(fonts?.backgroundDimIntensity) ? fonts.backgroundDimIntensity : 0) / 100,
+    "--wa-background-blur": `${(isInvitationBlurIntensity(fonts?.backgroundBlurIntensity) ? fonts.backgroundBlurIntensity : 0) * 0.24}px`,
     "--wa-blur": `${16 * strength}px`, "--wa-blur-color": `${24 * strength}px`,
     "--wa-blur-cover": `${20 * strength}px`, "--wa-blur-panel": `${18 * strength}px`,
     "--wa-base": palette.dark, "--wa-tint": palette.accent,
     "--wa-glass-background": "linear-gradient(135deg,#ffffff18,transparent 45%,#ffffff08),#ffffff05",
-    "--wa-glass-shadow": "inset 0 1px 0 #ffffff70,inset 1px 0 0 #ffffff24,inset 0 -1px 0 #ffffff30,0 8px 24px #00000010",
+    "--wa-glass-border-width": fonts?.glassBorder === false ? "0px" : "1px",
+    "--wa-glass-shadow": fonts?.glassBorder === false ? "0 8px 24px #00000010" : "inset 0 1px 0 #ffffff70,inset 1px 0 0 #ffffff24,inset 0 -1px 0 #ffffff30,0 8px 24px #00000010",
     "--wa-glass-filter": "blur(var(--wa-glass-blur)) saturate(115%)",
     "--wa-glass-blur": `${8 * strength}px`,
     "--wa-heading": getInvitationFont(fonts?.typography || sharedInvitationDesign.typography).family,

@@ -19,6 +19,9 @@ import { SectionFields, SectionTextAlignmentFields, SectionPhotoFields, SectionS
 import { InvitationIconsPicker } from "./InvitationIconsPicker";
 import { InvitationCornersPicker } from "./InvitationCornersPicker";
 import { InvitationSurfacePicker } from "./InvitationSurfacePicker";
+import { InvitationBackgroundBlurControl } from "./InvitationBackgroundBlurControl";
+import { InvitationBackgroundDimControl } from "./InvitationBackgroundDimControl";
+import { InvitationCoverLayoutPicker } from "./InvitationCoverLayoutPicker";
 import { useEditorProtection } from "./useEditorProtection";
 import styles from "./InvitationShowEditor.module.css";
 
@@ -109,6 +112,7 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
           {!availableSections.length && <p>Ya incluiste todas las secciones disponibles.</p>}
         </>}
         {target.kind === "cover" && <>
+          <InvitationCoverLayoutPicker value={values.coverLayout} imageUrl={values.imageUrl} onChange={coverLayout => patch({ coverLayout })} />
           <Field label="Tipo de evento" id="show-event-type"><select id="show-event-type" value={values.eventType} onChange={e => patch(changeGuidedEventType(values, e.target.value))}>{invitationEventTypes.map(type => <option key={type} value={type}>{getInvitationEventContent(type).label}</option>)}</select></Field>
           <Field label="Nombre de la invitación" id="show-name"><input id="show-name" required minLength={2} maxLength={100} value={values.name} onChange={e => patch({ name: e.target.value })} /></Field>
           <Field label="Protagonistas o anfitriones" id="show-hosts"><input id="show-hosts" maxLength={120} value={values.hostNames} onChange={e => patch({ hostNames: e.target.value })} /></Field>
@@ -129,8 +133,14 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
           {locationSection && <div className={styles.sectionMedia}><SectionPhotoFields section={locationSection} uploadProps={uploadProps} onChange={changes => patch({ sections: values.sections.map(item => item.id === locationSection.id ? { ...item, ...changes } : item) })} /></div>}
         </>}
         {(target.kind === "cover-photo" || target.kind === "background") && <CloudinaryImageUpload {...uploadProps} multiple={false} images={target.kind === "cover-photo" ? values.imageUrl ? [values.imageUrl] : [] : values.backgroundImageUrl ? [values.backgroundImageUrl] : []} onChange={images => patch(target.kind === "cover-photo" ? { imageUrl: images[0] ?? "" } : { backgroundImageUrl: images[0] ?? "" })} />}
+        {target.kind === "background" && <>
+          <InvitationBackgroundBlurControl value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
+          <InvitationBackgroundDimControl value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => patch({ backgroundDimIntensity })} />
+        </>}
         {target.kind === "appearance" && <>
-          <InvitationSurfacePicker values={values} onChange={panelStyle => patch({ panelStyle })} onBlurChange={blurIntensity => patch({ blurIntensity })} />
+          <InvitationSurfacePicker values={values} onChange={panelStyle => patch({ panelStyle })} onBlurChange={blurIntensity => patch({ blurIntensity })} onGlassBorderChange={glassBorder => patch({ glassBorder })} />
+          <InvitationBackgroundBlurControl value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
+          <InvitationBackgroundDimControl value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => patch({ backgroundDimIntensity })} />
               <InvitationCornersPicker value={values.sectionCorners} onChange={sectionCorners => patch({ sectionCorners })} />
               <InvitationIconsPicker value={values.showSectionIcons} onChange={showSectionIcons => patch({ showSectionIcons })} />
           <InvitationPalettePicker palettes={sharedInvitationDesign.palettes} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={accent => patch({ accent })} />
@@ -139,7 +149,10 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
         </>}
         {section && target.kind === "section" && <SectionFields section={section} onChange={changeSection} uploadProps={uploadProps} allowSectionPhoto globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle} mediaClassName={styles.sectionMedia} showStyleControls={false} />}
         {section && target.kind === "section-photo" && <SectionPhotoFields section={section} onChange={changeSection} uploadProps={uploadProps} />}
-        {section && target.kind === "section-surface" && <SectionSurfaceFields section={section} onChange={changeSection} globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle} />}
+        {section && target.kind === "section-surface" && <>
+          {section.type === "cover" && <InvitationCoverLayoutPicker value={values.coverLayout} imageUrl={values.imageUrl} onChange={coverLayout => patch({ coverLayout })} />}
+          <SectionSurfaceFields section={section} onChange={changeSection} globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle} />
+        </>}
         {section && section.type !== "cover" && target.kind === "section-visibility" && <>
           <label className="guided-toggle guided-include-toggle" htmlFor="show-section-enabled"><span><strong>Incluir en mi invitación</strong><small>{section.enabled ? "Esta sección aparece en tu invitación." : "Esta sección está desactivada. Puedes recuperarla desde el botón +."}</small></span><input id="show-section-enabled" type="checkbox" role="switch" checked={section.enabled} onChange={event => changeSection({ enabled: event.target.checked })} /><span className="guided-switch" aria-hidden="true" /></label>
           <p className={styles.sectionIntro}>Conservaremos el texto, las fotos y el estilo de esta sección aunque la desactives.</p>

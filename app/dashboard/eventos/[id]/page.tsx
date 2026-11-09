@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { EventEditor } from "@/components/dashboard/InvitationEditor";
 import { getCurrentPrice } from "@/lib/site-pricing";
+import { canEditInvitation } from "@/lib/invitation-lifecycle";
 
 export const metadata: Metadata = { title: "Editar invitación | Cheetah Invite" };
 
@@ -25,6 +26,7 @@ async function EditorData({ params, searchParams }: PageProps<"/dashboard/evento
 
   const event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id }, omit: { pinHash: true } });
   if (!event) notFound();
+  if (!canEditInvitation(event)) redirect(`/dashboard/eventos/${id}/pago`);
   if (event.isExample) {
     const example = await prisma.showcaseExample.findUnique({ where: { eventId: id } });
     if (example) redirect(`/admin/disenos/${example.id}/editar`);

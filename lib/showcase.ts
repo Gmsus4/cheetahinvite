@@ -1,4 +1,5 @@
 import "server-only";
+import { isInvitationCoverLayout } from "./invitation-cover-layout";
 import { connection } from "next/server";
 import { prisma } from "@/prisma";
 import type { Event } from "@/generated/prisma/client";
@@ -25,13 +26,14 @@ export function showcasePreview(content: InvitationProps): InvitationProps {
 
 export function showcaseContent(event: Event): InvitationProps {
   return {
+    coverLayout: isInvitationCoverLayout(event.coverLayout) ? event.coverLayout : "split",
     name: event.name, eventType: event.eventType, hostNames: event.hostNames || "",
     date: event.eventDate ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(event.eventDate) : "Fecha por definir",
     eventDateKey: event.eventDate?.toISOString().slice(0, 10) || "", eventTime: event.eventTime || "",
     venue: event.venue || "", address: event.address || "", message: event.message || "",
-    imageUrl: event.imageUrl || "", backgroundImageUrl: event.backgroundImageUrl || "",
+    imageUrl: event.imageUrl || "", backgroundImageUrl: event.backgroundImageUrl || "", backgroundBlurIntensity: event.backgroundBlurIntensity, backgroundDimIntensity: event.backgroundDimIntensity,
     accent: event.accent, typography: event.typography, bodyTypography: event.bodyTypography,
-    panelStyle: isInvitationPanelStyle(event.panelStyle) ? event.panelStyle : "auto", blurIntensity: event.blurIntensity,
+    panelStyle: isInvitationPanelStyle(event.panelStyle) ? event.panelStyle : "auto", blurIntensity: event.blurIntensity, glassBorder: event.glassBorder,
     showSectionIcons: event.showSectionIcons, sectionCorners: isInvitationSectionCorners(event.sectionCorners) ? event.sectionCorners : "rounded",
     sections: Array.isArray(event.sections) ? event.sections as InviteSection[] : [],
   };

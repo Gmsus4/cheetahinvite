@@ -14,6 +14,7 @@
 .admin-sidebar nav a[aria-current] { background:var(--surface); border-color:var(--line); color:var(--orange); box-shadow:0 5px 18px rgb(var(--shadow-rgb)/.025); }
 .admin-return { display:flex; justify-content:space-between; align-items:center; margin:25px 16px 0; padding-top:20px; border-top:1px solid var(--line); font-size:11px; color:var(--muted); }
 .admin-content { min-width:0; }
+.admin-content .dashboard-loading { min-height:calc(100svh - 200px); align-items:center; justify-content:center; padding:32px 24px; }
 .admin-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:30px; }
 .admin-heading h1 { margin:10px 0 12px; font-family:var(--font-poppins),Arial,sans-serif; font-size:clamp(32px,3.2vw,46px); font-weight:600; line-height:1.15; letter-spacing:-.055em; }
 .admin-heading p { max-width:590px; margin:0; font-size:13px; line-height:1.85; color:var(--muted); }

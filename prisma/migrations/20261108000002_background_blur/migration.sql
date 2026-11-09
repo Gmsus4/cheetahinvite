@@ -1,0 +1,1 @@
+ALTER TABLE "Event" ADD COLUMN "backgroundBlurIntensity" INTEGER NOT NULL DEFAULT 0;

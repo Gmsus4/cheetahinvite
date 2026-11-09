@@ -61,16 +61,18 @@ La conciliación consulta Checkout, PaymentIntent, cargo y las listas completas 
 reembolsos y disputas. Solo suma reembolsos `succeeded`; los pendientes o fallidos
 no revocan acceso. El reembolso total retira el enlace, el parcial lo mantiene;
 las disputas suspenden y las ganadas restauran la vigencia original. No se reactivan
-invitaciones eliminadas, archivadas o vencidas. La compra original controla el
-acceso: un segundo cargo queda registrado para soporte y no añade meses.
+invitaciones eliminadas, archivadas o vencidas. La compra vigente controla el
+acceso: un segundo cargo accidental queda registrado para soporte y no añade meses.
+Una renovación reservada durante el mes de archivo puede sustituir expresamente
+la compra anterior y activar otro año. Ver `invitation-lifecycle.md`.
 
 Las consultas y escrituras se serializan por compra con un bloqueo transaccional
 en PostgreSQL. Esto evita que un aviso atrasado sobrescriba una consulta más nueva.
 Un error de Stripe o de base de datos produce 500 y rollback; Stripe puede reintentar.
 El cliente puede conciliar manualmente desde Mis compras, con una pausa de 30 s
 entre verificaciones exitosas. No se guardan datos de tarjeta ni payloads completos.
-No hay renovación ni ejecución de reembolsos o resolución de disputas desde la app:
-esas operaciones corresponden al equipo autorizado en Stripe.
+La renovación manual está disponible durante el mes de archivo. La ejecución de
+reembolsos y la resolución de disputas corresponden al equipo autorizado en Stripe.
 
 ## Comprobaciones
 

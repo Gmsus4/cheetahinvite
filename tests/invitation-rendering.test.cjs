@@ -72,6 +72,45 @@ test('primary location respects its own selection alongside the optional ceremon
   }
 });
 
+test('cover compositions preserve one photo, names, countdown visibility and public layout settings', () => {
+  const load = loadComponents();
+  const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');
+  const { PublicInvitationContent } = load('components/invitation/PublicInvitationContent.tsx');
+  const base = { name: 'Nuestra celebración', hostNames: 'Alejandra Martínez y Santiago García', date: '20 de noviembre', eventDateKey: '2027-11-20', venue: '', address: '', message: '', accent: '#58664E', imageUrl: '/cover.webp', sections: [] };
+  for (const coverLayout of ['split', 'split-reverse', 'stacked', 'overlay']) {
+    for (const countdown of [true, false]) {
+      const sections = [{ id: 'countdown', type: 'countdown', title: 'Cuenta regresiva', content: '', detail: '', link: '', imageUrl: '', enabled: countdown }];
+      const html = renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...base, coverLayout, sections }));
+      assert.ok(html.includes('data-cover-layout="' + coverLayout + '"'));
+      assert.equal((html.match(/src="\/cover.webp"/g) || []).length, 1);
+      assert.match(html, /aria-label="Alejandra Martínez y Santiago García"/);
+      assert.equal(html.includes('class="wa-panel wa-countdown"'), countdown);
+    }
+    const publicHtml = renderToStaticMarkup(React.createElement(PublicInvitationContent, { event: { ...base, coverLayout, eventDate: new Date('2027-11-20T12:00:00Z') } }));
+    assert.ok(publicHtml.includes('data-cover-layout="' + coverLayout + '"'));
+  }
+  const render = changes => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...base, ...changes }));
+  assert.match(render({ coverLayout: 'overlay', imageUrl: '' }), /data-cover-layout="stacked"/);
+  assert.match(render({}), /data-cover-layout="split"/);
+  assert.match(render({ coverLayout: 'invalid' }), /data-cover-layout="split"/);
+});
+
+test('cover layout picker exposes four compositions and invokes the selected option', () => {
+  const { InvitationCoverLayoutPicker } = loadComponents()('components/dashboard/InvitationCoverLayoutPicker.tsx');
+  const render = props => renderToStaticMarkup(React.createElement(InvitationCoverLayoutPicker, { onChange() {}, ...props }));
+  const html = render({ value: 'stacked', imageUrl: '/cover.webp' });
+  assert.equal((html.match(/aria-pressed=/g) || []).length, 4);
+  assert.equal((html.match(/aria-pressed="true"/g) || []).length, 1);
+  for (const label of ['Foto a la derecha', 'Foto a la izquierda', 'Portada centrada', 'Texto sobre la foto']) assert.ok(html.includes(label));
+  assert.match(render({ value: 'overlay' }), /Agrega una foto de portada/);
+  assert.doesNotMatch(render({ value: 'overlay', imageUrl: '/cover.webp' }), /Agrega una foto de portada/);
+  let selected;
+  const picker = InvitationCoverLayoutPicker({ onChange: value => { selected = value; } });
+  const buttons = picker.props.children.find(child => child?.props?.role === 'group').props.children;
+  buttons[1].props.onClick();
+  assert.equal(selected, 'split-reverse');
+});
+
 test('cover finish is independent and venue photos belong to the second block', () => {
   const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
   const section = { content: '', detail: '', link: '', imageUrl: '', enabled: true };
@@ -270,7 +309,7 @@ test('section surfaces alternate over visible panels and allow explicit override
   const render = sections => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...weddingExample, templateId: 'wedding-minimal-v2', accent: '#736048', sections }));
   const html = render([base, { ...base, id: 'hidden', enabled: false }, { ...base, id: 'two' }, { ...base, id: 'three' }]);
   assert.deepEqual([...html.matchAll(/data-surface="([^"]+)"/g)].map(match => match[1]), ['blur','blur-color','color','blur','blur-color','color']);
-  for (const panelStyle of ['blur','blur-color','color','glass']) {
+  for (const panelStyle of ['blur','blur-color','color','glass','none']) {
     assert.ok(render([{ ...base, panelStyle }]).includes(`wa-story" data-surface="${panelStyle}"`));
   }
 });
@@ -459,7 +498,7 @@ test('global finishes cover every panel and switching back restores the original
   const original = structuredClone(sections);
   const render = panelStyle => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...example, sections, panelStyle }));
   const baseline = render('auto');
-  for (const style of ['blur', 'blur-color', 'color', 'glass']) {
+  for (const style of ['blur', 'blur-color', 'color', 'glass', 'none']) {
     const html = render(style);
     const finishes = [...html.matchAll(/data-surface="([^"]+)"/g)].map(match => match[1]);
     assert.ok(finishes.length >= 5);
@@ -469,6 +508,136 @@ test('global finishes cover every panel and switching back restores the original
   }
 });
 
+
+test('the content-only finish is selectable globally and per section and hides irrelevant controls', () => {
+  const load = loadComponents();
+  const { InvitationStyleJourney } = load('components/dashboard/InvitationStyleJourney.tsx');
+  const { InvitationSurfacePicker } = load('components/dashboard/InvitationSurfacePicker.tsx');
+  const { SectionSurfaceFields } = load('components/dashboard/InvitationSectionFields.tsx');
+  const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');
+  const values = load('lib/guided-invitation.ts').initialGuidedValues({ id: '', eventType: 'wedding', name: 'Nuestra boda', hostNames: 'Alex y Sam', accent: '#58664E', typography: 'default', bodyTypography: 'inter', sections: [] });
+  const props = { ...values, panelStyle: 'none' };
+  const guided = renderToStaticMarkup(React.createElement(InvitationStyleJourney, { values: props, step: 2, onStepChange() {}, onChange() {} }));
+  const surface = renderToStaticMarkup(React.createElement(InvitationSurfacePicker, { values: props, onChange() {}, onBlurChange() {}, onGlassBorderChange() {} }));
+  for (const html of [guided, surface]) {
+    assert.match(html, /aria-pressed="true">(?:<[^>]+>)*Sin fondo|aria-pressed="true"[\s\S]*Sin fondo/);
+    assert.match(html, /data-surface="none"/);
+    assert.doesNotMatch(html, /Intensidad del desenfoque|Intensidad del blur|Mostrar borde del cristal/);
+  }
+  const section = { id: 'story', type: 'story', title: 'Nuestra historia', content: 'Un recuerdo', detail: '', link: '', imageUrl: '/photo.webp', enabled: true, panelStyle: 'none' };
+  const fields = renderToStaticMarkup(React.createElement(SectionSurfaceFields, { section, onChange() {} }));
+  assert.match(fields, /aria-pressed="true">Sin fondo/);
+  const html = renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...values, panelStyle: 'auto', date: '', sections: [section] }));
+  assert.match(html, /wa-story" data-surface="none"/);
+  assert.match(html, /Un recuerdo/);
+  assert.match(html, /src="\/photo.webp"/);
+  assert.doesNotMatch(html, /data-panel-style="none"/);
+});
+
+test('glass border switch updates both editors and removes edges without changing transparency', () => {
+  const load = loadComponents();
+  const { InvitationStyleJourney } = load('components/dashboard/InvitationStyleJourney.tsx');
+  const { InvitationSurfacePicker } = load('components/dashboard/InvitationSurfacePicker.tsx');
+  const { InvitationGlassBorderToggle } = load('components/dashboard/InvitationGlassBorderToggle.tsx');
+  const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');
+  const { atmosphereStyle } = load('lib/invitation-atmosphere.ts');
+  const values = load('lib/guided-invitation.ts').initialGuidedValues({ id: '', eventType: 'wedding', name: 'Fiesta', hostNames: 'Alex', accent: '#58664E', typography: 'default', bodyTypography: 'inter', sections: [] });
+  for (const glassBorder of [undefined, true, false]) {
+    const props = { ...values, panelStyle: 'glass', glassBorder };
+    const guided = renderToStaticMarkup(React.createElement(InvitationStyleJourney, { values: props, step: 2, onStepChange() {}, onChange() {} }));
+    const surface = renderToStaticMarkup(React.createElement(InvitationSurfacePicker, { values: props, onChange() {}, onBlurChange() {}, onGlassBorderChange() {} }));
+    for (const html of [guided, surface]) {
+      assert.match(html, /Mostrar borde del cristal/);
+      assert.match(html, /type="checkbox" role="switch"/);
+      assert.equal(/type="checkbox" role="switch"[^>]*checked/.test(html), glassBorder !== false);
+    }
+    const html = renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...props, date: '' }));
+    assert.ok(html.includes('--wa-glass-border-width:' + (glassBorder === false ? '0px' : '1px')));
+    const style = atmosphereStyle(values.accent, props);
+    assert.equal(style['--wa-glass-shadow'].includes('inset'), glassBorder !== false);
+    assert.equal(style['--wa-glass-background'], atmosphereStyle(values.accent)['--wa-glass-background']);
+    assert.equal(style['--wa-glass-filter'], atmosphereStyle(values.accent)['--wa-glass-filter']);
+  }
+  // Exercise the switch callback with the event value in both directions.
+  const callbacks = loadComponents({ useId: () => 'glass-border' });
+  const Toggle = callbacks('components/dashboard/InvitationGlassBorderToggle.tsx').InvitationGlassBorderToggle;
+  let selected = true;
+  const input = Toggle({ onChange: value => { selected = value; } }).props.children[1];
+  input.props.onChange({ target: { checked: false } });
+  assert.equal(selected, false);
+  input.props.onChange({ target: { checked: true } });
+  assert.equal(selected, true);
+  assert.ok(InvitationGlassBorderToggle);
+});
+
+test('page background blur reaches public invitations and remains independent of section finishes', () => {
+  const load = loadComponents();
+  const { atmosphereStyle } = load('lib/invitation-atmosphere.ts');
+  const { PublicInvitationContent } = load('components/invitation/PublicInvitationContent.tsx');
+  const { InvitationStyleJourney } = load('components/dashboard/InvitationStyleJourney.tsx');
+  const values = load('lib/guided-invitation.ts').initialGuidedValues({ id: '', eventType: 'wedding', name: 'Nuestra boda', hostNames: 'Alex y Sam', accent: '#58664E', typography: 'default', bodyTypography: 'inter', sections: [] });
+  for (const backgroundBlurIntensity of [undefined, 0, 25, 50, 100]) {
+    const style = atmosphereStyle(values.accent, { backgroundBlurIntensity, blurIntensity: 50 });
+    assert.equal(style['--wa-background-blur'], ((backgroundBlurIntensity ?? 0) * 0.24) + 'px');
+    assert.equal(style['--wa-blur'], '16px');
+    assert.equal(style['--wa-glass-blur'], '8px');
+    const html = renderToStaticMarkup(React.createElement(PublicInvitationContent, { event: { ...values, eventDate: null, backgroundBlurIntensity } }));
+    assert.ok(html.includes('--wa-background-blur:' + style['--wa-background-blur']));
+  }
+  for (const panelStyle of ['none', 'color', 'glass']) {
+    const html = renderToStaticMarkup(React.createElement(InvitationStyleJourney, { values: { ...values, panelStyle, backgroundBlurIntensity: 75 }, step: 2, onStepChange() {}, onChange() {} }));
+    assert.match(html, /Desenfoque del fondo de la invitación/);
+    assert.match(html, /75% de desenfoque del fondo/);
+  }
+  for (const backgroundBlurIntensity of [NaN, -1, 101, '50']) assert.equal(atmosphereStyle(values.accent, { backgroundBlurIntensity })['--wa-background-blur'], '0px');
+  const hooks = loadComponents({ useId: () => 'background-blur' });
+  const { InvitationBackgroundBlurControl } = hooks('components/dashboard/InvitationBackgroundBlurControl.tsx');
+  let selected = 0;
+  const input = InvitationBackgroundBlurControl({ onChange: value => { selected = value; } }).props.children.find(child => child.type === 'input');
+  input.props.onChange({ target: { value: '75' } });
+  assert.equal(selected, 75);
+  input.props.onChange({ target: { value: '0' } });
+  assert.equal(selected, 0);
+});
+
+test('page background dimming reaches public invitations and both previews independently of blur', () => {
+  const load = loadComponents();
+  const { atmosphereStyle } = load('lib/invitation-atmosphere.ts');
+  const { PublicInvitationContent } = load('components/invitation/PublicInvitationContent.tsx');
+  const { InvitationStyleJourney } = load('components/dashboard/InvitationStyleJourney.tsx');
+  const { InvitationSurfacePicker } = load('components/dashboard/InvitationSurfacePicker.tsx');
+  const values = load('lib/guided-invitation.ts').initialGuidedValues({ id: '', eventType: 'wedding', name: 'Nuestra boda', hostNames: 'Alex y Sam', accent: '#58664E', typography: 'default', bodyTypography: 'inter', sections: [] });
+  for (const backgroundDimIntensity of [undefined, 0, 30, 100]) {
+    const style = atmosphereStyle(values.accent, { backgroundDimIntensity, backgroundBlurIntensity: 50, blurIntensity: 50 });
+    assert.equal(style['--wa-background-dim'], (backgroundDimIntensity ?? 0) / 100);
+    assert.equal(style['--wa-background-blur'], '12px');
+    assert.equal(style['--wa-blur'], '16px');
+    for (const backgroundImageUrl of ['', '/background.webp']) {
+      const html = renderToStaticMarkup(React.createElement(PublicInvitationContent, { event: { ...values, eventDate: null, backgroundDimIntensity, backgroundImageUrl } }));
+      assert.ok(html.includes('--wa-background-dim:' + style['--wa-background-dim']));
+      const background = html.slice(html.indexOf('class="wa-backdrop"'), html.indexOf('class="wa-column"'));
+      assert.match(background, /class="wa-backdrop-dim"/);
+      assert.equal(background.includes('wa-backdrop-image'), Boolean(backgroundImageUrl));
+    }
+  }
+  for (const panelStyle of ['none', 'color', 'glass']) {
+    const props = { ...values, panelStyle, backgroundDimIntensity: 30 };
+    const guided = renderToStaticMarkup(React.createElement(InvitationStyleJourney, { values: props, step: 2, onStepChange() {}, onChange() {} }));
+    assert.match(guided, /Oscurecer el fondo de la invitación/);
+    assert.match(guided, /30% de oscurecimiento del fondo/);
+    const surface = renderToStaticMarkup(React.createElement(InvitationSurfacePicker, { values: props, onChange() {}, onBlurChange() {}, onGlassBorderChange() {} }));
+    assert.match(surface, /--wa-background-dim:0.3/);
+  }
+  for (const backgroundDimIntensity of [NaN, -1, 101, '50']) assert.equal(atmosphereStyle(values.accent, { backgroundDimIntensity })['--wa-background-dim'], 0);
+  const hooks = loadComponents({ useId: () => 'background-dim' });
+  const { InvitationBackgroundDimControl } = hooks('components/dashboard/InvitationBackgroundDimControl.tsx');
+  let selected = 0;
+  const input = InvitationBackgroundDimControl({ onChange: value => { selected = value; } }).props.children.find(child => child.type === 'input');
+  input.props.onChange({ target: { value: '30' } });
+  assert.equal(selected, 30);
+  input.props.onChange({ target: { value: '0' } });
+  assert.equal(selected, 0);
+});
 
 test('blur intensity controls all blur layers while preserving the original default strengths', () => {
   const load = loadComponents();

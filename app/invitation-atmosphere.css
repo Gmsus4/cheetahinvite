@@ -32,9 +32,10 @@
 .celebration-invitation img { display: block; max-width: 100%; }
 /* A stable viewport height prevents the photo from reframing when mobile
    browser controls appear at the end of the page. */
-.celebration-invitation .wa-backdrop { position: fixed; z-index: -1; inset: 0 0 auto; height: 100vh; height: 100lvh; pointer-events: none; background: var(--wa-base); }
+.celebration-invitation .wa-backdrop { position: fixed; z-index: -1; inset: 0 0 auto; height: 100vh; height: 100lvh; pointer-events: none; overflow: hidden; background: var(--wa-base); }
 html:has(.celebration-invitation), body:has(.celebration-invitation) { overscroll-behavior-y: none; }
 .celebration-invitation .wa-backdrop-shade { position: absolute; inset: 0; }
+.celebration-invitation .wa-backdrop-dim { position: absolute; inset: 0; background: #000; opacity: var(--wa-background-dim,0); pointer-events: none; }
 .celebration-invitation[data-photo="false"] .wa-backdrop-shade { background: radial-gradient(ellipse at 15% 15%,color-mix(in srgb,var(--wa-tint) 50%,transparent),transparent 65%),radial-gradient(ellipse at 85% 85%,color-mix(in srgb,var(--wa-tint) 40%,transparent),transparent 60%); }
 .celebration-invitation .wa-column { position: relative; width: min(100% - 40px,560px); margin: 0 auto; padding: 64px 0 34px; }
 .celebration-invitation .wa-shell { position: relative; isolation: isolate; }
@@ -203,6 +204,8 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
 
 .celebration-invitation .wa-backdrop-image { position: absolute; inset: 0; }
 .celebration-invitation .wa-backdrop-image img { object-fit: cover; object-position: center; }
+/* Bleed the background past the viewport so blur never exposes its edges. */
+.celebration-invitation .wa-backdrop :is(.wa-backdrop-image,.wa-backdrop-shade) { inset: calc(var(--wa-background-blur,0px) * -2); filter: blur(var(--wa-background-blur,0px)); }
 
 .celebration-invitation .wa-panel { isolation: isolate; }
 .celebration-invitation .wa-cover-heading { position: relative; isolation: isolate; }
@@ -216,7 +219,7 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
 /* The intro surface belongs to the shared container only on desktop. */
 .celebration-invitation .wa-panel[data-surface="glass"],
 .celebration-invitation:is([data-panel-style="glass"],[data-cover-style="glass"]) :is(.wa-cover,.wa-intro)[data-surface="glass"] {
-  border: 1px solid #ffffff35;
+  border: var(--wa-glass-border-width,1px) solid #ffffff35;
   border-top-color: #ffffff70;
   border-bottom-color: #ffffff45;
   border-radius: var(--wa-section-radius,18px);
@@ -227,7 +230,7 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
 }
 @media(min-width:960px) {
   .celebration-invitation .wa-section-row[data-has-media="true"]:has(> .wa-panel[data-surface="glass"])::before {
-    border: 1px solid #ffffff35;
+    border: var(--wa-glass-border-width,1px) solid #ffffff35;
     border-top-color: #ffffff70;
     border-bottom-color: #ffffff45;
     border-radius: var(--wa-section-radius,18px);
@@ -241,8 +244,20 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
   }
 }
 @media(max-width:959px) {
-  .celebration-invitation:is([data-panel-style],[data-cover-style]) .wa-intro[data-surface] { border: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .celebration-invitation:is([data-panel-style],[data-cover-style]) .wa-intro[data-surface]:not([data-cover-layout="stacked"]):not([data-cover-layout="overlay"]) { border: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
+
+/* The content-only finish removes every card layer, including the shared desktop surface. */
+.celebration-invitation .wa-panel[data-surface="none"],
+.celebration-invitation:is([data-panel-style],[data-cover-style]) :is(.wa-cover,.wa-intro)[data-surface="none"],
+.celebration-invitation .wa-cover[data-surface="none"] .wa-no-photo {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.celebration-invitation .wa-section-row[data-has-media="true"]:has(> .wa-panel[data-surface="none"])::before { content: none; }
 
 /* Explicit text alignment leaves the automatic media columns untouched. */
 .celebration-invitation [data-text-align="left"] { --wa-text-align: left; --wa-text-justify: flex-start; --wa-text-icon-left: 0; --wa-text-icon-right: auto; }
@@ -260,3 +275,40 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
 .celebration-invitation .wa-shell :is(.wa-button,.wa-carousel-controls button),
 .celebration-invitation .wa-shell .invite-rsvp-form button { border-radius: var(--wa-section-radius,18px); }
 .celebration-invitation .wa-shell .invite-rsvp-form :is(input,textarea,select) { border-radius: var(--wa-section-radius,18px); }
+
+/* Cover compositions share the same content and countdown. */
+@media(min-width:960px) {
+  .celebration-invitation .wa-intro[data-cover-layout="split-reverse"] .wa-cover-heading,
+  .celebration-invitation .wa-intro[data-cover-layout="split-reverse"] > .wa-countdown { grid-column: 2; }
+  .celebration-invitation .wa-intro[data-cover-layout="split-reverse"] :is(.wa-portrait,.wa-no-photo) { grid-column: 1; }
+}
+@media(max-width:959px) {
+  .celebration-invitation .wa-intro[data-cover-layout="split-reverse"] > .wa-cover { display: flex; flex-direction: column-reverse; }
+  .celebration-invitation .wa-intro[data-cover-layout="split-reverse"] .wa-cover-heading { padding-top: 28px; padding-bottom: 12px; }
+}
+.celebration-invitation .wa-intro[data-cover-layout="stacked"] { display: grid; grid-template-columns: minmax(0,1fr); grid-template-rows: none; align-items: center; gap: 24px; padding: clamp(16px,4vw,40px); margin-bottom: 24px; }
+.celebration-invitation .wa-intro[data-cover-layout="stacked"]:not([data-surface]) { background: var(--wa-base); box-shadow: 0 20px 64px #00000020; }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .celebration-invitation .wa-intro[data-cover-layout="stacked"]:not([data-surface]) { background: linear-gradient(140deg,#fffaf21a,transparent 65%),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur-cover,20px)); backdrop-filter: blur(var(--wa-blur-cover,20px)); }
+}
+.celebration-invitation .wa-intro[data-cover-layout="stacked"] > .wa-cover { display: contents; }
+.celebration-invitation .wa-intro[data-cover-layout="stacked"] .wa-cover-heading { grid-column: 1; grid-row: 1; justify-self: center; align-self: center; width: 100%; max-width: 800px; padding: 24px 12px; text-align: center; }
+.celebration-invitation .wa-intro[data-cover-layout="stacked"] :is(.wa-portrait,.wa-no-photo) { grid-column: 1; grid-row: 2; justify-self: center; width: 100%; max-width: 800px; min-height: 0; }
+.celebration-invitation .wa-intro[data-cover-layout="stacked"] .wa-no-photo { min-height: 240px; }
+.celebration-invitation .wa-intro[data-cover-layout="stacked"] .wa-portrait img { position: static; width: 100%; height: auto; max-height: 560px; aspect-ratio: 16/10; object-position: center 25%; }
+.celebration-invitation .wa-intro[data-cover-layout="stacked"] > .wa-countdown { grid-column: 1; grid-row: 3; justify-self: center; width: min(100%,560px); margin: 0; padding: 24px 16px; }
+.celebration-invitation .wa-intro:is([data-cover-layout="stacked"],[data-cover-layout="overlay"]) .wa-cover-heading h1 { margin: 20px 0 16px; font-size: clamp(42px,6vw,76px); line-height: 1.12; }
+.celebration-invitation[data-long-names] .wa-intro:is([data-cover-layout="stacked"],[data-cover-layout="overlay"]) .wa-cover-heading h1 { font-size: clamp(34px,4.8vw,62px); }
+.celebration-invitation .wa-intro:is([data-cover-layout="stacked"],[data-cover-layout="overlay"]) .wa-couple-name { display: inline; }
+.celebration-invitation .wa-intro:is([data-cover-layout="stacked"],[data-cover-layout="overlay"]) .wa-ampersand { display: inline-block; margin: 0 .25em; font-size: .65em; line-height: 1; }
+.celebration-invitation .wa-intro[data-cover-layout="overlay"] { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0,1fr); grid-template-rows: 1fr auto; align-items: end; gap: 20px; min-height: clamp(640px,85svh,940px); padding: clamp(24px,5vw,60px); margin-bottom: 24px; overflow: hidden; }
+.celebration-invitation .wa-intro[data-cover-layout="overlay"] > .wa-cover { display: contents; }
+.celebration-invitation .wa-intro[data-cover-layout="overlay"] .wa-portrait { position: absolute; z-index: 0; inset: 0; grid-area: auto; min-height: 0; width: 100%; height: 100%; border-radius: inherit; }
+.celebration-invitation .wa-intro[data-cover-layout="overlay"] .wa-portrait img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; object-position: center 35%; }
+.celebration-invitation .wa-intro[data-cover-layout="overlay"] .wa-portrait::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg,#00000018 10%,#00000070 45%,#000000c4); pointer-events: none; }
+.celebration-invitation .wa-intro[data-cover-layout="overlay"] .wa-cover-heading { position: relative; z-index: 1; grid-column: 1; grid-row: 1; justify-self: center; align-self: end; width: 100%; max-width: 800px; padding: 100px 0 12px; text-align: center; }
+.celebration-invitation .wa-intro[data-cover-layout="overlay"] > .wa-countdown { position: relative; z-index: 1; grid-column: 1; grid-row: 2; justify-self: center; align-self: end; width: min(100%,560px); margin: 0; padding: 24px 12px; }
+@media(max-width:600px) {
+  .celebration-invitation .wa-intro[data-cover-layout="stacked"] .wa-portrait img { aspect-ratio: 4/5; }
+  .celebration-invitation .wa-intro[data-cover-layout="overlay"] { min-height: 680px; padding: 24px 20px; }
+}

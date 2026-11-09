@@ -17,7 +17,7 @@ con los datos reales del operador y revisarse para la operación concreta.
   un correo que el usuario debe enviar; no crean tickets automáticamente.
 - Reembolsos comerciales por fallas propias que impidan prestar el servicio,
   incluidos cobros duplicados por error del sistema. No excluir derechos legales.
-- Contenido vencido: tres meses naturales de conservación después del vencimiento.
+- Contenido vencido: un mes natural de archivo después del vencimiento, con renovación manual y eliminación automática al terminar sin renovar.
 - Cierre de cuenta solicitado por soporte: hasta tres meses para tramitar la baja
   del contenido, respetando cancelaciones procedentes y conservación legal.
 
@@ -40,26 +40,18 @@ Los marcadores `[POR DEFINIR]` se mantienen únicamente donde faltan datos o
 decisiones que no deben inventarse. No se ha declarado que el sitio está listo
 para operar legalmente ni que los documentos garantizan cumplimiento.
 
-## Operación de conservación: pendiente de implementar
+## Operación de conservación
 
-El vencimiento deshabilita el enlace mediante la comprobación de vigencia.
-El proyecto no incluye aún una tarea automática que elimine eventos vencidos
-o sus respaldos. La limpieza de imágenes reemplazadas, eliminadas y temporales
-está implementada con cola persistente; requiere el scheduler descrito en
-`cloudinary-storage.md` y no sustituye la eliminación de eventos vencidos.
+El vencimiento deshabilita el enlace y la edición al cumplir doce meses. La tarea
+periódica autenticada archiva las invitaciones y las elimina después de un mes
+natural sin renovación, encolando sus imágenes y liberando el espacio. El historial
+de compras se conserva independientemente. Ver `invitation-lifecycle.md` y
+`cloudinary-storage.md` para migración, scheduler y comprobaciones. El Worker
+incluido requiere configuración y despliegue para ejecutar la limpieza sin visitas.
 
-Para cumplir la política de tres meses, el equipo debe establecer y ejecutar
-un procedimiento de revisión y eliminación, manual o automatizado, que:
-
-- Identifique eventos que cumplieron tres meses naturales desde `expiresAt`.
-- Registre solicitudes de cierre y su fecha límite.
-- Separe los datos del evento de los registros de compras que deban conservarse.
-- Retire archivos de Cloudinary y resuelva el ciclo de respaldos según los plazos
-  y contratos acordados, sin asumir que borrar una fila elimina todas las copias.
-- Actualice el contador de espacios y registre la ejecución sin datos innecesarios.
-
-El texto describe la política elegida; no significa que se haya implementado esa
-automatización. No se ha ejecutado ninguna eliminación ni programado tareas.
+Siguen pendientes el proceso de cierre de cuentas solicitado por soporte y el
+ciclo de eliminación de respaldos y copias de proveedores. Esta implementación
+no programa ni ejecuta por sí sola tareas remotas de producción.
 
 ## Referencias oficiales consultadas
 

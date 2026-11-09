@@ -1,0 +1,10 @@
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 20px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); cursor: pointer; }
+.toggle > span { display: grid; gap: 5px; }
+.toggle strong { color: var(--ink); font-size: 13px; font-weight: 500; }
+.toggle small { color: var(--muted); font-size: 11px; line-height: 1.6; }
+.toggle input[type="checkbox"][role="switch"] { appearance: none; -webkit-appearance: none; flex: 0 0 40px; width: 40px; height: 24px; min-height: 24px; margin: 0; padding: 3px; border: 1px solid var(--line); border-radius: 99px; background: var(--surface-muted); cursor: pointer; }
+.toggle input[type="checkbox"][role="switch"]::before { content: ""; display: block; width: 16px; height: 16px; border-radius: 50%; background: var(--muted); transition: transform .15s; }
+.toggle input[type="checkbox"][role="switch"]:checked { border-color: var(--orange); background: var(--orange); }
+.toggle input[type="checkbox"][role="switch"]:checked::before { background: #fff; transform: translateX(16px); }
+.toggle input[type="checkbox"][role="switch"]:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+@media(prefers-reduced-motion:reduce) { .toggle input[type="checkbox"][role="switch"]::before { transition: none; } }

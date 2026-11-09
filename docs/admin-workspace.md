@@ -100,6 +100,13 @@ fallido sin cerrar. Antes de otorgarla hay que resolver esos pagos desde Ventas.
 requiere un motivo y cierra el acceso gratuito, conservando contenido e historial.
 Una cortesía anterior debe retirarse antes de otorgar otra al mismo evento.
 
+El destinatario recibe un aviso en su panel con el nombre de la invitación y su
+vigencia. «Abrir mi invitación» y la X marcan ese aviso como leído. `CourtesyGrant.readAt`
+guarda la lectura en la cuenta, de forma que el aviso no regresa al recargar ni
+al entrar desde otro dispositivo. La etiqueta «Cortesía» de la tarjeta permanece
+durante la vigencia; cerrar el aviso no retira el regalo. Cada nueva cortesía
+tiene su propia lectura. No se envía un correo automático.
+
 ## Estadísticas
 
 Periodos de 7, 30 y 90 días, con días de Ciudad de México. Incluyen compras reales,

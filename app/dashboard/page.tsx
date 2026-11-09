@@ -31,7 +31,7 @@ async function DashboardData() {
 
   if (!user?.id) redirect("/login?callbackUrl=%2Fdashboard");
 
-  const [events, account] = await Promise.all([
+  const [events, account, unreadGrants] = await Promise.all([
     prisma.event.findMany({
       where: { ownerId: user.id, isExample: false },
       orderBy: { updatedAt: "desc" },
@@ -56,6 +56,10 @@ async function DashboardData() {
       where: { id: user.id },
       select: { name: true, email: true, image: true },
     }),
+    prisma.courtesyGrant.findMany({
+      where: { ownerId: user.id, revokedAt: null, readAt: null, expiresAt: { gt: new Date(now) } },
+      select: { id: true, eventId: true, grantedAt: true },
+    }),
   ]);
 
   return (
@@ -64,7 +68,7 @@ async function DashboardData() {
       userName={account?.name || user.name || "Usuario"}
       userEmail={account?.email || user.email || ""}
       userImage={account?.image || user.image}
-      events={events}
+      events={events.map(event => ({ ...event, courtesyNoticeId: unreadGrants.find(grant => grant.eventId === event.id && grant.grantedAt.getTime() === event.complimentaryAt?.getTime())?.id ?? null }))}
     />
   );
 }

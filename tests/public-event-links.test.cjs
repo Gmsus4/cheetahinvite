@@ -8,7 +8,7 @@ test('pending migration allows manual and automatic content saves with the curre
   for (const mode of ['manual', 'auto']) {
     const f = createFixture();
     f.state.events.get('event').customSlug = 'emi';
-    if (mode === 'manual') Object.assign(f.state.events.get('event'), { paidAt: new Date(), status: 'PUBLISHED' });
+    if (mode === 'manual') Object.assign(f.state.events.get('event'), { paidAt: new Date(), expiresAt: new Date(Date.now() + 365 * 86400000), status: 'PUBLISHED' });
     let inTransaction = false;
     const transaction = f.prisma.$transaction;
     f.prisma.$transaction = work => transaction(async tx => { inTransaction = true; try { return await work(tx); } finally { inTransaction = false; } });
@@ -27,6 +27,7 @@ test('pending migration allows manual and automatic content saves with the curre
 test('pending migration lets an invitation without a custom link save and prevents unsupported renames', async () => {
   const f = createFixture();
   f.state.events.get('event').paidAt = new Date();
+  f.state.events.get('event').expiresAt = new Date(Date.now() + 365 * 86400000);
   f.prisma.invitationLink.findUnique = async () => { throw Object.assign(new Error('Missing table'), { code: 'P2021' }); };
   const form = f.saveForm(); form.set('customSlug', '');
   assert.equal((await f.actions.updateEvent('event', form)).ok, true);
@@ -75,6 +76,7 @@ test('payment cannot publish under another invitation’s reserved custom name',
 test('global names reject another account, suggest an alternative and preserve historical names', async () => {
   const f = createFixture();
   f.state.events.get('event').paidAt = new Date();
+  f.state.events.get('event').expiresAt = new Date(Date.now() + 365 * 86400000);
   f.state.links.set('/event/emi', { path: '/event/emi', eventId: 'other-event' });
   const availability = await f.actions.checkInvitationSlug('event', 'Emí');
   assert.deepEqual(availability, { available: false, suggestion: 'emi-2' });
@@ -107,6 +109,7 @@ test('custom links require confirmed payment, including forged manual and automa
     // Ordinary content saves stay available before payment.
     assert.equal((await f.actions.updateEvent('event', f.saveForm())).ok, true);
     f.state.events.get('event').paidAt = new Date();
+    f.state.events.get('event').expiresAt = new Date(Date.now() + 365 * 86400000);
     assert.equal((await f.actions.checkInvitationSlug('event', 'emi')).available, true);
     const paidForm = f.saveForm(); paidForm.set('customSlug', 'emi');
     assert.equal((await f.actions.updateEvent('event', paidForm)).ok, true);

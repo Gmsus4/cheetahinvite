@@ -1,0 +1,1 @@
+ALTER TABLE "CourtesyGrant" ADD COLUMN "readAt" TIMESTAMP(3);

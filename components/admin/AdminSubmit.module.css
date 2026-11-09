@@ -1,0 +1,16 @@
+.dialog { box-sizing: border-box; width: min(460px, calc(100% - 32px)); max-height: calc(100dvh - 32px); margin: auto; padding: 0; overflow: auto; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); color: var(--ink); box-shadow: 0 24px 90px rgb(0 0 0 / .24); font-family: var(--font-body), Arial, sans-serif; }
+.dialog::backdrop { background: rgb(0 0 0 / .55); backdrop-filter: blur(4px); }
+.content { position: relative; padding: 30px; }
+.close { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--muted); font-size: 18px; cursor: pointer; }
+.close:hover { background: var(--surface-muted); color: var(--ink); }
+.icon { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: 22px; border-radius: 15px; background: var(--accent-soft); color: var(--orange); font-size: 24px; }
+.dialog h2 { margin: 0 0 12px; padding-right: 12px; font-family: var(--font-poppins), Arial, sans-serif; font-size: 24px; font-weight: 600; line-height: 1.3; letter-spacing: -.04em; }
+.dialog p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; overflow-wrap: anywhere; }
+.actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.actions button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 11px 18px; border: 1px solid transparent; border-radius: 12px; font: 600 12px var(--font-body), Arial, sans-serif; cursor: pointer; }
+.actions .cancel { border-color: var(--line); background: var(--surface); color: var(--ink); }
+.actions .cancel:hover { background: var(--surface-muted); }
+.actions .confirm { background: var(--orange); color: var(--on-inverse); }
+.actions .confirm:hover { background: var(--orange-hover); }
+.dialog button:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }
+@media(max-width:480px) { .content { padding: 26px 22px; } .dialog h2 { font-size: 22px; } .actions button { flex: 1 1 auto; } }

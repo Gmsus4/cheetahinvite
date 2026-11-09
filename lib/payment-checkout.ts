@@ -5,6 +5,7 @@ import { getStripe } from "@/lib/stripe";
 import { getCurrentPrice } from "@/lib/site-pricing";
 import { stripeLiveMode } from "@/lib/payment-fulfillment";
 import { eventPublicationIssues } from "@/lib/guided-invitation";
+import { canRenewInvitation, invitationLifecycle } from "@/lib/invitation-lifecycle";
 
 export async function prepareInvitationCheckout(eventId: string, ownerId: string): Promise<string | null> {
   const currentPrice = await getCurrentPrice();
@@ -13,14 +14,20 @@ export async function prepareInvitationCheckout(eventId: string, ownerId: string
   const payment = await prisma.$transaction(async tx => {
     await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${eventId} AND "ownerId" = ${ownerId} FOR UPDATE`);
     const event = await tx.event.findFirst({ where: { id: eventId, ownerId } });
-    if (!event || event.paidAt || event.complimentaryAt || event.isExample) return null;
+    if (!event || event.isExample) return null;
+    const renewal = canRenewInvitation(event);
+    if ((event.paidAt || event.complimentaryAt) && !renewal) return null;
     if (eventPublicationIssues(event).length) throw new Error("Complete the invitation before checkout");
-    const pending = await tx.invitationPayment.findFirst({ where: { eventId, ownerId, status: "PENDING" }, orderBy: { createdAt: "desc" } });
+    const renewalOfPaymentIntentId = renewal ? event.stripePaymentIntentId : null;
+    const pending = await tx.invitationPayment.findFirst({ where: { eventId, ownerId, status: "PENDING", renewalOfPaymentIntentId }, orderBy: { createdAt: "desc" } });
     if (pending) return pending;
+    const checkoutExpiresAt = new Date(Math.floor(Math.min(Date.now() + 60 * 60 * 1000,
+      renewal ? invitationLifecycle(event)!.deletesAt.getTime() : Infinity) / 1000) * 1000);
+    if (checkoutExpiresAt.getTime() < Date.now() + 31 * 60 * 1000) throw new Error("Renewal checkout window has closed");
     return tx.invitationPayment.create({ data: { eventId, ownerId, eventName: event.name, amount: currentPrice.amount, currency: currentPrice.currency,
       // Explicit expiry prevents an ambiguous create retry after Stripe's
       // idempotency retention from opening another payable session.
-      checkoutExpiresAt: new Date(Math.floor(Date.now() / 1000) * 1000 + 60 * 60 * 1000), livemode: stripeLiveMode(),
+      checkoutExpiresAt, renewalOfPaymentIntentId, livemode: stripeLiveMode(),
     } });
   });
   if (!payment) return null;
@@ -67,7 +74,9 @@ export async function prepareInvitationCheckout(eventId: string, ownerId: string
     cancel_url: `${origin}/dashboard/eventos/${eventId}/pago?payment=cancelled`, locale: "es",
   }, { idempotencyKey: `invitation-payment:${payment.id}` });
   await prisma.invitationPayment.update({ where: { id: payment.id }, data: { stripeCheckoutSessionId: checkout.id } });
-  await prisma.event.updateMany({ where: { id: eventId, ownerId, paidAt: null, complimentaryAt: null, isExample: false }, data: { stripeCheckoutSessionId: checkout.id, status: "PENDING_PAYMENT" } });
+  await prisma.event.updateMany({ where: { id: eventId, ownerId, isExample: false,
+    ...(payment.renewalOfPaymentIntentId ? { stripePaymentIntentId: payment.renewalOfPaymentIntentId } : { paidAt: null, complimentaryAt: null }) },
+    data: { stripeCheckoutSessionId: checkout.id, ...(!payment.renewalOfPaymentIntentId ? { status: "PENDING_PAYMENT" as const } : {}) } });
   // Recover an ambiguous older create with its original idempotent parameters,
   // then retire that checkout before returning a link at the current price.
   if (priceChanged) return prepareInvitationCheckout(eventId, ownerId);

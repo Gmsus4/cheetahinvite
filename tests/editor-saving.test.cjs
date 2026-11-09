@@ -17,7 +17,7 @@ test('concurrent saves have one winner, retain the other copy and allow a delibe
 });
 
 test('automatic writes cannot change a published invitation; manual writes still require its version', async () => {
-  const f = createFixture(); const event = f.state.events.get('event'); event.paidAt = new Date(); event.status = 'PUBLISHED';
+  const f = createFixture(); const event = f.state.events.get('event'); event.paidAt = new Date(); event.expiresAt = new Date(Date.now() + 365 * 86400000); event.status = 'PUBLISHED';
   const form = f.saveForm(); form.set('name', 'Nuevo nombre');
   assert.equal((await f.actions.updateEvent('event', form, 'auto')).code, 'published');
   assert.equal(f.state.events.get('event').name, 'Celebración');
@@ -70,11 +70,125 @@ test('a save racing with publication returns the new version for an explicit con
 });
 
 
+test('glass borders can be disabled, saved and restored without changing the finish', async () => {
+  const f = createFixture();
+  const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
+  assert.equal(initialGuidedValues(f.state.events.get('event')).glassBorder, true);
+  for (const glassBorder of [false, true, false]) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('panelStyle', 'glass');
+    form.set('glassBorder', String(glassBorder));
+    assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+    const restored = initialGuidedValues(f.state.events.get('event'));
+    assert.equal(restored.glassBorder, glassBorder);
+    assert.equal(restored.panelStyle, 'glass');
+  }
+  const legacy = f.saveForm();
+  legacy.set('contentVersion', String(f.state.events.get('event').contentVersion));
+  assert.equal((await f.actions.updateEvent('event', legacy)).ok, true);
+  assert.equal(f.state.events.get('event').glassBorder, false);
+  for (const value of ['0', 'yes', '']) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('glassBorder', value);
+    assert.equal((await f.actions.updateEvent('event', form)).code, 'validation');
+    assert.equal(f.state.events.get('event').glassBorder, false);
+  }
+});
+
+test('page background blur persists independently from section blur and preserves legacy saves', async () => {
+  const f = createFixture();
+  const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
+  assert.equal(initialGuidedValues(f.state.events.get('event')).backgroundBlurIntensity, 0);
+  for (const backgroundBlurIntensity of [100, 35, 0, 60]) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('backgroundBlurIntensity', String(backgroundBlurIntensity));
+    form.set('blurIntensity', '17');
+    form.set('panelStyle', 'none');
+    assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+    const restored = initialGuidedValues(f.state.events.get('event'));
+    assert.equal(restored.backgroundBlurIntensity, backgroundBlurIntensity);
+    assert.equal(restored.blurIntensity, 17);
+    assert.equal(restored.panelStyle, 'none');
+  }
+  const legacy = f.saveForm();
+  legacy.set('contentVersion', String(f.state.events.get('event').contentVersion));
+  assert.equal((await f.actions.updateEvent('event', legacy)).ok, true);
+  assert.equal(f.state.events.get('event').backgroundBlurIntensity, 60);
+  for (const value of ['-1', '101', '1.5', 'NaN', '', 'true']) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('backgroundBlurIntensity', value);
+    assert.equal((await f.actions.updateEvent('event', form)).code, 'validation');
+    assert.equal(f.state.events.get('event').backgroundBlurIntensity, 60);
+  }
+});
+
+test('page background dimming persists independently from blur and preserves legacy saves', async () => {
+  const f = createFixture();
+  const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
+  assert.equal(initialGuidedValues(f.state.events.get('event')).backgroundDimIntensity, 0);
+  for (const backgroundDimIntensity of [100, 30, 0, 60]) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('backgroundDimIntensity', String(backgroundDimIntensity));
+    form.set('backgroundBlurIntensity', '75');
+    form.set('blurIntensity', '17');
+    form.set('panelStyle', 'none');
+    assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+    const restored = initialGuidedValues(f.state.events.get('event'));
+    assert.equal(restored.backgroundDimIntensity, backgroundDimIntensity);
+    assert.equal(restored.backgroundBlurIntensity, 75);
+    assert.equal(restored.blurIntensity, 17);
+    assert.equal(restored.panelStyle, 'none');
+  }
+  const legacy = f.saveForm();
+  legacy.set('contentVersion', String(f.state.events.get('event').contentVersion));
+  assert.equal((await f.actions.updateEvent('event', legacy)).ok, true);
+  assert.equal(f.state.events.get('event').backgroundDimIntensity, 60);
+  for (const value of ['-1', '101', '1.5', 'NaN', '', 'true']) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('backgroundDimIntensity', value);
+    assert.equal((await f.actions.updateEvent('event', form)).code, 'validation');
+    assert.equal(f.state.events.get('event').backgroundDimIntensity, 60);
+  }
+});
+
+test('cover layouts save and reopen independently from section finishes and support older clients', async () => {
+  const f = createFixture();
+  const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
+  assert.equal(initialGuidedValues(f.state.events.get('event')).coverLayout, 'split');
+  for (const coverLayout of ['split', 'split-reverse', 'stacked', 'overlay']) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('coverLayout', coverLayout);
+    form.set('panelStyle', 'none');
+    assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+    const restored = initialGuidedValues(f.state.events.get('event'));
+    assert.equal(restored.coverLayout, coverLayout);
+    assert.equal(restored.panelStyle, 'none');
+  }
+  const legacy = f.saveForm();
+  legacy.set('contentVersion', String(f.state.events.get('event').contentVersion));
+  assert.equal((await f.actions.updateEvent('event', legacy)).ok, true);
+  assert.equal(f.state.events.get('event').coverLayout, 'overlay');
+  for (const value of ['', 'invalid', 'true']) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('coverLayout', value);
+    assert.equal((await f.actions.updateEvent('event', form)).code, 'validation');
+    assert.equal(f.state.events.get('event').coverLayout, 'overlay');
+  }
+});
+
 test('global finishes persist independently and restore per-section choices after reload', async () => {
   const f = createFixture();
   const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
   const sections = [{ id: 'story', type: 'story', title: 'Historia', content: 'Nuestra historia', detail: '', link: '', imageUrl: '', enabled: true, panelStyle: 'glass' }];
-  for (const panelStyle of ['blur', 'blur-color', 'color', 'glass', 'auto']) {
+  for (const panelStyle of ['blur', 'blur-color', 'color', 'glass', 'none', 'auto']) {
     const form = f.saveForm();
     form.set('contentVersion', String(f.state.events.get('event').contentVersion));
     form.set('panelStyle', panelStyle);

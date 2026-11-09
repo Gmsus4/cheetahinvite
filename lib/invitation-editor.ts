@@ -1,12 +1,13 @@
 import type { InvitationButtonAppearance } from "@/lib/invitation-buttons";
+import { isInvitationCoverLayout, type InvitationCoverLayout } from "@/lib/invitation-cover-layout";
 
 export type InvitationSectionCorners = "square" | "soft" | "rounded";
 export function isInvitationSectionCorners(value: unknown): value is InvitationSectionCorners {
   return typeof value === "string" && ["square", "soft", "rounded"].includes(value);
 }
 
-export type InvitationPanelStyle = "auto" | "blur" | "blur-color" | "color" | "glass";
-export const invitationPanelStyles = ["auto", "blur", "blur-color", "color", "glass"] as const;
+export type InvitationPanelStyle = "auto" | "blur" | "blur-color" | "color" | "glass" | "none";
+export const invitationPanelStyles = ["auto", "blur", "blur-color", "color", "glass", "none"] as const;
 export function isInvitationPanelStyle(value: unknown): value is InvitationPanelStyle {
   return typeof value === "string" && invitationPanelStyles.some(style => style === value);
 }
@@ -21,7 +22,7 @@ export function isSectionTextAlign(value: unknown): value is SectionTextAlign {
 export type InviteSection = { id: string; type: SectionType; title: string; titleCustomized?: boolean; showIcon?: boolean; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; panelStyle?: InvitationPanelStyle; textAlign?: SectionTextAlign; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; enabled: boolean };
 export type EditorValues = {
   name: string; eventType: string; eventDate: string; eventTime: string; hostNames: string; venue: string; address: string;
-  message: string; imageUrl: string; backgroundImageUrl?: string; panelStyle?: InvitationPanelStyle; blurIntensity?: number; showSectionIcons?: boolean; sectionCorners?: InvitationSectionCorners; accent: string; typography: string; bodyTypography: string; sections: InviteSection[];
+  message: string; imageUrl: string; backgroundImageUrl?: string; panelStyle?: InvitationPanelStyle; coverLayout?: InvitationCoverLayout; glassBorder?: boolean; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; showSectionIcons?: boolean; sectionCorners?: InvitationSectionCorners; accent: string; typography: string; bodyTypography: string; sections: InviteSection[];
   customSlug: string; templateId: string; texture: string; heroHorizontal: string; heroVertical: string; buttonAppearance: InvitationButtonAppearance;
 };
 export type EditorSaveResult = { ok: true; eventId: string; version: number } | {
@@ -77,8 +78,12 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
     const strings = ["name", "eventType", "eventDate", "eventTime", "hostNames", "venue", "address", "message", "imageUrl", "accent", "typography", "bodyTypography", "customSlug", "templateId", "texture", "heroHorizontal", "heroVertical"] as const;
     if (!values || !strings.every(key => typeof values[key] === "string")
       || (values.showSectionIcons !== undefined && typeof values.showSectionIcons !== "boolean")
+      || (values.glassBorder !== undefined && typeof values.glassBorder !== "boolean")
       || (values.sectionCorners !== undefined && !isInvitationSectionCorners(values.sectionCorners))
+      || (values.coverLayout !== undefined && !isInvitationCoverLayout(values.coverLayout))
       || (values.blurIntensity !== undefined && !isInvitationBlurIntensity(values.blurIntensity))
+      || (values.backgroundBlurIntensity !== undefined && !isInvitationBlurIntensity(values.backgroundBlurIntensity))
+      || (values.backgroundDimIntensity !== undefined && !isInvitationBlurIntensity(values.backgroundDimIntensity))
       || (values.panelStyle !== undefined && !invitationPanelStyles.includes(values.panelStyle))
       || (values.backgroundImageUrl !== undefined && (typeof values.backgroundImageUrl !== "string" || values.backgroundImageUrl.length > 1000))
       || (values.eventDate && (!/^\d{4}-\d{2}-\d{2}$/.test(values.eventDate) || !Number.isFinite(Date.parse(`${values.eventDate}T12:00:00Z`))))
@@ -102,11 +107,11 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
 export type EventData = {
   isExample?: boolean; complimentaryAt?: Date | null;
   id: string; ownerId: string; privacy?: string; privacyVersion?: number; contentVersion: number; customSlug: string | null; templateId: string; texture: string; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; paidAt: Date | null; expiresAt: Date | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED" | "SUSPENDED" | "REFUNDED"; slug: string | null;
-  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; backgroundImageUrl?: string | null; panelStyle?: string; blurIntensity?: number; showSectionIcons?: boolean; sectionCorners?: string; imageUploads: number; accent: string; typography: string; bodyTypography: string; heroHorizontal?: string; heroVertical?: string; buttonShape?: string; buttonFilled?: boolean; buttonIcons?: boolean; buttonBorder?: boolean; buttonBold?: boolean; sections: unknown;
+  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; backgroundImageUrl?: string | null; panelStyle?: string; coverLayout?: string; glassBorder?: boolean; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; showSectionIcons?: boolean; sectionCorners?: string; imageUploads: number; accent: string; typography: string; bodyTypography: string; heroHorizontal?: string; heroVertical?: string; buttonShape?: string; buttonFilled?: boolean; buttonIcons?: boolean; buttonBorder?: boolean; buttonBold?: boolean; sections: unknown;
 };
 
 export type InvitationProps = {
-  eventType: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string; panelStyle?: InvitationPanelStyle; blurIntensity?: number; showSectionIcons?: boolean; sectionCorners?: InvitationSectionCorners;
+  eventType: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string; panelStyle?: InvitationPanelStyle; coverLayout?: InvitationCoverLayout; glassBorder?: boolean; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; showSectionIcons?: boolean; sectionCorners?: InvitationSectionCorners;
   typography?: string; bodyTypography?: string; eventTime?: string; venue: string; address: string;
   message: string; imageUrl: string; backgroundImageUrl?: string; sections: InviteSection[]; publicEventId?: string;
 };

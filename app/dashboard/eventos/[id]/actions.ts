@@ -1,10 +1,12 @@
 "use server";
 import { eventPublicationIssues } from "@/lib/guided-invitation";
 import { hasPublicationGrant } from "@/lib/invitation-payment";
+import { canEditInvitation } from "@/lib/invitation-lifecycle";
 import { publishCourtesy } from "@/lib/courtesy";
 import { Prisma } from "@/generated/prisma/client";
 
 import { isInvitationPanelStyle, isInvitationBlurIntensity, isInvitationSectionCorners } from "@/lib/invitation-editor";
+import { isInvitationCoverLayout } from "@/lib/invitation-cover-layout";
 import type { EditorSaveResult } from "@/lib/invitation-editor";
 import { invitationSectionUrl, invitationExternalUrl } from "@/lib/invitation-links";
 import { parseButtonAppearance } from "@/lib/invitation-buttons";
@@ -167,13 +169,24 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
   const rawBlurIntensity = formData.get("blurIntensity");
   const blurIntensity = rawBlurIntensity === null ? 50 : typeof rawBlurIntensity === "string" && /^\d{1,3}$/.test(rawBlurIntensity) ? Number(rawBlurIntensity) : NaN;
   if (!isInvitationBlurIntensity(blurIntensity)) return failure("validation", "Elige una intensidad de blur entre 0 y 100.");
+  const rawBackgroundBlur = formData.get("backgroundBlurIntensity");
+  const backgroundBlurIntensity = rawBackgroundBlur === null ? 0 : typeof rawBackgroundBlur === "string" && /^\d{1,3}$/.test(rawBackgroundBlur) ? Number(rawBackgroundBlur) : NaN;
+  if (!isInvitationBlurIntensity(backgroundBlurIntensity)) return failure("validation", "Elige un desenfoque del fondo entre 0 y 100.");
+  const rawBackgroundDim = formData.get("backgroundDimIntensity");
+  const backgroundDimIntensity = rawBackgroundDim === null ? 0 : typeof rawBackgroundDim === "string" && /^\d{1,3}$/.test(rawBackgroundDim) ? Number(rawBackgroundDim) : NaN;
+  if (!isInvitationBlurIntensity(backgroundDimIntensity)) return failure("validation", "Elige una intensidad de oscurecimiento del fondo entre 0 y 100.");
   const rawShowSectionIcons = formData.get("showSectionIcons") ?? "true";
   if (rawShowSectionIcons !== "true" && rawShowSectionIcons !== "false") return failure("validation", "Elige si quieres mostrar los iconos de las secciones.");
   const showSectionIcons = rawShowSectionIcons === "true";
+  const rawGlassBorder = formData.get("glassBorder") ?? "true";
+  if (rawGlassBorder !== "true" && rawGlassBorder !== "false") return failure("validation", "Elige si quieres mostrar el borde del cristal.");
+  const glassBorder = rawGlassBorder === "true";
   const sectionCorners = formData.get("sectionCorners") ?? "rounded";
   if (!isInvitationSectionCorners(sectionCorners)) return failure("validation", "Elige una forma válida para las esquinas de las secciones.");
   const panelStyle = formData.get("panelStyle") ?? "auto";
   if (!isInvitationPanelStyle(panelStyle)) return failure("validation", "Elige un fondo válido para las secciones.");
+  const coverLayout = formData.get("coverLayout") ?? "split";
+  if (!isInvitationCoverLayout(coverLayout)) return failure("validation", "Elige un diseño válido para la portada.");
   const buttonAppearance = parseButtonAppearance(formData);
   const heroHorizontal = String(formData.get("heroHorizontal") ?? "left");
   const heroVertical = String(formData.get("heroVertical") ?? "center");
@@ -212,9 +225,13 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     templateId: sharedInvitationId,
     accent: invitationPalette(accent).accent, typography, bodyTypography,
     ...(formData.has("showSectionIcons") ? { showSectionIcons } : {}),
+    ...(formData.has("glassBorder") ? { glassBorder } : {}),
     ...(formData.has("sectionCorners") ? { sectionCorners } : {}),
     ...(formData.has("panelStyle") ? { panelStyle } : {}),
+    ...(formData.has("coverLayout") ? { coverLayout } : {}),
     ...(formData.has("blurIntensity") ? { blurIntensity } : {}),
+    ...(formData.has("backgroundBlurIntensity") ? { backgroundBlurIntensity } : {}),
+    ...(formData.has("backgroundDimIntensity") ? { backgroundDimIntensity } : {}),
     texture: "none", heroHorizontal: "center", heroVertical: "center",
     buttonShape: design.buttons.shape, buttonFilled: design.buttons.filled, buttonIcons: design.buttons.icons,
     buttonBorder: design.buttons.border, buttonBold: design.buttons.bold,
@@ -224,10 +241,12 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     // Probe outside the transaction: a missing table aborts a PostgreSQL transaction.
     const registryReady = !hasCustomSlug || await invitationLinkRegistryReady(prisma);
     const result = await withImageLock(session.user.id, async tx => {
-      const previous = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, contentVersion: true, status: true, paidAt: true, complimentaryAt: true, isExample: true, customSlug: true } });
+      await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${eventId} FOR UPDATE`);
+      const previous = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, contentVersion: true, status: true, paidAt: true, complimentaryAt: true, expiresAt: true, isExample: true, customSlug: true } });
       if (!previous) throw new EditorWriteError(failure("not-found", "No encontramos esta invitación. Tu copia local sigue disponible."));
       if (previous.isExample && (await tx.user.findUnique({ where: { id: session.user.id }, select: { role: true } }))?.role !== "ADMIN") throw new EditorWriteError(failure("auth", "Esta cuenta no tiene permisos para editar ejemplos del sitio."));
       if (previous.contentVersion !== version) throw new EditorWriteError({ ...failure("conflict", "Hay cambios guardados desde otra pestaña o dispositivo. Tu versión se conserva; revísala antes de reemplazarlos."), version: previous.contentVersion });
+      if (!canEditInvitation(previous)) throw new EditorWriteError(failure("validation", "La edición está desactivada. Revisa la vigencia y renueva desde Pago y soporte."));
       if (automatic && (hasPublicationGrant(previous) || !["DRAFT", "PENDING_PAYMENT"].includes(previous.status))) {
         throw new EditorWriteError(failure("published", "Los cambios de esta invitación se guardan en este dispositivo. Usa Guardar cambios para aplicarlos."));
       }

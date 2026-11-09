@@ -229,9 +229,11 @@ test('all migrations preserve existing accounts, default to normal access, and c
   try {
     const root = 'prisma/migrations';
     const folders = fs.readdirSync(root).filter(name => fs.existsSync(path.join(root, name, 'migration.sql'))).sort();
-    for (const folder of folders.filter(name => name !== '20261108000001_admin_workspace')) await db.exec(fs.readFileSync(path.join(root, folder, 'migration.sql'), 'utf8'));
+    const adminIndex = folders.indexOf('20261108000001_admin_workspace');
+    assert.ok(adminIndex >= 0);
+    for (const folder of folders.slice(0, adminIndex)) await db.exec(fs.readFileSync(path.join(root, folder, 'migration.sql'), 'utf8'));
     await db.query('INSERT INTO "User" (id, email, "invitationCount") VALUES ($1, $2, 2)', ['existing', 'fixture@example.invalid']);
-    await db.exec(fs.readFileSync(path.join(root, '20261108000001_admin_workspace/migration.sql'), 'utf8'));
+    for (const folder of folders.slice(adminIndex)) await db.exec(fs.readFileSync(path.join(root, folder, 'migration.sql'), 'utf8'));
     assert.equal((await db.query('SELECT role FROM "User" WHERE id = $1', ['existing'])).rows[0].role, 'USER');
     assert.equal((await db.query('SELECT count(*)::int AS count FROM "ShowcaseExample"')).rows[0].count, 0);
     assert.equal((await db.query('SELECT count(*)::int AS count FROM "Event"')).rows[0].count, 0);

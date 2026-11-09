@@ -60,9 +60,13 @@ model Event {
   typography   String      @default("default")
   bodyTypography String    @default("inter")
   panelStyle   String      @default("auto")
+  coverLayout String @default("split")
+  glassBorder Boolean @default(true)
   showSectionIcons Boolean @default(true)
   sectionCorners String @default("rounded")
   blurIntensity Int        @default(50)
+  backgroundBlurIntensity Int @default(0)
+  backgroundDimIntensity Int @default(0)
   sections     Json        @default("[]")
   slug         String?     @unique
   customSlug   String?     @db.VarChar(80)
@@ -89,6 +93,7 @@ model Event {
   showcaseExample ShowcaseExample?
 
   @@index([ownerId, status])
+  @@index([expiresAt])
   @@unique([ownerId, customSlug])
 }
 
@@ -137,6 +142,7 @@ model CourtesyGrant {
   grantedAt DateTime @default(now())
   expiresAt DateTime
   revokedAt DateTime?
+  readAt DateTime?
   @@index([eventId, revokedAt])
   @@index([ownerId])
 }
@@ -290,6 +296,7 @@ model InvitationPayment {
   ownerId                 String
   eventId                 String
   eventName               String
+  renewalOfPaymentIntentId String?
   amount                  Int
   currency                String
   status                  InvitationPaymentStatus @default(PENDING)

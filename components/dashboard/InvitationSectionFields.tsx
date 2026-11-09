@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { FiAlignLeft, FiAlignCenter, FiAlignRight } from "react-icons/fi";
 import type { InviteSection, InvitationPanelStyle } from "@/lib/invitation-editor";
+import { invitationSurfaceOptions } from "@/lib/invitation-style-journey";
 import { InvitationProgramFields } from "./InvitationProgramFields";
 import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
 
@@ -60,7 +61,7 @@ export function SectionSurfaceFields({ section, onChange, globalPanelStyle = "au
   return <><fieldset className="guided-section-surface">
     <legend>Estilo de esta sección</legend>
     <div role="group" aria-label={`Estilo de ${section.title}`}>
-      {([['auto', 'Automático'], ['blur', 'Desenfoque'], ['blur-color', 'Desenfoque con color'], ['color', 'Color sólido'], ['glass', 'Cristal']] as const).map(([value, label]) => <button
+      {invitationSurfaceOptions.map(({ value, label }) => <button
         key={value}
         type="button"
         disabled={surfaceLocked}

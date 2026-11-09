@@ -4,6 +4,7 @@ import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { invitationPath } from "@/lib/invitation-url";
 import { supportMailto } from "@/lib/support";
 import { isInvitationPublished } from "@/lib/invitation-payment";
+import { canEditInvitation, invitationLifecycle } from "@/lib/invitation-lifecycle";
 import {
   FiArrowUpRight,
   FiCalendar,
@@ -22,6 +23,7 @@ import {
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { CopyInvitationLink } from "@/components/dashboard/CopyInvitationLink";
 import { DeleteInvitationButton } from "@/components/dashboard/DeleteInvitationButton";
+import { CourtesyNotice } from "@/components/dashboard/CourtesyNotice";
 
 type EventStatus = "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED" | "SUSPENDED" | "REFUNDED";
 
@@ -35,6 +37,7 @@ type DashboardEvent = {
   expiresAt: Date | null;
   paidAt: Date | null;
   complimentaryAt?: Date | null;
+  courtesyNoticeId?: string | null;
   slug: string | null;
   ownerId: string;
   customSlug: string | null;
@@ -83,6 +86,9 @@ export function DashboardContent({ userName, userEmail, userImage, events, now }
   const firstName = userName.trim().split(/\s+/)[0] || "bienvenido";
   const activeEvents = events.filter((event) => isInvitationPublished(event, new Date(now))).length;
   const drafts = events.filter((event) => event.status === "DRAFT").length;
+  const courtesyEvents = events.filter((event) => event.complimentaryAt && !event.paidAt && canEditInvitation(event, new Date(now)));
+  const courtesyIds = new Set(courtesyEvents.map((event) => event.id));
+  const unreadCourtesyEvents = courtesyEvents.filter((event) => event.courtesyNoticeId);
   const soon = now + 30 * 24 * 60 * 60 * 1000;
   const expiring = events.filter(
     (event) =>
@@ -109,6 +115,9 @@ export function DashboardContent({ userName, userEmail, userImage, events, now }
               Nueva invitación <FiArrowUpRight aria-hidden="true" />
             </Link> : <span className="dashboard-capacity-full">Tus {ACCOUNT_LIMITS.invitations} espacios están ocupados</span>}
           </div>
+          {unreadCourtesyEvents.length > 0 && <section className="dashboard-courtesy-notices" aria-label="Cortesías recibidas">
+            {unreadCourtesyEvents.map((event) => <CourtesyNotice key={event.courtesyNoticeId} grantId={event.courtesyNoticeId!} eventId={event.id} name={event.name} expiresAt={event.expiresAt!} published={isInvitationPublished(event, new Date(now))} />)}
+          </section>}
           <section className="dashboard-events-section" id="mis-invitaciones" aria-labelledby="dashboard-events-title" tabIndex={-1}>
             <div className="dashboard-section-heading">
               <div>
@@ -123,18 +132,18 @@ export function DashboardContent({ userName, userEmail, userImage, events, now }
                   <article className="dashboard-invitation-card" key={event.id}>
                     <div className={`dashboard-invitation-cover${event.imageUrl ? " has-image" : ""}`}>
                       {event.imageUrl ? <Image src={event.imageUrl} alt={`Portada de ${event.name}`} fill unoptimized sizes="(max-width: 640px) 100vw, (max-width: 1050px) 50vw, 33vw" /> : <FiGift className="dashboard-cover-gift" aria-hidden="true" />}
-                      <span className={`dashboard-status status-${event.status.toLowerCase()}`}><i aria-hidden="true" />{statusLabels[event.status]}</span>
+                      <span className={`dashboard-status status-${event.status.toLowerCase()}`}><i aria-hidden="true" />{["PUBLISHED", "EXPIRED"].includes(event.status) && invitationLifecycle(event, new Date(now))?.phase !== "active" ? "Archivado" : statusLabels[event.status]}</span>
                       <span className="dashboard-invitation-number">INVITACIÓN {String(index + 1).padStart(2, "0")}</span>
                     </div>
                     <div className="dashboard-invitation-body">
-                      <span className="dashboard-invitation-type">{eventLabels[event.eventType] ?? event.eventType}</span>
+                      <div className="dashboard-invitation-type-row"><span className="dashboard-invitation-type">{eventLabels[event.eventType] ?? event.eventType}</span>{courtesyIds.has(event.id) && <span className="dashboard-courtesy-badge"><FiGift aria-hidden="true" /> Cortesía</span>}</div>
                       <h3>{event.name}</h3>
                       <div className="dashboard-invitation-meta">
                         <span className="dashboard-invitation-date"><FiCalendar aria-hidden="true" /> {formatDate(event.eventDate)}</span>
                         {event.privacy === "PRIVATE" && <span className="dashboard-invitation-privacy"><FiLock aria-hidden="true" /> Protegida con PIN</span>}
                       </div>
                       <div className="dashboard-invitation-actions">
-                        <Link className="dashboard-card-edit" href={`/dashboard/eventos/${event.id}`} aria-label={`Editar invitación: ${event.name}`}><FiEdit2 aria-hidden="true" /> Editar</Link>
+                        <Link className="dashboard-card-edit" href={`/dashboard/eventos/${event.id}${canEditInvitation(event, new Date(now)) ? "" : "/pago"}`} aria-label={`Administrar invitación: ${event.name}`}><FiEdit2 aria-hidden="true" /> {canEditInvitation(event, new Date(now)) ? "Editar" : "Ver vigencia"}</Link>
                         <Link className="dashboard-card-payment" href={`/dashboard/eventos/${event.id}/ajustes`} aria-label={`Ajustes de ${event.name}`}><FiSettings aria-hidden="true" /> Ajustes</Link>
                         <div className="dashboard-card-share">
                           {isInvitationPublished(event, new Date(now)) && event.slug ? <CopyInvitationLink path={invitationPath(event)!} /> : <>

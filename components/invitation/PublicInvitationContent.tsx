@@ -1,3 +1,4 @@
+import { isInvitationCoverLayout } from "@/lib/invitation-cover-layout";
 import type { Event } from "@/generated/prisma/client";
 import { isInvitationPanelStyle, isInvitationSectionCorners, type InviteSection } from "@/lib/invitation-editor";
 import { CelebrationInvitation } from "./CelebrationInvitation";
@@ -24,6 +25,10 @@ export function PublicInvitationContent({ event }: { event: Omit<Event, "pinHash
       typography={event.typography}
       bodyTypography={event.bodyTypography} blurIntensity={event.blurIntensity} panelStyle={isInvitationPanelStyle(event.panelStyle) ? event.panelStyle : "auto"}
       showSectionIcons={event.showSectionIcons}
+      glassBorder={event.glassBorder}
+      backgroundBlurIntensity={event.backgroundBlurIntensity}
+      backgroundDimIntensity={event.backgroundDimIntensity}
+      coverLayout={isInvitationCoverLayout(event.coverLayout) ? event.coverLayout : "split"}
       sectionCorners={isInvitationSectionCorners(event.sectionCorners) ? event.sectionCorners : "rounded"}
       sections={sections}
     />
