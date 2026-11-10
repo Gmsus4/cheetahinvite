@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FiArrowUp, FiArrowDown, FiPlus, FiTrash2 } from "react-icons/fi";
 import { parseInvitationProgram, serializeInvitationProgram, type ProgramActivity } from "@/lib/invitation-program";
 
-export function InvitationProgramFields({ id, content, onChange }: { id: string; content: string; onChange(content: string): void }) {
+export function InvitationProgramFields({ id, content, onChange, fieldErrors = {} }: { fieldErrors?: Record<string, string>; id: string; content: string; onChange(content: string): void }) {
   const items = parseInvitationProgram(content);
   const [error, setError] = useState("");
   function update(next: ProgramActivity[]) {
@@ -33,8 +33,9 @@ export function InvitationProgramFields({ id, content, onChange }: { id: string;
         </div></div>
         <div className="guided-program-row-fields">
           <div className="guided-field"><label htmlFor={`${id}-activity-${index}-time`}>Hora <span>(opcional)</span></label><input id={`${id}-activity-${index}-time`} type="time" value={item.time} onChange={event => update(items.map((row, position) => position === index ? { ...row, time: event.target.value } : row))} /></div>
-          <div className="guided-field"><label htmlFor={`${id}-activity-${index}-text`}>¿Qué sucederá?</label><input id={`${id}-activity-${index}-text`} value={item.activity} maxLength={2000} placeholder="Ej. Llegada de invitados" onChange={event => update(items.map((row, position) => position === index ? { ...row, activity: event.target.value } : row))} /></div>
+          <div className="guided-field"><label htmlFor={`${id}-activity-${index}-text`}>¿Qué sucederá?</label><input id={`${id}-activity-${index}-text`} aria-invalid={Boolean(fieldErrors[`${id}-activity-${index}-text`])} aria-describedby={fieldErrors[`${id}-activity-${index}-text`] ? `${id}-activity-${index}-error` : undefined} value={item.activity} maxLength={2000} placeholder="Ej. Llegada de invitados" onChange={event => update(items.map((row, position) => position === index ? { ...row, activity: event.target.value } : row))} /></div>
         </div>
+        {fieldErrors[`${id}-activity-${index}-text`] && <small id={`${id}-activity-${index}-error`} role="alert" style={{ color: 'var(--danger)' }}>{fieldErrors[`${id}-activity-${index}-text`]}</small>}
       </li>)}
     </ol>
     <button className="guided-program-add" type="button" onClick={() => update([...items, { time: "", activity: "" }])}><FiPlus aria-hidden="true" />Agregar actividad</button>

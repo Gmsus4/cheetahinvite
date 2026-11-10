@@ -1,4 +1,5 @@
 import { isInvitationCoverLayout } from "./invitation-cover-layout";
+import { requiredSectionFields } from "./invitation-required-fields";
 import { invitationStyleStepIndex } from "./invitation-style-journey";
 import { normalizeEventLocations } from "./invitation-locations";
 import { invitationGoogleMapsUrl } from "./invitation-links";
@@ -40,7 +41,7 @@ export function guidedContentSectionIds(eventType: string, sections: InviteSecti
 }
 
 export function guidedInformationSectionIds(eventType: string, sections: InviteSection[], activeSection = '') {
-  const informationIds = new Set(sections.filter(section => !['cover', 'countdown', 'location', 'gallery'].includes(section.type)).map(section => section.id));
+  const informationIds = new Set(sections.filter(section => !['cover', 'countdown', 'location'].includes(section.type)).map(section => section.id));
   return guidedContentSectionIds(eventType, sections, activeSection).filter(id => id === '__more' || informationIds.has(id));
 }
 
@@ -107,10 +108,7 @@ export function guidedPublicationIssues(values: Pick<EditorValues, 'eventType' |
   }
   for (const section of values.sections.filter(section => section.enabled)) {
     if (section.type === 'reception' || section.type === 'countdown' || section.type === 'cover' || section.type === 'location' || (section.type === 'rsvp' && section.rsvpMode === 'integrated')) continue;
-    const complete = section.type === 'gallery' ? Boolean(section.imageUrls?.length || section.imageUrl)
-      : section.type === 'rsvp' ? Boolean(section.link.trim())
-      : section.type === 'ceremony' ? Boolean(section.content.trim() && section.detail.trim() && section.link.trim())
-      : Boolean(section.content.trim() || section.link.trim());
+    const complete = requiredSectionFields(section, true).length === 0;
     if (!complete) issues.push({ step: 4, message: `Completa «${section.title}» o desactívala.`, sectionId: section.id });
   }
   return issues;

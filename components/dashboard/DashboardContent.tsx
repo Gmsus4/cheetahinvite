@@ -8,10 +8,7 @@ import { canEditInvitation, invitationLifecycle } from "@/lib/invitation-lifecyc
 import {
   FiArrowUpRight,
   FiCalendar,
-  FiCheckCircle,
-  FiClock,
   FiEdit2,
-  FiFileText,
   FiGift,
   FiPlus,
   FiHelpCircle,
@@ -87,20 +84,9 @@ function formatDate(date: Date | null) {
 export function DashboardContent({ ownerId, userName, userEmail, userImage, events, now }: DashboardContentProps) {
   const availableSlots = Math.max(0, ACCOUNT_LIMITS.invitations - events.length);
   const firstName = userName.trim().split(/\s+/)[0] || "bienvenido";
-  const activeEvents = events.filter((event) => isInvitationPublished(event, new Date(now))).length;
-  const drafts = events.filter((event) => event.status === "DRAFT").length;
   const courtesyEvents = events.filter((event) => event.complimentaryAt && !event.paidAt && canEditInvitation(event, new Date(now)));
   const courtesyIds = new Set(courtesyEvents.map((event) => event.id));
   const unreadCourtesyEvents = courtesyEvents.filter((event) => event.courtesyNoticeId);
-  const soon = now + 30 * 24 * 60 * 60 * 1000;
-  const expiring = events.filter(
-    (event) =>
-      event.status === "PUBLISHED" &&
-      event.expiresAt &&
-      event.expiresAt.getTime() >= now &&
-      event.expiresAt.getTime() <= soon,
-  ).length;
-
   return (
     <div className="dashboard-page dashboard-home-style">
       <a className="dashboard-skip-link" href="#mis-invitaciones">Ir a mis invitaciones</a>
@@ -171,29 +157,6 @@ export function DashboardContent({ ownerId, userName, userEmail, userImage, even
                 </Link>)}
               </div>
             <p className="dashboard-slot-explanation">Puedes tener hasta {ACCOUNT_LIMITS.invitations} invitaciones en tu cuenta.{availableSlots === 0 ? " Si necesitas crear otra, primero elimina una que ya no uses." : ` Te ${availableSlots === 1 ? "queda 1 espacio disponible" : `quedan ${availableSlots} espacios disponibles`}.`}</p>
-          </section>
-
-          <section className="dashboard-stats" aria-label="Estado de tus invitaciones">
-            <article className="dashboard-stat-card">
-              <span className="dashboard-stat-icon stat-icon-orange"><FiCalendar aria-hidden="true" /></span>
-              <span className="dashboard-stat-copy"><small>Invitaciones</small><strong>{events.length}</strong></span>
-              <span className="dashboard-stat-caption">en tu cuenta</span>
-            </article>
-            <article className="dashboard-stat-card">
-              <span className="dashboard-stat-icon stat-icon-navy"><FiCheckCircle aria-hidden="true" /></span>
-              <span className="dashboard-stat-copy"><small>Activas</small><strong>{activeEvents}</strong></span>
-              <span className="dashboard-stat-caption">publicadas</span>
-            </article>
-            <article className="dashboard-stat-card">
-              <span className="dashboard-stat-icon stat-icon-gray"><FiFileText aria-hidden="true" /></span>
-              <span className="dashboard-stat-copy"><small>Borradores</small><strong>{drafts}</strong></span>
-              <span className="dashboard-stat-caption">por terminar</span>
-            </article>
-            <article className="dashboard-stat-card">
-              <span className="dashboard-stat-icon stat-icon-orange"><FiClock aria-hidden="true" /></span>
-              <span className="dashboard-stat-copy"><small>Por vencer</small><strong>{expiring}</strong></span>
-              <span className="dashboard-stat-caption">en 30 días</span>
-            </article>
           </section>
 
           <footer className="dashboard-footer">

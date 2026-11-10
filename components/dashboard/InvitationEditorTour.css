@@ -1,4 +1,9 @@
 .invitation-tour-welcome,.driver-popover.invitation-tour-popover{box-sizing:border-box;background:var(--surface,#192632);color:var(--ink,#fff);border:1px solid var(--line,#40505e);border-radius:20px;font-family:var(--font-body),Arial,sans-serif;box-shadow:0 12px 48px #0004}
+.dashboard-account-panel .dashboard-account-guide{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:10px 12px;border:0;border-radius:12px;background:transparent;color:var(--accent);font:500 13px/1.5 var(--font-body),Arial,sans-serif;text-align:left;cursor:pointer}
+.dashboard-account-guide:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.dashboard-account-guide[aria-disabled="true"]{opacity:.6;cursor:default}
+.dashboard-account-tour-error{margin:8px 12px;font-size:12px;color:var(--danger)}
+@media(max-width:600px){[data-account-tour-active="true"] .dashboard-account-panel{max-height:45dvh;overflow-y:auto;overscroll-behavior:contain}}
 .invitation-tour-welcome{position:fixed;z-index:60;right:100px;bottom:24px;width:min(380px,calc(100vw - 32px));padding:26px;max-height:calc(100dvh - 32px);overflow:auto}
 .invitation-tour-eyebrow{display:block;padding-right:24px;font-size:10px;letter-spacing:.12em;color:var(--accent);font-weight:600}
 .invitation-tour-welcome h2{margin:12px 0;padding-right:16px;font-size:22px;line-height:1.25;letter-spacing:-.025em}

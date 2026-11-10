@@ -243,3 +243,35 @@ test('creation skips visual steps and visual block controls while traversing inf
   const inputs = ui.nodes.filter(n => typeof n.type === 'string' && n.type === 'input');
   assert.equal(inputs.some(n => n.props.type === 'file'), false);
 });
+
+test('creation prevents empty next steps and progress jumps, while valid location links allow continuing', async t=>{
+ const h=setup(0);t.after(()=>h.stop());h.render();
+ h.states[0]={...h.states[0],hostNames:' ',name:''};
+ let ui=h.render();ui.submit();await h.flush();ui=h.render();
+ assert.equal(h.states[1],0);
+ assert.ok(ui.find(n=>n.props.errors?.['w-hosts']));
+ ui.find(n=>n.props['aria-label']?.startsWith('Paso 5:')).props.onClick();assert.equal(h.states[1],0);
+ h.states[0]={...h.states[0],name:'Mi celebración',hostNames:'Sofía',eventDate:'',eventTime:'',address:'',venue:''};
+ h.render().submit();assert.equal(h.states[1],1);
+ h.render().submit();await h.flush();assert.equal(h.states[1],1);
+ h.states[0]={...h.states[0],eventDate:'2027-01-15',eventTime:'17:00',venue:'Salón',sections:h.states[0].sections.map(s=>s.type==='location'?{...s,link:'https://maps.app.goo.gl/location'}:s)};
+ h.render().submit();assert.equal(h.states[1],4);
+ const story=h.states[0].sections.find(s=>s.type==='story');
+ h.states[0]={...h.states[0],sections:h.states[0].sections.map(s=>s.id===story.id?{...s,content:''}:s)};
+ h.render().submit();assert.equal(h.states[1],4);assert.equal(h.states[2],story.id);
+});
+
+test('gallery can be included from optional information blocks while photos are deferred to design', t => {
+  const h=setup(4);t.after(()=>h.stop());h.states[2]='__more';
+  let ui=h.render();
+  const add=ui.find(n=>n.type==='button'&&n.props.children?.[0]?.props?.children==='Galería de fotos');
+  assert.ok(add);add.props.onClick();ui=h.render();
+  const gallery=h.states[0].sections.find(section=>section.type==='gallery');
+  assert.equal(gallery.enabled,true);assert.equal(gallery.imageUrls.length,0);
+  assert.equal(h.states[2],gallery.id);
+  const fields=ui.find(n=>n.type?.displayName==='SectionFields');
+  assert.equal(fields.props.deferGalleryPhotos,true);
+  assert.equal(fields.props.section.id,gallery.id);
+  assert.equal(ui.nodes.some(n=>n.type?.displayName==='SectionQuickActions'),false);
+  ui.submit();assert.equal(h.states[2],'__more');
+});

@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { InviteSection } from "@/lib/invitation-editor";
 import { invitationWhatsAppLink, parseInvitationWhatsAppLink, splitWhatsAppPhone } from "@/lib/invitation-whatsapp";
 
-export function InvitationWhatsAppFields({ section, onChange }: { section: InviteSection; onChange(changes: Partial<InviteSection>): void }) {
+export function InvitationWhatsAppFields({ section, onChange, fieldErrors = {} }: { fieldErrors?: Record<string, string>; section: InviteSection; onChange(changes: Partial<InviteSection>): void }) {
   const existing = parseInvitationWhatsAppLink(section.link);
   const [destination, setDestination] = useState(section.whatsappPhone !== undefined || !section.link || existing ? "whatsapp" : "link");
   const phone = section.whatsappPhone ?? existing?.phone ?? "";
@@ -28,12 +28,14 @@ export function InvitationWhatsAppFields({ section, onChange }: { section: Invit
         else onChange({ whatsappPhone: undefined, whatsappMessage: undefined, link: "" });
       }}><option value="whatsapp">WhatsApp</option><option value="link">Otro enlace de confirmación</option></select>
     </div>
+    {fieldErrors[`${prefix}-phone`] && <small role="alert" style={{color:"var(--danger)"}}>{fieldErrors[`${prefix}-phone`]}</small>}
+    {fieldErrors[`${prefix}-link`] && <small role="alert" style={{color:"var(--danger)"}}>{fieldErrors[`${prefix}-link`]}</small>}
     {destination === "whatsapp" ? <>
       <div className="guided-field" data-preview-field={`${prefix}-phone`} data-preview-label="Número de WhatsApp">
         <label htmlFor={`${prefix}-phone`}>Número de WhatsApp</label>
         <div className="guided-phone-input">
           <div className="guided-phone-country"><input id={`${prefix}-country-code`} aria-label="Clave de país" type="tel" inputMode="numeric" autoComplete="tel-country-code" pattern="\+?[0-9]*" maxLength={4} value={`+${countryCode}`} onChange={event => update(`+${event.target.value.replace(/\D/g, "").slice(0, 3)} ${number}`, message)} /></div>
-          <input id={`${prefix}-phone`} type="tel" inputMode="numeric" autoComplete="tel-national" pattern="[0-9]*" maxLength={40} value={number} placeholder="5512345678" aria-invalid={invalidPhone} aria-describedby={`${prefix}-phone-help`} onChange={event => {
+          <input id={`${prefix}-phone`} type="tel" inputMode="numeric" autoComplete="tel-national" pattern="[0-9]*" maxLength={40} value={number} placeholder="5512345678" aria-invalid={invalidPhone || Boolean(fieldErrors[`${prefix}-phone`])} aria-describedby={`${prefix}-phone-help`} onChange={event => {
             const value = event.target.value;
             // Accept a pasted international number without duplicating its prefix.
             if (/^\s*\+/.test(value)) {

@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { cloneElement, isValidElement, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { FiArrowLeft, FiArrowRight, FiImage, FiChevronDown, FiCheck, FiEye, FiList, FiLock, FiSave, FiSend, FiSliders, FiUsers, FiMapPin, FiPlus } from "react-icons/fi";
 import { prepareEvent } from "@/app/crear/actions";
 import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 
 import { initialGuidedValues, completeGuidedSections, changeGuidedEventType, guidedDetails, guidedPublicationIssues, guidedRecoveryStep, guidedRecoverySection, guidedRecoveryAppearanceStep, guidedContentSectionIds, guidedInformationSectionIds } from "@/lib/guided-invitation";
+import { creationRequiredFields, type RequiredIssue } from "@/lib/invitation-required-fields";
 import { normalizeEventLocations } from "@/lib/invitation-locations";
 
 import { InvitationStyleJourney } from "./InvitationStyleJourney";
@@ -61,6 +62,9 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const [initiallySaved] = useState(Boolean(event.id));
   const [preparingPreview, setPreparingPreview] = useState(false);
   const [visualSession, setVisualSession] = useState<{ tab: Window; eventId: string; token: string; snapshot: string } | null>(null);
+  const [validationAttempted, setValidationAttempted] = useState(false);
+  const requiredIssues = creation ? creationRequiredFields(values) : [];
+  const fieldErrors = Object.fromEntries((validationAttempted ? requiredIssues : []).map(issue => [issue.field, issue.message]));
   const flowSteps = guidedFlow ? creation ? [0, 1, 4, 5, 6] : [0, 1, 4, 6] : [0, 1, 2, 3, 4, 5];
   const flowPosition = flowSteps.indexOf(step);
   const finalStep = guidedFlow ? 6 : lastStep;
@@ -156,7 +160,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const details = guidedDetails(values.eventType);
   const editableSections = [...values.sections.filter(section => section.type === "countdown"), ...values.sections.filter(section => section.type === "location"), ...details.flatMap(detail => values.sections.filter(section => section.type === detail.type))];
   const contentIds = guidedContentSectionIds(values.eventType, values.sections, activeSection);
-  const informationSections = editableSections.filter(section => !['cover', 'countdown', 'location', 'gallery'].includes(section.type));
+  const informationSections = editableSections.filter(section => !['cover', 'countdown', 'location'].includes(section.type));
   const availableSections = (guidedFlow ? informationSections : editableSections).filter(section => !section.enabled);
   const includedSections = guidedFlow ? informationSections.filter(section => section.enabled) : [...values.sections.filter(section => section.type === "cover"), ...editableSections.filter(section => section.enabled)];
   const journeyContentIds = guidedFlow ? guidedInformationSectionIds(values.eventType, values.sections, activeSection) : contentIds;
@@ -169,7 +173,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const acknowledgedValues = JSON.parse(protection.acknowledged) as EditorValues;
   const hasPin = protection.lastSaved ? acknowledgedValues.privacy === "PRIVATE" : event.privacy === "PRIVATE";
   const privacyIssue = !exampleId ? invitationPrivacyIssue(values.privacy ?? "UNSET", values.pin ?? "", Boolean(values.pinPending), hasPin) : null;
-  const issues: ReturnType<typeof guidedPublicationIssues> = [...guidedPublicationIssues(values), ...(privacyIssue ? [{ step: finalStep, message: privacyIssue }] : [])];
+  const issues: ReturnType<typeof guidedPublicationIssues> = [...(creation ? creationRequiredFields(values, true).map(({step, message, sectionId}) => ({step, message, sectionId})) : guidedPublicationIssues(values)), ...(privacyIssue ? [{ step: finalStep, message: privacyIssue }] : [])];
   const informationIssues = issues.filter(issue => issue.step !== finalStep && (!guidedFlow || !values.sections.some(section => section.id === issue.sectionId && section.type === 'gallery')));
   const published = isInvitationPublished(event);
   const changesSaved = protection.ready && !protection.recovery && !protection.error && !dirty && !saving && !protection.saving && uploads === 0 && (!creation || initiallySaved || protection.lastSaved);
@@ -179,7 +183,20 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const date = values.eventDate ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${values.eventDate}T12:00:00Z`)) : "Fecha por definir";
   function patch(changes: Partial<EditorValues>) { setNotice(""); setValues(current => ({ ...current, ...changes })); }
   function changeSection(id: string, changes: Partial<InviteSection>) { setNotice(""); setValues(current => ({ ...current, sections: current.sections.map(section => section.id === id ? { ...section, ...changes } : section) })); }
+  function showRequiredErrors(errors: RequiredIssue[]) {
+    if (!errors.length) return false;
+    setValidationAttempted(true); setNotice('Completa la información indicada para continuar. Puedes desactivar los bloques opcionales que no necesites.');
+    const first = errors[0];
+    setStep(first.step);
+    if (first.sectionId) { setActiveSection(first.sectionId); setAddingDetail(false); }
+    window.setTimeout(() => { const field = form.current?.elements?.namedItem(first.field) as HTMLElement | null; field?.focus(); field?.scrollIntoView({ block: 'center', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); }, 0);
+    return true;
+  }
   function validateCurrent() {
+    if (creation) {
+      const errors = requiredIssues.filter(issue => step <= 1 ? issue.step === step : step === 4 ? issue.step === 4 && (contentKey === '__more' || issue.sectionId === contentKey) : true);
+      if (showRequiredErrors(errors)) return false;
+    }
     const invalid = form.current?.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('input:invalid,textarea:invalid,select:invalid');
     if (!invalid) return true;
     const advanced = invalid.closest<HTMLDetailsElement>('details');
@@ -242,7 +259,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   async function save(forPublication = false, overwrite = false) {
     if (busy || uploads) return;
     if (forPublication && issues.length) { setStep(finalStep); setNotice(event.complimentaryAt ? "Completa los datos pendientes antes de publicar tu cortesía." : "Completa los datos pendientes antes de continuar al pago."); return; }
-    if (!form.current?.reportValidity()) return;
+    if ((!creation || forPublication) && !form.current?.reportValidity()) return;
     setSaving(true); setNotice("");
     try {
       const result = await persistence.saveNow(false, overwrite ? protection.conflictVersion : undefined, overwrite ? protection.conflictPrivacyVersion : undefined);
@@ -356,7 +373,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
         <form id="guided-invitation-form" ref={form} onSubmit={submit} noValidate className="guided-form" aria-busy={saving}>
           <fieldset disabled={busy} className="guided-fields">
             {step === 0 && <div className="guided-data-grid">
-              <Field label="Tipo de evento" id="event-type" wide><select id="event-type" value={values.eventType} onChange={e => { patch(changeGuidedEventType(values, e.target.value)); setActiveSection('__cover'); setAddingDetail(false); }}>{invitationEventTypes.map(type => <option key={type} value={type}>{getInvitationEventContent(type).label}</option>)}</select></Field>
+              <Field errors={fieldErrors} label="Tipo de evento" id="event-type" wide><select id="event-type" value={values.eventType} onChange={e => { patch(changeGuidedEventType(values, e.target.value)); setActiveSection('__cover'); setAddingDetail(false); }}>{invitationEventTypes.map(type => <option key={type} value={type}>{getInvitationEventContent(type).label}</option>)}</select></Field>
               <Field label={values.eventType === 'wedding' || values.eventType === 'anniversary' ? '¿Cómo se llaman?' : '¿Quién celebra?'} id="w-hosts" wide help="Escribe los nombres tal como quieres que aparezcan."><input id="w-hosts" value={values.hostNames} maxLength={120} placeholder="Nombre de quien celebra o de los anfitriones" onChange={e => patch({ hostNames: e.target.value })} /></Field>
               <Field label="Nombre de la invitación" id="w-name" wide><input id="w-name" value={values.name} required minLength={2} maxLength={100} onChange={e => patch({ name: e.target.value })} /></Field>
               <p className="guided-help guided-wide">Empecemos por los protagonistas. Los demás detalles vienen después.</p>
@@ -408,7 +425,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                       <span><strong>{currentSection.enabled ? 'Incluida' : 'Desactivada'}</strong></span>
                       <input id={`include-${currentSection.id}`} type="checkbox" role="switch" aria-label={`Incluir ${currentSection.title} en mi invitación`} checked={currentSection.enabled} onChange={e => changeSection(currentSection.id, { enabled: e.target.checked })} /><span className="guided-switch" aria-hidden="true" />
                     </label></div>
-                    {currentSection.enabled ? <><SectionFields globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle ?? "auto"} section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} uploadProps={uploadProps} showStyleControls={false} locationFields={<>
+                    {currentSection.enabled ? <><SectionFields fieldErrors={fieldErrors} deferGalleryPhotos={guidedFlow} globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle ?? "auto"} section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} uploadProps={uploadProps} showStyleControls={false} locationFields={<>
                       <Field label="Lugar del evento" id="w-venue" wide><input id="w-venue" value={values.venue} maxLength={160} onChange={e => patch({ venue: e.target.value })} /></Field>
                       <Field label="Dirección" id="w-address" wide><input id="w-address" value={values.address} maxLength={240} onChange={e => patch({ address: e.target.value })} /></Field>
                       <Field label="Enlace de Google Maps (opcional)" id="w-map" wide help="Se usará este enlace para «Cómo llegar». Si lo dejas vacío, buscaremos la dirección escrita."><input id="w-map" type="url" value={currentSection.link} maxLength={500} placeholder="https://maps.app.goo.gl/…" onChange={e => changeSection(currentSection.id, { link: e.target.value })} /></Field>
@@ -459,6 +476,9 @@ function extraDetailLabel(section: InviteSection) {
   return ({ countdown: 'Cuenta regresiva', cover: 'Portada', location: 'Lugar principal de la celebración', gallery: 'Galería de fotos', dress_code: 'Código de vestimenta', gifts: 'Regalos', ceremony: 'Ceremonia', reception: 'Celebración en otra sede', music: 'Playlist', custom: 'Información adicional', parents: 'Familia y personas especiales', program: 'Programa de actividades', story: 'Historia de la celebración', rsvp: 'Confirmación de asistencia' } as const)[section.type];
 }
 
-function Field({ label, id, help, wide, children }: { label: string; id: string; help?: string; wide?: boolean; children: ReactNode }) {
-  return <div className={`guided-field${wide ? " guided-wide" : ""}`} data-preview-field={id} data-preview-label={label}><label htmlFor={id}>{label}</label>{children}{help && <small>{help}</small>}</div>;
+function Field({ label, id, help, wide, children, errors = {} }: { errors?: Record<string, string>; label: string; id: string; help?: string; wide?: boolean; children: ReactNode }) {
+  const error = errors[id];
+  const control = isValidElement<{ 'aria-invalid'?: boolean; 'aria-describedby'?: string }>(children) && typeof children.type === 'string' && ['input', 'select', 'textarea'].includes(children.type)
+    ? cloneElement(children, { 'aria-invalid': error ? true : children.props['aria-invalid'], 'aria-describedby': [children.props['aria-describedby'], error ? `${id}-error` : null].filter(Boolean).join(' ') || undefined }) : children;
+  return <div className={`guided-field${wide ? " guided-wide" : ""}`} data-preview-field={id} data-preview-label={label}><label htmlFor={id}>{label}</label>{control}{errors[id] && <small id={`${id}-error`} role="alert" style={{ color: "var(--danger)" }}>{errors[id]}</small>}{help && <small>{help}</small>}</div>;
 }

@@ -12,7 +12,10 @@ test('creation information journey excludes visual blocks and retains added info
   const ids=guidedInformationSectionIds(type,sections);
   assert.equal(ids.at(-1),'__more');
   assert.ok(ids.includes(sections.find(s=>s.type==='story').id));
-  for(const visual of ['cover','countdown','location','gallery']) assert.ok(!ids.includes(sections.find(s=>s.type===visual).id));
+  for(const visual of ['cover','countdown','location']) assert.ok(!ids.includes(sections.find(s=>s.type===visual).id));
+  const gallery=sections.find(s=>s.type==='gallery');
+  assert.ok(!ids.includes(gallery.id));gallery.enabled=true;
+  assert.ok(guidedInformationSectionIds(type,sections).includes(gallery.id));
   const extra=sections.find(s=>s.type==='ceremony');extra.enabled=true;
   assert.ok(guidedInformationSectionIds(type,sections).includes(extra.id));
   assert.equal(guidedRecoverySection({step:4,activeExtra:`__add:${extra.id}`,flow:'content-v6'},sections),extra.id);
