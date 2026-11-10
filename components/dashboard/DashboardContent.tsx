@@ -151,7 +151,7 @@ export function DashboardContent({ ownerId, userName, userEmail, userImage, even
                         <div className="dashboard-card-share">
                           {isInvitationPublished(event, new Date(now)) && event.slug ? <CopyInvitationLink path={invitationPath(event)!} /> : <>
                             <button className="dashboard-event-open" type="button" disabled title="Disponible cuando tu invitación esté publicada" aria-label="Ver invitación: disponible cuando esté publicada"><FiExternalLink aria-hidden="true" /><span>Ver</span></button>
-                            <button className="dashboard-event-share" type="button" disabled title="Disponible cuando tu invitación esté publicada" aria-label="Compartir invitación: disponible cuando esté publicada"><FiCopy aria-hidden="true" /><span>Compartir</span></button>
+                            <button className="dashboard-event-share" type="button" disabled title="Disponible cuando tu invitación esté publicada" aria-label="Copiar enlace: disponible cuando esté publicada"><FiCopy aria-hidden="true" /><span>Copiar enlace</span></button>
                           </>}
                         </div>
                       </div>
