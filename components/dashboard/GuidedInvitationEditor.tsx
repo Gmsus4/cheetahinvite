@@ -313,7 +313,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const uploadProps = { eventId: event.id, ensureEvent: creation ? () => ensureEvent() : undefined, onBusyChange: uploadBusy };
   const CurrentStepIcon = guidedFlow && step === 5 ? FiSliders : stepIcons[step] ?? FiSend;
   const progress = <nav className="guided-progress guided-journey-progress" data-grouped="true" data-expanded={mobileStepsExpanded} aria-label="Pasos de tu invitación" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setMobileStepsExpanded(false); }} onKeyDown={event => { if (event.key === 'Escape') { setMobileStepsExpanded(false); event.currentTarget.querySelector<HTMLButtonElement>('.guided-steps-toggle')?.focus(); } }}>
-    <button className="guided-steps-toggle" type="button" aria-expanded={mobileStepsExpanded} aria-controls="guided-step-options" aria-label={`Paso ${flowPosition + 1} de ${flowSteps.length}: ${stepLabel(step)}. ${mobileStepsExpanded ? 'Ocultar' : 'Mostrar'} todos los pasos`} onClick={() => setMobileStepsExpanded(current => !current)}><CurrentStepIcon aria-hidden="true" /><span>{flowPosition + 1} / {flowSteps.length}</span><FiChevronDown aria-hidden="true" /></button>
+    <button className="guided-steps-toggle" type="button" aria-expanded={mobileStepsExpanded} aria-controls="guided-step-options" aria-label={`Paso ${flowPosition + 1} de ${flowSteps.length}: ${stepLabel(step)}. ${mobileStepsExpanded ? 'Ocultar' : 'Mostrar'} todos los pasos`} onClick={() => setMobileStepsExpanded(current => !current)}><CurrentStepIcon aria-hidden="true" /><span>{flowPosition + 1} / {flowSteps.length}<span className={styles.mobileStepsSuffix}> pasos</span></span><FiChevronDown aria-hidden="true" /></button>
     <ol id="guided-step-options" hidden={!mobileStepsExpanded}>{flowSteps.map((id, index) => {
       const Icon = guidedFlow && id === 5 ? FiSliders : stepIcons[id] ?? FiSend;
       const label = stepLabel(id);
@@ -332,6 +332,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
               <p className={styles.saveAndExitStatus} role="status" aria-live="polite">{changesSaved && <FiCheck aria-hidden="true" />}{saveStatus}</p>
               <button className={styles.saveAndExitButton} type="button" disabled={busy || uploads > 0} onClick={() => void saveAndExit()}><FiSave aria-hidden="true" />{saving ? published ? "Publicando…" : "Guardando…" : saveAndExitLabel}</button>
             </div>
+            {step < finalStep && <button className={styles.mobileSaveButton} type="button" aria-label={saveLabel} title={saveLabel} disabled={busy || uploads > 0 || changesSaved || (!creation && !dirty)} onClick={() => void save()}><FiSave aria-hidden="true" /></button>}
             {exampleId && <div className={styles.exampleReturn}>
               <EditorProtectedLink className={styles.exampleReturnLink} guard={confirmNavigation} href={`/admin/disenos/${exampleId}`}>
                 <FiArrowLeft aria-hidden="true" />Volver a gestionar este ejemplo
@@ -340,7 +341,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
             </div>}
           </div>;
 
-  return <main className={`guided-editor ${styles.workspace}`} data-intro-layout="true" data-example-editor={exampleId ? "true" : undefined} data-short-step={step === 0 || step === 1 || step === 2 || step === 3}>
+  return <main className={`guided-editor ${styles.workspace}`} data-intro-layout="true" data-final-step={step === finalStep} data-example-editor={exampleId ? "true" : undefined} data-short-step={step === 0 || step === 1 || step === 2 || step === 3}>
     {protection.recovery && <EditorRecoveryDialog onRecover={recover} onDiscard={() => persistence.discardRecovery()} />}
     {navigation.destination && <EditorLeaveDialog onStay={navigation.stay} onLeave={navigation.leave} onSaveAndLeave={() => void saveAndExit(navigation.destination!)} saving={saving} saveDisabled={busy || uploads > 0} uploading={uploads > 0} error={protection.error} saveLabel={saveAndExitLabel} publishesChanges={published} />}
     <DashboardHeader name={account?.name || "Usuario"} email={account?.email || ""} image={account?.image} guard={confirmNavigation} />

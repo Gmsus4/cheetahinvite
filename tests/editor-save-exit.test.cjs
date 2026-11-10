@@ -184,6 +184,20 @@ test('every step saves an incomplete creation in the account and returns to the 
   }
 });
 
+test('the mobile save icon saves in place without exiting or opening an overflow menu', async t => {
+  const f=editor(t,{mobile:true});f.changeName('Avance desde móvil');
+  f.refs[0].current={reportValidity:()=>true};
+  const [save]=nodes(f.view,node=>node.type==='button'&&node.props.className==='mobileSaveButton');
+  assert.equal(save.props['aria-label'],'Guardar borrador');
+  assert.equal(text(save),'');
+  assert.equal(nodes(f.view,node=>node.props?.className==='mobileSaveMenu').length,0);
+  save.props.onClick();
+  await f.flush();
+  assert.equal(f.routes.some(([,href])=>href==='/dashboard'),false);
+  assert.equal(f.states[1],0);
+  assert.equal(f.db.state.events.get(f.controller.getEventId()).name,'Avance desde móvil');
+});
+
 test('offline saves stay in the editor and retain a recoverable device copy', async t => {
   const f = editor(t); f.changeName('Mi avance'); f.online = false;
   await f.click();
