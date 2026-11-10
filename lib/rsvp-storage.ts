@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { prisma } from "@/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { isInvitationPublished } from "@/lib/invitation-payment";
-import { hasIntegratedRsvp, RSVP_LIMITS, type RsvpValues } from "@/lib/rsvp";
+import { hasIntegratedRsvp, eventCompanionLimit, validCompanionLimit, RSVP_LIMITS, type RsvpValues } from "@/lib/rsvp";
 import { canAccessInvitation } from "@/lib/invitation-access";
 
 export class RsvpError extends Error {
@@ -26,6 +26,8 @@ export async function saveRsvp(eventId: string, values: RsvpValues & { token: st
     const event = await tx.event.findUnique({ where: { id: eventId } });
     canRespond(event);
     if (!await canAccessInvitation(event!, tx)) throw new RsvpError(403, "Introduce el PIN de la invitación antes de confirmar tu asistencia.");
+    const maximum = eventCompanionLimit(event!.sections);
+    if (!validCompanionLimit(values.companions) || values.companions > maximum || (!values.attending && values.companions !== 0)) throw new RsvpError(400, `Esta invitación permite hasta ${maximum} acompañantes extra. Revisa tu respuesta; si el organizador cambió el límite, vuelve a cargar la invitación.`);
     const hash = tokenHash(values.token);
     const now = new Date();
     const hour = Math.floor(now.getTime() / 3600000);

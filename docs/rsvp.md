@@ -15,10 +15,24 @@ el invitado verá el mensaje listo para enviar. Los enlaces anteriores de
 editarlos. También puedes elegir **Otro enlace de confirmación**. Un teléfono
 incompleto se conserva en el borrador, sin generar un botón de WhatsApp.
 
+En **paso 5 → Confirmación de asistencia**, al elegir respuestas integradas,
+el organizador configura **Acompañantes permitidos por invitado**, de 0 a 10.
+El número cuenta únicamente personas adicionales a quien responde. Los eventos
+nuevos comienzan en 0; los anteriores sin configuración conservan el máximo de 5.
+La opción se guarda junto al contenido y está disponible también en `/show`.
+
 El formulario pide nombre y apellido, permite elegir Sí asistiré / No asistiré y
-ofrece un botón Acompañantes para indicar de cero a cinco personas adicionales.
-El máximo por respuesta afirmativa es seis asistentes contando al principal.
+ofrece Acompañantes según el límite del evento. Con 0 informa que la invitación
+es individual. El servidor verifica el límite dentro de la transacción del evento,
+también para las actualizaciones y solicitudes manipuladas.
 Una respuesta negativa siempre tiene cero acompañantes y cero asistentes.
+
+Reducir el límite no modifica las respuestas recibidas. Si alguien con una respuesta
+anterior que supera el nuevo máximo vuelve a editarla, verá el aviso y deberá ajustar
+el número antes de guardar. La lista y el CSV conservan los totales registrados.
+
+Aplicar `npx prisma migrate deploy` en cada entorno al desplegar: la migración
+`20261110000000_rsvp_companion_limit` amplía la restricción de PostgreSQL a 10.
 
 Solo se reciben respuestas si la invitación está publicada, pagada, vigente y
 con la confirmación integrada activa. Los ejemplos y vistas previas no envían

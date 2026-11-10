@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FiArrowRight, FiArrowUpRight, FiCheck, FiCheckCircle, FiCreditCard, FiExternalLink, FiEye, FiFileText, FiHelpCircle, FiLock, FiMessageCircle } from "react-icons/fi";
+import { FiArrowRight, FiArrowUpRight, FiCheck, FiCheckCircle, FiCreditCard, FiEye, FiFileText, FiHelpCircle, FiLock, FiMessageCircle } from "react-icons/fi";
 import { invitationPath } from "@/lib/invitation-url";
 import { Suspense } from "react";
 import { BrandLoader } from "@/components/BrandLoader";
@@ -18,6 +18,8 @@ import { PaymentRefresh } from "@/components/dashboard/PaymentRefresh";
 import { startCheckout } from "./actions";
 import { SupportRequest } from "@/components/SupportRequest";
 import { PaymentReceipt } from "@/components/dashboard/PaymentReceipt";
+import { PublicationReady } from "@/components/dashboard/PublicationReady";
+import { publicationResponses } from "@/lib/publication-next-steps";
 import "@/app/ayuda/soporte.css";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { InvitationActionLink } from "@/components/dashboard/InvitationActionLink";
@@ -56,6 +58,7 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
   }
   if (!event) notFound();
   const published = isInvitationPublished(event);
+  const publication = published ? <PublicationReady eventId={event.id} name={event.name} path={invitationPath(event)!} privateInvitation={event.privacy === "PRIVATE"} responses={publicationResponses(event.sections)} /> : null;
   const renewal = canRenewInvitation(event);
   // eslint-disable-next-line react-hooks/purity -- Request-time server clock.
   const now = Date.now();
@@ -64,7 +67,7 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
   const renewalWindowOpen = renewal && term!.deletesAt.getTime() - now >= 31 * 60 * 1000;
   if (event.complimentaryAt && !event.paidAt) return <main className={styles.page}>
     <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} />
-    <div className={styles.content}><div className={styles.heading}><span className={styles.eyebrow}>UN DETALLE PARA TU CELEBRACIÓN</span><h1>Tu invitación tiene una cortesía.</h1><p className={styles.eventName}>{event.name}</p></div><section className={styles.card}><InvitationTerm event={termEvent} now={now} /><h2>{published ? "Lista para compartir" : event.expiresAt && event.expiresAt > new Date() ? "Publica cuando esté lista" : "La cortesía ha vencido"}</h2><p>Recibiste una publicación sin cobro. {event.expiresAt && <>Vigencia hasta el {new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "America/Mexico_City" }).format(event.expiresAt)}.</>}</p><p>{published ? "Tu invitación está publicada y puedes compartir el enlace." : "Completa los datos y elige la privacidad desde el editor. Si necesitas ayuda con la vigencia, contacta con soporte."}</p><div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>{published && <Link className={styles.primary} href={invitationPath(event)!} target="_blank" rel="noopener noreferrer">Abrir invitación<FiExternalLink /></Link>}<Link className={styles.primary} href={`/dashboard/eventos/${id}`}>Ir al editor<FiArrowRight /></Link></div></section></div>
+    <div className={styles.content}><div className={styles.heading}><span className={styles.eyebrow}>UN DETALLE PARA TU CELEBRACIÓN</span><h1>Tu invitación tiene una cortesía.</h1><p className={styles.eventName}>{event.name}</p></div><section className={styles.card}><InvitationTerm event={termEvent} now={now} /><h2>{published ? "Lista para compartir" : event.expiresAt && event.expiresAt > new Date() ? "Publica cuando esté lista" : "La cortesía ha vencido"}</h2><p>Recibiste una publicación sin cobro. {event.expiresAt && <>Vigencia hasta el {new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "America/Mexico_City" }).format(event.expiresAt)}.</>}</p><p>{published ? "Tu invitación está publicada y puedes compartir el enlace." : "Completa los datos y elige la privacidad desde el editor. Si necesitas ayuda con la vigencia, contacta con soporte."}</p>{publication}<div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 20 }}><Link className={styles.primary} href={`/dashboard/eventos/${id}`}>Ir al editor<FiArrowRight /></Link></div></section></div>
   </main>;
   const ready = stripeIsConfigured();
   const payment = await prisma.invitationPayment.findFirst({ where: { eventId: id, ownerId: session.user.id,
@@ -73,7 +76,7 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
   return <main className={styles.page}>
     <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} />
     <div className={styles.content}>
-      <div className={styles.heading}><span className={styles.eyebrow}>TU CELEBRACIÓN · PAGO Y SOPORTE</span><h1>Todo para tu invitación.</h1><p className={styles.eventName}>{event.name}</p><p>Consulta tu compra, revisa su estado y encuentra ayuda cuando la necesites.</p></div>
+      <div className={styles.heading}><span className={styles.eyebrow}>TU CELEBRACIÓN · PAGO Y SOPORTE</span><h1>{published ? "Tu invitación ya está publicada." : "Todo para tu invitación."}</h1><p className={styles.eventName}>{event.name}</p><p>{published ? "El siguiente paso es compartirla con las personas que más quieres." : "Consulta tu compra, revisa su estado y encuentra ayuda cuando la necesites."}</p></div>
       <div className={styles.layout}>
         <div className={styles.mainColumn}>
           <section className={styles.card} aria-labelledby="payment-heading">
@@ -86,7 +89,7 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
               {query.error === "checkout" && <p className={styles.notice} role="alert">No pudimos abrir la renovación. Inténtalo nuevamente.</p>}
               {query.payment === "cancelled" && <p className={styles.notice} role="status">La renovación no se completó. Tu invitación sigue archivada hasta la fecha indicada.</p>}
               {waiting ? <PaymentRefresh /> : ready && renewalWindowOpen ? <form action={startCheckout.bind(null, id)}><button className={styles.primary} type="submit">Renovar por {invitationPriceLabel} MXN <FiArrowRight aria-hidden="true" /></button></form> : <p className={styles.notice}>{!renewalWindowOpen ? "El plazo para iniciar un nuevo pago ha cerrado: Stripe necesita al menos 31 minutos antes de la eliminación. Si ya pagaste, estamos verificando tu renovación." : "Los pagos no están disponibles por el momento. Inténtalo más tarde o contacta con soporte."}</p>}
-            </> : published ? <><p>Tu pago está confirmado y tu invitación está publicada. Ya puedes compartir este momento con tus invitados.</p><Link className={styles.primary} href={invitationPath(event)!} target="_blank" rel="noopener noreferrer">Abrir invitación <FiExternalLink aria-hidden="true" /></Link></> : event.paidAt ? <p className={styles.notice}>{event.status === "REFUNDED" ? "El reembolso total está confirmado. El enlace público fue retirado." : event.status === "SUSPENDED" ? "El enlace está suspendido por una disputa del pago. Si se resuelve a favor, se reactivará con la vigencia original." : "La invitación terminó su vigencia. Consulta el plazo de conservación a continuación."}</p> : <>
+            </> : published ? <><p>Tu pago está confirmado y tu invitación está publicada. Ya puedes compartir este momento con tus invitados.</p>{publication}</> : event.paidAt ? <p className={styles.notice}>{event.status === "REFUNDED" ? "El reembolso total está confirmado. El enlace público fue retirado." : event.status === "SUSPENDED" ? "El enlace está suspendido por una disputa del pago. Si se resuelve a favor, se reactivará con la vigencia original." : "La invitación terminó su vigencia. Consulta el plazo de conservación a continuación."}</p> : <>
               <div className={styles.price}>{invitationPriceLabel} <small>MXN</small></div><p className={styles.priceNote}>IVA incluido · Un pago por evento · Sin renovación automática.</p>
               <ul className={styles.benefits}><li><FiCheck aria-hidden="true" /> Enlace para compartir con la privacidad que elijas.</li><li><FiCheck aria-hidden="true" /> 12 meses a partir de la confirmación del pago.</li><li><FiCheck aria-hidden="true" /> Edición disponible durante la vigencia.</li><li><FiCheck aria-hidden="true" /> Un mes de archivo para renovar; después, eliminación automática.</li></ul>
               <p className={styles.privateNote}><FiLock aria-hidden="true" /> Tu borrador y vista previa permanecen privados hasta confirmar el pago.</p>

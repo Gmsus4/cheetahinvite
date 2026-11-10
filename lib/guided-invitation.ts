@@ -20,7 +20,7 @@ export function guidedDetails(eventType: string) {
   }));
 }
 export function guidedSections(eventType: string): InviteSection[] {
-  return [{ type: "cover" as const }, { type: "countdown" as const }, { type: "location" as const }, ...guidedDetails(eventType)].map(d => ({ id: `${eventType}-${d.type}`, type:d.type, ...invitationSectionPreset(eventType, d.type), detail:'', link:'', imageUrl:'', imageUrls:[], ...(d.type === 'rsvp' ? { rsvpMode:'integrated' as const } : {}) }));
+  return [{ type: "cover" as const }, { type: "countdown" as const }, { type: "location" as const }, ...guidedDetails(eventType)].map(d => ({ id: `${eventType}-${d.type}`, type:d.type, ...invitationSectionPreset(eventType, d.type), detail:'', link:'', imageUrl:'', imageUrls:[], ...(d.type === 'rsvp' ? { rsvpMode:'integrated' as const, maxCompanions:0 } : {}) }));
 }
 export function availableGuidedSections(eventType: string, sections: InviteSection[]) {
   const defaults = guidedSections(eventType);

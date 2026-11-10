@@ -37,7 +37,7 @@ export async function POST(request: Request, { params }: Context) {
     }
     let values;
     try { values = parseRsvp(JSON.parse(body + decoder.decode())); } catch { return json({ error: "Revisa tu respuesta." }, 400); }
-    if (!values) return json({ error: "Escribe tu nombre, elige si asistirás y agrega como máximo 5 acompañantes extra." }, 400);
+    if (!values) return json({ error: "Escribe tu nombre, elige si asistirás y revisa el número de acompañantes (entre 0 y 10, según el límite del evento)." }, 400);
     return json({ response: await saveRsvp(id, values) });
   } catch (error) { return failure(error); }
 }

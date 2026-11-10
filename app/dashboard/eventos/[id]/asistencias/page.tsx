@@ -1,3 +1,4 @@
+import { eventCompanionLimit } from "@/lib/rsvp";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -55,7 +56,7 @@ async function AttendanceData({ params, searchParams }: PageProps<"/dashboard/ev
         </tbody></table></div>
         <div className={styles.collectionFooter}><span>{totalResponses === 0 ? "Sin respuestas todavía" : `${Math.min((page - 1) * 50 + 1, totalResponses)}–${Math.min((page - 1) * 50 + responses.slice(0, 50).length, totalResponses)} de ${totalResponses} respuestas`}</span><nav aria-label="Páginas de respuestas">{page > 1 && <Link href={`?page=${page - 1}`}><FiArrowLeft aria-hidden="true" /> Más recientes</Link>}{responses.length > 50 && <Link href={`?page=${page + 1}`}>Anteriores <FiArrowRight aria-hidden="true" /></Link>}</nav></div>
       </section>
-      <aside className={styles.help}><FiInfo aria-hidden="true" /><p>Los nombres son declarados por quienes responden. Cada respuesta afirmativa puede incluir hasta 5 acompañantes extra. Sin una lista previa de invitados no se calcula quién falta por confirmar.</p></aside>
+      <aside className={styles.help}><FiInfo aria-hidden="true" /><p>Los nombres son declarados por quienes responden. El límite actual es de {eventCompanionLimit(event.sections)} acompañantes extra por respuesta afirmativa. Las respuestas anteriores conservan los datos con los que se registraron. Sin una lista previa de invitados no se calcula quién falta por confirmar.</p></aside>
       <footer className={styles.footer}><span>Todo listo para celebrar contigo.</span><Link href="/ayuda">¿Necesitas ayuda? <FiArrowRight aria-hidden="true" /></Link></footer>
     </div>
   </main>;

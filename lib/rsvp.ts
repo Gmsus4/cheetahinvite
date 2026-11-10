@@ -1,4 +1,10 @@
-export const RSVP_LIMITS = { companions: 5, nameLength: 120, bodyBytes: 2048, submissionsPerHour: 500, updatesPerHour: 20, responsesPerEvent: 10000 } as const;
+export const RSVP_LIMITS = { companions: 10, nameLength: 120, bodyBytes: 2048, submissionsPerHour: 500, updatesPerHour: 20, responsesPerEvent: 10000 } as const;
+export const validCompanionLimit = (value: unknown): value is number => typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= RSVP_LIMITS.companions;
+// Existing invitations retain their previous allowance until explicitly changed.
+export const rsvpCompanionLimit = (value: unknown) => validCompanionLimit(value) ? value : 5;
+export function eventCompanionLimit(sections: unknown) {
+  return rsvpCompanionLimit(Array.isArray(sections) ? sections.find(section => section?.type === "rsvp" && section.enabled)?.maxCompanions : undefined);
+}
 export type RsvpValues = { name: string; attending: boolean; companions: number };
 export const validRsvpToken = (token: unknown): token is string => typeof token === "string" && /^[a-f0-9]{64}$/.test(token);
 

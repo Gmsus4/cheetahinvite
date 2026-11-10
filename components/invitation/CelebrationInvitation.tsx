@@ -12,6 +12,7 @@ import { atmospherePanelStyle, atmosphereSections, atmosphereStyle, atmosphereTi
 import { invitationLinkLabel, invitationLocationUrl, invitationSectionUrl } from "@/lib/invitation-links";
 import type { InvitationEditTarget, InvitationProps } from "@/lib/invitation-editor";
 import { CountdownTimer } from "./CountdownTimer";
+import { rsvpCompanionLimit } from "@/lib/rsvp";
 import { RsvpForm } from "./RsvpForm";
 import { InvitationPhotoCarousel } from "./InvitationPhotoCarousel";
 import { useInvitationMotion } from "@/components/dashboard/useInvitationMotion";
@@ -142,6 +143,6 @@ function AtmosphereSection({ section, eventId, surface, onEdit, renderStyleContr
       return <li key={index}>{time && <span className="wa-timeline-time">{time}</span>}<span>{activity}</span></li>;
     })}</ol> : section.content && <p data-invitation-field={`${section.id}-content`}>{section.content}</p>)}
     {onEdit && !locationDetails && !media && !section.content && !section.detail && !url && !(section.type === "rsvp" && section.rsvpMode === "integrated") && <p>{section.type === "gallery" ? "Agrega fotos a este apartado." : "Agrega contenido o una foto a este apartado."}</p>}
-    {section.type === "rsvp" && section.rsvpMode === "integrated" ? <RsvpForm eventId={eventId} /> : url && <a className="wa-button" href={url} target="_blank" rel="noopener noreferrer" data-invitation-field={`${locationDetails ? "w-map " : ""}${section.id}-link ${section.id}-map ${section.id}-mode`}>{invitationLinkLabel(section.type)}<FiArrowUpRight aria-hidden="true" /></a>}
+    {section.type === "rsvp" && section.rsvpMode === "integrated" ? <RsvpForm eventId={eventId} maxCompanions={rsvpCompanionLimit(section.maxCompanions)} /> : url && <a className="wa-button" href={url} target="_blank" rel="noopener noreferrer" data-invitation-field={`${locationDetails ? "w-map " : ""}${section.id}-link ${section.id}-map ${section.id}-mode`}>{invitationLinkLabel(section.type)}<FiArrowUpRight aria-hidden="true" /></a>}
   </section>{photoPosition === "after" && media}</div>;
 }

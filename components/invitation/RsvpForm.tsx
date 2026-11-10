@@ -3,9 +3,10 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { FiCheck, FiChevronDown, FiMinus, FiPlus, FiUsers, FiX } from "react-icons/fi";
-import { RSVP_LIMITS, validRsvpToken, type RsvpValues } from "@/lib/rsvp";
+import { RSVP_LIMITS, rsvpCompanionLimit, validRsvpToken, type RsvpValues } from "@/lib/rsvp";
 
-export function RsvpForm({ eventId }: { eventId?: string }) {
+export function RsvpForm({ eventId, maxCompanions = 5 }: { eventId?: string; maxCompanions?: number }) {
+  const maximum = rsvpCompanionLimit(maxCompanions);
   const id = useId();
   const token = useRef<string | null>(null);
   const [name, setName] = useState("");
@@ -54,6 +55,7 @@ export function RsvpForm({ eventId }: { eventId?: string }) {
     event.preventDefault();
     if (saving || loading) return;
     if (attending === null) { setError("Elige si asistirás o no podrás acompañarnos."); return; }
+    if (attending && companions > maximum) { setError(`El límite actual es de ${maximum} acompañantes. Ajusta tu respuesta antes de guardarla.`); return; }
     if (!eventId) { setNotice("Vista previa: aquí se guardará la respuesta cuando la invitación esté publicada."); return; }
     setError(""); setNotice(""); setSaving(true);
     try {
@@ -88,15 +90,17 @@ export function RsvpForm({ eventId }: { eventId?: string }) {
       <button className="invite-rsvp-button invite-rsvp-choice" type="button" aria-pressed={attending === true} onClick={() => choose(true)} disabled={loading || saving}><span className="invite-rsvp-choice-icon" aria-hidden="true"><FiCheck /></span><span>Sí asistiré</span></button>
       <button className="invite-rsvp-button invite-rsvp-choice" type="button" aria-pressed={attending === false} onClick={() => choose(false)} disabled={loading || saving}><span className="invite-rsvp-choice-icon" aria-hidden="true"><FiX /></span><span>No asistiré</span></button>
     </div></fieldset>
-    {attending && <>
+    {attending && maximum === 0 && <p className="invite-rsvp-note">Esta invitación es individual, sin acompañantes extra.</p>}
+    {attending && companions > maximum && <p className="invite-rsvp-error" role="alert">El organizador cambió el límite a {maximum}. Tu respuesta anterior se conserva; reduce los acompañantes antes de actualizarla.</p>}
+    {attending && (maximum > 0 || companions > 0) && <>
       <button className="invite-rsvp-button invite-rsvp-companions-toggle" type="button" aria-expanded={showCompanions} aria-controls={`${id}-companions`} onClick={() => setShowCompanions(shown => !shown)} disabled={saving}>
-        <FiUsers aria-hidden="true" /><span className="invite-rsvp-companions-copy"><strong>Acompañantes{companions > 0 ? ` (${companions})` : ""}</strong><small>Puedes sumar hasta 5 personas.</small></span><FiChevronDown className="invite-rsvp-chevron" aria-hidden="true" />
+        <FiUsers aria-hidden="true" /><span className="invite-rsvp-companions-copy"><strong>Acompañantes{companions > 0 ? ` (${companions})` : ""}</strong><small>Puedes sumar hasta {maximum} {maximum === 1 ? "persona" : "personas"}.</small></span><FiChevronDown className="invite-rsvp-chevron" aria-hidden="true" />
       </button>
       <div id={`${id}-companions`} hidden={!showCompanions} className="invite-rsvp-companions">
-        <div className="invite-rsvp-companions-heading"><span>Acompañantes extra</span><small>Máximo 5</small></div><div className="invite-rsvp-counter">
+        <div className="invite-rsvp-companions-heading"><span>Acompañantes extra</span><small>Máximo {maximum}</small></div><div className="invite-rsvp-counter">
           <button type="button" aria-label="Quitar acompañante" onClick={() => setCompanions(count => Math.max(0, count - 1))} disabled={saving || companions === 0}><FiMinus aria-hidden="true" /></button>
           <output aria-live="polite" aria-label="Número de acompañantes extra">{companions}</output>
-          <button type="button" aria-label="Agregar acompañante" onClick={() => setCompanions(count => Math.min(RSVP_LIMITS.companions, count + 1))} disabled={saving || companions === RSVP_LIMITS.companions}><FiPlus aria-hidden="true" /></button>
+          <button type="button" aria-label="Agregar acompañante" onClick={() => setCompanions(count => Math.min(maximum, count + 1))} disabled={saving || companions >= maximum}><FiPlus aria-hidden="true" /></button>
         </div>
       </div>
       <p className="invite-rsvp-total">Contándote a ti<span>{1 + companions} {companions ? "personas" : "persona"}</span></p>

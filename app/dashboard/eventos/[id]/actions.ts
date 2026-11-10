@@ -1,4 +1,6 @@
 "use server";
+import { validCompanionLimit } from "@/lib/rsvp";
+
 import { eventPublicationIssues } from "@/lib/guided-invitation";
 import { hasPublicationGrant } from "@/lib/invitation-payment";
 import { canEditInvitation } from "@/lib/invitation-lifecycle";
@@ -316,6 +318,7 @@ function isValidSection(value: unknown): value is {
   if (typeof section.enabled !== "boolean" || !types.includes(section.type as string)) return false;
   if (section.showIcon !== undefined && typeof section.showIcon !== "boolean") return false;
   if (section.titleCustomized !== undefined && typeof section.titleCustomized !== "boolean") return false;
+  if (section.maxCompanions !== undefined && (section.type !== "rsvp" || !validCompanionLimit(section.maxCompanions))) return false;
   if (section.rsvpMode !== undefined && (section.type !== "rsvp" || !["external", "integrated"].includes(section.rsvpMode as string))) return false;
   if ((section.id as string).length > 80 || (section.title as string).length > 100 || (section.content as string).length > 2000 || (section.detail as string).length > 240 || (section.link as string).length > (section.type === "rsvp" ? 3000 : 500) || (section.imageUrl as string).length > 1000) return false;
   if (section.whatsappPhone !== undefined && (section.type !== "rsvp" || typeof section.whatsappPhone !== "string" || section.whatsappPhone.length > 40)) return false;
