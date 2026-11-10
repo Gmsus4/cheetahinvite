@@ -156,6 +156,17 @@ export class EditorPersistence {
     return true;
   }
   reportError(message: string) { this.patch({ error: message, code: "unavailable" }); this.backup(); }
+  acceptExternalSave(snapshot: string, version: number, privacyVersion: number, expectedSnapshot?: string) {
+    // Adopt only while idle and unchanged since the parent's explicit handoff.
+    // Never overwrite later local edits or move a revision backwards.
+    if (this.uploading || this.state.saving || this.state.code === "conflict" || (this.isDirty() && this.snapshot !== expectedSnapshot) || this.state.recovery || !this.state.ready || !Number.isSafeInteger(version) || version <= this.version
+      || !Number.isSafeInteger(privacyVersion) || privacyVersion !== this.privacyVersion) return false;
+    this.clearTimer();
+    this.snapshot = snapshot; this.version = version; this.creationComplete = true;
+    this.patch({ acknowledged: snapshot, lastSaved: true, error: "", code: "", conflictVersion: undefined, conflictPrivacyVersion: undefined });
+    this.backup();
+    return true;
+  }
   acceptFailure(result: Extract<EditorSaveResult, { ok: false }>) {
     this.patch({ error: result.message, code: result.code, conflictVersion: result.version, conflictPrivacyVersion: result.privacyVersion }); this.backup();
   }

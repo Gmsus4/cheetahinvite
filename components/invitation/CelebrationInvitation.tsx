@@ -25,21 +25,21 @@ type StyleControlRenderer = (section: InviteSection, label: string) => ReactNode
 
 function SurfaceControl({ section, label, onEdit, renderStyleControl }: { section?: InviteSection; label: string; onEdit?: EditHandler; renderStyleControl?: StyleControlRenderer }) {
   if (!section || !onEdit) return null;
-  return renderStyleControl ? renderStyleControl(section, label) : <button type="button" className="wa-edit-button wa-edit-surface" aria-label={label} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-surface", sectionId: section.id })}><FiLayers aria-hidden="true" /><span>Estilo</span></button>;
+  return renderStyleControl ? renderStyleControl(section, label) : <button type="button" className="wa-edit-button wa-edit-surface" data-tour="block-style" aria-label={label} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-surface", sectionId: section.id })}><FiLayers aria-hidden="true" /><span>Estilo</span></button>;
 }
 
 function EditControl({ target, label, text, onEdit }: { target: InvitationEditTarget; label: string; text?: string; onEdit?: EditHandler }) {
   const Icon = target.kind === "cover-photo" || target.kind === "section-photo" ? FiImage : FiEdit3;
-  return onEdit ? <button type="button" className="wa-edit-button" aria-label={`Editar ${label}`} aria-haspopup="dialog" onClick={() => onEdit(target)}><Icon aria-hidden="true" /><span>{text ?? `Editar ${label}`}</span></button> : null;
+  return onEdit ? <button type="button" className="wa-edit-button" data-tour={target.kind === "cover-photo" || target.kind === "section-photo" ? undefined : "block-edit"} aria-label={`Editar ${label}`} aria-haspopup="dialog" onClick={() => onEdit(target)}><Icon aria-hidden="true" /><span>{text ?? `Editar ${label}`}</span></button> : null;
 }
 
 function AlignmentControl({ section, onEdit, renderAlignmentControl }: { section?: InviteSection; onEdit?: EditHandler; renderAlignmentControl?: StyleControlRenderer }) {
   if (section && onEdit && renderAlignmentControl) return renderAlignmentControl(section, `Editar alineación del texto de ${section.title}`);
-  return section && onEdit ? <button type="button" className="wa-edit-button wa-edit-alignment" aria-label={`Editar alineación del texto de ${section.title}`} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-alignment", sectionId: section.id })}><FiAlignCenter aria-hidden="true" /><span>Alineación</span></button> : null;
+  return section && onEdit ? <button type="button" className="wa-edit-button wa-edit-alignment" data-tour="block-alignment" aria-label={`Editar alineación del texto de ${section.title}`} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-alignment", sectionId: section.id })}><FiAlignCenter aria-hidden="true" /><span>Alineación</span></button> : null;
 }
 
 function VisibilityControl({ section, onEdit }: { section?: InviteSection; onEdit?: EditHandler }) {
-  return section && section.type !== "cover" && onEdit ? <button type="button" className="wa-edit-button" aria-label={`Cambiar visibilidad de ${section.title}`} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-visibility", sectionId: section.id })}><FiEyeOff aria-hidden="true" /><span>Visibilidad</span></button> : null;
+  return section && section.type !== "cover" && onEdit ? <button type="button" className="wa-edit-button" data-tour="block-visibility" aria-label={`Cambiar visibilidad de ${section.title}`} aria-haspopup="dialog" onClick={() => onEdit({ kind: "section-visibility", sectionId: section.id })}><FiEyeOff aria-hidden="true" /><span>Visibilidad</span></button> : null;
 }
 
 export function CelebrationInvitation(inputProps: InvitationProps & { preview?: boolean; showPlaceholders?: boolean; onEdit?: EditHandler; renderStyleControl?: StyleControlRenderer; renderAlignmentControl?: StyleControlRenderer }) {

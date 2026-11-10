@@ -1,0 +1,35 @@
+.invitation-tour-welcome,.driver-popover.invitation-tour-popover{box-sizing:border-box;background:var(--surface,#192632);color:var(--ink,#fff);border:1px solid var(--line,#40505e);border-radius:20px;font-family:var(--font-body),Arial,sans-serif;box-shadow:0 12px 48px #0004}
+.invitation-tour-welcome{position:fixed;z-index:60;right:100px;bottom:24px;width:min(380px,calc(100vw - 32px));padding:26px;max-height:calc(100dvh - 32px);overflow:auto}
+.invitation-tour-eyebrow{display:block;padding-right:24px;font-size:10px;letter-spacing:.12em;color:var(--accent);font-weight:600}
+.invitation-tour-welcome h2{margin:12px 0;padding-right:16px;font-size:22px;line-height:1.25;letter-spacing:-.025em}
+.invitation-tour-welcome p{margin:0 0 20px;font-size:14px;line-height:1.65;color:var(--muted)}
+.invitation-tour-welcome small{display:block;margin-top:16px;color:var(--muted);font-size:12px;line-height:1.5}
+.invitation-tour-welcome button,.invitation-tour-popover button{font-family:inherit;cursor:pointer}
+.invitation-tour-dismiss{position:absolute;top:12px;right:12px;display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--muted)}
+.invitation-tour-welcome-actions{display:flex;flex-wrap:wrap;gap:10px}
+.invitation-tour-welcome-actions button{min-height:44px;padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font-size:14px;font-weight:600}
+.invitation-tour-welcome-actions button:first-child{background:var(--orange);border-color:var(--orange);color:var(--on-inverse,#fff)}
+.invitation-tour-welcome button:disabled{opacity:.5;cursor:wait}
+.invitation-tour-welcome button:focus-visible,.invitation-tour-popover button:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+.driver-popover.invitation-tour-popover{width:340px;min-width:0;max-width:calc(100vw - 24px);padding:24px}
+.invitation-tour-popover .driver-popover-title{margin:0;padding-right:36px;font-family:inherit;font-size:20px;line-height:1.3;color:var(--ink);font-weight:600}
+.invitation-tour-popover .driver-popover-description{margin-top:12px;font-size:14px;line-height:1.65;color:var(--muted)}
+.invitation-tour-popover .driver-popover-footer{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:20px}
+.invitation-tour-popover .driver-popover-progress-text{font-size:12px;color:var(--muted);flex-shrink:0}
+.invitation-tour-popover .driver-popover-navigation-btns{display:flex;gap:8px;margin-left:auto}
+.invitation-tour-popover .driver-popover-footer button{min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-size:13px;font-weight:600;text-shadow:none}
+.invitation-tour-popover .driver-popover-footer .driver-popover-next-btn{background:var(--orange);border-color:var(--orange);color:var(--on-inverse,#fff)}
+.invitation-tour-popover .driver-popover-close-btn{top:8px;right:8px;width:44px;height:44px;display:grid;place-items:center;color:var(--muted);font-size:26px}
+.invitation-tour-popover .driver-popover-arrow-side-left{border-left-color:var(--surface)}
+.invitation-tour-popover .driver-popover-arrow-side-right{border-right-color:var(--surface)}
+.invitation-tour-popover .driver-popover-arrow-side-top{border-top-color:var(--surface)}
+.invitation-tour-popover .driver-popover-arrow-side-bottom{border-bottom-color:var(--surface)}
+[data-editor-tour-active="true"] .wa-edit-actions,[data-editor-tour-active="true"] .wa-edit-button{opacity:1!important;pointer-events:none!important}
+@media(max-width:600px){
+ .invitation-tour-welcome{right:12px;left:12px;bottom:max(12px,env(safe-area-inset-bottom));width:auto;max-height:calc(100dvh - 24px);padding:22px}
+ .driver-popover.invitation-tour-popover{position:fixed!important;top:auto!important;left:12px!important;right:12px!important;bottom:max(12px,env(safe-area-inset-bottom))!important;display:flex;flex-direction:column;width:auto!important;max-width:none;max-height:45dvh;overflow:hidden;padding:20px;overscroll-behavior:contain}
+ .invitation-tour-popover .driver-popover-title{flex-shrink:0;font-size:18px}
+ .invitation-tour-popover .driver-popover-description{min-height:0;overflow-y:auto;overscroll-behavior:contain;font-size:14px;margin-top:8px;line-height:1.5}
+ .invitation-tour-popover .driver-popover-footer{flex-shrink:0;margin-top:14px;gap:8px}
+ .invitation-tour-popover .driver-popover-arrow{display:none}
+}

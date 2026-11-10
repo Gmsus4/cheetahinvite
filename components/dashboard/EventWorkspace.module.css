@@ -300,6 +300,7 @@
 .workspace .blockHeader :global(.guided-toggle input) { right: 0; }
 .workspace .blockHeader :global(.guided-toggle strong) { font-size: 12px; font-weight: 400; color: var(--muted); }
 .blockLinks { display: flex; flex-wrap: wrap; gap: 12px; }
+.workspace .designButton { margin: 8px 0 24px; }
 .blockLinks button { min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: var(--accent); font: inherit; font-size: 13px; cursor: pointer; }
 .workspace[data-intro-layout="true"] :global(.guided-layout) { display: block; width: min(1232px,100%); max-width: none; padding: 48px 24px 124px; }
 .workspace[data-intro-layout="true"] :global(.guided-workspace) { display: grid; grid-template-columns: minmax(0,.85fr) minmax(0,1.3fr); align-items: start; column-gap: clamp(36px,5vw,76px); row-gap: 20px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }

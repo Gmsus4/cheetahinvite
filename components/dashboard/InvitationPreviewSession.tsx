@@ -8,12 +8,18 @@ import { invitationPreviewKey, parseInvitationPreview, storeInvitationPreview } 
 import { initialGuidedValues } from "@/lib/guided-invitation";
 import { InvitationShowEditor } from "./InvitationShowEditor";
 
-type Props = { event: EventData; returnLink: { href: string; title: string; label: string }; previewToken?: string };
+type Props = { event: EventData; returnLink: { href: string; title: string; label: string }; previewToken?: string; returnToDashboard?: boolean };
 const subscribe = (listener: () => void) => { window.addEventListener("storage", listener); return () => window.removeEventListener("storage", listener); };
 const serverSnapshot = () => undefined;
 
 export function InvitationPreviewSession(props: Props) {
-  return props.previewToken ? <IncomingPreview {...props} /> : <InvitationShowEditor event={props.event} returnLink={props.returnLink} />;
+  return props.previewToken ? <IncomingPreview {...props} /> : <InvitationShowEditor event={props.event} returnLink={props.returnToDashboard ? { href: '/dashboard', title: 'Cerrar el editor visual y volver al dashboard', label: 'Volver al dashboard' } : props.returnLink} onReturn={props.returnToDashboard ? () => closeAndReturn('/dashboard') : undefined} />;
+}
+
+function closeAndReturn(href: string) {
+  window.close();
+  // If the browser cannot close a reopened tab, return within that tab.
+  window.setTimeout(() => window.location.assign(href), 200);
 }
 
 function IncomingPreview({ event, returnLink, previewToken }: Props) {
@@ -27,7 +33,10 @@ function IncomingPreview({ event, returnLink, previewToken }: Props) {
   const initialChanges = { ...changes, sessionId: previewToken, ...(changes.saved ? {
     snapshot: JSON.stringify(initialGuidedValues(event)), version: event.contentVersion, privacyVersion: event.privacyVersion ?? 0,
   } : {}) };
-  return <InvitationShowEditor event={event} returnLink={returnLink} initialChanges={initialChanges} onSaved={(snapshot, version, privacyVersion) => {
+  const creationFlow = changes.creationFlow === true && !event.isExample;
+  const guidedFlow = (creationFlow || changes.editorFlow === true) && !event.isExample;
+  const creationReturn = creationFlow ? { href: `/crear?resume=${encodeURIComponent(event.id)}`, title: 'Cerrar el editor visual y volver a crear', label: 'Volver a crear' } : { ...returnLink, title: 'Cerrar el editor visual y volver a editar', label: 'Volver a editar' };
+  return <InvitationShowEditor event={event} returnLink={guidedFlow ? creationReturn : returnLink} initialChanges={initialChanges} onReturn={guidedFlow ? () => closeAndReturn(creationReturn.href) : undefined} onSaved={(snapshot, version, privacyVersion) => {
     // Refreshing this /show URL should use the version just saved explicitly.
     try { storeInvitationPreview(window.localStorage, { ...changes, snapshot, version, privacyVersion: privacyVersion ?? changes.privacyVersion, saved: true }, previewToken!); }
     catch { /* A later reload still checks the old revision before any save. */ }

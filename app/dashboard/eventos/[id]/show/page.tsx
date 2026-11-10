@@ -24,8 +24,12 @@ async function ShowInvitationData({ params, searchParams }: ShowPageProps) {
   await connection();
   const query = await searchParams;
   const previewToken = typeof query.preview === "string" && validCreationKey(query.preview) ? query.preview : undefined;
+  const returnToDashboard = !previewToken && query.from === "dashboard";
+  const callbackQuery = new URLSearchParams();
+  if (previewToken) callbackQuery.set("preview", previewToken);
+  else if (returnToDashboard) callbackQuery.set("from", "dashboard");
   const session = await auth();
-  if (!session?.user?.id) redirect(`/login?callbackUrl=${encodeURIComponent(`/dashboard/eventos/${id}/show${previewToken ? `?preview=${previewToken}` : ""}`)}`);
+  if (!session?.user?.id) redirect(`/login?callbackUrl=${encodeURIComponent(`/dashboard/eventos/${id}/show${callbackQuery.size ? `?${callbackQuery}` : ""}`)}`);
 
   const event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id }, omit: { pinHash: true } });
   if (!event) notFound();
@@ -37,6 +41,6 @@ async function ShowInvitationData({ params, searchParams }: ShowPageProps) {
   }
 
   return <main className="public-invitation-page">
-    <InvitationPreviewSession key={`invitation:${event.id}:${previewToken ?? "saved"}`} event={event} previewToken={previewToken} returnLink={{ href: `/dashboard/eventos/${event.id}`, title: "Volver al editor completo", label: "Editor completo" }} />
+    <InvitationPreviewSession key={`invitation:${event.id}:${previewToken ?? (returnToDashboard ? "dashboard" : "saved")}`} event={event} previewToken={previewToken} returnToDashboard={returnToDashboard} returnLink={{ href: `/dashboard/eventos/${event.id}`, title: "Volver al editor completo", label: "Editor completo" }} />
   </main>;
 }

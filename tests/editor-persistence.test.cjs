@@ -38,6 +38,42 @@ function setup(t, options = {}) {
 }
 const edit = (controller, name, uploading = false) => controller.update(values(name), uploading, { step: 0, activeExtra: null }, false);
 
+test('creation adopts newer saves from its visual editor and publishes against that revision', async t => {
+  const { controller: c, calls } = setup(t, { creation: true, manualOnly: true });
+  assert.equal(c.acceptExternalSave(values('Diseño guardado'), 2, 0), true);
+  assert.equal(c.getSnapshot().acknowledged, values('Diseño guardado'));
+  assert.equal(c.shouldWarn(), false);
+  edit(c, 'Información corregida');
+  assert.equal((await c.saveNow()).ok, true);
+  assert.equal(calls[0].version, 2);
+  assert.equal(calls[0].snapshot, values('Información corregida'));
+});
+
+test('visual saves cannot erase local edits, uploads, older revisions or privacy changes', t => {
+  const { controller: c } = setup(t, { manualOnly: true, privacyVersion: 2, version: 3 });
+  for (const [version, privacy] of [[3, 2], [2, 2], [4, 1], [4, 3], [NaN, 2]]) {
+    assert.equal(c.acceptExternalSave(values('Otra copia'), version, privacy), false);
+  }
+  edit(c, 'Sin guardar');
+  assert.equal(c.acceptExternalSave(values('Otra copia'), 4, 2), false);
+  assert.equal(c.getSnapshot().acknowledged, values('Inicial'));
+  assert.equal(c.shouldWarn(), true);
+  c.discardChanges();
+  edit(c, 'Inicial', true);
+  assert.equal(c.acceptExternalSave(values('Otra copia'), 4, 2), false);
+});
+
+test('editing adopts an explicit visual save only for the exact snapshot handed off', t => {
+  const { controller: c } = setup(t, { manualOnly: true });
+  edit(c,'Entregado al editor visual');
+  assert.equal(c.acceptExternalSave(values('Diseño guardado'),1,0,values('Otra copia')),false);
+  edit(c,'Cambio posterior al envío');
+  assert.equal(c.acceptExternalSave(values('Diseño guardado'),1,0,values('Entregado al editor visual')),false);
+  assert.equal(c.getVersion(),0);
+  assert.equal(c.acceptExternalSave(values('Diseño guardado'),1,0,values('Cambio posterior al envío')),true);
+  assert.equal(c.getSnapshot().acknowledged,values('Diseño guardado'));
+});
+
 test('debounces edits, saves only the latest values and clears its local backup after acknowledgment', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const { controller: c, calls, storage } = setup(t);

@@ -6,7 +6,7 @@ import { FiArrowLeft, FiArrowRight, FiImage, FiChevronDown, FiCheck, FiEye, FiLi
 import { prepareEvent } from "@/app/crear/actions";
 import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 
-import { initialGuidedValues, completeGuidedSections, changeGuidedEventType, guidedDetails, guidedPublicationIssues, guidedRecoveryStep, guidedRecoverySection, guidedRecoveryAppearanceStep, guidedContentSectionIds } from "@/lib/guided-invitation";
+import { initialGuidedValues, completeGuidedSections, changeGuidedEventType, guidedDetails, guidedPublicationIssues, guidedRecoveryStep, guidedRecoverySection, guidedRecoveryAppearanceStep, guidedContentSectionIds, guidedInformationSectionIds } from "@/lib/guided-invitation";
 import { normalizeEventLocations } from "@/lib/invitation-locations";
 
 import { InvitationStyleJourney } from "./InvitationStyleJourney";
@@ -30,7 +30,7 @@ import { useEditorProtection } from "./useEditorProtection";
 import { EditorProtectedLink } from "./EditorProtectedLink";
 import { EditorLeaveDialog } from "./EditorLeaveDialog";
 import { EditorRecoveryDialog } from "./EditorRecoveryDialog";
-import { storeInvitationPreview } from "@/lib/invitation-preview";
+import { invitationPreviewKey, parseInvitationPreview, storeInvitationPreview } from "@/lib/invitation-preview";
 
 
 import { InvitationPrivacyFields } from "./InvitationPrivacyFields";
@@ -47,6 +47,7 @@ const introTitles = [<>¿Quién <em>celebra?</em></>, <>¿Cuándo <em>y dónde?<
 
 export function GuidedInvitationEditor({ event, creation = false, error, account, exampleId, priceLabel = invitationPriceLabel }: { event: EventData; creation?: boolean; exampleId?: string; priceLabel?: string; saved: boolean; published: boolean; error: string; account?: { name: string; email: string; image?: string | null } }) {
   const router = useRouter();
+  const guidedFlow = !exampleId;
   const [values, setValues] = useState<EditorValues>(() => ({ ...initialGuidedValues(event), privacy: isInvitationPrivacy(event.privacy) ? event.privacy : "UNSET", pin: "", pinPending: false }));
   const [step, setStep] = useState(0);
   const [activeSection, setActiveSection] = useState("__cover");
@@ -59,6 +60,11 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const [notice, setNotice] = useState("");
   const [initiallySaved] = useState(Boolean(event.id));
   const [preparingPreview, setPreparingPreview] = useState(false);
+  const [visualSession, setVisualSession] = useState<{ tab: Window; eventId: string; token: string; snapshot: string } | null>(null);
+  const flowSteps = guidedFlow ? creation ? [0, 1, 4, 5, 6] : [0, 1, 4, 6] : [0, 1, 2, 3, 4, 5];
+  const flowPosition = flowSteps.indexOf(step);
+  const finalStep = guidedFlow ? 6 : lastStep;
+  const stepLabel = (id: number) => guidedFlow ? ({ 4: 'Información de los bloques', 5: 'Personaliza tu diseño', 6: 'Revisa y publica' } as Record<number, string>)[id] ?? stepLabels[id] : stepLabels[id];
   const form = useRef<HTMLFormElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const scrollToTop = useRef(false);
@@ -99,7 +105,40 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
       return updateEvent(await ensureEvent(submitted), formData, automatic ? "auto" : "manual");
     },
   });
-  useEffect(() => { persistence.update(snapshot, uploads > 0, { step, activeExtra: step === 4 ? (addingDetail ? `__add:${activeSection}` : activeSection) : step === 3 ? `style:${invitationStyleSteps[appearanceStep].id}` : null, flow: "content-v5" }, manualOnly); }, [persistence, snapshot, uploads, step, activeSection, addingDetail, appearanceStep, manualOnly]);
+  useEffect(() => { persistence.update(snapshot, uploads > 0, { step, activeExtra: step === 4 ? (addingDetail ? `__add:${activeSection}` : activeSection) : step === 3 ? `style:${invitationStyleSteps[appearanceStep].id}` : null, flow: guidedFlow ? "content-v6" : "content-v5" }, manualOnly); }, [persistence, snapshot, uploads, step, activeSection, addingDetail, appearanceStep, manualOnly, guidedFlow]);
+  useEffect(() => {
+    if (!visualSession) return;
+    const key = invitationPreviewKey(event.ownerId, visualSession.eventId, visualSession.token);
+    let expectedSnapshot = visualSession.snapshot;
+    const synchronize = () => {
+      try {
+        const saved = parseInvitationPreview(window.localStorage.getItem(key), event.ownerId, visualSession.eventId);
+        if (saved?.saved && (saved.creationFlow || saved.editorFlow) && saved.version > persistence.getVersion()) {
+          const acknowledged = JSON.parse(persistence.getSnapshot().acknowledged) as EditorValues;
+          const current = JSON.parse(expectedSnapshot) as EditorValues;
+          const incoming = { ...JSON.parse(saved.snapshot) as EditorValues, customSlug: current.customSlug, privacy: current.privacy, pin: current.pin, pinPending: current.pinPending };
+          const incomingAcknowledged = { ...incoming, privacy: acknowledged.privacy, pin: acknowledged.pin, pinPending: acknowledged.pinPending };
+          if (persistence.acceptExternalSave(JSON.stringify(incomingAcknowledged), saved.version, saved.privacyVersion ?? persistence.getPrivacyVersion(), expectedSnapshot)) {
+            expectedSnapshot = JSON.stringify(incoming);
+            persistence.update(expectedSnapshot, false, { step: creation ? 5 : 6, activeExtra: null, flow: "content-v6" }, manualOnly);
+            setValues(incoming);
+          } else {
+            persistence.acceptFailure({ ok: false, code: 'conflict', message: 'El diseño cambió en otra pestaña. Revisa la versión guardada antes de continuar.', version: saved.version, privacyVersion: saved.privacyVersion });
+          }
+        }
+      } catch { persistence.reportError('No pudimos recuperar el diseño guardado. Reabre la invitación antes de publicar.'); }
+      if (visualSession.tab.closed) {
+        setVisualSession(null);
+        setNotice('Ya puedes continuar a revisar tu invitación y publicarla.');
+      }
+    };
+    const onStorage = (event: StorageEvent) => { if (event.key === key) synchronize(); };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('focus', synchronize);
+    const timer = window.setInterval(synchronize, 1000);
+    synchronize();
+    return () => { window.removeEventListener('storage', onStorage); window.removeEventListener('focus', synchronize); window.clearInterval(timer); };
+  }, [visualSession, event.ownerId, persistence, manualOnly, creation]);
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
     if (scrollToTop.current) {
@@ -107,7 +146,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
       window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
     }
   }, [step, activeSection, appearanceStep]);
-  const busy = saving || preparingPreview || !protection.ready || Boolean(protection.recovery);
+  const busy = saving || preparingPreview || !protection.ready || Boolean(protection.recovery) || Boolean(visualSession);
   const signInHref = authPageHref("/login", creation
     ? persistence.getEventId() ? `/crear?resume=${encodeURIComponent(persistence.getEventId())}` : "/crear"
     : `/dashboard/eventos/${event.id}`);
@@ -117,18 +156,21 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const details = guidedDetails(values.eventType);
   const editableSections = [...values.sections.filter(section => section.type === "countdown"), ...values.sections.filter(section => section.type === "location"), ...details.flatMap(detail => values.sections.filter(section => section.type === detail.type))];
   const contentIds = guidedContentSectionIds(values.eventType, values.sections, activeSection);
-  const availableSections = editableSections.filter(section => !section.enabled);
-  const includedSections = [...values.sections.filter(section => section.type === "cover"), ...editableSections.filter(section => section.enabled)];
-  const contentKey = contentIds.includes(activeSection) ? activeSection : contentIds[0];
-  const contentIndex = contentIds.indexOf(contentKey);
+  const informationSections = editableSections.filter(section => !['cover', 'countdown', 'location', 'gallery'].includes(section.type));
+  const availableSections = (guidedFlow ? informationSections : editableSections).filter(section => !section.enabled);
+  const includedSections = guidedFlow ? informationSections.filter(section => section.enabled) : [...values.sections.filter(section => section.type === "cover"), ...editableSections.filter(section => section.enabled)];
+  const journeyContentIds = guidedFlow ? guidedInformationSectionIds(values.eventType, values.sections, activeSection) : contentIds;
+  const contentKey = journeyContentIds.includes(activeSection) ? activeSection : journeyContentIds[0];
+  const contentIndex = journeyContentIds.indexOf(contentKey);
   const currentSection = values.sections.find(section => section.id === contentKey);
   const primaryLocation = values.sections.find(section => section.type === "location");
-  const continuingDetail = step === 4 && contentIndex < contentIds.length - 1;
+  const continuingDetail = step === 4 && contentIndex < journeyContentIds.length - 1;
   const continueLabel = step === 3 ? appearanceStep < invitationStyleSteps.length - 1 ? "Siguiente" : "Personalizar bloques" : "Continuar";
   const acknowledgedValues = JSON.parse(protection.acknowledged) as EditorValues;
   const hasPin = protection.lastSaved ? acknowledgedValues.privacy === "PRIVATE" : event.privacy === "PRIVATE";
   const privacyIssue = !exampleId ? invitationPrivacyIssue(values.privacy ?? "UNSET", values.pin ?? "", Boolean(values.pinPending), hasPin) : null;
-  const issues: ReturnType<typeof guidedPublicationIssues> = [...guidedPublicationIssues(values), ...(privacyIssue ? [{ step: lastStep, message: privacyIssue }] : [])];
+  const issues: ReturnType<typeof guidedPublicationIssues> = [...guidedPublicationIssues(values), ...(privacyIssue ? [{ step: finalStep, message: privacyIssue }] : [])];
+  const informationIssues = issues.filter(issue => issue.step !== finalStep && (!guidedFlow || !values.sections.some(section => section.id === issue.sectionId && section.type === 'gallery')));
   const published = isInvitationPublished(event);
   const changesSaved = protection.ready && !protection.recovery && !protection.error && !dirty && !saving && !protection.saving && uploads === 0 && (!creation || initiallySaved || protection.lastSaved);
   const saveLabel = uploads > 0 ? "Subiendo fotografías…" : saving || protection.saving ? published ? "Publicando…" : "Guardando…" : changesSaved ? published ? "Cambios publicados" : "Cambios guardados" : exampleId ? "Guardar diseño" : published ? "Publicar cambios" : "Guardar borrador";
@@ -152,7 +194,11 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     if (sectionId && target === 4) { setActiveSection(sectionId); setAddingDetail(false); }
     if (target === 3 && sectionId) setAppearanceStep(invitationStyleStepIndex(sectionId));
     scrollToTop.current = true;
-    setStep(target);
+    setStep(guidedFlow && !flowSteps.includes(target) ? creation ? 5 : 6 : target);
+  }
+  function goToIssue(issue: { step: number; sectionId?: string }) {
+    if (guidedFlow && values.sections.some(section => section.id === issue.sectionId && section.type === 'gallery')) void openPrivatePreview();
+    else goTo(issue.step, issue.sectionId);
   }
   function goToAppearance(index: number) {
     if (uploads || busy || !validateCurrent()) return;
@@ -165,8 +211,8 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     scrollToTop.current = true;
     if (step === 3 && appearanceStep < invitationStyleSteps.length - 1) setAppearanceStep(current => current + 1);
     else if (step === 4 && addingDetail) { setAddingDetail(false); setActiveSection("__more"); }
-    else if (continuingDetail) setActiveSection(contentIds[contentIndex + 1]);
-    else goTo(step + 1);
+    else if (continuingDetail) setActiveSection(journeyContentIds[contentIndex + 1]);
+    else goTo(flowSteps[flowPosition + 1]);
   }
   function previousJourney() {
     if (uploads || busy) return;
@@ -174,9 +220,10 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     scrollToTop.current = true;
     if (step === 3 && appearanceStep > 0) setAppearanceStep(current => current - 1);
     else if (step === 4 && addingDetail) { setAddingDetail(false); setActiveSection("__more"); }
-    else if (step === 4 && contentIndex > 0) setActiveSection(contentIds[contentIndex - 1]);
+    else if (step === 4 && contentIndex > 0) setActiveSection(journeyContentIds[contentIndex - 1]);
+    else if (step === 4 && guidedFlow) goTo(1);
     else if (step === 4) { setAppearanceStep(invitationStyleSteps.length - 1); goTo(3); }
-    else goTo(step - 1);
+    else goTo(flowSteps[flowPosition - 1]);
   }
   function recover() {
     const record = persistence.recover();
@@ -185,15 +232,16 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     const locations = normalizeEventLocations(recovered.venue, recovered.address, recovered.sections);
     const restored = { ...recovered, ...locations, texture: "none", sections: completeGuidedSections(recovered.eventType, locations.sections) };
     setValues({ privacy: isInvitationPrivacy(event.privacy) ? event.privacy : "UNSET", pin: "", pinPending: false, ...restored, texture: "none" });
-    setStep(guidedRecoveryStep(record.wizard));
+    const restoredStep = guidedRecoveryStep(record.wizard);
+    setStep(guidedFlow && !flowSteps.includes(restoredStep) ? creation ? 5 : 6 : !guidedFlow && restoredStep === 6 ? lastStep : restoredStep);
     setActiveSection(guidedRecoverySection(record.wizard, restored.sections));
-    setAddingDetail((record.wizard.flow === "content-v4" || record.wizard.flow === "content-v5") && Boolean(record.wizard.activeExtra?.startsWith("__add:")));
+    setAddingDetail((record.wizard.flow === "content-v4" || record.wizard.flow === "content-v5" || record.wizard.flow === "content-v6") && Boolean(record.wizard.activeExtra?.startsWith("__add:")));
     setAppearanceStep(guidedRecoveryAppearanceStep(record.wizard));
     if (creation && record.eventId) router.replace(`/crear?resume=${record.eventId}`);
   }
   async function save(forPublication = false, overwrite = false) {
     if (busy || uploads) return;
-    if (forPublication && issues.length) { setStep(lastStep); setNotice(event.complimentaryAt ? "Completa los datos pendientes antes de publicar tu cortesía." : "Completa los datos pendientes antes de continuar al pago."); return; }
+    if (forPublication && issues.length) { setStep(finalStep); setNotice(event.complimentaryAt ? "Completa los datos pendientes antes de publicar tu cortesía." : "Completa los datos pendientes antes de continuar al pago."); return; }
     if (!form.current?.reportValidity()) return;
     setSaving(true); setNotice("");
     try {
@@ -204,8 +252,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
         if (!next.ok) { persistence.acceptFailure(next); return; }
         if (creation) router.replace(`/dashboard/eventos/${result.eventId}/pago`);
         else router.push(`/dashboard/eventos/${result.eventId}/pago`);
-      } else if (creation) router.replace(`/dashboard/eventos/${result.eventId}/show`);
-      else setNotice(exampleId ? "Diseño guardado. Publícalo desde Administración." : published ? "Cambios publicados. Tus invitados ya pueden verlos." : "Tu borrador está guardado. Todavía no se ha publicado.");
+      } else setNotice(exampleId ? "Diseño guardado. Publícalo desde Administración." : published ? "Cambios publicados. Tus invitados ya pueden verlos." : "Tu borrador está guardado. Todavía no se ha publicado.");
     } catch { persistence.reportError("No pudimos completar la operación. Tu borrador sigue protegido; intenta de nuevo."); }
     finally { setSaving(false); }
   }
@@ -226,43 +273,58 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   }
   async function openPrivatePreview() {
     if (busy || uploads > 0 || previewInFlight.current) return;
+    if (guidedFlow && informationIssues.length) { setStep(creation ? 5 : 6); setNotice('Completa la información pendiente antes de personalizar.'); return; }
     previewInFlight.current = true;
     let preview: Window | null = null;
     setPreparingPreview(true); setNotice("");
     try {
       preview = window.open("about:blank", "_blank");
       if (preview) preview.opener = null;
-      // Existing invitations are never saved here. New creations only reserve
-      // their draft ID so /show can authenticate ownership and save on request.
-      const id = await ensureEvent();
+      if (guidedFlow && !preview) {
+        setNotice('El navegador bloqueó la nueva pestaña. Permite las ventanas emergentes y pulsa «Editar diseño» de nuevo.');
+        return;
+      }
+      // Creation saves its information before the design handoff. Ordinary
+      // previews leave the existing invitation unchanged.
+      let id: string;
+      if (guidedFlow && !published) {
+        const result = await persistence.saveNow(false);
+        if (!result.ok) { preview?.close(); return; }
+        id = result.eventId;
+      } else id = await ensureEvent();
       const token = crypto.randomUUID();
-      storeInvitationPreview(window.localStorage, { ownerId: event.ownerId, eventId: id, snapshot,
-        version: persistence.getVersion(), privacyVersion: persistence.getPrivacyVersion(), creationKey: persistence.getCreationKey() }, token);
+      storeInvitationPreview(window.localStorage, { ownerId: event.ownerId, eventId: id, snapshot: guidedFlow && !published ? persistence.getSnapshot().acknowledged : snapshot,
+        version: persistence.getVersion(), privacyVersion: persistence.getPrivacyVersion(), creationKey: persistence.getCreationKey(), ...(guidedFlow ? { editorFlow: true, creationFlow: creation } : {}) }, token);
       const href = `${exampleId ? `/admin/disenos/${exampleId}/vista-previa` : `/dashboard/eventos/${id}/show`}?preview=${token}`;
       if (preview && !preview.closed) preview.location.replace(href);
       else if (!preview) router.push(href);
+      if (guidedFlow && preview && !preview.closed) {
+        setVisualSession({ tab: preview, eventId: id, token, snapshot: published ? snapshot : persistence.getSnapshot().acknowledged });
+        scrollToTop.current = true;
+      }
     } catch (failure) {
       preview?.close();
       if (failure instanceof EditorSaveFailure) persistence.acceptFailure(failure.result);
       else persistence.reportError("No pudimos abrir la vista previa. Tus cambios siguen en el editor; revisa el almacenamiento del navegador e intenta de nuevo.");
     } finally { previewInFlight.current = false; setPreparingPreview(false); }
   }
-  function submit(event: FormEvent) { event.preventDefault(); if (step < lastStep) continueJourney(); else void save(); }
+  function submit(event: FormEvent) { event.preventDefault(); if (step < finalStep) continueJourney(); else void save(); }
   const uploadBusy = (active: boolean) => setUploads(current => current + (active ? 1 : -1));
   const uploadProps = { eventId: event.id, ensureEvent: creation ? () => ensureEvent() : undefined, onBusyChange: uploadBusy };
-  const CurrentStepIcon = stepIcons[step];
+  const CurrentStepIcon = guidedFlow && step === 5 ? FiSliders : stepIcons[step] ?? FiSend;
   const progress = <nav className="guided-progress guided-journey-progress" data-grouped="true" data-expanded={mobileStepsExpanded} aria-label="Pasos de tu invitación" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setMobileStepsExpanded(false); }} onKeyDown={event => { if (event.key === 'Escape') { setMobileStepsExpanded(false); event.currentTarget.querySelector<HTMLButtonElement>('.guided-steps-toggle')?.focus(); } }}>
-    <button className="guided-steps-toggle" type="button" aria-expanded={mobileStepsExpanded} aria-controls="guided-step-options" aria-label={`Paso ${step + 1} de ${steps.length}: ${stepLabels[step]}. ${mobileStepsExpanded ? 'Ocultar' : 'Mostrar'} todos los pasos`} onClick={() => setMobileStepsExpanded(current => !current)}><CurrentStepIcon aria-hidden="true" /><span>{step + 1} / {steps.length}</span><FiChevronDown aria-hidden="true" /></button>
-    <ol id="guided-step-options" hidden={!mobileStepsExpanded}>{stepLabels.map((label, index) => {
-      const Icon = stepIcons[index];
-      return <li key={label}><button type="button" aria-label={`Paso ${index + 1}: ${label}`} aria-current={step === index ? 'step' : undefined} disabled={busy || uploads > 0} onClick={() => goTo(index)}><span aria-hidden="true"><Icon /></span><strong>{label}</strong></button></li>;
+    <button className="guided-steps-toggle" type="button" aria-expanded={mobileStepsExpanded} aria-controls="guided-step-options" aria-label={`Paso ${flowPosition + 1} de ${flowSteps.length}: ${stepLabel(step)}. ${mobileStepsExpanded ? 'Ocultar' : 'Mostrar'} todos los pasos`} onClick={() => setMobileStepsExpanded(current => !current)}><CurrentStepIcon aria-hidden="true" /><span>{flowPosition + 1} / {flowSteps.length}</span><FiChevronDown aria-hidden="true" /></button>
+    <ol id="guided-step-options" hidden={!mobileStepsExpanded}>{flowSteps.map((id, index) => {
+      const Icon = guidedFlow && id === 5 ? FiSliders : stepIcons[id] ?? FiSend;
+      const label = stepLabel(id);
+      return <li key={id}><button type="button" aria-label={`Paso ${index + 1}: ${label}`} aria-current={step === id ? 'step' : undefined} disabled={busy || uploads > 0} onClick={() => goTo(id)}><span aria-hidden="true"><Icon /></span><strong>{label}</strong></button></li>;
     })}</ol>
   </nav>;
 
   const journeyNavigation = <div className={`guided-bottom-bar ${styles.journeyNavigation}`}>
             <button className="guided-back" type="button" aria-label="Paso anterior" disabled={step === 0 || busy || uploads > 0} onClick={previousJourney}><FiArrowLeft /><span className="guided-bottom-label">Anterior</span></button>
             {progress}
-            {step < lastStep ? <button className="button" type="submit" form="guided-invitation-form" aria-label={step === 3 ? appearanceStep < invitationStyleSteps.length - 1 ? `Continuar a ${invitationStyleSteps[appearanceStep + 1].label}` : "Continuar a Personaliza los bloques" : "Continuar al siguiente paso"} disabled={busy || uploads > 0}><span className="guided-bottom-label">{continueLabel}</span><FiArrowRight /></button> : <div className="guided-footer-actions">
+            {step < finalStep ? <button className="button" type="submit" form="guided-invitation-form" aria-label={guidedFlow && step === 5 ? 'Revisar y publicar' : step === 3 ? appearanceStep < invitationStyleSteps.length - 1 ? `Continuar a ${invitationStyleSteps[appearanceStep + 1].label}` : "Continuar a Personaliza los bloques" : "Continuar al siguiente paso"} disabled={busy || uploads > 0}><span className="guided-bottom-label">{guidedFlow && step === 5 ? 'Revisar y publicar' : continueLabel}</span><FiArrowRight /></button> : <div className="guided-footer-actions">
               <button className={`button${!exampleId && !event.paidAt && !published ? " guided-save-compact" : ""}`} type="button" aria-label={saveLabel} title={saveLabel} data-save-state={changesSaved ? "saved" : undefined} disabled={busy || uploads > 0 || changesSaved || (!creation && !dirty)} onClick={() => void save()}>{changesSaved ? <FiCheck aria-hidden="true" /> : <FiSave aria-hidden="true" />}<span className="guided-bottom-label" role="status">{saveLabel}</span></button>
               {!exampleId && !event.paidAt && !published && <button className="button guided-publish" type="button" aria-label={event.complimentaryAt ? "Publicar con mi cortesía" : "Guardar y continuar al pago"} title={issues.length ? "Completa los datos indicados antes de publicar" : undefined} disabled={busy || uploads > 0 || issues.length > 0} onClick={() => void save(true)}><span className="guided-bottom-label">{saving ? "Guardando…" : event.complimentaryAt ? "Publicar cortesía" : "Continuar al pago"}</span><span className="guided-mobile-payment-label">{event.complimentaryAt ? "Publicar" : "Pagar"}</span><FiArrowRight aria-hidden="true" /></button>}
             </div>}
@@ -284,8 +346,9 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     <DashboardHeader name={account?.name || "Usuario"} email={account?.email || ""} image={account?.image} guard={confirmNavigation} />
     <div className="guided-layout">
       <div className="guided-workspace">
-        <div className="guided-heading"><span className="guided-eyebrow">{creation ? "CREA ALGO ESPECIAL" : "TU INVITACIÓN"} · PASO {step + 1} DE {steps.length}</span><h1 ref={heading} tabIndex={-1}>{introTitles[step]}</h1><p>{descriptions[step]}</p>{journeyNavigation}{step === 0 && <div className={styles.introNote}><span><FiCheck aria-hidden="true" /></span><p>Puedes empezar ahora y completar los detalles después.</p></div>}</div>
+        <div className="guided-heading"><span className="guided-eyebrow">{guidedFlow ? step >= 5 ? 'PARTE 2 · DISEÑO Y PUBLICACIÓN' : 'PARTE 1 · INFORMACIÓN DEL EVENTO' : "TU INVITACIÓN"} · PASO {flowPosition + 1} DE {flowSteps.length}</span><h1 ref={heading} tabIndex={-1}>{guidedFlow && step === 4 ? <>Información de <em>los bloques</em></> : guidedFlow && step === 5 ? <>Personaliza <em>tu diseño</em></> : step === 6 ? <>Revisa <em>y publica</em></> : introTitles[step]}</h1><p>{guidedFlow && step === 4 ? creation ? 'Completa el contenido y elige qué bloques incluir. El diseño viene después.' : 'Completa el contenido y elige qué bloques incluir. Puedes editar el diseño desde el dashboard.' : guidedFlow && step === 5 ? 'Dale tu estilo a la invitación con el editor visual.' : step === 6 ? published ? 'Revisa la información y el acceso antes de publicar tus cambios.' : 'Revisa la información, elige quién puede ver tu invitación y continúa al pago para publicarla.' : descriptions[step]}</p>{journeyNavigation}{step === 0 && <div className={styles.introNote}><span><FiCheck aria-hidden="true" /></span><p>Puedes empezar ahora y completar los detalles después.</p></div>}</div>
         <div className={styles.formArea}>
+        {visualSession && <div className="guided-notice" role="status"><p>El editor visual está abierto en otra pestaña. Guarda tus cambios allí y usa la flecha de regreso para continuar aquí.</p><button type="button" className="button" onClick={() => visualSession.tab.focus()}>Ir al editor visual</button></div>}
         {protection.localWarning && <p className="guided-alert" role="status">El navegador no permite guardar una copia local. Guarda tu borrador antes de salir.</p>}
         {(protection.error || error) && <div className="guided-alert" role="alert"><p>{protection.error || (error === "pendientes" ? "Completa los datos principales y los detalles activos antes de continuar al pago." : "Revisa tus datos e intenta guardar de nuevo.")}</p><div>{protection.conflictVersion !== undefined && <><button type="button" disabled={busy || uploads > 0} onClick={() => void save(false, true)}>{published ? "Publicar mi versión" : "Guardar mi versión"}</button><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${persistence.getEventId()}/show`} target="_blank">Revisar versión guardada</EditorProtectedLink></>}{protection.code === "unavailable" && <button type="button" disabled={busy || uploads > 0} onClick={() => void save()}>{published ? "Reintentar publicación de cambios" : "Reintentar guardado"}</button>}{protection.code === "auth" && <EditorProtectedLink guard={confirmNavigation} href={signInHref}>Iniciar sesión</EditorProtectedLink>}</div></div>}
         {notice && <p className="guided-notice" role="status">{notice}</p>}
@@ -318,7 +381,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
             {step === 4 && <>
               <div className={styles.blockSelector}>
                 <div className="guided-content-position">
-                  <span>{contentKey === '__more' ? 'Más bloques' : addingDetail ? 'Detalle adicional' : `Bloque ${contentIndex + 1} de ${contentIds.length - 1}`}</span>
+                  <span>{contentKey === '__more' ? 'Más bloques' : addingDetail ? 'Detalle adicional' : `Bloque ${contentIndex + 1} de ${journeyContentIds.length - 1}`}</span>
                   <button className="guided-blocks-toggle" type="button" aria-expanded={blocksExpanded} aria-controls="included-sections-list" onClick={() => setBlocksExpanded(expanded => !expanded)}>{blocksExpanded ? 'Ocultar bloques' : 'Ver todos los bloques'}<FiChevronDown aria-hidden="true" /></button>
                 </div>
                 <div className="guided-included-summary guided-block-list" id="included-sections-list" hidden={!blocksExpanded}>
@@ -348,28 +411,37 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                       <Field label="Lugar del evento" id="w-venue" wide><input id="w-venue" value={values.venue} maxLength={160} onChange={e => patch({ venue: e.target.value })} /></Field>
                       <Field label="Dirección" id="w-address" wide><input id="w-address" value={values.address} maxLength={240} onChange={e => patch({ address: e.target.value })} /></Field>
                       <Field label="Enlace de Google Maps (opcional)" id="w-map" wide help="Se usará este enlace para «Cómo llegar». Si lo dejas vacío, buscaremos la dirección escrita."><input id="w-map" type="url" value={currentSection.link} maxLength={500} placeholder="https://maps.app.goo.gl/…" onChange={e => changeSection(currentSection.id, { link: e.target.value })} /></Field>
-                    </>} /><SectionQuickActions section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} globalPanelStyle={values.panelStyle} globalShowIcons={values.showSectionIcons} uploadProps={uploadProps} disabled={busy || uploads > 0} /></> : <p className="guided-excluded-note">Puedes continuar o volver a activarlo cuando quieras.</p>}
+                    </>} />{!guidedFlow && <SectionQuickActions section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} globalPanelStyle={values.panelStyle} globalShowIcons={values.showSectionIcons} uploadProps={uploadProps} disabled={busy || uploads > 0} />}</> : <p className="guided-excluded-note">Puedes continuar o volver a activarlo cuando quieras.</p>}
                   </>}
                 </div>
               </>}
             </>}
             {step === 3 && <InvitationStyleJourney values={values} step={appearanceStep} onStepChange={goToAppearance} onChange={patch} />}
-            {step === lastStep && <>
+            {creation && step === 5 && <section className="guided-more-details" aria-labelledby="invitation-design-title">
+              <h2 id="invitation-design-title">Edita tu invitación de forma visual</h2>
+              <p>Elige fotos, fondo, colores y letras directamente sobre tu invitación. El editor se abrirá en otra pestaña.</p>
+              <button className={`button ${styles.designButton}`} type="button" aria-label="Editar diseño en una nueva pestaña" disabled={busy || uploads > 0 || informationIssues.length > 0} onClick={() => void openPrivatePreview()}><FiEye aria-hidden="true" />{preparingPreview ? 'Abriendo editor…' : 'Editar diseño'}</button>
+              <p>Guarda tus cambios en el editor visual y usa su flecha de regreso. Después pulsa «Revisar y publicar» para ver el resumen y continuar al pago.</p>
+              {informationIssues.length > 0 && <div className="guided-checklist"><h3>Completa estos datos para editar el diseño</h3><ul>{informationIssues.map(issue => <li key={issue.message}><button type="button" onClick={() => goToIssue(issue)}>{issue.message}<FiArrowRight /></button></li>)}</ul></div>}
+            </section>}
+            {((!guidedFlow && step === lastStep) || (guidedFlow && step === 6)) && <>
+              {!guidedFlow && <>
               <div className={styles.reviewTools}>
-              <button className={styles.reviewPreview} type="button" disabled={busy || uploads > 0} onClick={() => void openPrivatePreview()}><FiEye aria-hidden="true" />{preparingPreview ? "Abriendo vista previa…" : "Abrir vista previa"}</button>
-              <div className="guided-review-design"><FiCheck aria-hidden="true" /><div><strong>Apariencia</strong><span>{(design.palettes.find(p => p.accent.toLowerCase() === values.accent.toLowerCase())?.label || "Color personalizado")}</span></div><button type="button" aria-label="Ajustar apariencia" onClick={() => goTo(3, "style:colors")}>Ajustar</button></div>
+              <button className={styles.reviewPreview} aria-label={guidedFlow && !creation ? "Editar diseño en una nueva pestaña" : undefined} type="button" disabled={busy || uploads > 0 || (guidedFlow && informationIssues.length > 0)} onClick={() => creation ? goTo(5) : void openPrivatePreview()}><FiEye aria-hidden="true" />{preparingPreview ? "Abriendo…" : creation ? 'Volver a editar diseño' : guidedFlow ? 'Editar diseño' : "Abrir vista previa"}</button>
+              <div className="guided-review-design"><FiCheck aria-hidden="true" /><div><strong>Apariencia</strong><span>{(design.palettes.find(p => p.accent.toLowerCase() === values.accent.toLowerCase())?.label || "Color personalizado")}</span></div><button type="button" aria-label="Ajustar apariencia" onClick={() => guidedFlow && !creation ? void openPrivatePreview() : goTo(3, "style:colors")}>Ajustar</button></div>
               </div>
               <p className="guided-help">{exampleId ? "La vista previa muestra tus cambios sin guardarlos. Publica el diseño desde Administración." : published ? "La vista previa muestra tus cambios sin publicarlos. Pulsa «Publicar cambios» para actualizar lo que ven tus invitados." : event.complimentaryAt ? "Guardar borrador conserva tu avance. «Publicar cortesía» activa tu invitación para compartirla." : "Guardar borrador conserva tu avance. Tu invitación se publicará cuando se confirme el pago."}</p>
+              </>}
               <dl className="guided-review">{[["Protagonistas", values.hostNames || "Por definir"], ["Fecha y hora", `${date}${values.eventTime ? ` · ${values.eventTime}` : ""}`], ["Lugar", values.venue || "Por definir"], ["Dirección", values.address || "Por definir"]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}<button type="button" onClick={() => goTo(label === "Protagonistas" ? 0 : 1)} aria-label={`Editar ${label.toLowerCase()}`}>Editar</button></dd></div>)}</dl>
               <section className="guided-included-summary" aria-labelledby="review-sections-title">
                 <div className="guided-included-heading"><h2 id="review-sections-title">Secciones de tu invitación</h2><span role="status">{includedSections.length} {includedSections.length === 1 ? 'sección incluida' : 'secciones incluidas'}</span></div>
                 <p>{includedSections.length ? 'Estas son las secciones que elegiste. Puedes abrir cualquiera para revisarla o hacer un cambio.' : 'Todavía no has incluido secciones. Puedes agregar los detalles que quieras compartir.'}</p>
                 <nav aria-label="Secciones elegidas para la invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.title || extraDetailLabel(section)} aria-label={`Revisar sección: ${section.title || extraDetailLabel(section)}`} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}>{section.title || extraDetailLabel(section)}</button>)}{!includedSections.length && <button type="button" disabled={busy || uploads > 0} onClick={() => goTo(4, '__more')}>Agregar detalles</button>}</nav>
               </section>
-              <div className="guided-checklist"><h2>{issues.length ? "Antes de publicar" : "Todo listo para compartir"}</h2>{issues.length ? <><p>{published ? "Revisa estos datos antes de publicar tus cambios:" : "Puedes guardar el borrador ahora. Para publicar, completa lo siguiente:"}</p><ul>{issues.map(issue => <li key={issue.message}><button type="button" data-target-step={issue.step} data-target-section={issue.sectionId} onClick={() => goTo(issue.step, issue.sectionId)}>{issue.message}<FiArrowRight /></button></li>)}</ul></> : <p>Los datos principales están completos. Revisa la vista previa antes de continuar.</p>}</div>
-              {!exampleId && <InvitationPrivacyFields privacy={values.privacy ?? "UNSET"} pin={values.pin ?? ""} pinPending={Boolean(values.pinPending)} hasPin={hasPin} disabled={busy || uploads > 0} onChange={patch} />}
+              <div className="guided-checklist"><h2>{issues.length ? "Antes de publicar" : "Todo listo para compartir"}</h2>{issues.length ? <><p>{published ? "Revisa estos datos antes de publicar tus cambios:" : "Puedes guardar el borrador ahora. Para publicar, completa lo siguiente:"}</p><ul>{issues.map(issue => <li key={issue.message}><button type="button" data-target-step={issue.step} data-target-section={issue.sectionId} onClick={() => goToIssue(issue)}>{issue.message}<FiArrowRight /></button></li>)}</ul></> : <p>{guidedFlow ? 'Tu invitación está lista para publicar.' : 'Los datos principales están completos. Revisa la vista previa antes de continuar.'}</p>}</div>
+              {!exampleId && (!guidedFlow || step === 6) && <InvitationPrivacyFields privacy={values.privacy ?? "UNSET"} pin={values.pin ?? ""} pinPending={Boolean(values.pinPending)} hasPin={hasPin} disabled={busy || uploads > 0} onChange={patch} />}
               {!exampleId && !creation && granted && <CustomInvitationLinkField eventId={event.id} value={values.customSlug} savedValue={event.customSlug} suggestion={content.slug} onChange={customSlug => patch({ customSlug })} />}
-              {!exampleId && !granted && <p className="guided-payment"><FiLock />{priceLabel} MXN · IVA incluido · 12 meses activa. Podrás personalizar y compartir tu enlace cuando se confirme el pago.</p>}
+              {!exampleId && !granted && (!guidedFlow || step === 6) && <p className="guided-payment"><FiLock />{priceLabel} MXN · IVA incluido · 12 meses activa. Podrás personalizar y compartir tu enlace cuando se confirme el pago.</p>}
               {!exampleId && event.complimentaryAt && <p className="guided-payment">Tienes una cortesía de publicación. Completa los datos y publica sin realizar un pago.</p>}
               {!exampleId && !creation && <div className="guided-management"><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${event.id}/ajustes`}>Ajustes de la invitación</EditorProtectedLink>{published && <EditorProtectedLink guard={confirmNavigation} href={invitationPath(event)!} target="_blank">Abrir invitación</EditorProtectedLink>}</div>}
             </>}
@@ -378,7 +450,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
         </div>
       </div>
     </div>
-    {step >= 4 && <button className="guided-mobile-preview" type="button" disabled={busy || uploads > 0} onClick={() => void openPrivatePreview()} aria-label={preparingPreview ? "Abriendo vista previa…" : "Abrir vista previa privada"} title="Abrir vista previa privada"><FiEye aria-hidden="true" /></button>}
+    {step >= 4 && !guidedFlow && <button className="guided-mobile-preview" type="button" disabled={busy || uploads > 0} onClick={() => void openPrivatePreview()} aria-label={preparingPreview ? "Abriendo vista previa…" : "Abrir vista previa privada"} title="Abrir vista previa privada"><FiEye aria-hidden="true" /></button>}
   </main>;
 }
 

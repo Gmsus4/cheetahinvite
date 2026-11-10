@@ -4,6 +4,21 @@ const assert=require('node:assert/strict');
 const {randomUUID}=require('node:crypto');
 const {createFixture}=require('./helpers/cloudinary-fixture.cjs');
 function setup(){const f=createFixture();return {f,...f.load('lib/guided-invitation.ts')};}
+
+test('creation information journey excludes visual blocks and retains added information and recovery', () => {
+ const {guidedSections,guidedInformationSectionIds,guidedRecoveryStep,guidedRecoverySection}=setup();
+ for(const type of ['wedding','birthday','graduation','baby_shower','anniversary','other']) {
+  const sections=guidedSections(type);
+  const ids=guidedInformationSectionIds(type,sections);
+  assert.equal(ids.at(-1),'__more');
+  assert.ok(ids.includes(sections.find(s=>s.type==='story').id));
+  for(const visual of ['cover','countdown','location','gallery']) assert.ok(!ids.includes(sections.find(s=>s.type===visual).id));
+  const extra=sections.find(s=>s.type==='ceremony');extra.enabled=true;
+  assert.ok(guidedInformationSectionIds(type,sections).includes(extra.id));
+  assert.equal(guidedRecoverySection({step:4,activeExtra:`__add:${extra.id}`,flow:'content-v6'},sections),extra.id);
+ }
+ for(const step of [0,1,4,5,6])assert.equal(guidedRecoveryStep({step,activeExtra:null,flow:'content-v6'}),step);
+});
 test('previous draft flows migrate to the gradual journey without losing the active detail',()=>{
  const {guidedRecoveryStep,guidedRecoverySection,guidedRecoveryAppearance}=setup();
  for(const [step,expected] of [[0,0],[1,0],[2,4],[3,5],[15,5]])assert.equal(guidedRecoveryStep({step,activeExtra:null}),expected);
@@ -60,7 +75,7 @@ test('optional primary location is not required when hidden or replaced by anoth
 
 test('block journey starts with cover and location before the remaining wedding details',()=>{
  const {guidedDetails,guidedSections,guidedContentSectionIds}=setup();
- assert.equal(guidedDetails('wedding').length,8);
+ assert.equal(guidedDetails('wedding').length,10);
  assert.ok(guidedDetails('wedding').every(section=>section.type!=='reception'));
  assert.equal(guidedDetails('wedding').find(section=>section.type==='ceremony').title,'Ceremonia');
  assert.ok(guidedDetails('wedding').every(section=>section.type!=='location'));
@@ -222,6 +237,43 @@ test('preview section picker lists disabled supported blocks only and is exhaust
   const ceremony=sections.find(s=>s.type==='ceremony');
   assert.ok(!availableGuidedSections(eventType,[...sections,{...ceremony,id:'another',enabled:true}]).some(s=>s.type==='ceremony'));
  }
+});
+
+test('every occasion offers the same optional block catalog without enabling extra blocks by default',()=>{
+ const {guidedSections,guidedContentSectionIds,availableGuidedSections}=setup();
+ const catalog=['cover','countdown','location','story','ceremony','program','parents','dress_code','gifts','gallery','rsvp','music','custom'];
+ for(const eventType of ['wedding','birthday','graduation','baby_shower','anniversary','other']) {
+  const sections=guidedSections(eventType);
+  assert.deepEqual(sections.map(section=>section.type),catalog);
+  const available=availableGuidedSections(eventType,sections);
+  for(const type of ['music','custom']) {
+   const section=sections.find(section=>section.type===type);
+   assert.equal(section.enabled,false);
+   assert.ok(available.some(option=>option.id===section.id));
+   assert.ok(!guidedContentSectionIds(eventType,sections).includes(section.id));
+   section.enabled=true;
+   assert.ok(guidedContentSectionIds(eventType,sections).includes(section.id));
+   assert.ok(!availableGuidedSections(eventType,sections).some(option=>option.id===section.id));
+  }
+ }
+});
+
+test('existing weddings gain missing optional playlist and information blocks without altering saved content',()=>{
+ const {guidedSections,initialGuidedValues,availableGuidedSections}=setup();
+ const original=guidedSections('wedding').filter(section=>!['music','custom'].includes(section.type));
+ original.find(section=>section.type==='story').content='Nuestra historia personalizada';
+ original.find(section=>section.type==='gifts').enabled=false;
+ const before=structuredClone(original);
+ const values=initialGuidedValues({id:'saved',eventType:'wedding',sections:original});
+ for(const section of before) assert.deepEqual(values.sections.find(item=>item.id===section.id),section);
+ const optional=availableGuidedSections('wedding',values.sections);
+ for(const type of ['music','custom']) {
+  const section=optional.find(section=>section.type===type);
+  assert.ok(section);
+  assert.equal(section.enabled,false);
+  assert.equal(section.content,'');
+ }
+ assert.deepEqual(original,before);
 });
 
 

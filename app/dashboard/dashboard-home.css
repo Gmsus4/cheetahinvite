@@ -62,9 +62,11 @@
 .dashboard-home-style .dashboard-invitation-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
 .dashboard-home-style .dashboard-card-edit { grid-column: 1; grid-row: 1; min-height: 40px; padding: 8px 10px; gap: 7px; border-radius: 12px; font-size: 11px; }
 .dashboard-home-style .dashboard-card-edit:hover { background: var(--orange-hover); }
-.dashboard-home-style .dashboard-card-share { grid-column: 1 / -1; grid-row: 2; gap: 8px; }
-.dashboard-page.dashboard-home-style .dashboard-invitation-card .dashboard-card-share :is(.dashboard-event-open,.dashboard-event-share) { min-height: 38px; padding: 8px; border-radius: 12px; font-size: 11px; }
-.dashboard-home-style .dashboard-card-payment { grid-column: 2; grid-row: 1; min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font-size: 11px; }
+.dashboard-home-style .dashboard-card-share { grid-column: 1 / -1; grid-row: 2; grid-template-columns: minmax(0,.7fr) minmax(0,1.3fr) minmax(0,1fr); gap: 8px; }
+.dashboard-page.dashboard-home-style .dashboard-invitation-card .dashboard-card-share :is(.dashboard-event-open,.dashboard-event-share) { min-height: 44px; padding: 8px; border-radius: 12px; font-size: 11px; }
+.dashboard-home-style .dashboard-card-payment { grid-column: 1 / -1; grid-row: 2; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font-size: 11px; }
+.dashboard-home-style .dashboard-card-design { grid-column: 2; grid-row: 1; }
+.dashboard-home-style .dashboard-card-edit { min-height: 44px; }
 .dashboard-home-style .dashboard-card-payment:hover { border-color: var(--orange); background: var(--surface); color: var(--accent); }
 .dashboard-home-style .dashboard-card-payment svg { color: var(--accent); }
 .dashboard-home-style .dashboard-card-footer { margin-top: 12px; padding-top: 8px; border-color: var(--line); }

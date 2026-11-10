@@ -27,8 +27,9 @@ import { InvitationSectionStyleMenu } from "./InvitationSectionStyleMenu";
 import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
 import { useEditorProtection } from "./useEditorProtection";
 import styles from "./InvitationShowEditor.module.css";
+import { InvitationEditorTour } from "./InvitationEditorTour";
 
-export function InvitationShowEditor({ event, returnLink, initialChanges, onSaved }: { event: EventData; returnLink: { href: string; title: string; label: string }; initialChanges?: { snapshot: string; version: number; privacyVersion?: number; sessionId?: string }; onSaved?(snapshot: string, version: number, privacyVersion?: number): void }) {
+export function InvitationShowEditor({ event, returnLink, initialChanges, onSaved, onReturn }: { event: EventData; returnLink: { href: string; title: string; label: string }; initialChanges?: { snapshot: string; version: number; privacyVersion?: number; sessionId?: string }; onSaved?(snapshot: string, version: number, privacyVersion?: number): void; onReturn?(): void }) {
   const savedValues = initialGuidedValues(event);
   const incomingValues = initialChanges ? { ...JSON.parse(initialChanges.snapshot) as EditorValues, customSlug: savedValues.customSlug } : savedValues;
   const [values, setValues] = useState<EditorValues>(() => incomingValues);
@@ -36,6 +37,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
   const [uploads, setUploads] = useState(0);
   const [pending, startTransition] = useTransition();
   const [notice, setNotice] = useState("");
+  const [returnRequested, setReturnRequested] = useState(false);
   const snapshot = JSON.stringify(values);
   const wizard = { step: 0, activeExtra: null };
   const { controller, state, confirmNavigation, navigation } = useEditorProtection({
@@ -98,28 +100,30 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
     controller.update(state.acknowledged, false, wizard, true);
     setTarget(null);
   }
-  function save(overwrite = false) {
+  function save(overwrite = false, returnAfterSave = false) {
     if (editingDisabled) return;
     startTransition(async () => {
       controller.update(snapshot, false, wizard, true);
       const result = await controller.saveNow(false, overwrite ? state.conflictVersion : undefined, overwrite ? state.conflictPrivacyVersion : undefined);
       if (!result.ok) return;
       onSaved?.(controller.getSnapshot().acknowledged, result.version, result.privacyVersion);
+      if (returnAfterSave) { setReturnRequested(false); onReturn?.(); return; }
       setTarget(null);
       setNotice(published ? "Cambios publicados. Tus invitados ya pueden verlos." : event.isExample ? "Diseño guardado" : "Borrador guardado. Todavía no se ha publicado.");
     });
   }
 
-  return <div className={styles.workspace}>
-    <nav className={styles.toolbar} aria-label="Edición de la vista previa" data-surface={values.panelStyle === "auto" ? "blur" : values.panelStyle} style={atmosphereStyle(values.accent, values)}>
-      <EditorProtectedLink guard={confirmNavigation} href={returnLink.href} className={styles.back} title={returnLink.title}><FiArrowLeft aria-hidden="true" /><span>{returnLink.label}</span></EditorProtectedLink>
+  return <div className={styles.workspace} data-editor-tour-root>
+    <nav className={styles.toolbar} data-tour-toolbar aria-label="Edición de la vista previa" data-surface={values.panelStyle === "auto" ? "blur" : values.panelStyle} style={atmosphereStyle(values.accent, values)}>
+      {onReturn ? <button type="button" className={styles.back} data-tour="back" title={returnLink.title} disabled={editingDisabled} onClick={() => { if (controller.shouldWarn()) setReturnRequested(true); else onReturn(); }}><FiArrowLeft aria-hidden="true" /><span>{returnLink.label}</span></button> : <EditorProtectedLink guard={confirmNavigation} href={returnLink.href} className={styles.back} data-tour="back" title={returnLink.title}><FiArrowLeft aria-hidden="true" /><span>{returnLink.label}</span></EditorProtectedLink>}
       <p><FiEdit3 aria-hidden="true" /><span>Pasa sobre una sección para editarla</span></p>
       <div className={styles.tools}>
-        <button type="button" onClick={() => open({ kind: "location" })} aria-haspopup="dialog" aria-expanded={target?.kind === "location"} title="Fecha y lugar"><FiMapPin aria-hidden="true" /><span>Fecha y lugar</span></button>
-        <button type="button" onClick={() => open({ kind: "background" })} aria-haspopup="dialog" aria-expanded={target?.kind === "background"} title="Foto de fondo"><FiImage aria-hidden="true" /><span>Fondo</span></button>
-        <button type="button" onClick={() => open({ kind: "appearance" })} aria-haspopup="dialog" aria-expanded={target?.kind === "appearance"} title="Apariencia"><FiSliders aria-hidden="true" /><span>Apariencia</span></button>
-        <button type="button" onClick={() => open({ kind: "add-section" })} aria-label="Agregar secciones" aria-haspopup="dialog" aria-expanded={target?.kind === "add-section"} disabled={!availableSections.length || busy || !state.ready || Boolean(state.recovery)} title={availableSections.length ? "Agregar secciones" : "Todas las secciones están incluidas"}><FiPlus aria-hidden="true" /><span>{availableSections.length ? "Agregar secciones" : "Todas las secciones están incluidas"}</span></button>
-        <button type="button" className={styles.toolbarSave} onClick={() => save()} disabled={editingDisabled || !dirty} aria-label={pending || state.saving ? savingLabel : saveLabel} aria-busy={pending || state.saving} title={pending || state.saving ? savingLabel : dirty ? saveLabel : "Sin cambios pendientes"}><FiSave aria-hidden="true" /><span>{pending || state.saving ? savingLabel : saveLabel}</span></button>
+        <button data-tour="location" type="button" onClick={() => open({ kind: "location" })} aria-haspopup="dialog" aria-expanded={target?.kind === "location"} title="Fecha y lugar"><FiMapPin aria-hidden="true" /><span>Fecha y lugar</span></button>
+        <button data-tour="background" type="button" onClick={() => open({ kind: "background" })} aria-haspopup="dialog" aria-expanded={target?.kind === "background"} title="Foto de fondo"><FiImage aria-hidden="true" /><span>Fondo</span></button>
+        <button data-tour="appearance" type="button" onClick={() => open({ kind: "appearance" })} aria-haspopup="dialog" aria-expanded={target?.kind === "appearance"} title="Apariencia"><FiSliders aria-hidden="true" /><span>Apariencia</span></button>
+        <button data-tour="add" type="button" onClick={() => open({ kind: "add-section" })} aria-label="Agregar secciones" aria-haspopup="dialog" aria-expanded={target?.kind === "add-section"} disabled={!availableSections.length || busy || !state.ready || Boolean(state.recovery)} title={availableSections.length ? "Agregar secciones" : "Todas las secciones están incluidas"}><FiPlus aria-hidden="true" /><span>{availableSections.length ? "Agregar secciones" : "Todas las secciones están incluidas"}</span></button>
+        <button data-tour="save" type="button" className={styles.toolbarSave} onClick={() => save()} disabled={editingDisabled || !dirty} aria-label={pending || state.saving ? savingLabel : saveLabel} aria-busy={pending || state.saving} title={pending || state.saving ? savingLabel : dirty ? saveLabel : "Sin cambios pendientes"}><FiSave aria-hidden="true" /><span>{pending || state.saving ? savingLabel : saveLabel}</span></button>
+        <InvitationEditorTour ownerId={event.ownerId} enabled={!editingDisabled && !target && !returnRequested && !navigation.destination} published={published} example={Boolean(event.isExample)} returnsToCreation={Boolean(onReturn) && returnLink.href !== "/dashboard"} returnsToDashboard={returnLink.href === "/dashboard"} allIncluded={!availableSections.length} />
       </div>
     </nav>
     <CelebrationInvitation {...values} date={date} eventDateKey={values.eventDate} onEdit={open}
@@ -197,6 +201,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
       if (record) { setValues(JSON.parse(record.snapshot) as EditorValues); setTarget({ kind: "cover" }); }
     }} />}
     {navigation.destination && <EditorLeaveDialog onStay={navigation.stay} onLeave={navigation.leave} />}
+    {returnRequested && <EditorLeaveDialog onStay={() => setReturnRequested(false)} onLeave={() => { if (controller.discardChanges()) { setReturnRequested(false); onReturn?.(); } }} onSaveAndLeave={() => save(false, true)} saving={pending || state.saving} saveDisabled={editingDisabled} uploading={uploads > 0} error={state.error} publishesChanges={published} saveLabel={published ? "Publicar cambios y volver" : returnLink.href === "/dashboard" ? "Guardar y volver al dashboard" : "Guardar y volver al asistente"} />}
   </div>;
 }
 

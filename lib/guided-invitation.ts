@@ -12,12 +12,14 @@ import { eventButtonAppearance } from './invitation-buttons';
 import { sharedInvitationId, sharedInvitationDesign } from './shared-invitation';
 
 export function guidedDetails(eventType: string) {
-  if (eventType === 'wedding') return weddingDetails;
-  return (['story', 'ceremony', 'program', 'parents', 'dress_code', 'gifts', 'gallery', 'rsvp', 'music', 'custom'] as const).map(type => ({
+  return (['story', 'ceremony', 'program', 'parents', 'dress_code', 'gifts', 'gallery', 'rsvp', 'music', 'custom'] as const).map(type => {
+    const weddingDetail = eventType === 'wedding' ? weddingDetails.find(detail => detail.type === type) : undefined;
+    return weddingDetail ?? ({
     type, title: invitationSectionPreset(eventType, type).title,
     question: ({location:'¿Mostrar el lugar principal?', story:'¿Quieres compartir unas palabras?', ceremony:'¿Habrá una ceremonia?', reception:'¿Habrá otra sede para la celebración?', program:'¿Quieres compartir el programa?', parents:'¿Quieres mencionar a personas especiales?', dress_code:'¿Habrá código de vestimenta?', gifts:'¿Quieres incluir información de regalos?', gallery:'¿Quieres incluir una galería?', rsvp:'¿Quieres recibir confirmaciones?', music:'¿Quieres compartir una playlist?', custom:'¿Hay algo más que deban saber?'} as const)[type],
     help: type === 'rsvp' ? 'Recibe respuestas en la invitación o mediante un enlace externo.' : 'Opcional. Activa esta sección para personalizarla.',
-  }));
+    });
+  });
 }
 export function guidedSections(eventType: string): InviteSection[] {
   return [{ type: "cover" as const }, { type: "countdown" as const }, { type: "location" as const }, ...guidedDetails(eventType)].map(d => ({ id: `${eventType}-${d.type}`, type:d.type, ...invitationSectionPreset(eventType, d.type), detail:'', link:'', imageUrl:'', imageUrls:[], ...(d.type === 'rsvp' ? { rsvpMode:'integrated' as const, maxCompanions:0 } : {}) }));
@@ -35,6 +37,11 @@ export function guidedContentSectionIds(eventType: string, sections: InviteSecti
   const recommended = new Set(guidedSections(eventType).filter(section => section.enabled).map(section => section.type));
   const ordered = guidedDetails(eventType).flatMap(detail => sections.filter(section => section.type === detail.type));
   return [sections.find(section => section.type === 'cover')?.id ?? '__cover', ...sections.filter(section => section.type === 'countdown').map(section => section.id), ...sections.filter(section => section.type === 'location').map(section => section.id), ...ordered.filter(section => recommended.has(section.type) || section.enabled || section.id === activeSection).map(section => section.id), '__more'];
+}
+
+export function guidedInformationSectionIds(eventType: string, sections: InviteSection[], activeSection = '') {
+  const informationIds = new Set(sections.filter(section => !['cover', 'countdown', 'location', 'gallery'].includes(section.type)).map(section => section.id));
+  return guidedContentSectionIds(eventType, sections, activeSection).filter(id => id === '__more' || informationIds.has(id));
 }
 
 
@@ -109,6 +116,7 @@ export function guidedPublicationIssues(values: Pick<EditorValues, 'eventType' |
   return issues;
 }
 export function guidedRecoveryStep(wizard: EditorWizard) {
+  if (wizard.flow === 'content-v6') return [0, 1, 4, 5, 6].includes(wizard.step) ? wizard.step : 5;
   if (wizard.flow === 'content-v5') return Math.min(5, Math.max(0, wizard.step));
   if (wizard.flow === 'content-v4') return wizard.step === 3 ? 4 : wizard.step === 4 ? 3 : Math.min(5, Math.max(0, wizard.step));
   if (wizard.flow === 'content-v3') return wizard.step <= 0 ? 0 : wizard.step >= 2 ? 5 : (({ photos: 2, content: 4, appearance: 3 } as Record<string, number>)[wizard.activeExtra ?? ''] ?? 2);
@@ -117,7 +125,7 @@ export function guidedRecoveryStep(wizard: EditorWizard) {
 }
 export function guidedRecoverySection(wizard: EditorWizard, sections: InviteSection[]) {
   const cover = sections.find(section => section.type === 'cover')?.id ?? '__cover';
-  if (wizard.flow !== 'content-v4' && wizard.flow !== 'content-v5') return cover;
+  if (wizard.flow !== 'content-v4' && wizard.flow !== 'content-v5' && wizard.flow !== 'content-v6') return cover;
   const active = wizard.activeExtra?.replace(/^__add:/, '') ?? '';
   if (active === '__cover' || active === '__welcome') return cover;
   return active === '__more' || sections.some(section => section.id === active) ? active : cover;

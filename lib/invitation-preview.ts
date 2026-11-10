@@ -1,7 +1,7 @@
 import { parseEditorDraft, validCreationKey, type EditorDraftRecord, type EditorValues } from "@/lib/invitation-editor";
 
 const lifetime = 30 * 60 * 1000;
-export type InvitationPreviewRecord = EditorDraftRecord & { saved?: boolean };
+export type InvitationPreviewRecord = EditorDraftRecord & { saved?: boolean; creationFlow?: boolean; editorFlow?: boolean };
 export const invitationPreviewKey = (ownerId: string, eventId: string, token: string) => `cheetahinvite:preview:v1:${ownerId}:${eventId}:${token}`;
 
 // This handoff belongs only to the private /show editor. It never writes an event.
@@ -22,8 +22,9 @@ export function storeInvitationPreview(storage: Storage, record: Omit<Invitation
 
 export function parseInvitationPreview(raw: string | null, ownerId: string, eventId: string, now = Date.now()) {
   const record = parseEditorDraft(raw, ownerId, eventId, now) as InvitationPreviewRecord | null;
-  if (!record || record.eventId !== eventId || record.updatedAt < now - lifetime || (record.saved !== undefined && typeof record.saved !== "boolean")) return null;
+  if (!record || record.eventId !== eventId || record.updatedAt < now - lifetime || (record.saved !== undefined && typeof record.saved !== "boolean") || (record.creationFlow !== undefined && typeof record.creationFlow !== "boolean")) return null;
   const values = JSON.parse(record.snapshot) as EditorValues;
+  if (record.editorFlow !== undefined && typeof record.editorFlow !== "boolean") return null;
   if (values.privacy !== undefined || values.pin !== undefined || values.pinPending !== undefined) return null;
   return record;
 }

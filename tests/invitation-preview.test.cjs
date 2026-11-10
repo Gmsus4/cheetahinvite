@@ -49,3 +49,21 @@ test('separate previews cannot replace each other and an explicit save refreshes
   assert.equal(f.storage.getItem(otherKey), otherRaw);
   assert.equal(f.parseInvitationPreview(f.storage.getItem(f.invitationPreviewKey('owner', 'event', f.token)), 'owner', 'event', f.now + 1).saved, true);
 });
+
+test('creation handoffs preserve their return mode through saves and reject malformed modes', () => {
+  const f = setup();
+  f.storeInvitationPreview(f.storage, { ...f.record, creationFlow: true }, f.token, f.now);
+  const key = f.invitationPreviewKey('owner', 'event', f.token);
+  const record = f.parseInvitationPreview(f.storage.getItem(key), 'owner', 'event', f.now);
+  assert.equal(record.creationFlow, true);
+  f.storeInvitationPreview(f.storage, { ...record, saved: true, version: 4 }, f.token, f.now);
+  const saved = f.parseInvitationPreview(f.storage.getItem(key), 'owner', 'event', f.now);
+  assert.equal(saved.creationFlow, true);
+  assert.equal(saved.saved, true);
+  assert.equal(f.parseInvitationPreview(JSON.stringify({ ...saved, creationFlow: 'yes' }), 'owner', 'event', f.now), null);
+  f.storeInvitationPreview(f.storage, { ...f.record, editorFlow: true, creationFlow: false }, f.token, f.now);
+  const editing = f.parseInvitationPreview(f.storage.getItem(key), 'owner', 'event', f.now);
+  assert.equal(editing.editorFlow, true);
+  assert.equal(editing.creationFlow, false);
+  assert.equal(f.parseInvitationPreview(JSON.stringify({ ...editing, editorFlow: 'yes' }), 'owner', 'event', f.now), null);
+});

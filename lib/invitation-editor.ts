@@ -36,7 +36,7 @@ export type EditorSaveResult = { ok: true; eventId: string; version: number; pri
   ok: false; code: "validation" | "auth" | "conflict" | "published" | "not-found" | "unavailable";
   message: string; version?: number; privacyVersion?: number;
 };
-export type EditorWizard = { step: number; activeExtra: string | null; flow?: "content-v2" | "content-v3" | "content-v4" | "content-v5" };
+export type EditorWizard = { step: number; activeExtra: string | null; flow?: "content-v2" | "content-v3" | "content-v4" | "content-v5" | "content-v6" };
 export class EditorSaveFailure extends Error {
   constructor(public result: Extract<EditorSaveResult, { ok: false }>) { super(result.message); }
 }
@@ -81,7 +81,7 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
       || !Number.isFinite(record.updatedAt) || record.updatedAt > now + 60_000 || record.updatedAt < now - EDITOR_DRAFT_LIFETIME
       || typeof record.snapshot !== "string" || !record.wizard || !Number.isInteger(record.wizard.step)
       || record.wizard.step < 0 || record.wizard.step > 15 || !(record.wizard.activeExtra === null || typeof record.wizard.activeExtra === "string")
-      || (record.wizard.flow !== undefined && record.wizard.flow !== "content-v2" && record.wizard.flow !== "content-v3" && record.wizard.flow !== "content-v4" && record.wizard.flow !== "content-v5")) return null;
+      || (record.wizard.flow !== undefined && record.wizard.flow !== "content-v2" && record.wizard.flow !== "content-v3" && record.wizard.flow !== "content-v4" && record.wizard.flow !== "content-v5" && record.wizard.flow !== "content-v6")) return null;
     const values = JSON.parse(record.snapshot) as EditorValues;
     const strings = ["name", "eventType", "eventDate", "eventTime", "hostNames", "venue", "address", "message", "imageUrl", "accent", "typography", "bodyTypography", "customSlug", "templateId", "texture", "heroHorizontal", "heroVertical"] as const;
     if (!values || !strings.every(key => typeof values[key] === "string")
