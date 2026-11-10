@@ -53,6 +53,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const [addingDetail, setAddingDetail] = useState(false);
   const [appearanceStep, setAppearanceStep] = useState(0);
   const [mobileStepsExpanded, setMobileStepsExpanded] = useState(false);
+  const [blocksExpanded, setBlocksExpanded] = useState(false);
   const [uploads, setUploads] = useState(0);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
@@ -147,6 +148,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   function goTo(target: number, sectionId?: string) {
     setMobileStepsExpanded(false);
     if (uploads || busy || (target > step && !validateCurrent())) return;
+    setBlocksExpanded(false);
     if (sectionId && target === 4) { setActiveSection(sectionId); setAddingDetail(false); }
     if (target === 3 && sectionId) setAppearanceStep(invitationStyleStepIndex(sectionId));
     scrollToTop.current = true;
@@ -159,6 +161,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   }
   function continueJourney() {
     if (uploads || busy || !validateCurrent()) return;
+    setBlocksExpanded(false);
     scrollToTop.current = true;
     if (step === 3 && appearanceStep < invitationStyleSteps.length - 1) setAppearanceStep(current => current + 1);
     else if (step === 4 && addingDetail) { setAddingDetail(false); setActiveSection("__more"); }
@@ -167,6 +170,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   }
   function previousJourney() {
     if (uploads || busy) return;
+    setBlocksExpanded(false);
     scrollToTop.current = true;
     if (step === 3 && appearanceStep > 0) setAppearanceStep(current => current - 1);
     else if (step === 4 && addingDetail) { setAddingDetail(false); setActiveSection("__more"); }
@@ -312,16 +316,20 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
               <p className="guided-help" id="guided-photo-formats">JPG, PNG, WebP o AVIF · máximo {ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB por imagen. Puedes continuar sin subir fotos.</p>
             </>}
             {step === 4 && <>
-              <section className={`guided-included-summary ${styles.blockSelector}`} aria-labelledby="included-sections-title">
-                <div className="guided-included-heading"><h2 id="included-sections-title">Bloques de tu invitación</h2><span role="status">{includedSections.length} {includedSections.length === 1 ? 'bloque incluido' : 'bloques incluidos'}</span></div>
-                {includedSections.length ? <><p>Revisa los bloques en el orden en que aparecerán.</p><nav aria-label="Secciones incluidas en tu invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.title || extraDetailLabel(section)} aria-label={`Editar sección: ${section.title || extraDetailLabel(section)}`} aria-current={contentKey === section.id ? 'step' : undefined} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}>{section.title || extraDetailLabel(section)}</button>)}</nav></> : <p>Aún no hay secciones incluidas. Puedes activarlas durante el recorrido o agregar un detalle al final.</p>}
-              </section>
+              <div className={styles.blockSelector}>
+                <div className="guided-content-position">
+                  <span>{contentKey === '__more' ? 'Más bloques' : addingDetail ? 'Detalle adicional' : `Bloque ${contentIndex + 1} de ${contentIds.length - 1}`}</span>
+                  <button className="guided-blocks-toggle" type="button" aria-expanded={blocksExpanded} aria-controls="included-sections-list" onClick={() => setBlocksExpanded(expanded => !expanded)}>{blocksExpanded ? 'Ocultar bloques' : 'Ver todos los bloques'}<FiChevronDown aria-hidden="true" /></button>
+                </div>
+                <div className="guided-included-summary guided-block-list" id="included-sections-list" hidden={!blocksExpanded}>
+                  {includedSections.length ? <><p>Revisa los bloques en el orden en que aparecerán.</p><nav aria-label="Secciones incluidas en tu invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.title || extraDetailLabel(section)} aria-label={`Editar sección: ${section.title || extraDetailLabel(section)}`} aria-current={contentKey === section.id ? 'step' : undefined} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}>{section.title || extraDetailLabel(section)}</button>)}</nav></> : <p>Aún no hay secciones incluidas. Puedes activarlas durante el recorrido o agregar un detalle al final.</p>}
+                </div>
+              </div>
               {contentKey === '__more' ? <section className="guided-more-details" aria-labelledby="more-details-title">
                 <h2 id="more-details-title">¿Quieres agregar algo más?</h2>
                 <p>Estos detalles son opcionales. Elige uno para completarlo o continúa a la revisión de tu invitación.</p>
                 {availableSections.length ? <div className="guided-more-options">{availableSections.map(section => <button type="button" key={section.id} onClick={() => { changeSection(section.id, { enabled: true }); setAddingDetail(true); setActiveSection(section.id); }}><span>{extraDetailLabel(section)}</span><FiPlus aria-hidden="true" /></button>)}</div> : <p>Ya incluiste todos los detalles disponibles.</p>}
               </section> : <>
-                <div className="guided-content-position"><span>{addingDetail ? 'Detalle adicional' : `Bloque ${contentIndex + 1} de ${contentIds.length - 1}`}</span><span>{contentIndex === 0 ? 'La portada de tu invitación' : 'Un detalle a la vez'}</span></div>
                 <div className="guided-single-detail" key={contentKey} data-preview-label={currentSection?.title}>
                   {currentSection?.type === "cover" ? <>
                     <h2>Portada</h2>

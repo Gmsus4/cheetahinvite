@@ -1,12 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { FiAlignLeft, FiAlignCenter, FiAlignRight } from "react-icons/fi";
+import { FiAlignLeft, FiAlignCenter, FiAlignRight, FiMinus, FiPlus } from "react-icons/fi";
 import type { InviteSection, InvitationPanelStyle } from "@/lib/invitation-editor";
 import { invitationSurfaceOptions } from "@/lib/invitation-style-journey";
 import { InvitationWhatsAppFields } from "./InvitationWhatsAppFields";
 import { InvitationProgramFields } from "./InvitationProgramFields";
-import { rsvpCompanionLimit } from "@/lib/rsvp";
+import { RSVP_LIMITS, rsvpCompanionLimit } from "@/lib/rsvp";
 import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
 import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
 
@@ -32,6 +32,8 @@ export function SectionFields(props: SectionFieldsProps) {
 
 function SectionContentFields({ section, onChange, uploadProps, allowSectionPhoto = false, showStyleControls = true, globalShowIcons = true, globalPanelStyle = "auto", mediaClassName, locationFields }: SectionFieldsProps) {
   const prefix = section.id;
+  const companionLimit = rsvpCompanionLimit(section.maxCompanions);
+  const updateCompanionLimit = (value: number) => onChange({ maxCompanions: Number.isFinite(value) ? Math.min(RSVP_LIMITS.companions, Math.max(0, Math.trunc(value))) : 0 });
   const mediaClass = `guided-section-media${mediaClassName ? ` ${mediaClassName}` : ""}`;
   const surfaceControl = showStyleControls && allowSectionPhoto && <SectionSurfaceFields section={section} onChange={onChange} globalShowIcons={globalShowIcons} globalPanelStyle={globalPanelStyle} />;
   if (section.type === "countdown") return <>
@@ -52,7 +54,13 @@ function SectionContentFields({ section, onChange, uploadProps, allowSectionPhot
   return <>
     <Field label="Título de la sección" id={`${prefix}-title`}><input id={`${prefix}-title`} value={section.title} maxLength={120} onChange={e => onChange({ title: e.target.value })} /></Field>
     {section.type === "rsvp" && <Field label="¿Cómo quieres recibir las respuestas?" id={`${prefix}-mode`}><select id={`${prefix}-mode`} value={section.rsvpMode ?? "external"} onChange={e => onChange({ rsvpMode: e.target.value as "integrated" | "external" })}><option value="integrated">Aquí mismo, en la invitación</option><option value="external">En WhatsApp u otro enlace</option></select></Field>}
-    {section.type === "rsvp" && section.rsvpMode === "integrated" && <Field label="Acompañantes permitidos por invitado" id={`${prefix}-companions`} help="Son personas adicionales a quien confirma. Elige 0 para una invitación individual. Si cambias el límite después, las respuestas recibidas se conservan."><select id={`${prefix}-companions`} value={rsvpCompanionLimit(section.maxCompanions)} onChange={e => onChange({ maxCompanions: Number(e.target.value) })}>{Array.from({ length: 11 }, (_, count) => <option key={count} value={count}>{count === 0 ? "0 · Sin acompañantes" : `${count} ${count === 1 ? "acompañante" : "acompañantes"} como máximo`}</option>)}</select></Field>}
+    {section.type === "rsvp" && section.rsvpMode === "integrated" && <Field label="Acompañantes permitidos por invitado" id={`${prefix}-companions`} help="Son personas adicionales a quien confirma. Escribe un número de 0 a 10; usa 0 para una invitación individual. Si cambias el límite después, las respuestas recibidas se conservan.">
+      <div className="guided-companion-input" role="group" aria-label="Límite de acompañantes">
+        <button type="button" aria-label="Restar un acompañante" disabled={companionLimit === 0} onClick={() => updateCompanionLimit(companionLimit - 1)}><FiMinus aria-hidden="true" /></button>
+        <input id={`${prefix}-companions`} type="number" inputMode="numeric" min={0} max={RSVP_LIMITS.companions} step={1} value={companionLimit} onChange={event => updateCompanionLimit(Number(event.target.value))} />
+        <button type="button" aria-label="Agregar un acompañante" disabled={companionLimit === RSVP_LIMITS.companions} onClick={() => updateCompanionLimit(companionLimit + 1)}><FiPlus aria-hidden="true" /></button>
+      </div>
+    </Field>}
     {section.type === "program" ? <InvitationProgramFields id={prefix} content={section.content} onChange={content => onChange({ content })} /> : <Field label={({ story: "Cuenta la historia de tu celebración", ceremony: "Nombre del lugar de la ceremonia", reception: "Nombre del lugar de la recepción", parents: "Nombres de las personas que quieres mencionar", dress_code: "¿Cómo deben vestir tus invitados?", gifts: "Mensaje sobre los regalos", rsvp: "Texto de la sección (opcional)", music: "Mensaje para la playlist", custom: "Información adicional" } as Record<string, string>)[section.type]} id={`${prefix}-content`}><textarea id={`${prefix}-content`} rows={section.type === "story" ? 10 : ["ceremony", "reception"].includes(section.type) ? 3 : 6} data-short-content={["ceremony", "reception"].includes(section.type)} value={section.content} maxLength={2000} placeholder={({ story: "Todo empezó cuando…", ceremony: "Ej. Parroquia San José", reception: "Ej. Jardín Las Rosas", dress_code: "Ej. Casual, con calzado cómodo.", gifts: "Tu compañía es nuestro mejor regalo…" } as Record<string, string>)[section.type]} onChange={e => onChange({ content: e.target.value })} /></Field>}
     {(section.type === "ceremony" || section.type === "reception") && <><Field label="Horario" id={`${prefix}-time`}><input id={`${prefix}-time`} value={section.detail} maxLength={240} placeholder="Ej. 5:00 p. m." onChange={e => onChange({ detail: e.target.value })} /></Field><Field label="Dirección o enlace de Google Maps" id={`${prefix}-map`}><input id={`${prefix}-map`} value={section.link} maxLength={500} placeholder="Calle, número y ciudad, o enlace de Maps" onChange={e => onChange({ link: e.target.value })} /></Field></>}
     {(section.type === "gifts" || section.type === "music" || section.type === "custom") && <Field label={section.type === "gifts" ? "Enlace a la mesa de regalos (opcional)" : section.type === "music" ? "Enlace a la playlist" : "Enlace adicional (opcional)"} id={`${prefix}-link`}><input id={`${prefix}-link`} type="url" maxLength={500} value={section.link} placeholder="https://…" onChange={e => onChange({ link: e.target.value })} /></Field>}

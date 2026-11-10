@@ -329,7 +329,6 @@
   .workspace[data-intro-layout="true"]:has(.blockSelector) :global(.guided-heading h1) { margin: 10px 0 0; font-size: 26px; }
   .workspace[data-intro-layout="true"]:has(.blockSelector) :global(.guided-heading > p) { display: none; }
   .workspace[data-intro-layout="true"]:has(.blockSelector) :global(.guided-workspace) { row-gap: 20px; }
-  .workspace .blockSelector { display: none; }
   .workspace[data-intro-layout="true"] :global(.guided-layout) { padding: 26px 20px calc(120px + env(safe-area-inset-bottom,0px)); }
   .workspace[data-intro-layout="true"] :global(.guided-workspace) { row-gap: 28px; }
   .workspace[data-intro-layout="true"] :global(.guided-heading h1) { font-size: clamp(33px,9vw,40px); line-height: 1.2; }
