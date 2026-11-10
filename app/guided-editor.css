@@ -32,6 +32,15 @@
 .guided-field :is(input,textarea)::placeholder{color:var(--faint);font-size:12px}
 .guided-field :is(input,select):disabled{background:var(--surface-muted);color:var(--faint)}
 .guided-field small,.guided-help{color:var(--muted);font-size:11px;line-height:1.8;margin:0}
+.guided-phone-input{display:flex;min-width:0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.guided-phone-input:focus-within{border-color:var(--orange);outline:2px solid var(--orange);outline-offset:2px}
+.guided-phone-country{position:relative;display:flex;align-items:center;flex:0 0 76px}
+.guided-phone-country::after{content:"";position:absolute;right:0;top:50%;height:24px;width:1px;transform:translateY(-50%);background:var(--line)}
+.guided-field .guided-phone-input input{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;min-width:0}
+.guided-field .guided-phone-country input{padding:12px 10px;text-align:center}
+.guided-editor .guided-phone-input input:focus-visible{outline:none}
+.guided-phone-input>input{flex:1}
+.guided-field small[data-invalid="true"]{color:var(--danger)}
 .guided-palettes>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .guided-palettes label{display:flex;gap:16px;align-items:center;padding:14px 18px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer}
 .guided-palettes label:has(input:checked){border-color:var(--accent-line);background:var(--surface)}
@@ -207,6 +216,7 @@
 .guided-appearance-options { display: flex; flex-direction: column; gap: 28px; }
 .guided-appearance-options[hidden] { display: none; }
 .guided-editor .guided-bottom-bar .guided-progress.guided-journey-progress { position: relative; width: auto; justify-self: center; }
+.guided-editor .guided-bottom-bar .guided-progress.guided-journey-progress[data-expanded="true"] { z-index: 10; }
 .guided-editor .guided-bottom-bar .guided-progress.guided-journey-progress .guided-steps-toggle { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; width: auto; min-width: 98px; height: 44px; padding: 8px 10px; border-radius: 12px; background: var(--surface-muted); color: var(--muted); font-size: 12px; }
 .guided-editor .guided-bottom-bar .guided-progress.guided-journey-progress .guided-steps-toggle > svg { flex-shrink: 0; }
 .guided-editor .guided-bottom-bar .guided-progress.guided-journey-progress .guided-steps-toggle > span { width: auto; height: auto; border: 0; background: none; white-space: nowrap; }

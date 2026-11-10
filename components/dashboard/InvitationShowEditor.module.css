@@ -53,10 +53,10 @@
 .sectionOptions svg { flex: 0 0 20px; width: 20px; height: 20px; color: var(--accent); }
 .fields :global(.guided-field), .fields :global(.editor-field) { display: flex; min-width: 0; flex-direction: column; gap: 9px; margin: 0; }
 .fields :global(.guided-field) > label, .fields :global(.editor-field) > label { color: var(--ink); font-size: 14px; font-weight: 600; }
-.fields :is(input:not([type="file"]):not([type="radio"]):not([type="range"]):not([type="checkbox"]), textarea, select) { width: 100%; min-width: 0; min-height: 49px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; line-height: 1.6; accent-color: var(--orange); transition: border-color .18s, box-shadow .18s; }
+.fields :is(input:not([type="file"]):not([type="radio"]):not([type="range"]):not([type="checkbox"]), textarea, select):not(:where(:global(.guided-phone-input) input)) { width: 100%; min-width: 0; min-height: 49px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; line-height: 1.6; accent-color: var(--orange); transition: border-color .18s, box-shadow .18s; }
 .fields input[type="checkbox"] { width: 22px; height: 22px; margin: 0; accent-color: var(--orange); cursor: pointer; }
 .fields textarea { resize: vertical; line-height: 1.7; }
-.fields :is(input, textarea, select):focus-visible { border-color: var(--orange); outline: 2px solid var(--orange); outline-offset: 2px; }
+.fields :is(input, textarea, select):not(:where(:global(.guided-phone-input) input)):focus-visible { border-color: var(--orange); outline: 2px solid var(--orange); outline-offset: 2px; }
 .fields :is(input, select):disabled { background: var(--surface-muted); color: var(--muted); }
 .fields small { color: var(--muted); font-size: 12px; line-height: 1.7; }
 .fields :global(.guided-section-photo) { margin-top: 0; padding-top: 0; border-top: 0; }

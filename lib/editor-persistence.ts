@@ -4,6 +4,7 @@ import { redactEditorPin } from "@/lib/invitation-privacy";
 type Options = {
   ownerId: string; eventId: string; snapshot: string; version: number; creation: boolean; manualOnly: boolean;
   privacyVersion?: number;
+  initialChanges?: { snapshot: string; version: number; privacyVersion?: number; sessionId?: string };
   save(snapshot: string, version: number, automatic: boolean, privacyVersion: number): Promise<EditorSaveResult>;
 };
 type Browser = { storage: Storage | null; uuid(): string; now(): number; online(): boolean };
@@ -38,9 +39,13 @@ export class EditorPersistence {
   private creationComplete = false;
 
   constructor(private options: Options) {
-    this.snapshot = options.snapshot; this.version = options.version; this.eventId = options.eventId;
-    this.privacyVersion = options.privacyVersion ?? 0;
-    this.state = { ready: false, acknowledged: options.snapshot, saving: false, local: false, localWarning: false, lastSaved: false, recovery: null, error: "", code: "", manualOnly: options.manualOnly };
+    this.snapshot = options.initialChanges?.snapshot ?? options.snapshot;
+    this.version = options.initialChanges?.version ?? options.version; this.eventId = options.eventId;
+    this.privacyVersion = options.initialChanges?.privacyVersion ?? options.privacyVersion ?? 0;
+    const conflict = this.version !== options.version || this.privacyVersion !== (options.privacyVersion ?? 0);
+    this.state = { ready: false, acknowledged: options.snapshot, saving: false, local: false, localWarning: false, lastSaved: false, recovery: null,
+      error: conflict ? "Hay una versión más reciente guardada. Revisa tus cambios antes de publicarlos." : "", code: conflict ? "conflict" : "", manualOnly: options.manualOnly,
+      ...(conflict ? { conflictVersion: options.version, conflictPrivacyVersion: options.privacyVersion ?? 0 } : {}) };
     this.serverState = this.state;
   }
   subscribe = (listener: () => void) => { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; };
@@ -48,6 +53,7 @@ export class EditorPersistence {
   getServerSnapshot = () => this.serverState;
   getEventId = () => this.eventId;
   getVersion = () => this.version;
+  getPrivacyVersion = () => this.privacyVersion;
   getCreationKey = () => this.creationKey;
   private patch(changes: Partial<EditorPersistenceState>) { this.state = { ...this.state, ...changes }; for (const listener of this.listeners) listener(); }
   private clearTimer() { if (this.timer) clearTimeout(this.timer); this.timer = undefined; }
@@ -61,7 +67,17 @@ export class EditorPersistence {
       this.creationKey = browser.uuid();
       const prefix = editorDraftPrefix(this.options.ownerId, this.options.creation ? "" : this.options.eventId);
       const creationPrefix = editorDraftPrefix(this.options.ownerId, "");
-      this.recordKey = prefix + browser.uuid();
+      this.recordKey = prefix + (this.options.initialChanges?.sessionId ? `preview-${this.options.initialChanges.sessionId}` : browser.uuid());
+      // An explicit /show handoff is already the user's selected copy. Keep other
+      // tabs' backups, and protect these edits without asking to recover them again.
+      if (this.options.initialChanges) {
+        let recovery: EditorDraftRecord | null = null;
+        try {
+          const previous = parseEditorDraft(browser.storage?.getItem(this.recordKey) ?? null, this.options.ownerId, this.eventId, browser.now());
+          if (previous && previous.snapshot !== this.snapshot) recovery = { ...previous, key: this.recordKey };
+        } catch { this.patch({ localWarning: true }); }
+        this.patch({ ready: true, recovery }); this.backup(); this.schedule(); return;
+      }
       const records: EditorDraftRecord[] = [];
       try {
         if (!browser.storage) throw new Error("Storage unavailable");

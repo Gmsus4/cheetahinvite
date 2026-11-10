@@ -103,6 +103,44 @@ test('published invitations keep device backups and require an explicit save', a
   assert.equal(calls[0].automatic, false);
 });
 
+test('/show starts with transferred edits as unsaved changes and does not consume other tabs backups', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const source = setup(t, { manualOnly: true }); edit(source.controller, 'Desde el asistente');
+  const originalKeys = [...source.storage.data.keys()];
+  const preview = setup(t, { storage: source.storage, manualOnly: true, initialChanges: { snapshot: values('Desde el asistente'), version: 0, privacyVersion: 0 } });
+  assert.equal(preview.controller.getSnapshot().recovery, null);
+  assert.equal(preview.controller.getSnapshot().acknowledged, values('Inicial'));
+  assert.equal(preview.controller.isDirty(), true);
+  t.mock.timers.tick(60_000); await flush();
+  assert.equal(preview.calls.length, 0);
+  assert.equal((await preview.controller.saveNow()).ok, true);
+  assert.equal(preview.calls[0].snapshot, values('Desde el asistente'));
+  assert.equal(preview.calls[0].automatic, false);
+  assert.equal(preview.controller.isDirty(), false);
+  for (const key of originalKeys) assert.ok(source.storage.getItem(key));
+});
+
+test('/show detects content or privacy changes made after the preview was opened', async t => {
+  for (const revisions of [{ version: 1, privacyVersion: 0 }, { version: 0, privacyVersion: 1 }]) {
+    const { controller, calls } = setup(t, { ...revisions, manualOnly: true, initialChanges: { snapshot: values('Pendiente'), version: 0, privacyVersion: 0 } });
+    assert.equal(controller.getSnapshot().code, 'conflict');
+    assert.equal((await controller.saveNow()).ok, false); assert.equal(calls.length, 0);
+    assert.equal((await controller.saveNow(false, revisions.version, revisions.privacyVersion)).ok, true);
+    assert.equal(calls.length, 1);
+  }
+});
+
+test('/show reloads offer the edits made inside that preview without taking another tabs copy', t => {
+  const sessionId = randomUUID(), storage = new MemoryStorage();
+  const options = { storage, manualOnly: true, initialChanges: { snapshot: values('Desde el asistente'), version: 0, sessionId } };
+  const first = setup(t, options);
+  first.controller.update(values('Editado dentro de show'), false, { step: 0, activeExtra: null }, true);
+  first.controller.stop();
+  const reloaded = setup(t, options);
+  assert.equal(JSON.parse(reloaded.controller.getSnapshot().recovery.snapshot).name, 'Editado dentro de show');
+  assert.equal(JSON.parse(reloaded.controller.recover().snapshot).name, 'Editado dentro de show');
+});
+
 test('uploads block autosave and manual publication prerequisites until completion', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const { controller: c, calls } = setup(t);

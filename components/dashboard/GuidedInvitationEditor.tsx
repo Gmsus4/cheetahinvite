@@ -30,6 +30,7 @@ import { useEditorProtection } from "./useEditorProtection";
 import { EditorProtectedLink } from "./EditorProtectedLink";
 import { EditorLeaveDialog } from "./EditorLeaveDialog";
 import { EditorRecoveryDialog } from "./EditorRecoveryDialog";
+import { storeInvitationPreview } from "@/lib/invitation-preview";
 
 
 import { InvitationPrivacyFields } from "./InvitationPrivacyFields";
@@ -56,11 +57,13 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
   const [initiallySaved] = useState(Boolean(event.id));
+  const [preparingPreview, setPreparingPreview] = useState(false);
   const form = useRef<HTMLFormElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const scrollToTop = useRef(false);
   const draftPromise = useRef<Promise<string> | null>(null);
   const exitInFlight = useRef(false);
+  const previewInFlight = useRef(false);
   const snapshot = JSON.stringify(values);
   const granted = hasPublicationGrant(event);
   const manualOnly = granted || !["DRAFT", "PENDING_PAYMENT"].includes(event.status);
@@ -103,7 +106,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
       window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
     }
   }, [step, activeSection, appearanceStep]);
-  const busy = saving || !protection.ready || Boolean(protection.recovery);
+  const busy = saving || preparingPreview || !protection.ready || Boolean(protection.recovery);
   const signInHref = authPageHref("/login", creation
     ? persistence.getEventId() ? `/crear?resume=${encodeURIComponent(persistence.getEventId())}` : "/crear"
     : `/dashboard/eventos/${event.id}`);
@@ -127,8 +130,9 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const issues: ReturnType<typeof guidedPublicationIssues> = [...guidedPublicationIssues(values), ...(privacyIssue ? [{ step: lastStep, message: privacyIssue }] : [])];
   const published = isInvitationPublished(event);
   const changesSaved = protection.ready && !protection.recovery && !protection.error && !dirty && !saving && !protection.saving && uploads === 0 && (!creation || initiallySaved || protection.lastSaved);
-  const saveLabel = uploads > 0 ? "Subiendo fotografías…" : saving || protection.saving ? "Guardando…" : changesSaved ? "Cambios guardados" : published ? "Guardar cambios" : "Guardar borrador";
-  const saveStatus = !protection.ready ? "Preparando guardado…" : saving || protection.saving ? "Guardando en tu cuenta…" : uploads > 0 ? "Subiendo fotografías…" : changesSaved ? "Guardado en tu cuenta" : protection.local ? "Copia en este dispositivo" : "Cambios pendientes de guardar";
+  const saveLabel = uploads > 0 ? "Subiendo fotografías…" : saving || protection.saving ? published ? "Publicando…" : "Guardando…" : changesSaved ? published ? "Cambios publicados" : "Cambios guardados" : exampleId ? "Guardar diseño" : published ? "Publicar cambios" : "Guardar borrador";
+  const saveAndExitLabel = exampleId ? "Guardar y salir" : published ? "Publicar cambios y salir" : "Guardar borrador y salir";
+  const saveStatus = !protection.ready ? "Preparando guardado…" : saving || protection.saving ? published ? "Publicando cambios…" : "Guardando en tu cuenta…" : uploads > 0 ? "Subiendo fotografías…" : changesSaved ? published ? "Versión publicada al día" : "Guardado en tu cuenta" : protection.local ? "Copia en este dispositivo" : "Cambios pendientes de guardar";
   const date = values.eventDate ? new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${values.eventDate}T12:00:00Z`)) : "Fecha por definir";
   function patch(changes: Partial<EditorValues>) { setNotice(""); setValues(current => ({ ...current, ...changes })); }
   function changeSection(id: string, changes: Partial<InviteSection>) { setNotice(""); setValues(current => ({ ...current, sections: current.sections.map(section => section.id === id ? { ...section, ...changes } : section) })); }
@@ -197,7 +201,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
         if (creation) router.replace(`/dashboard/eventos/${result.eventId}/pago`);
         else router.push(`/dashboard/eventos/${result.eventId}/pago`);
       } else if (creation) router.replace(`/dashboard/eventos/${result.eventId}/show`);
-      else setNotice("Tus cambios están guardados.");
+      else setNotice(exampleId ? "Diseño guardado. Publícalo desde Administración." : published ? "Cambios publicados. Tus invitados ya pueden verlos." : "Tu borrador está guardado. Todavía no se ha publicado.");
     } catch { persistence.reportError("No pudimos completar la operación. Tu borrador sigue protegido; intenta de nuevo."); }
     finally { setSaving(false); }
   }
@@ -217,24 +221,27 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     } finally { exitInFlight.current = false; setSaving(false); }
   }
   async function openPrivatePreview() {
-    if (busy || uploads > 0 || !validateCurrent()) return;
-    // Open during the click so the browser does not block the tab after saving.
-    const preview = window.open('about:blank', '_blank');
-    if (preview) preview.opener = null;
-    setSaving(true);
-    setNotice('');
+    if (busy || uploads > 0 || previewInFlight.current) return;
+    previewInFlight.current = true;
+    let preview: Window | null = null;
+    setPreparingPreview(true); setNotice("");
     try {
-      const result = await persistence.saveNow(false);
-      if (!result.ok) { preview?.close(); return; }
-      const href = exampleId ? `/admin/disenos/${exampleId}/vista-previa` : `/dashboard/eventos/${result.eventId}/show`;
-      if (preview) {
-        if (!preview.closed) preview.location.replace(href);
-        setNotice('Cambios guardados. La vista previa se abrió en otra pestaña.');
-      } else router.push(href);
-    } catch {
+      preview = window.open("about:blank", "_blank");
+      if (preview) preview.opener = null;
+      // Existing invitations are never saved here. New creations only reserve
+      // their draft ID so /show can authenticate ownership and save on request.
+      const id = await ensureEvent();
+      const token = crypto.randomUUID();
+      storeInvitationPreview(window.localStorage, { ownerId: event.ownerId, eventId: id, snapshot,
+        version: persistence.getVersion(), privacyVersion: persistence.getPrivacyVersion(), creationKey: persistence.getCreationKey() }, token);
+      const href = `${exampleId ? `/admin/disenos/${exampleId}/vista-previa` : `/dashboard/eventos/${id}/show`}?preview=${token}`;
+      if (preview && !preview.closed) preview.location.replace(href);
+      else if (!preview) router.push(href);
+    } catch (failure) {
       preview?.close();
-      persistence.reportError('No pudimos preparar la vista previa. Tu borrador sigue protegido; intenta de nuevo.');
-    } finally { setSaving(false); }
+      if (failure instanceof EditorSaveFailure) persistence.acceptFailure(failure.result);
+      else persistence.reportError("No pudimos abrir la vista previa. Tus cambios siguen en el editor; revisa el almacenamiento del navegador e intenta de nuevo.");
+    } finally { previewInFlight.current = false; setPreparingPreview(false); }
   }
   function submit(event: FormEvent) { event.preventDefault(); if (step < lastStep) continueJourney(); else void save(); }
   const uploadBusy = (active: boolean) => setUploads(current => current + (active ? 1 : -1));
@@ -257,7 +264,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
             </div>}
             <div className={styles.saveAndExit}>
               <p className={styles.saveAndExitStatus} role="status" aria-live="polite">{changesSaved && <FiCheck aria-hidden="true" />}{saveStatus}</p>
-              <button className={styles.saveAndExitButton} type="button" disabled={busy || uploads > 0} onClick={() => void saveAndExit()}><FiSave aria-hidden="true" />{saving ? "Guardando…" : "Guardar y salir"}</button>
+              <button className={styles.saveAndExitButton} type="button" disabled={busy || uploads > 0} onClick={() => void saveAndExit()}><FiSave aria-hidden="true" />{saving ? published ? "Publicando…" : "Guardando…" : saveAndExitLabel}</button>
             </div>
             {exampleId && <div className={styles.exampleReturn}>
               <EditorProtectedLink className={styles.exampleReturnLink} guard={confirmNavigation} href={`/admin/disenos/${exampleId}`}>
@@ -269,14 +276,14 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
 
   return <main className={`guided-editor ${styles.workspace}`} data-intro-layout="true" data-example-editor={exampleId ? "true" : undefined} data-short-step={step === 0 || step === 1 || step === 2 || step === 3}>
     {protection.recovery && <EditorRecoveryDialog onRecover={recover} onDiscard={() => persistence.discardRecovery()} />}
-    {navigation.destination && <EditorLeaveDialog onStay={navigation.stay} onLeave={navigation.leave} onSaveAndLeave={() => void saveAndExit(navigation.destination!)} saving={saving} saveDisabled={busy || uploads > 0} uploading={uploads > 0} error={protection.error} />}
+    {navigation.destination && <EditorLeaveDialog onStay={navigation.stay} onLeave={navigation.leave} onSaveAndLeave={() => void saveAndExit(navigation.destination!)} saving={saving} saveDisabled={busy || uploads > 0} uploading={uploads > 0} error={protection.error} saveLabel={saveAndExitLabel} publishesChanges={published} />}
     <DashboardHeader name={account?.name || "Usuario"} email={account?.email || ""} image={account?.image} guard={confirmNavigation} />
     <div className="guided-layout">
       <div className="guided-workspace">
         <div className="guided-heading"><span className="guided-eyebrow">{creation ? "CREA ALGO ESPECIAL" : "TU INVITACIÓN"} · PASO {step + 1} DE {steps.length}</span><h1 ref={heading} tabIndex={-1}>{introTitles[step]}</h1><p>{descriptions[step]}</p>{journeyNavigation}{step === 0 && <div className={styles.introNote}><span><FiCheck aria-hidden="true" /></span><p>Puedes empezar ahora y completar los detalles después.</p></div>}</div>
         <div className={styles.formArea}>
         {protection.localWarning && <p className="guided-alert" role="status">El navegador no permite guardar una copia local. Guarda tu borrador antes de salir.</p>}
-        {(protection.error || error) && <div className="guided-alert" role="alert"><p>{protection.error || (error === "pendientes" ? "Completa los datos principales y los detalles activos antes de continuar al pago." : "Revisa tus datos e intenta guardar de nuevo.")}</p><div>{protection.conflictVersion !== undefined && <><button type="button" disabled={busy || uploads > 0} onClick={() => void save(false, true)}>Guardar mi versión</button><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${persistence.getEventId()}/show`} target="_blank">Revisar versión guardada</EditorProtectedLink></>}{protection.code === "unavailable" && <button type="button" disabled={busy || uploads > 0} onClick={() => void save()}>Reintentar guardado</button>}{protection.code === "auth" && <EditorProtectedLink guard={confirmNavigation} href={signInHref}>Iniciar sesión</EditorProtectedLink>}</div></div>}
+        {(protection.error || error) && <div className="guided-alert" role="alert"><p>{protection.error || (error === "pendientes" ? "Completa los datos principales y los detalles activos antes de continuar al pago." : "Revisa tus datos e intenta guardar de nuevo.")}</p><div>{protection.conflictVersion !== undefined && <><button type="button" disabled={busy || uploads > 0} onClick={() => void save(false, true)}>{published ? "Publicar mi versión" : "Guardar mi versión"}</button><EditorProtectedLink guard={confirmNavigation} href={`/dashboard/eventos/${persistence.getEventId()}/show`} target="_blank">Revisar versión guardada</EditorProtectedLink></>}{protection.code === "unavailable" && <button type="button" disabled={busy || uploads > 0} onClick={() => void save()}>{published ? "Reintentar publicación de cambios" : "Reintentar guardado"}</button>}{protection.code === "auth" && <EditorProtectedLink guard={confirmNavigation} href={signInHref}>Iniciar sesión</EditorProtectedLink>}</div></div>}
         {notice && <p className="guided-notice" role="status">{notice}</p>}
         <form id="guided-invitation-form" ref={form} onSubmit={submit} noValidate className="guided-form" aria-busy={saving}>
           <fieldset disabled={busy} className="guided-fields">
@@ -341,16 +348,17 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
             {step === 3 && <InvitationStyleJourney values={values} step={appearanceStep} onStepChange={goToAppearance} onChange={patch} />}
             {step === lastStep && <>
               <div className={styles.reviewTools}>
-              <button className={styles.reviewPreview} type="button" disabled={busy || uploads > 0} onClick={() => void openPrivatePreview()}><FiEye aria-hidden="true" />{saving ? "Preparando vista previa…" : "Abrir vista previa"}</button>
+              <button className={styles.reviewPreview} type="button" disabled={busy || uploads > 0} onClick={() => void openPrivatePreview()}><FiEye aria-hidden="true" />{preparingPreview ? "Abriendo vista previa…" : "Abrir vista previa"}</button>
               <div className="guided-review-design"><FiCheck aria-hidden="true" /><div><strong>Apariencia</strong><span>{(design.palettes.find(p => p.accent.toLowerCase() === values.accent.toLowerCase())?.label || "Color personalizado")}</span></div><button type="button" aria-label="Ajustar apariencia" onClick={() => goTo(3, "style:colors")}>Ajustar</button></div>
               </div>
+              <p className="guided-help">{exampleId ? "La vista previa muestra tus cambios sin guardarlos. Publica el diseño desde Administración." : published ? "La vista previa muestra tus cambios sin publicarlos. Pulsa «Publicar cambios» para actualizar lo que ven tus invitados." : event.complimentaryAt ? "Guardar borrador conserva tu avance. «Publicar cortesía» activa tu invitación para compartirla." : "Guardar borrador conserva tu avance. Tu invitación se publicará cuando se confirme el pago."}</p>
               <dl className="guided-review">{[["Protagonistas", values.hostNames || "Por definir"], ["Fecha y hora", `${date}${values.eventTime ? ` · ${values.eventTime}` : ""}`], ["Lugar", values.venue || "Por definir"], ["Dirección", values.address || "Por definir"]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}<button type="button" onClick={() => goTo(label === "Protagonistas" ? 0 : 1)} aria-label={`Editar ${label.toLowerCase()}`}>Editar</button></dd></div>)}</dl>
               <section className="guided-included-summary" aria-labelledby="review-sections-title">
                 <div className="guided-included-heading"><h2 id="review-sections-title">Secciones de tu invitación</h2><span role="status">{includedSections.length} {includedSections.length === 1 ? 'sección incluida' : 'secciones incluidas'}</span></div>
                 <p>{includedSections.length ? 'Estas son las secciones que elegiste. Puedes abrir cualquiera para revisarla o hacer un cambio.' : 'Todavía no has incluido secciones. Puedes agregar los detalles que quieras compartir.'}</p>
                 <nav aria-label="Secciones elegidas para la invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.title || extraDetailLabel(section)} aria-label={`Revisar sección: ${section.title || extraDetailLabel(section)}`} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}>{section.title || extraDetailLabel(section)}</button>)}{!includedSections.length && <button type="button" disabled={busy || uploads > 0} onClick={() => goTo(4, '__more')}>Agregar detalles</button>}</nav>
               </section>
-              <div className="guided-checklist"><h2>{issues.length ? "Antes de publicar" : "Todo listo para compartir"}</h2>{issues.length ? <><p>Puedes guardar el borrador ahora. Para publicar, completa lo siguiente:</p><ul>{issues.map(issue => <li key={issue.message}><button type="button" data-target-step={issue.step} data-target-section={issue.sectionId} onClick={() => goTo(issue.step, issue.sectionId)}>{issue.message}<FiArrowRight /></button></li>)}</ul></> : <p>Los datos principales están completos. Revisa la vista previa antes de continuar.</p>}</div>
+              <div className="guided-checklist"><h2>{issues.length ? "Antes de publicar" : "Todo listo para compartir"}</h2>{issues.length ? <><p>{published ? "Revisa estos datos antes de publicar tus cambios:" : "Puedes guardar el borrador ahora. Para publicar, completa lo siguiente:"}</p><ul>{issues.map(issue => <li key={issue.message}><button type="button" data-target-step={issue.step} data-target-section={issue.sectionId} onClick={() => goTo(issue.step, issue.sectionId)}>{issue.message}<FiArrowRight /></button></li>)}</ul></> : <p>Los datos principales están completos. Revisa la vista previa antes de continuar.</p>}</div>
               {!exampleId && <InvitationPrivacyFields privacy={values.privacy ?? "UNSET"} pin={values.pin ?? ""} pinPending={Boolean(values.pinPending)} hasPin={hasPin} disabled={busy || uploads > 0} onChange={patch} />}
               {!exampleId && !creation && granted && <CustomInvitationLinkField eventId={event.id} value={values.customSlug} savedValue={event.customSlug} suggestion={content.slug} onChange={customSlug => patch({ customSlug })} />}
               {!exampleId && !granted && <p className="guided-payment"><FiLock />{priceLabel} MXN · IVA incluido · 12 meses activa. Podrás personalizar y compartir tu enlace cuando se confirme el pago.</p>}
@@ -362,7 +370,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
         </div>
       </div>
     </div>
-    {step >= 4 && <button className="guided-mobile-preview" type="button" disabled={busy || uploads > 0} onClick={() => void openPrivatePreview()} aria-label={saving ? "Preparando vista previa…" : "Abrir vista previa privada"} title="Abrir vista previa privada"><FiEye aria-hidden="true" /></button>}
+    {step >= 4 && <button className="guided-mobile-preview" type="button" disabled={busy || uploads > 0} onClick={() => void openPrivatePreview()} aria-label={preparingPreview ? "Abriendo vista previa…" : "Abrir vista previa privada"} title="Abrir vista previa privada"><FiEye aria-hidden="true" /></button>}
   </main>;
 }
 

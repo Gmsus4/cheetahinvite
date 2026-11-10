@@ -6,6 +6,15 @@ cerrar la recepción de respuestas; las ya recibidas siguen visibles para el
 organizador. La opción de enlace externo o WhatsApp se conserva. Las secciones
 anteriores sin modo explícito siguen usando su enlace externo.
 
+Para confirmar por WhatsApp, ingresa el teléfono con clave de país y un mensaje
+opcional de hasta 200 caracteres. El editor genera el enlace automáticamente;
+la clave se muestra separada, con +52 por defecto, y el campo del número acepta
+solo dígitos. Para México se requieren 10 dígitos para generar el enlace;
+el invitado verá el mensaje listo para enviar. Los enlaces anteriores de
+`wa.me` y de `api.whatsapp.com/send` se muestran como teléfono y mensaje al
+editarlos. También puedes elegir **Otro enlace de confirmación**. Un teléfono
+incompleto se conserva en el borrador, sin generar un botón de WhatsApp.
+
 El formulario pide nombre y apellido, permite elegir Sí asistiré / No asistiré y
 ofrece un botón Acompañantes para indicar de cero a cinco personas adicionales.
 El máximo por respuesta afirmativa es seis asistentes contando al principal.

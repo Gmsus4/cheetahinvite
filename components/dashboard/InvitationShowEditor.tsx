@@ -8,6 +8,7 @@ import { atmosphereStyle } from "@/lib/invitation-atmosphere";
 import { availableGuidedSections, changeGuidedEventType, guidedDetails, initialGuidedValues } from "@/lib/guided-invitation";
 import { getInvitationEventContent, invitationEventTypes } from "@/lib/invitation-event-content";
 import { editorFormData, type EditorValues, type EventData, type InvitationEditTarget, type InviteSection } from "@/lib/invitation-editor";
+import { isInvitationPublished } from "@/lib/invitation-payment";
 import { sharedInvitationDesign } from "@/lib/shared-invitation";
 import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
 import { EditorLeaveDialog } from "./EditorLeaveDialog";
@@ -27,8 +28,10 @@ import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
 import { useEditorProtection } from "./useEditorProtection";
 import styles from "./InvitationShowEditor.module.css";
 
-export function InvitationShowEditor({ event, returnLink }: { event: EventData; returnLink: { href: string; title: string; label: string } }) {
-  const [values, setValues] = useState(() => initialGuidedValues(event));
+export function InvitationShowEditor({ event, returnLink, initialChanges, onSaved }: { event: EventData; returnLink: { href: string; title: string; label: string }; initialChanges?: { snapshot: string; version: number; privacyVersion?: number; sessionId?: string }; onSaved?(snapshot: string, version: number, privacyVersion?: number): void }) {
+  const savedValues = initialGuidedValues(event);
+  const incomingValues = initialChanges ? { ...JSON.parse(initialChanges.snapshot) as EditorValues, customSlug: savedValues.customSlug } : savedValues;
+  const [values, setValues] = useState<EditorValues>(() => incomingValues);
   const [target, setTarget] = useState<InvitationEditTarget | null>(null);
   const [uploads, setUploads] = useState(0);
   const [pending, startTransition] = useTransition();
@@ -36,7 +39,8 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
   const snapshot = JSON.stringify(values);
   const wizard = { step: 0, activeExtra: null };
   const { controller, state, confirmNavigation, navigation } = useEditorProtection({
-    ownerId: event.ownerId, eventId: event.id, snapshot, version: event.contentVersion, privacyVersion: event.privacyVersion ?? 0, creation: false, manualOnly: true,
+    ownerId: event.ownerId, eventId: event.id, snapshot: JSON.stringify(savedValues), version: event.contentVersion, privacyVersion: event.privacyVersion ?? 0, creation: false, manualOnly: true,
+    initialChanges: initialChanges ? { ...initialChanges, snapshot: JSON.stringify(incomingValues) } : undefined,
     save: async (submitted, version) => {
       const data = editorFormData(submitted, version);
       data.delete("customSlug");
@@ -54,6 +58,9 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
   const busy = pending || state.saving || uploads > 0;
   const editingDisabled = busy || !state.ready || Boolean(state.recovery);
   const dirty = snapshot !== state.acknowledged || state.code === "conflict";
+  const published = isInvitationPublished(event);
+  const saveLabel = published ? "Publicar cambios" : event.isExample ? "Guardar diseño" : "Guardar borrador";
+  const savingLabel = published ? "Publicando…" : "Guardando…";
   const availableSections = availableGuidedSections(values.eventType, values.sections);
   const locationSection = values.sections.find(item => item.type === "location");
   const countdownSection = values.sections.find(item => item.type === "countdown");
@@ -95,10 +102,11 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
     if (editingDisabled) return;
     startTransition(async () => {
       controller.update(snapshot, false, wizard, true);
-      const result = await controller.saveNow(false, overwrite ? state.conflictVersion : undefined);
+      const result = await controller.saveNow(false, overwrite ? state.conflictVersion : undefined, overwrite ? state.conflictPrivacyVersion : undefined);
       if (!result.ok) return;
+      onSaved?.(controller.getSnapshot().acknowledged, result.version, result.privacyVersion);
       setTarget(null);
-      setNotice("Cambios guardados");
+      setNotice(published ? "Cambios publicados. Tus invitados ya pueden verlos." : event.isExample ? "Diseño guardado" : "Borrador guardado. Todavía no se ha publicado.");
     });
   }
 
@@ -111,7 +119,7 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
         <button type="button" onClick={() => open({ kind: "background" })} aria-haspopup="dialog" aria-expanded={target?.kind === "background"} title="Foto de fondo"><FiImage aria-hidden="true" /><span>Fondo</span></button>
         <button type="button" onClick={() => open({ kind: "appearance" })} aria-haspopup="dialog" aria-expanded={target?.kind === "appearance"} title="Apariencia"><FiSliders aria-hidden="true" /><span>Apariencia</span></button>
         <button type="button" onClick={() => open({ kind: "add-section" })} aria-label="Agregar secciones" aria-haspopup="dialog" aria-expanded={target?.kind === "add-section"} disabled={!availableSections.length || busy || !state.ready || Boolean(state.recovery)} title={availableSections.length ? "Agregar secciones" : "Todas las secciones están incluidas"}><FiPlus aria-hidden="true" /><span>{availableSections.length ? "Agregar secciones" : "Todas las secciones están incluidas"}</span></button>
-        <button type="button" className={styles.toolbarSave} onClick={() => save()} disabled={editingDisabled || !dirty} aria-label={pending || state.saving ? "Guardando cambios" : "Guardar cambios"} aria-busy={pending || state.saving} title={pending || state.saving ? "Guardando cambios…" : dirty ? "Guardar cambios" : "Sin cambios pendientes"}><FiSave aria-hidden="true" /><span>{pending || state.saving ? "Guardando…" : "Guardar cambios"}</span></button>
+        <button type="button" className={styles.toolbarSave} onClick={() => save()} disabled={editingDisabled || !dirty} aria-label={pending || state.saving ? savingLabel : saveLabel} aria-busy={pending || state.saving} title={pending || state.saving ? savingLabel : dirty ? saveLabel : "Sin cambios pendientes"}><FiSave aria-hidden="true" /><span>{pending || state.saving ? savingLabel : saveLabel}</span></button>
       </div>
     </nav>
     <CelebrationInvitation {...values} date={date} eventDateKey={values.eventDate} onEdit={open}
@@ -120,10 +128,10 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
     />
     <div className={styles.notice} role="status">{notice && <><FiCheck aria-hidden="true" />{notice}</>}</div>
     {!target && state.error && <div className={`${styles.error} ${styles.saveError}`} role="alert"><p>{state.error}</p>
-      {state.conflictVersion !== undefined && <button type="button" disabled={editingDisabled} onClick={() => save(true)}>Guardar mi versión</button>}
+      {state.conflictVersion !== undefined && <button type="button" disabled={editingDisabled} onClick={() => save(true)}>{published ? "Publicar mi versión" : "Guardar mi versión"}</button>}
       {state.code === "auth" && <EditorProtectedLink guard={confirmNavigation} href={`/login?callbackUrl=${encodeURIComponent(`/dashboard/eventos/${event.id}/show`)}`}>Iniciar sesión</EditorProtectedLink>}
     </div>}
-    {target && <EditDialog key={target.kind} selectionOnly={target.kind === "add-section"} title={label} busy={busy} uploading={uploads > 0} onCancel={cancel} onSave={() => save()}>
+    {target && <EditDialog key={target.kind} selectionOnly={target.kind === "add-section"} title={label} busy={busy} uploading={uploads > 0} saveLabel={saveLabel} savingLabel={savingLabel} published={published} onCancel={cancel} onSave={() => save()}>
       <fieldset className={styles.fields} disabled={busy}>
         {target.kind === "add-section" && <>
           <p className={styles.sectionIntro}>Elige una sección para agregarla y completar su información.</p>
@@ -180,7 +188,7 @@ export function InvitationShowEditor({ event, returnLink }: { event: EventData; 
         {section && target.kind === "section-alignment" && <SectionTextAlignmentFields section={section} onChange={changeSection} />}
       </fieldset>
       {state.error && <div className={styles.error} role="alert"><p>{state.error}</p>
-        {state.conflictVersion !== undefined && <button type="button" disabled={busy} onClick={() => save(true)}>Guardar mi versión</button>}
+        {state.conflictVersion !== undefined && <button type="button" disabled={busy} onClick={() => save(true)}>{published ? "Publicar mi versión" : "Guardar mi versión"}</button>}
         {state.code === "auth" && <EditorProtectedLink guard={confirmNavigation} href={`/login?callbackUrl=${encodeURIComponent(`/dashboard/eventos/${event.id}/show`)}`}>Iniciar sesión</EditorProtectedLink>}
       </div>}
     </EditDialog>}
@@ -212,7 +220,7 @@ function DateFields({ values, patch }: { values: EditorValues; patch(changes: Pa
   </div>;
 }
 
-function EditDialog({ title, busy, uploading, onCancel, onSave, children, selectionOnly = false }: { title: string; busy: boolean; uploading: boolean; onCancel(): void; onSave(): void; children: ReactNode; selectionOnly?: boolean }) {
+function EditDialog({ title, busy, uploading, onCancel, onSave, children, selectionOnly = false, saveLabel, savingLabel, published }: { title: string; busy: boolean; uploading: boolean; onCancel(): void; onSave(): void; children: ReactNode; selectionOnly?: boolean; saveLabel: string; savingLabel: string; published: boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const dialog = ref.current;
@@ -223,9 +231,9 @@ function EditDialog({ title, busy, uploading, onCancel, onSave, children, select
   }, []);
   return <dialog ref={ref} className={styles.dialog} aria-labelledby="show-edit-title" aria-describedby="show-edit-description" onCancel={event => { event.preventDefault(); onCancel(); }}>
     <form onSubmit={event => { event.preventDefault(); if (!busy && !selectionOnly) onSave(); }}>
-      <header className={styles.dialogHeader}><div className={styles.dialogHeading}><span className={styles.dialogIcon} aria-hidden="true">{selectionOnly ? <FiPlus /> : <FiEdit3 />}</span><div><span className={styles.eyebrow}>EDITAR INVITACIÓN</span><h2 id="show-edit-title">{title}</h2><p id="show-edit-description">Personaliza este apartado sin salir de la vista previa.</p></div></div><button type="button" aria-label="Cerrar edición" disabled={busy} onClick={onCancel}><FiX aria-hidden="true" /></button></header>
+      <header className={styles.dialogHeader}><div className={styles.dialogHeading}><span className={styles.dialogIcon} aria-hidden="true">{selectionOnly ? <FiPlus /> : <FiEdit3 />}</span><div><span className={styles.eyebrow}>EDITAR INVITACIÓN</span><h2 id="show-edit-title">{title}</h2><p id="show-edit-description">{published ? "Tus cambios solo serán visibles para los invitados al pulsar «Publicar cambios»." : "Personaliza este apartado y guarda cuando termines de revisar."}</p></div></div><button type="button" aria-label="Cerrar edición" disabled={busy} onClick={onCancel}><FiX aria-hidden="true" /></button></header>
       <div className={styles.dialogBody}>{children}</div>
-      <footer className={styles.dialogFooter}><button type="button" disabled={busy} onClick={onCancel}>{selectionOnly ? "Cerrar" : "Cancelar"}</button>{!selectionOnly && <button type="submit" className={styles.save} disabled={busy}><FiSave aria-hidden="true" />{uploading ? "Subiendo fotografías…" : busy ? "Guardando…" : "Guardar cambios"}</button>}</footer>
+      <footer className={styles.dialogFooter}><button type="button" disabled={busy} onClick={onCancel}>{selectionOnly ? "Cerrar" : "Cancelar"}</button>{!selectionOnly && <button type="submit" className={styles.save} disabled={busy}><FiSave aria-hidden="true" />{uploading ? "Subiendo fotografías…" : busy ? savingLabel : saveLabel}</button>}</footer>
     </form>
   </dialog>;
 }

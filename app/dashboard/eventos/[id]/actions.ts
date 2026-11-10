@@ -317,7 +317,9 @@ function isValidSection(value: unknown): value is {
   if (section.showIcon !== undefined && typeof section.showIcon !== "boolean") return false;
   if (section.titleCustomized !== undefined && typeof section.titleCustomized !== "boolean") return false;
   if (section.rsvpMode !== undefined && (section.type !== "rsvp" || !["external", "integrated"].includes(section.rsvpMode as string))) return false;
-  if ((section.id as string).length > 80 || (section.title as string).length > 100 || (section.content as string).length > 2000 || (section.detail as string).length > 240 || (section.link as string).length > 500 || (section.imageUrl as string).length > 1000) return false;
+  if ((section.id as string).length > 80 || (section.title as string).length > 100 || (section.content as string).length > 2000 || (section.detail as string).length > 240 || (section.link as string).length > (section.type === "rsvp" ? 3000 : 500) || (section.imageUrl as string).length > 1000) return false;
+  if (section.whatsappPhone !== undefined && (section.type !== "rsvp" || typeof section.whatsappPhone !== "string" || section.whatsappPhone.length > 40)) return false;
+  if (section.whatsappMessage !== undefined && (section.type !== "rsvp" || typeof section.whatsappMessage !== "string" || section.whatsappMessage.length > 200)) return false;
   if (section.layout !== undefined && !["auto", "split", "centered", "card"].includes(section.layout as string)) return false;
   if (section.textAlign !== undefined && !["auto", "left", "center", "right"].includes(section.textAlign as string)) return false;
   if (section.desktopImageFocus !== undefined && !isMobileImageFocus(section.desktopImageFocus)) return false;

@@ -4,36 +4,39 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { BrandLoader } from "@/components/BrandLoader";
 import { auth } from "@/auth";
-import { InvitationShowEditor } from "@/components/dashboard/InvitationShowEditor";
+import { InvitationPreviewSession } from "@/components/dashboard/InvitationPreviewSession";
+import { validCreationKey } from "@/lib/invitation-editor";
 import { prisma } from "@/prisma";
 import { canEditInvitation } from "@/lib/invitation-lifecycle";
 
 export const metadata: Metadata = { title: "Vista previa privada | Cheetah Invite" };
 
-type ShowPageProps = Pick<PageProps<"/dashboard/eventos/[id]/show">, "params">;
+type ShowPageProps = PageProps<"/dashboard/eventos/[id]/show">;
 
-export default function ShowInvitationPage({ params }: ShowPageProps) {
+export default function ShowInvitationPage(props: ShowPageProps) {
   return <Suspense fallback={<BrandLoader message="Preparando la vista previa…" />}>
-    <ShowInvitationData params={params} />
+    <ShowInvitationData {...props} />
   </Suspense>;
 }
 
-async function ShowInvitationData({ params }: ShowPageProps) {
+async function ShowInvitationData({ params, searchParams }: ShowPageProps) {
   const { id } = await params;
   await connection();
+  const query = await searchParams;
+  const previewToken = typeof query.preview === "string" && validCreationKey(query.preview) ? query.preview : undefined;
   const session = await auth();
-  if (!session?.user?.id) redirect(`/login?callbackUrl=${encodeURIComponent(`/dashboard/eventos/${id}/show`)}`);
+  if (!session?.user?.id) redirect(`/login?callbackUrl=${encodeURIComponent(`/dashboard/eventos/${id}/show${previewToken ? `?preview=${previewToken}` : ""}`)}`);
 
   const event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id }, omit: { pinHash: true } });
   if (!event) notFound();
   if (!canEditInvitation(event)) redirect(`/dashboard/eventos/${id}/pago`);
   if (event.isExample) {
     const example = await prisma.showcaseExample.findUnique({ where: { eventId: id } });
-    if (example) redirect(`/admin/disenos/${example.id}/vista-previa`);
+    if (example) redirect(`/admin/disenos/${example.id}/vista-previa${previewToken ? `?preview=${previewToken}` : ""}`);
     notFound();
   }
 
   return <main className="public-invitation-page">
-    <InvitationShowEditor key={`invitation:${event.id}`} event={event} returnLink={{ href: `/dashboard/eventos/${event.id}`, title: "Volver al editor completo", label: "Editor completo" }} />
+    <InvitationPreviewSession key={`invitation:${event.id}:${previewToken ?? "saved"}`} event={event} previewToken={previewToken} returnLink={{ href: `/dashboard/eventos/${event.id}`, title: "Volver al editor completo", label: "Editor completo" }} />
   </main>;
 }

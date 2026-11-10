@@ -27,12 +27,14 @@ function text(node) {
   return node && typeof node === 'object' ? text(node.props?.children) : '';
 }
 
-function editor(t, { creation = true, exampleId, privacy = 'PUBLIC', privacyVersion = 0 } = {}) {
+function editor(t, { creation = true, exampleId, privacy = 'PUBLIC', privacyVersion = 0, published = false, mobile = false } = {}) {
   const db = createFixture();
   const { EditorPersistence } = db.load('lib/editor-persistence.ts');
-  const f = { db, states: [], refs: [], routes: [], storage: new MemoryStorage(), destination: null, online: true, saveCalls: 0, pending: [], publications: 0 };
+  const f = { db, states: [], refs: [], routes: [], windows: [], storage: new MemoryStorage(), destination: null, online: true, saveCalls: 0, pending: [], publications: 0 };
   const event = { ...db.state.events.get('event'), id: creation ? '' : 'event', eventType: 'wedding', accent: '#E9560A',
-    name: 'Mi celebración', contentVersion: 0, eventDate: null, eventTime: null, paidAt: null, expiresAt: null, privacy, privacyVersion };
+    name: 'Mi celebración', contentVersion: 0, eventDate: null, eventTime: null, typography: 'default', bodyTypography: 'inter', templateId: 'none', texture: 'none',
+    paidAt: published ? new Date() : null, expiresAt: published ? new Date('2099-01-01') : null,
+    status: published ? 'PUBLISHED' : 'DRAFT', slug: published ? 'mi-celebracion' : null, privacy, privacyVersion };
   Object.assign(db.state.events.get('event'), event, { id: 'event' });
   f.event = event;
   let stateIndex = 0, refIndex = 0;
@@ -69,7 +71,8 @@ function editor(t, { creation = true, exampleId, privacy = 'PUBLIC', privacyVers
     return require(name);
   }
   new Function('require', 'module', 'exports', 'window', compiled)(requireMock, { exports }, exports,
-    { scrollTo() {}, matchMedia: () => ({ matches: true }) });
+    { scrollTo() {}, matchMedia: query => ({ matches: query === '(max-width: 600px)' ? mobile : true }), localStorage: f.storage,
+      open() { if (f.blockPopup) return null; const preview = { closed: false, location: { replace(href) { preview.href = href; } }, close() { preview.closed = true; } }; f.windows.push(preview); return preview; } });
   f.render = () => {
     // The real useSyncExternalStore rerenders when the update effect writes a backup.
     for (let render = 0; render < 2; render++) {
@@ -86,6 +89,108 @@ function editor(t, { creation = true, exampleId, privacy = 'PUBLIC', privacyVers
   t.after(() => f.controller.stop());
   return f;
 }
+
+test('previewing a new invitation opens the original /show editor with its unsaved values and reserves only a draft', async t => {
+  for (const mobile of [false, true]) {
+    const f = editor(t, { mobile }); f.states[1] = mobile ? 4 : 5;
+    f.changeName('Nombre solo en edición');
+    const initialVersion = f.controller.getSnapshot().acknowledged;
+    const [previewButton] = nodes(f.view, node => node.type === 'button' && (mobile
+      ? node.props.className === 'guided-mobile-preview' : node.props.className === 'reviewPreview'));
+    previewButton.props.onClick(); await f.flush();
+    const id = f.controller.getEventId();
+    const url = new URL(f.windows[0].href, 'https://example.invalid');
+    assert.equal(url.pathname, `/dashboard/eventos/${id}/show`);
+    const { invitationPreviewKey, parseInvitationPreview } = f.db.load('lib/invitation-preview.ts');
+    const preview = parseInvitationPreview(f.storage.getItem(invitationPreviewKey('owner', id, url.searchParams.get('preview'))), 'owner', id);
+    assert.equal(JSON.parse(preview.snapshot).name, 'Nombre solo en edición');
+    assert.equal(f.saveCalls, 0); assert.equal(f.publications, 0);
+    assert.equal(f.db.state.events.get(id).status, 'DRAFT');
+    assert.equal(f.db.state.events.get(id).contentVersion, 0);
+    assert.equal(f.db.state.events.size, 2);
+    assert.equal(f.controller.getSnapshot().acknowledged, initialVersion);
+    assert.equal(nodes(f.view, node => node.props?.expanded && node.props.fitViewport).length, 0);
+    assert.equal(f.states[0].name, 'Nombre solo en edición'); assert.equal(f.states[1], mobile ? 4 : 5);
+  }
+});
+
+test('previewing a published invitation leaves public content, privacy, PIN and guest sessions untouched', async t => {
+  const f = editor(t, { creation: false, published: true }); f.states[1] = 5;
+  f.db.state.accessSessions.set('guest', { tokenHash: 'guest', eventId: 'event' });
+  const publicBefore = structuredClone(f.db.state.events.get('event'));
+  f.states[0] = { ...f.states[0], name: 'Prueba sin publicar', venue: 'Otra dirección', privacy: 'PRIVATE', pin: '123456', pinPending: true };
+  f.render();
+  const [previewButton] = nodes(f.view, node => node.props?.className === 'reviewPreview');
+  previewButton.props.onClick(); await f.flush();
+  const url = new URL(f.windows[0].href, 'https://example.invalid');
+  assert.equal(url.pathname, '/dashboard/eventos/event/show');
+  const { invitationPreviewKey, parseInvitationPreview } = f.db.load('lib/invitation-preview.ts');
+  const record = parseInvitationPreview(f.storage.getItem(invitationPreviewKey('owner', 'event', url.searchParams.get('preview'))), 'owner', 'event');
+  assert.equal(JSON.parse(record.snapshot).name, 'Prueba sin publicar');
+  assert.equal(JSON.parse(record.snapshot).venue, 'Otra dirección');
+  assert.equal(JSON.parse(record.snapshot).privacy, undefined);
+  assert.deepEqual(f.db.state.events.get('event'), publicBefore);
+  assert.equal(f.db.state.accessSessions.size, 1);
+  assert.equal(f.saveCalls, 0); assert.equal(f.publications, 0); assert.deepEqual(f.routes, []);
+  assert.equal(f.controller.shouldWarn(), true);
+  assert.equal(JSON.stringify([...f.storage.data]).includes('123456'), false);
+});
+
+test('an incomplete draft can be previewed without triggering validation, payment or a save error', async t => {
+  const f = editor(t, { creation: false, privacy: 'UNSET' }); f.states[1] = 5;
+  f.states[0] = { ...f.states[0], name: '', privacy: 'PRIVATE', pin: '123', pinPending: true }; f.render();
+  f.refs[0].current = { querySelector() { throw new Error('Preview must allow incomplete data'); } };
+  nodes(f.view, node => node.props?.className === 'reviewPreview')[0].props.onClick(); await f.flush();
+  assert.match(f.windows[0].href, /^\/dashboard\/eventos\/event\/show\?preview=/);
+  assert.equal(f.controller.getSnapshot().error, ''); assert.equal(f.saveCalls, 0); assert.equal(f.publications, 0);
+});
+
+test('blocked popups use /show in the same tab without saving published content', async t => {
+  const f = editor(t, { creation: false, published: true }); f.blockPopup = true; f.states[1] = 5; f.changeName('Sin publicar');
+  nodes(f.view, node => node.props?.className === 'reviewPreview')[0].props.onClick(); await f.flush();
+  assert.equal(f.routes[0][0], 'push'); assert.match(f.routes[0][1], /^\/dashboard\/eventos\/event\/show\?preview=/);
+  assert.equal(f.db.state.events.get('event').name, 'Mi celebración'); assert.equal(f.saveCalls, 0);
+});
+
+test('unavailable preview storage retains changes and never falls back to saving the public invitation', async t => {
+  const f = editor(t, { creation: false, published: true }); f.states[1] = 5; f.changeName('Sin perder');
+  f.storage.setItem = () => { throw Error('Storage unavailable'); };
+  nodes(f.view, node => node.props?.className === 'reviewPreview')[0].props.onClick(); await f.flush();
+  assert.equal(f.windows[0].closed, true); assert.deepEqual(f.routes, []); assert.equal(f.saveCalls, 0);
+  assert.equal(f.states[0].name, 'Sin perder'); assert.equal(f.controller.getSnapshot().code, 'unavailable');
+});
+
+test('an expired creation session closes the preview tab and keeps the sign-in recovery action', async t => {
+  const f = editor(t); f.states[1] = 5; f.changeName('Sin perder'); f.db.owner = null;
+  nodes(f.view, node => node.props?.className === 'reviewPreview')[0].props.onClick(); await f.flush();
+  assert.equal(f.windows[0].closed, true); assert.deepEqual(f.routes, []); assert.equal(f.saveCalls, 0);
+  assert.equal(f.controller.getSnapshot().code, 'auth'); assert.equal(f.states[0].name, 'Sin perder');
+});
+
+test('draft and live edit actions clearly distinguish saving from publishing', async t => {
+  const draft = editor(t); draft.states[1] = 5; draft.changeName('Un borrador');
+  assert.equal(text(draft.button()), 'Guardar borrador y salir');
+  assert.ok(nodes(draft.view, node => node.props?.['aria-label'] === 'Guardar borrador')[0]);
+  await draft.click();
+  assert.equal(draft.db.state.events.get(draft.controller.getEventId()).status, 'DRAFT');
+  const live = editor(t, { creation: false, published: true }); live.states[1] = 5; live.changeName('Versión nueva');
+  assert.equal(text(live.button()), 'Publicar cambios y salir');
+  const [publish] = nodes(live.view, node => node.props?.['aria-label'] === 'Publicar cambios');
+  assert.ok(publish); live.refs[0].current = { reportValidity: () => true };
+  publish.props.onClick(); await live.flush();
+  assert.equal(live.db.state.events.get('event').name, 'Versión nueva');
+  assert.equal(live.db.state.events.get('event').status, 'PUBLISHED');
+  assert.equal(live.saveCalls, 1); assert.equal(live.publications, 0);
+  assert.match(text(live.view), /Tus invitados ya pueden verlos/);
+});
+
+test('a published edit leave dialog explicitly identifies the public update', t => {
+  const f = editor(t, { creation: false, published: true });
+  f.changeName('Cambio pendiente'); f.destination = '/dashboard'; f.render();
+  const [dialog] = nodes(f.view, node => node.props?.onSaveAndLeave);
+  assert.equal(dialog.props.saveLabel, 'Publicar cambios y salir');
+  assert.equal(dialog.props.publishesChanges, true);
+});
 
 test('every step saves an incomplete creation in the account and returns to the dashboard without payment', async t => {
   for (let step = 0; step < 6; step++) {
