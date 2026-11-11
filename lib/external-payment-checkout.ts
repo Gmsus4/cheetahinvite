@@ -6,7 +6,7 @@ import { getCurrentPrice } from "@/lib/site-pricing";
 import { eventPublicationIssues } from "@/lib/guided-invitation";
 import { canRenewInvitation, invitationLifecycle } from "@/lib/invitation-lifecycle";
 import { mercadoPagoRequest, paypalRequest, providerLiveMode, paymentCheckoutOrigin, type PaymentProvider } from "@/lib/payment-providers";
-import { isMercadoPagoOrderId, validateMercadoPagoOrder } from "@/lib/mercadopago-orders";
+import { isMercadoPagoOrderId, validateMercadoPagoOrder, mercadoPagoOrderPaidAmount } from "@/lib/mercadopago-orders";
 
 export async function prepareExternalCheckout(eventId: string, ownerId: string, provider: Exclude<PaymentProvider, "stripe">) {
   const price = await getCurrentPrice();
@@ -49,14 +49,14 @@ export async function prepareExternalCheckout(eventId: string, ownerId: string, 
       } else if (isMercadoPagoOrderId(remoteId)) {
         let order = await mercadoPagoRequest(`/v1/orders/${encodeURIComponent(remoteId)}`);
         validateMercadoPagoOrder(order, remoteId, payment);
-        if (!["created", "canceled"].includes(order.status) || Number(order.total_paid_amount) > 0) return received;
+        if (!["created", "canceled"].includes(order.status) || mercadoPagoOrderPaidAmount(order) > 0) return received;
         if (order.status === "created") {
           // A concurrent payment may win the cancellation race. Never issue a
           // replacement unless a fresh provider read proves the old one closed.
           await mercadoPagoRequest(`/v1/orders/${encodeURIComponent(remoteId)}/cancel`, {}, undefined, randomUUID());
           order = await mercadoPagoRequest(`/v1/orders/${encodeURIComponent(remoteId)}`);
           validateMercadoPagoOrder(order, remoteId, payment);
-          if (order.status !== "canceled" || Number(order.total_paid_amount) > 0) return received;
+          if (order.status !== "canceled" || mercadoPagoOrderPaidAmount(order) > 0) return received;
         }
       } else {
         const hasPaymentInProgress = async () => {

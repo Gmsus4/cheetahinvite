@@ -74,12 +74,28 @@ test('Mercado Pago Orders validates the stored order, reference, amount, currenc
     { currency: 'USD' }, { live_mode: true }, { type: 'point' }, { processing_mode: 'automatic' },
     { transactions: { payments: [{ id: 'PAYOTHER', status: 'processed', amount: '1.00' }] } },
     { transactions: { payments: [{ id: 'PAYOTHER', status: 'processed', amount: '499.00', paid_amount: '1.00' }] } },
+    { total_paid_amount: undefined },
   ]) {
     const f = mpOrderFixture();
     await withFetch(async () => ({ ...mpOrder(), ...mismatch }), async () => {
       await assert.rejects(f.reconcile('payment-fixture'));
       assert.equal(f.events.get('event-fixture').paidAt, null);
     });
+  }
+});
+
+test('Mercado Pago requires an explicit paid total once a transaction exists', () => {
+  const f = createPaymentFixture();
+  const { mercadoPagoOrderPaidAmount } = f.load('lib/mercadopago-orders.ts');
+  for (const status of ['created', 'canceled']) {
+    const remote = { ...mpOrder('created'), status }; delete remote.total_paid_amount;
+    assert.equal(mercadoPagoOrderPaidAmount(remote), 0);
+    remote.transactions.payments.push({ id: 'PAY01FIXTURE', status: 'processing', amount: '499.00' });
+    assert.throws(() => mercadoPagoOrderPaidAmount(remote), /Invalid payment amount/);
+  }
+  for (const status of ['processed', 'processing', 'refunded', 'charged_back']) {
+    const remote = { ...mpOrder(), status }; delete remote.total_paid_amount;
+    assert.throws(() => mercadoPagoOrderPaidAmount(remote), /Invalid payment amount/);
   }
 });
 
@@ -390,7 +406,11 @@ test('external checkout serializes concurrent creation and reuses the original q
     assert.deepEqual(data.config.payment_method.not_allowed_types, ['ticket', 'atm']);
     assert.equal(data.config.online.retries.allowed, false); assert.equal(data.payer, undefined);
     assert.match(data.expiration_time, /^PT\d+S$/);
-    return { ...mpOrder('created'), external_reference: data.external_reference, total_amount: data.total_amount, checkout_url: 'https://www.mercadopago.com.mx/checkout/fixture' };
+    // Real POST /v1/orders responses omit total_paid_amount and transactions
+    // before the buyer has attempted a payment.
+    const order = { ...mpOrder('created'), external_reference: data.external_reference, total_amount: data.total_amount, checkout_url: 'https://www.mercadopago.com.mx/checkout/fixture' };
+    delete order.total_paid_amount; delete order.transactions;
+    return order;
   }, async () => {
     const { prepareExternalCheckout } = f.load('lib/external-payment-checkout.ts');
     const urls = await Promise.all([prepareExternalCheckout('event-fixture', f.ownerId, 'mercadopago'), prepareExternalCheckout('event-fixture', f.ownerId, 'mercadopago')]);

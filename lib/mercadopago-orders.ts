@@ -5,7 +5,7 @@ type OrderTransaction = {
 };
 export type MercadoPagoOrder = {
   id: string; type: string; processing_mode: string; external_reference: string;
-  status: string; status_detail: string; total_amount: string; total_paid_amount: string;
+  status: string; status_detail: string; total_amount: string; total_paid_amount?: string;
   currency: string; live_mode?: boolean; created_date: string;
   transactions?: {
     payments?: OrderTransaction[];
@@ -19,6 +19,14 @@ export function isMercadoPagoOrderId(id: string) {
   return /^ORD[A-Z0-9]+$/.test(id);
 }
 
+export function mercadoPagoOrderPaidAmount(order: MercadoPagoOrder) {
+  // A newly created Checkout Pro order can omit this field entirely. That
+  // absence proves zero only before any payment transaction exists.
+  if (order.total_paid_amount === undefined && ["created", "canceled"].includes(order.status)
+    && !(order.transactions?.payments?.length)) return 0;
+  return minorUnits(order.total_paid_amount);
+}
+
 export function validateMercadoPagoOrder(order: MercadoPagoOrder, id: string, payment: {
   id: string; amount: number; currency: string; livemode: boolean;
 }) {
@@ -27,7 +35,7 @@ export function validateMercadoPagoOrder(order: MercadoPagoOrder, id: string, pa
   if (!isMercadoPagoOrderId(id) || order.id !== id || order.external_reference !== payment.id
     || order.type !== "online" || order.processing_mode !== "manual" || live !== payment.livemode
     || order.currency?.toLowerCase() !== payment.currency || minorUnits(order.total_amount) !== payment.amount
-    || minorUnits(order.total_paid_amount) > payment.amount) {
+    || mercadoPagoOrderPaidAmount(order) > payment.amount) {
     throw new Error("Mercado Pago order purchase mismatch");
   }
 }
