@@ -594,3 +594,37 @@ test('privacy revisions advance with saves and an explicit conflict decision upd
   assert.deepEqual(calls, [[0, 2], [1, 3], [1, 8]]);
   assert.equal(f.controller.getSnapshot().conflictPrivacyVersion, undefined);
 });
+
+
+test('canceling a dialog preserves previous pending edits, their backup and save warning', async t => {
+  const { controller: c, storage, calls } = setup(t, { manualOnly: true });
+  const beforeDialog = JSON.parse(values('Cambio anterior'));
+  beforeDialog.sections = [{ id: 'story', type: 'story', enabled: true, textAlign: 'right' }];
+  const previous = JSON.stringify(beforeDialog);
+  c.update(previous, false, { step: 0, activeExtra: null }, true);
+  c.update(JSON.stringify({ ...beforeDialog, venue: 'Cambio dentro del cuadro' }), false, { step: 0, activeExtra: null }, true);
+  assert.equal(c.discardChanges(previous), true);
+  assert.equal(c.shouldWarn(), true);
+  assert.equal(c.getSnapshot().acknowledged, values('Inicial'));
+  assert.equal(storage.length, 1);
+  assert.equal(JSON.parse([...storage.data.values()][0]).snapshot, previous);
+  assert.equal(calls.length, 0);
+  await c.saveNow();
+  assert.equal(calls[0].snapshot, previous);
+});
+
+test('canceling to a pending snapshot preserves a conflict and guards saves in flight', async t => {
+  let complete;
+  const { controller: c } = setup(t, { manualOnly: true, save: () => new Promise(resolve => { complete = resolve; }) });
+  const previous = values('Edición previa');
+  c.update(values('Cambio del cuadro'), false, { step: 0, activeExtra: null }, true);
+  c.acceptFailure({ ok: false, code: 'conflict', message: 'Otra versión', version: 7 });
+  assert.equal(c.discardChanges(previous), true);
+  assert.equal(c.getSnapshot().code, 'conflict');
+  assert.equal(c.getSnapshot().conflictVersion, 7);
+  const saving = c.saveNow(false, 7);
+  await flush();
+  assert.equal(c.discardChanges(values('Inicial')), false);
+  complete({ ok: true, eventId: 'event', version: 8 });
+  await saving;
+});

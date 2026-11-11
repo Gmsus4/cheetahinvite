@@ -8,14 +8,15 @@ import { connection } from "next/server";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
-import { getStripe, stripeIsConfigured } from "@/lib/stripe";
-import { fulfillInvitationPayment } from "@/lib/payment-fulfillment";
+import { paymentProviderConfigured } from "@/lib/payment-providers";
+import { reconcilePurchase } from "@/lib/payment-reconciliation";
+import { PaymentMethods } from "@/components/dashboard/PaymentMethods";
 import { isInvitationPublished } from "@/lib/invitation-payment";
 import { canRenewInvitation, invitationLifecycle } from "@/lib/invitation-lifecycle";
+import { InvitationDateNotice } from "@/components/dashboard/InvitationDateNotice";
 import { InvitationTerm } from "@/components/dashboard/InvitationTerm";
 import { getCurrentPrice } from "@/lib/site-pricing";
 import { PaymentRefresh } from "@/components/dashboard/PaymentRefresh";
-import { startCheckout } from "./actions";
 import { SupportRequest } from "@/components/SupportRequest";
 import { PaymentReceipt } from "@/components/dashboard/PaymentReceipt";
 import { PublicationReady } from "@/components/dashboard/PublicationReady";
@@ -42,19 +43,15 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
   if (event.isExample) notFound();
   const currentPrice = await getCurrentPrice();
   const invitationPriceLabel = currentPrice.label;
-  // Recover a missed webhook using the stored session, never URL payment claims.
-  if (query.payment === "received" && stripeIsConfigured()) {
-    try {
-      const pending = await prisma.invitationPayment.findFirst({ where: { eventId: id, ownerId: session.user.id, status: "PENDING" }, orderBy: { createdAt: "desc" } });
-      const sessionId = pending?.stripeCheckoutSessionId ?? event.stripeCheckoutSessionId;
-      const checkout = sessionId ? await getStripe().checkout.sessions.retrieve(sessionId) : null;
-      if (checkout?.metadata?.eventId === event.id && checkout.metadata?.ownerId === session.user.id) {
-        const fulfilled = await fulfillInvitationPayment(checkout);
-        if (fulfilled) event = (await prisma.event.findFirst({ where: { id, ownerId: session.user.id } }))!;
-      }
-    } catch {
-      console.error("Unable to verify invitation payment with Stripe");
+  // URL parameters never prove settlement. Reconcile only server-owned attempts.
+  if (query.payment === "received") {
+    const pending = await prisma.invitationPayment.findMany({ where: { eventId: id, ownerId: session.user.id, status: "PENDING" }, orderBy: { createdAt: "desc" }, take: 10 });
+    for (const attempt of pending) {
+      if (!paymentProviderConfigured(attempt.provider)) continue;
+      try { await reconcilePurchase(attempt.id, 30000); }
+      catch { console.error("Unable to verify invitation purchase"); }
     }
+    event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id } });
   }
   if (!event) notFound();
   const published = isInvitationPublished(event);
@@ -69,9 +66,10 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
     <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} />
     <div className={styles.content}><div className={styles.heading}><span className={styles.eyebrow}>UN DETALLE PARA TU CELEBRACIÓN</span><h1>Tu invitación tiene una cortesía.</h1><p className={styles.eventName}>{event.name}</p></div><section className={styles.card}><InvitationTerm event={termEvent} now={now} /><h2>{published ? "Lista para compartir" : event.expiresAt && event.expiresAt > new Date() ? "Publica cuando esté lista" : "La cortesía ha vencido"}</h2><p>Recibiste una publicación sin cobro. {event.expiresAt && <>Vigencia hasta el {new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "America/Mexico_City" }).format(event.expiresAt)}.</>}</p><p>{published ? "Tu invitación está publicada y puedes compartir el enlace." : "Completa los datos y elige la privacidad desde el editor. Si necesitas ayuda con la vigencia, contacta con soporte."}</p>{publication}<div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 20 }}><Link className={styles.primary} href={`/dashboard/eventos/${id}`}>Ir al editor<FiArrowRight /></Link></div></section></div>
   </main>;
-  const ready = stripeIsConfigured();
+  const providers = { stripe: paymentProviderConfigured("stripe"), paypal: paymentProviderConfigured("paypal"), mercadopago: paymentProviderConfigured("mercadopago") };
+  const ready = Object.values(providers).some(Boolean);
   const payment = await prisma.invitationPayment.findFirst({ where: { eventId: id, ownerId: session.user.id,
-    ...(event.stripePaymentIntentId && !renewal ? { stripePaymentIntentId: event.stripePaymentIntentId } : {}) }, orderBy: { createdAt: "desc" } });
+    ...(event.stripePaymentIntentId && !renewal ? { OR: [{ stripePaymentIntentId: event.stripePaymentIntentId }, { providerPaymentId: event.stripePaymentIntentId }] } : {}) }, orderBy: { createdAt: "desc" } });
   const waiting = !published && query.payment === "received" && payment?.status === "PENDING";
   return <main className={styles.page}>
     <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} />
@@ -82,13 +80,14 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
           <section className={styles.card} aria-labelledby="payment-heading">
             <div className={styles.cardHeading}><span className={`${styles.icon} ${published ? styles.confirmed : ""}`}>{published ? <FiCheckCircle aria-hidden="true" /> : <FiCreditCard aria-hidden="true" />}</span><span className={`${styles.status} ${published ? styles.confirmed : ""}`}>{published ? "Publicada" : event.paidAt ? "Pago registrado" : waiting ? "Verificando pago" : "Pendiente de pago"}</span></div>
             <h2 id="payment-heading">{published ? "Lista para compartir" : event.paidAt ? "El estado de tu invitación" : "Un último paso para compartir"}</h2>
+            {(!event.paidAt || renewal) && <InvitationDateNotice date={event.eventDate?.toISOString().slice(0, 10) ?? ""} time={event.eventTime ?? ""} now={now} showTimeHelp={false} />}
             {renewal ? <>
               <p>Conservamos tu invitación durante un mes después de vencer. Compra otro año para recuperar su contenido, sus fotos y el mismo enlace.</p>
               <div className={styles.price}>{invitationPriceLabel} <small>MXN</small></div>
               <p className={styles.priceNote}>12 meses desde la confirmación del nuevo pago. Sin renovación automática.</p>
               {query.error === "checkout" && <p className={styles.notice} role="alert">No pudimos abrir la renovación. Inténtalo nuevamente.</p>}
               {query.payment === "cancelled" && <p className={styles.notice} role="status">La renovación no se completó. Tu invitación sigue archivada hasta la fecha indicada.</p>}
-              {waiting ? <PaymentRefresh /> : ready && renewalWindowOpen ? <form action={startCheckout.bind(null, id)}><button className={styles.primary} type="submit">Renovar por {invitationPriceLabel} MXN <FiArrowRight aria-hidden="true" /></button></form> : <p className={styles.notice}>{!renewalWindowOpen ? "El plazo para iniciar un nuevo pago ha cerrado: Stripe necesita al menos 31 minutos antes de la eliminación. Si ya pagaste, estamos verificando tu renovación." : "Los pagos no están disponibles por el momento. Inténtalo más tarde o contacta con soporte."}</p>}
+              {waiting ? <PaymentRefresh /> : ready && renewalWindowOpen ? <PaymentMethods eventId={id} providers={providers} oxxo={process.env.STRIPE_OXXO_ENABLED === "true" && term!.deletesAt.getTime() - now > 5 * 86400000} renewal /> : <p className={styles.notice}>{!renewalWindowOpen ? "El plazo para iniciar un nuevo pago ha cerrado: Stripe necesita al menos 31 minutos antes de la eliminación. Si ya pagaste, estamos verificando tu renovación." : "Los pagos no están disponibles por el momento. Inténtalo más tarde o contacta con soporte."}</p>}
             </> : published ? <><p>Tu pago está confirmado y tu invitación está publicada. Ya puedes compartir este momento con tus invitados.</p>{publication}</> : event.paidAt ? <p className={styles.notice}>{event.status === "REFUNDED" ? "El reembolso total está confirmado. El enlace público fue retirado." : event.status === "SUSPENDED" ? "El enlace está suspendido por una disputa del pago. Si se resuelve a favor, se reactivará con la vigencia original." : "La invitación terminó su vigencia. Consulta el plazo de conservación a continuación."}</p> : <>
               <div className={styles.price}>{invitationPriceLabel} <small>MXN</small></div><p className={styles.priceNote}>IVA incluido · Un pago por evento · Sin renovación automática.</p>
               <ul className={styles.benefits}><li><FiCheck aria-hidden="true" /> Enlace para compartir con la privacidad que elijas.</li><li><FiCheck aria-hidden="true" /> 12 meses a partir de la confirmación del pago.</li><li><FiCheck aria-hidden="true" /> Edición disponible durante la vigencia.</li><li><FiCheck aria-hidden="true" /> Un mes de archivo para renovar; después, eliminación automática.</li></ul>
@@ -96,13 +95,13 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
               <div className={styles.checkout}>{waiting ? <PaymentRefresh /> : <>
                 {query.payment === "cancelled" && <p className={styles.notice} role="status">El pago no se completó. Tu borrador sigue guardado.</p>}
                 {query.error === "checkout" && <p className={styles.notice} role="alert">No pudimos abrir el pago. Inténtalo nuevamente.</p>}
-                {event.privacy === "UNSET" ? <><p className={styles.notice}>Elige primero si tu invitación será pública o protegida con PIN.</p><Link className={styles.primary} href={`/dashboard/eventos/${id}/ajustes`}>Elegir privacidad <FiArrowRight aria-hidden="true" /></Link></> : ready ? <form action={startCheckout.bind(null, id)}><button className={styles.primary} type="submit">Pagar {invitationPriceLabel} MXN con Stripe <FiArrowRight aria-hidden="true" /></button><small>Te llevaremos a la página de pago de Stripe.</small></form> : <p className={styles.notice} role="status">Los pagos aún no están disponibles. Puedes seguir editando y previsualizando tu invitación.</p>}
+                {event.privacy === "UNSET" ? <><p className={styles.notice}>Elige primero si tu invitación será pública o protegida con PIN.</p><Link className={styles.primary} href={`/dashboard/eventos/${id}/ajustes`}>Elegir privacidad <FiArrowRight aria-hidden="true" /></Link></> : ready ? <PaymentMethods eventId={id} providers={providers} oxxo={process.env.STRIPE_OXXO_ENABLED === "true"} /> : <p className={styles.notice} role="status">Los pagos aún no están disponibles. Puedes seguir editando y previsualizando tu invitación.</p>}
               </>}</div>
             </>}
             <InvitationTerm event={termEvent} now={now} />
             <div className={styles.reference}><span>Referencia de tu invitación</span><strong>{event.id}</strong></div>
           </section>
-          {payment && (payment.status !== "PENDING" || payment.amount === currentPrice.amount) && <section className={styles.card} aria-labelledby="receipt-heading"><div className={styles.sectionTitle}><FiFileText aria-hidden="true" /><h2 id="receipt-heading">Detalle de tu compra</h2></div><PaymentReceipt payment={payment} /></section>}
+          {payment && <section className={styles.card} aria-labelledby="receipt-heading"><div className={styles.sectionTitle}><FiFileText aria-hidden="true" /><h2 id="receipt-heading">Detalle de tu compra</h2></div><PaymentReceipt payment={payment} /></section>}
           <div className={styles.quickLinksContainer}>
             <nav className={styles.quickLinks} aria-label="Más opciones de tu invitación">
               <InvitationActionLink href="/dashboard/compras" title="Historial de compras" description="Consulta y actualiza el estado." icon={<FiCreditCard />} />

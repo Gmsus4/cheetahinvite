@@ -338,3 +338,7 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
   .celebration-invitation .wa-shell .wa-intro .wa-portrait[data-desktop-image-focus] img,
   .celebration-invitation .wa-shell .wa-section-media[data-desktop-image-focus] img { object-position: var(--desktop-image-position); }
 }
+
+.celebration-invitation .wa-footer { position: relative; }
+.celebration-invitation .wa-footer[data-text-align]:not([data-text-align="auto"]) { text-align: var(--wa-text-align); }
+.celebration-invitation .wa-footer p { white-space: pre-line; }

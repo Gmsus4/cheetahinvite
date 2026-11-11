@@ -80,3 +80,16 @@
 @media (prefers-reduced-motion: reduce) { .support > summary svg { transition: none; } }
 
 @media (max-width: 440px) { .content { width: calc(100% - 28px); } }
+.methods {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0 0 12px;
+}
+
+.methods legend {
+  margin-bottom: 12px;
+  font-weight: 600;
+}

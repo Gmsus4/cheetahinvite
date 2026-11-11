@@ -211,9 +211,9 @@ export async function removeCourtesy(id: string, form: FormData) {
 
 export async function refreshAdminPayment(id: string) {
   await requireAdmin();
-  const { reconcileInvitationPayment } = await import("@/lib/payment-fulfillment");
+  const { reconcilePurchase } = await import("@/lib/payment-reconciliation");
   let error = "";
-  try { await reconcileInvitationPayment(id, 30000); }
+  try { await reconcilePurchase(id, 30000); }
   catch { error = "No pudimos consultar Stripe. Intenta más tarde."; }
   invalidateAdmin();
   done("/admin/ventas", error || undefined);

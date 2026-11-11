@@ -69,3 +69,5 @@ servicios aislados, sin cobros ni eliminación de invitaciones reales.
 simultáneas, eliminación en cascada y cola de fotos con PostgreSQL real. Crea y
 elimina una cuenta desechable; todas las consultas de limpieza se limitan a ella.
 Stripe y Cloudinary permanecen simulados.
+
+La fecha y hora de la celebración se interpretan con desplazamiento fijo UTC−6, independientemente de la zona del visitante. Sin hora se usa 00:00. Los editores y la pantalla de pago advierten si la celebración alcanza o supera el vencimiento; antes de comprar se estiman doce meses naturales desde el momento actual y después se usa la vigencia registrada. La advertencia no impide guardar ni pagar.

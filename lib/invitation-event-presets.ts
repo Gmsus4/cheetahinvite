@@ -1,5 +1,5 @@
 import type { SectionType } from './invitation-editor';
-import { getInvitationEventContent } from './invitation-event-content';
+import { invitationPresentation, getInvitationEventContent } from './invitation-event-content';
 
 type EventPreset = {
   message: string;
@@ -76,7 +76,7 @@ const presets: Record<string, EventPreset> = {
 };
 
 const titles: Record<SectionType, string> = {
-  countdown: 'Cuenta regresiva', cover: 'Portada', location: 'Lugar del evento', story: 'Nuestra celebración', ceremony: 'Ceremonia', reception: 'Otra sede',
+  closing: 'Despedida', countdown: 'Cuenta regresiva', cover: 'Portada', location: 'Lugar del evento', story: 'Nuestra celebración', ceremony: 'Ceremonia', reception: 'Otra sede',
   program: 'Programa', parents: 'Personas especiales', dress_code: 'Código de vestimenta',
   gifts: 'Regalos', gallery: 'Galería', rsvp: 'Confirma tu asistencia', music: 'Nuestra playlist', custom: 'Información adicional',
 };
@@ -86,6 +86,10 @@ export function invitationEventPreset(eventType: string) {
 }
 
 export function invitationSectionPreset(eventType: string, type: SectionType) {
+  if (type === "closing") {
+    const copy = invitationPresentation(eventType);
+    return { title: copy.closingKicker, content: copy.closingMessage, enabled: true };
+  }
   if (type === "countdown") return { title: "Cuenta regresiva", content: "", enabled: true };
   if (type === "ceremony") return { title: "Ceremonia", content: "", enabled: false };
   if (type === "cover") return { title: "Portada", content: "", enabled: true };

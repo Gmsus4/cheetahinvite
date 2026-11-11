@@ -71,3 +71,12 @@
 @media(prefers-reduced-motion:reduce) { .option,.intensity input[type="range"]::-webkit-slider-thumb { transition: none; } .option:hover { transform: none; } }
 
 .backgroundDim { position: absolute; inset: 0; background: #000; opacity: var(--wa-background-dim,0); pointer-events: none; }
+
+/* Flat presentation inside the appearance accordion. */
+.picker.embedded { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.embedded .headingIcon, .embedded .eyebrow { display: none; }
+.embedded .heading h2 { margin: 0; font-size: 14px; letter-spacing: 0; }
+.embedded .intro { margin: 8px 0 18px; }
+.embedded .intensity { padding: 22px 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
+.embedded .option:hover { transform: none; box-shadow: none; }
+.embedded .option[aria-pressed="true"] { box-shadow: none; }

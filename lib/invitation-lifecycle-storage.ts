@@ -2,7 +2,7 @@ import "server-only";
 import { prisma } from "@/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { invitationLifecycle } from "@/lib/invitation-lifecycle";
-import { reconcileInvitationPayment } from "@/lib/payment-fulfillment";
+import { reconcilePurchase } from "@/lib/payment-reconciliation";
 import { queueEventImages, withImageLock } from "@/lib/cloudinary-storage";
 
 // Run from the existing authenticated, scheduled cleanup, even without visits.
@@ -29,9 +29,9 @@ export async function runInvitationLifecycle(now = new Date(), limit = 10, owner
         eventId: candidate.id, ownerId: candidate.ownerId, status: { in: ["PENDING", "FAILED"] },
       } });
       for (const payment of attempts) {
-        if (payment.stripeCheckoutSessionId) await reconcileInvitationPayment(payment.id);
+        if (payment.stripeCheckoutSessionId || payment.providerCheckoutId) await reconcilePurchase(payment.id);
         else if (payment.checkoutExpiresAt <= now) await prisma.invitationPayment.updateMany({
-          where: { id: payment.id, status: { in: ["PENDING", "FAILED"] }, stripeCheckoutSessionId: null },
+          where: { id: payment.id, status: { in: ["PENDING", "FAILED"] }, stripeCheckoutSessionId: null, providerCheckoutId: null },
           data: { status: "EXPIRED" },
         });
       }

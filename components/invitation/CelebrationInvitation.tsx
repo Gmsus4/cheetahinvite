@@ -18,7 +18,7 @@ import { InvitationPhotoCarousel } from "./InvitationPhotoCarousel";
 import { useInvitationMotion } from "@/components/dashboard/useInvitationMotion";
 import { orderedInvitationSections, usesPrimaryLocation, locationSectionTitle } from "@/lib/invitation-sections";
 
-const sectionIcons = { countdown: FiClock, cover: FiImage, location: FiMapPin, story: FiHeart, ceremony: FiHeart, reception: FiMapPin, program: FiClock, parents: FiUsers, dress_code: FiUsers, gifts: FiGift, gallery: FiImage, rsvp: FiHeart, music: FiMusic, custom: FiHeart };
+const sectionIcons = { closing: FiHeart, countdown: FiClock, cover: FiImage, location: FiMapPin, story: FiHeart, ceremony: FiHeart, reception: FiMapPin, program: FiClock, parents: FiUsers, dress_code: FiUsers, gifts: FiGift, gallery: FiImage, rsvp: FiHeart, music: FiMusic, custom: FiHeart };
 
 type EditHandler = (target: InvitationEditTarget) => void;
 type StyleControlRenderer = (section: InviteSection, label: string) => ReactNode;
@@ -60,7 +60,8 @@ export function CelebrationInvitation(inputProps: InvitationProps & { preview?: 
   const countdownSection = props.sections.find(section => section.type === "countdown");
   const hasCountdown = Boolean(props.eventDateKey) && countdownSection?.enabled !== false;
   const locationSection = props.sections.find(section => section.type === "location");
-  const detailSections = props.sections.filter(section => section.type !== "reception" && section.type !== "location" && section.type !== "cover" && section.type !== "countdown");
+  const closingSection = props.sections.find(section => section.type === "closing");
+  const detailSections = props.sections.filter(section => section.type !== "reception" && section.type !== "location" && section.type !== "cover" && section.type !== "countdown" && section.type !== "closing");
   const sections = props.onEdit ? orderedInvitationSections(detailSections).filter(section => section.enabled) : atmosphereSections(detailSections);
   const time = atmosphereTime(props.eventTime);
   const date = props.eventDateKey ? props.date : "La fecha, muy pronto";
@@ -106,7 +107,14 @@ export function CelebrationInvitation(inputProps: InvitationProps & { preview?: 
 
       {sections.map((section, index) => <AtmosphereSection showIcons={props.showSectionIcons !== false} key={section.id} section={section} surface={atmospherePanelStyle(section, firstDetailIndex + index, panelStyle)} eventId={props.publicEventId} onEdit={props.onEdit} renderStyleControl={props.renderStyleControl} renderAlignmentControl={props.renderAlignmentControl} />)}
       </div>
-      <footer className="wa-footer"><span className="wa-kicker">{copy.closingKicker}</span><strong>{title}</strong><p>{copy.closingMessage}</p><small>Cheetah Invite</small></footer>
+      {closingSection?.enabled !== false && <footer className="wa-footer" data-editable={Boolean(props.onEdit) || undefined} data-text-align={closingSection?.textAlign} data-invitation-field={closingSection ? 'section:' + closingSection.id : undefined}>
+        {closingSection && props.onEdit && <div className="wa-edit-actions" role="group" aria-label="Acciones de Despedida">
+          <EditControl target={{ kind: "section", sectionId: closingSection.id }} label="despedida" text="Editar" onEdit={props.onEdit} />
+          <AlignmentControl section={closingSection} onEdit={props.onEdit} renderAlignmentControl={props.renderAlignmentControl} />
+          <VisibilityControl section={closingSection} onEdit={props.onEdit} />
+        </div>}
+        <span className="wa-kicker" data-invitation-field={closingSection ? closingSection.id + '-title' : undefined}>{closingSection ? closingSection.title : copy.closingKicker}</span><strong>{title}</strong><p data-invitation-field={closingSection ? closingSection.id + '-content' : undefined}>{closingSection ? closingSection.content : copy.closingMessage}</p><small>Cheetah Invite</small>
+      </footer>}
     </div>
   </article>;
 }

@@ -17,7 +17,7 @@ function createPaymentFixture(options = {}) {
     return {
       async findUnique({ where }) { return this.findFirst({ where }); },
       async findFirst({ where }) { if (f.databaseFailure) throw Error('Temporary database failure'); return structuredClone([...rows.values()].find(row => matches(row, where)) ?? null); },
-      async create({ data }) { const row = { id: randomUUID(), paidAt: null, expiresAt: null, status: 'PENDING', stripeCheckoutSessionId: null, stripePaymentIntentId: null, refundedAmount: 0, refundPendingAmount: 0, disputeStatus: null, lastSyncedAt: null, ...defaults, ...data }; rows.set(row.id, row); return structuredClone(row); },
+      async create({ data }) { const row = { id: randomUUID(), paidAt: null, expiresAt: null, status: 'PENDING', provider: 'stripe', stripeOxxo: false, stripeCheckoutSessionId: null, stripePaymentIntentId: null, refundedAmount: 0, refundPendingAmount: 0, disputeStatus: null, lastSyncedAt: null, ...defaults, ...data }; rows.set(row.id, row); return structuredClone(row); },
       async update({ where, data }) { const row = [...rows.values()].find(row => matches(row, where)); assert.ok(row); Object.assign(row, data); return structuredClone(row); },
       async updateMany({ where, data }) { const rowsToChange = [...rows.values()].filter(row => matches(row, where)); rowsToChange.forEach(row => Object.assign(row, data)); return { count: rowsToChange.length }; },
     };
@@ -84,7 +84,7 @@ function createPaymentFixture(options = {}) {
     new Function('require', 'module', 'exports', code)(requireMock, mod, mod.exports); return mod.exports;
   };
   f.addPurchase = (overrides = {}) => {
-    const payment = { id: 'payment-fixture', eventId: 'event-fixture', ownerId: f.ownerId, eventName: 'Celebración', amount: 49900, currency: 'mxn', status: 'PENDING', livemode: false, stripeCheckoutSessionId: 'cs_fixture', stripePaymentIntentId: null, renewalOfPaymentIntentId: null, paidAt: null, expiresAt: null, refundedAmount: 0, refundPendingAmount: 0, disputeStatus: null, checkoutExpiresAt: new Date(Date.now() + 3600000), ...overrides };
+    const payment = { id: 'payment-fixture', eventId: 'event-fixture', ownerId: f.ownerId, eventName: 'Celebración', provider: 'stripe', stripeOxxo: false, amount: 49900, currency: 'mxn', status: 'PENDING', livemode: false, stripeCheckoutSessionId: 'cs_fixture', stripePaymentIntentId: null, renewalOfPaymentIntentId: null, paidAt: null, expiresAt: null, refundedAmount: 0, refundPendingAmount: 0, disputeStatus: null, checkoutExpiresAt: new Date(Date.now() + 3600000), ...overrides };
     f.payments.set(payment.id, payment);
     f.events.set(payment.eventId, { ...f.eventDetails, id: payment.eventId, ownerId: payment.ownerId, name: payment.eventName, paidAt: null, slug: null, status: 'PENDING_PAYMENT', stripePaymentIntentId: null });
     const session = { id: payment.stripeCheckoutSessionId, mode: 'payment', status: 'complete', payment_status: 'paid', amount_total: payment.amount, currency: payment.currency, livemode: false, client_reference_id: payment.eventId, payment_intent: 'pi_fixture', metadata: { eventId: payment.eventId, ownerId: payment.ownerId, paymentId: payment.id, product: 'invitation-12-months' } };

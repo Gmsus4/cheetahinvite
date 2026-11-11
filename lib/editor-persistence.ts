@@ -143,12 +143,13 @@ export class EditorPersistence {
     catch { this.patch({ localWarning: true }); }
     this.patch({ recovery: null });
   }
-  discardChanges() {
+  discardChanges(snapshot = this.state.acknowledged) {
     if (this.flight || this.uploading || this.state.recovery) return false;
     this.clearTimer();
-    this.snapshot = this.state.acknowledged;
+    this.snapshot = snapshot;
     this.failedSnapshot = "";
-    this.patch({ error: "", code: "", conflictVersion: undefined, conflictPrivacyVersion: undefined });
+    // Keep conflict information while earlier unsaved edits still need saving.
+    if (snapshot === this.state.acknowledged) this.patch({ error: "", code: "", conflictVersion: undefined, conflictPrivacyVersion: undefined });
     try { if (this.restoredKey) this.browser?.storage?.removeItem(this.restoredKey); }
     catch { this.patch({ localWarning: true }); }
     this.restoredKey = undefined;

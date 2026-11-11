@@ -163,3 +163,31 @@
 @media (prefers-reduced-motion: reduce) {
   .workspace :global([data-editable]), .workspace :global(.wa-edit-button), .workspace :global(.wa-edit-actions), .toolbar :is(a, button), .fields :is(input, textarea, select), .dialogFooter button { transition: none; }
 }
+
+.workspace :global(.wa-footer[data-editable]) { padding-top: 72px; }
+
+.appearanceGroups { display: grid; min-width: 0; gap: 0; }
+.appearanceGroups > p { margin-bottom: 16px; }
+.appearanceGroup { min-width: 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; }
+.appearanceGroup:last-child { border-bottom: 0; }
+.appearanceSummary { display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 18px 0; list-style: none; cursor: pointer; background: transparent; }
+.appearanceSummary::-webkit-details-marker { display: none; }
+.appearanceSummary:hover, .appearanceSummary:active { background: transparent; }
+.appearanceSummary:hover .appearanceLabel strong, .appearanceSummary:hover .appearanceChevron { color: var(--accent); }
+.appearanceSummary:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; border-radius: 4px; }
+.appearanceIcon { display: grid; flex: 0 0 22px; place-items: center; color: var(--muted); }
+.appearanceIcon svg { width: 19px; height: 19px; stroke-width: 1.6; }
+.appearanceGroup[open] .appearanceIcon { color: var(--accent); }
+.appearanceLabel { display: grid; min-width: 0; gap: 4px; }
+.appearanceLabel strong { color: var(--ink); font-size: 14px; font-weight: 600; line-height: 1.4; }
+.appearanceLabel > span { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.appearanceChevron { flex: 0 0 15px; width: 15px; height: 15px; margin-left: auto; color: var(--muted); }
+.appearanceGroup[open] > summary .appearanceChevron { transform: rotate(180deg); }
+.appearanceContent { display: grid; min-width: 0; gap: 28px; padding: 4px 0 28px; }
+.appearanceContent > * { min-width: 0; }
+.appearanceContent > section { margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.appearanceContent > section + section { padding-top: 24px; border-top: 1px solid var(--line); }
+@media (max-width: 460px) {
+  .appearanceSummary { gap: 10px; }
+  .appearanceLabel > span { font-size: 11px; }
+}

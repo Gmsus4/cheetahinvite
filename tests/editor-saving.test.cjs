@@ -365,3 +365,14 @@ test('mobile and desktop framing persist independently for cover and section pho
   assert.deepEqual(f.state.events.get('event'), before);
  }
 });
+
+
+test('closing text and visibility survive saving and reopening', async () => {
+ const f=createFixture(); const {initialGuidedValues}=f.load('lib/guided-invitation.ts');
+ for(const enabled of [true,false,true]) {
+  const section={id:'closing',type:'closing',title:'Hasta pronto',content:'Gracias por venir',detail:'',link:'',imageUrl:'',enabled};
+  const form=f.saveForm();form.set('contentVersion',String(f.state.events.get('event').contentVersion));form.set('sections',JSON.stringify([section]));
+  assert.equal((await f.actions.updateEvent('event',form)).ok,true);
+  assert.deepEqual(initialGuidedValues(f.state.events.get('event')).sections.find(s=>s.type==='closing'),{...section,layout:'auto'});
+ }
+});

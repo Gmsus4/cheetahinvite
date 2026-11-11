@@ -16,3 +16,8 @@
 .control input:checked + .track::after { left: 21px; background: #fff; }
 .control input:focus-visible + .track { outline: 3px solid var(--orange); outline-offset: 4px; }
 @media(max-width:600px) { .picker { padding: 20px; } }
+
+.picker.embedded { padding: 0; border: 0; border-radius: 0; background: transparent; }
+.embedded .heading > span { display: none; }
+.embedded .heading h2 { font-size: 14px; letter-spacing: 0; }
+.embedded > p { margin: 8px 0 18px; }

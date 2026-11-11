@@ -16,7 +16,7 @@ export function isInvitationPanelStyle(value: unknown): value is InvitationPanel
 export function isInvitationBlurIntensity(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 100;
 }
-export type SectionType = "countdown" | "cover" | "location" | "story" | "ceremony" | "reception" | "program" | "parents" | "dress_code" | "gifts" | "rsvp" | "gallery" | "music" | "custom";
+export type SectionType = "countdown" | "cover" | "location" | "story" | "ceremony" | "reception" | "program" | "parents" | "dress_code" | "gifts" | "rsvp" | "gallery" | "music" | "custom" | "closing";
 export type SectionTextAlign = "auto" | "left" | "center" | "right";
 export type MobileImageFocus = "top" | "center" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
 export function isMobileImageFocus(value: unknown): value is MobileImageFocus {
@@ -98,8 +98,8 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
       || (values.panelStyle !== undefined && !invitationPanelStyles.includes(values.panelStyle))
       || (values.backgroundImageUrl !== undefined && (typeof values.backgroundImageUrl !== "string" || values.backgroundImageUrl.length > 1000))
       || (values.eventDate && (!/^\d{4}-\d{2}-\d{2}$/.test(values.eventDate) || !Number.isFinite(Date.parse(`${values.eventDate}T12:00:00Z`))))
-      || !Array.isArray(values.sections) || values.sections.length > 15) return null;
-    const types = ["countdown", "cover", "location", "story", "ceremony", "reception", "program", "parents", "dress_code", "gifts", "rsvp", "gallery", "music", "custom"];
+      || !Array.isArray(values.sections) || values.sections.length > 16) return null;
+    const types = ["countdown", "cover", "location", "story", "ceremony", "reception", "program", "parents", "dress_code", "gifts", "rsvp", "gallery", "music", "custom", "closing"];
     if (values.sections.some(section => !section || !types.includes(section.type) || typeof section.enabled !== "boolean"
       || (section.titleCustomized !== undefined && typeof section.titleCustomized !== 'boolean')
       || (section.showIcon !== undefined && typeof section.showIcon !== 'boolean')

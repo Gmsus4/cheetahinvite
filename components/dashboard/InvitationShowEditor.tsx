@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
-import { FiArrowLeft, FiCheck, FiEdit3, FiImage, FiMapPin, FiPlus, FiSave, FiSliders, FiX } from "react-icons/fi";
+import { FiArrowLeft, FiCheck, FiChevronDown, FiLayers, FiType, FiStar, FiEdit3, FiImage, FiMapPin, FiPlus, FiSave, FiSliders, FiX } from "react-icons/fi";
 import { updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 import { CelebrationInvitation } from "@/components/invitation/CelebrationInvitation";
 import { atmosphereStyle } from "@/lib/invitation-atmosphere";
@@ -27,6 +27,7 @@ import { InvitationSectionStyleMenu } from "./InvitationSectionStyleMenu";
 import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
 import { useEditorProtection } from "./useEditorProtection";
 import styles from "./InvitationShowEditor.module.css";
+import { InvitationDateNotice } from "./InvitationDateNotice";
 import { InvitationEditorTour } from "./InvitationEditorTour";
 
 export function InvitationShowEditor({ event, returnLink, initialChanges, onSaved, onReturn }: { event: EventData; returnLink: { href: string; title: string; label: string }; initialChanges?: { snapshot: string; version: number; privacyVersion?: number; sessionId?: string }; onSaved?(snapshot: string, version: number, privacyVersion?: number): void; onReturn?(): void }) {
@@ -34,6 +35,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
   const incomingValues = initialChanges ? { ...JSON.parse(initialChanges.snapshot) as EditorValues, customSlug: savedValues.customSlug } : savedValues;
   const [values, setValues] = useState<EditorValues>(() => incomingValues);
   const [target, setTarget] = useState<InvitationEditTarget | null>(null);
+  const dialogSnapshot = useRef<string | null>(null);
   const [uploads, setUploads] = useState(0);
   const [pending, startTransition] = useTransition();
   const [notice, setNotice] = useState("");
@@ -75,6 +77,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
   function open(next: InvitationEditTarget) {
     if (!state.ready || state.recovery || busy) return;
     setNotice("");
+    dialogSnapshot.current = snapshot;
     setTarget(next);
   }
   function patch(changes: Partial<EditorValues>) { setValues(current => ({ ...current, ...changes })); }
@@ -95,9 +98,11 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
   }
   function cancel() {
     if (busy) return;
-    if (!controller.discardChanges()) return;
-    setValues(JSON.parse(state.acknowledged) as EditorValues);
-    controller.update(state.acknowledged, false, wizard, true);
+    const restored = dialogSnapshot.current;
+    if (restored === null || !controller.discardChanges(restored)) return;
+    setValues(JSON.parse(restored) as EditorValues);
+    controller.update(restored, false, wizard, true);
+    dialogSnapshot.current = null;
     setTarget(null);
   }
   function save(overwrite = false, returnAfterSave = false) {
@@ -106,6 +111,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
       controller.update(snapshot, false, wizard, true);
       const result = await controller.saveNow(false, overwrite ? state.conflictVersion : undefined, overwrite ? state.conflictPrivacyVersion : undefined);
       if (!result.ok) return;
+      dialogSnapshot.current = null;
       onSaved?.(controller.getSnapshot().acknowledged, result.version, result.privacyVersion);
       if (returnAfterSave) { setReturnRequested(false); onReturn?.(); return; }
       setTarget(null);
@@ -139,7 +145,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
       <fieldset className={styles.fields} disabled={busy}>
         {target.kind === "add-section" && <>
           <p className={styles.sectionIntro}>Elige una sección para agregarla y completar su información.</p>
-          <div className={styles.sectionOptions}>{availableSections.map(item => <button key={item.id} type="button" aria-label={`Agregar ${item.title}`} onClick={() => addSection(item.id)}><span><strong>{item.title}</strong><small>{item.type === "countdown" ? "Los días, horas y minutos que faltan para tu evento." : item.type === "location" ? "El lugar, la dirección y el mapa del evento." : guidedDetails(values.eventType).find(detail => detail.type === item.type)?.help}</small></span><FiPlus aria-hidden="true" /></button>)}</div>
+          <div className={styles.sectionOptions}>{availableSections.map(item => <button key={item.id} type="button" aria-label={`Agregar ${item.type === 'closing' ? 'Despedida' : item.title}`} onClick={() => addSection(item.id)}><span><strong>{item.type === 'closing' ? 'Despedida' : item.title}</strong><small>{item.type === "countdown" ? "Los días, horas y minutos que faltan para tu evento." : item.type === "location" ? "El lugar, la dirección y el mapa del evento." : guidedDetails(values.eventType).find(detail => detail.type === item.type)?.help}</small></span><FiPlus aria-hidden="true" /></button>)}</div>
           {!availableSections.length && <p>Ya incluiste todas las secciones disponibles.</p>}
         </>}
         {target.kind === "cover" && <>
@@ -147,9 +153,9 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
           <Field label="Tipo de evento" id="show-event-type"><select id="show-event-type" value={values.eventType} onChange={e => patch(changeGuidedEventType(values, e.target.value))}>{invitationEventTypes.map(type => <option key={type} value={type}>{getInvitationEventContent(type).label}</option>)}</select></Field>
           <Field label="Nombre de la invitación" id="show-name"><input id="show-name" required minLength={2} maxLength={100} value={values.name} onChange={e => patch({ name: e.target.value })} /></Field>
           <Field label="Protagonistas o anfitriones" id="show-hosts"><input id="show-hosts" maxLength={120} value={values.hostNames} onChange={e => patch({ hostNames: e.target.value })} /></Field>
-          <DateFields values={values} patch={patch} />
+          <DateFields values={values} patch={patch} expiresAt={event.expiresAt} isExample={event.isExample} />
         </>}
-        {(target.kind === "date" || target.kind === "location") && <DateFields values={values} patch={patch} />}
+        {(target.kind === "date" || target.kind === "location") && <DateFields values={values} patch={patch} expiresAt={event.expiresAt} isExample={event.isExample} />}
         {target.kind === "date" && countdownSection && <>
           <Field label="Mostrar cuenta regresiva" id="show-countdown-enabled"><input id="show-countdown-enabled" type="checkbox" checked={countdownSection.enabled} onChange={e => patch({ sections: values.sections.map(item => item.id === countdownSection.id ? { ...item, enabled: e.target.checked } : item) })} /></Field>
           <Field label="Título de la sección" id="show-countdown-title"><input id="show-countdown-title" maxLength={100} value={countdownSection.title} onChange={e => patch({ sections: values.sections.map(item => item.id === countdownSection.id ? { ...item, title: e.target.value } : item) })} /></Field>
@@ -169,16 +175,26 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
           <InvitationBackgroundBlurControl value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
           <InvitationBackgroundDimControl value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => patch({ backgroundDimIntensity })} />
         </>}
-        {target.kind === "appearance" && <>
-          <InvitationSurfacePicker values={values} onChange={panelStyle => patch({ panelStyle })} onBlurChange={blurIntensity => patch({ blurIntensity })} onGlassBorderChange={glassBorder => patch({ glassBorder })} />
-          <InvitationBackgroundBlurControl value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
-          <InvitationBackgroundDimControl value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => patch({ backgroundDimIntensity })} />
-              <InvitationCornersPicker value={values.sectionCorners} onChange={sectionCorners => patch({ sectionCorners })} />
-              <InvitationIconsPicker value={values.showSectionIcons} onChange={showSectionIcons => patch({ showSectionIcons })} />
-          <InvitationPalettePicker palettes={sharedInvitationDesign.palettes} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={accent => patch({ accent })} />
+        {target.kind === "appearance" && <div className={styles.appearanceGroups}>
+          <p className={styles.sectionIntro}>Dale tu estilo a la invitación. Abre un apartado para personalizarlo.</p>
+          <AppearanceGroup title="Fondo" description="Tu fotografía, desenfoque y oscuridad" icon={<FiImage />} defaultOpen>
+            <CloudinaryImageUpload {...uploadProps} multiple={false} images={values.backgroundImageUrl ? [values.backgroundImageUrl] : []} onChange={images => patch({ backgroundImageUrl: images[0] ?? "" })} />
+            <InvitationBackgroundBlurControl value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
+            <InvitationBackgroundDimControl value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => patch({ backgroundDimIntensity })} />
+          </AppearanceGroup>
+          <AppearanceGroup title="Tarjeta" description="Acabado, efecto cristal y esquinas" icon={<FiLayers />} >
+            <InvitationSurfacePicker embedded values={values} onChange={panelStyle => patch({ panelStyle })} onBlurChange={blurIntensity => patch({ blurIntensity })} onGlassBorderChange={glassBorder => patch({ glassBorder })} />
+            <InvitationCornersPicker value={values.sectionCorners} onChange={sectionCorners => patch({ sectionCorners })} />
+          </AppearanceGroup>
+          <AppearanceGroup title="Color y tipografía" description="El color de tu celebración y sus letras" icon={<FiType />} >
+            <InvitationPalettePicker palettes={sharedInvitationDesign.palettes} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={accent => patch({ accent })} />
           <InvitationFontSelect role="heading" eventType={values.eventType} value={values.typography} onChange={typography => patch({ typography })} />
           <InvitationFontSelect role="body" eventType={values.eventType} value={values.bodyTypography} onChange={bodyTypography => patch({ bodyTypography })} />
-        </>}
+          </AppearanceGroup>
+          <AppearanceGroup title="Detalles" description="Iconos que acompañan tus secciones" icon={<FiStar />} >
+            <InvitationIconsPicker embedded value={values.showSectionIcons} onChange={showSectionIcons => patch({ showSectionIcons })} />
+          </AppearanceGroup>
+        </div>}
         {section && target.kind === "section" && <SectionFields section={section} onChange={changeSection} uploadProps={uploadProps} allowSectionPhoto globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle} mediaClassName={styles.sectionMedia} showStyleControls={false} />}
         {section && target.kind === "section-photo" && <SectionPhotoFields section={section} onChange={changeSection} uploadProps={uploadProps} />}
         {section && target.kind === "section-surface" && <>
@@ -198,7 +214,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
     </EditDialog>}
     {state.recovery && <EditorRecoveryDialog onDiscard={() => controller.discardRecovery()} onRecover={() => {
       const record = controller.recover();
-      if (record) { setValues(JSON.parse(record.snapshot) as EditorValues); setTarget({ kind: "cover" }); }
+      if (record) { dialogSnapshot.current = record.snapshot; setValues(JSON.parse(record.snapshot) as EditorValues); setTarget({ kind: "cover" }); }
     }} />}
     {navigation.destination && <EditorLeaveDialog onStay={navigation.stay} onLeave={navigation.leave} />}
     {returnRequested && <EditorLeaveDialog onStay={() => setReturnRequested(false)} onLeave={() => { if (controller.discardChanges()) { setReturnRequested(false); onReturn?.(); } }} onSaveAndLeave={() => save(false, true)} saving={pending || state.saving} saveDisabled={editingDisabled} uploading={uploads > 0} error={state.error} publishesChanges={published} saveLabel={published ? "Publicar cambios y volver" : returnLink.href === "/dashboard" ? "Guardar y volver al dashboard" : "Guardar y volver al asistente"} />}
@@ -206,7 +222,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
 }
 
 function editLabel(target: InvitationEditTarget, section?: InviteSection) {
-  if (target.kind === "section") return section?.title || "Sección";
+  if (target.kind === "section") return section?.type === "closing" ? "Despedida" : section?.title || "Sección";
   if (target.kind === "section-photo") return `${section?.type === "gallery" ? "Fotos" : "Foto"} de ${section?.title || "la sección"}`;
   if (target.kind === "section-surface") return `Estilo de ${section?.title || "la sección"}`;
   if (target.kind === "section-visibility") return `Visibilidad de ${section?.title || "la sección"}`;
@@ -214,12 +230,24 @@ function editLabel(target: InvitationEditTarget, section?: InviteSection) {
   return ({ cover: "Portada", date: "Fecha y hora", location: "Fecha y lugar", "cover-photo": "Foto de portada", background: "Foto de fondo", appearance: "Apariencia", "add-section": "Agregar secciones" })[target.kind];
 }
 
+function AppearanceGroup({ title, description, icon, defaultOpen = false, children }: { title: string; description: string; icon: ReactNode; defaultOpen?: boolean; children: ReactNode }) {
+  return <details className={styles.appearanceGroup} open={defaultOpen}>
+    <summary className={styles.appearanceSummary}>
+      <span className={styles.appearanceIcon} aria-hidden="true">{icon}</span>
+      <span className={styles.appearanceLabel}><strong>{title}</strong><span>{description}</span></span>
+      <FiChevronDown className={styles.appearanceChevron} aria-hidden="true" />
+    </summary>
+    <div className={styles.appearanceContent}>{children}</div>
+  </details>;
+}
+
 function Field({ label, id, children }: { label: string; id: string; children: ReactNode }) {
   return <div className="guided-field"><label htmlFor={id}>{label}</label>{children}</div>;
 }
 
-function DateFields({ values, patch }: { values: EditorValues; patch(changes: Partial<EditorValues>): void }) {
+function DateFields({ values, patch, expiresAt, isExample }: { values: EditorValues; patch(changes: Partial<EditorValues>): void; expiresAt?: Date | null; isExample?: boolean }) {
   return <div className={styles.dateFields}>
+    {!isExample && <InvitationDateNotice date={values.eventDate} time={values.eventTime} expiresAt={expiresAt} />}
     <Field label="Fecha" id="show-date"><input id="show-date" type="date" value={values.eventDate} onChange={e => patch({ eventDate: e.target.value, ...(!e.target.value ? { eventTime: "" } : {}) })} /></Field>
     <Field label="Hora" id="show-time"><input id="show-time" type="time" disabled={!values.eventDate} value={values.eventTime} onChange={e => patch({ eventTime: e.target.value })} /></Field>
   </div>;

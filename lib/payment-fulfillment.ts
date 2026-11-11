@@ -1,6 +1,7 @@
 import "server-only";
 import type Stripe from "stripe";
 import { prisma } from "@/prisma";
+import type { InvitationPayment } from "@/generated/prisma/client";
 import { Prisma } from "@/generated/prisma/client";
 import { getStripe } from "@/lib/stripe";
 import { invitationSlug, isPaidInvitationSession } from "@/lib/stripe-payment";
@@ -68,37 +69,7 @@ export async function reconcileInvitationPayment(paymentId: string, minimumAgeMs
       status: "PAID", livemode: checkout.livemode, stripePaymentIntentId: intent.id, stripeChargeId: charge.id,
       paidAt, expiresAt, refundedAmount, refundPendingAmount, refunds, disputes, disputeStatus, lastSyncedAt: new Date(),
     } });
-    await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${payment.eventId} FOR UPDATE`);
-    const invitation = await tx.event.findFirst({ where: { id: payment.eventId, ownerId: payment.ownerId } });
-    if (!invitation) return { paymentId: payment.id, invitation: null };
-    let slug = invitation.slug || invitationSlug(invitation.name, invitation.id);
-    const baseSlug = slug;
-    let suffix = 2;
-    if (registryReady) {
-      while (!await reserveInvitationPath(tx, `/event/${slug}`, invitation.id)) slug = `${baseSlug}-${suffix++}`;
-      if (invitation.customSlug && !await reserveInvitationPath(tx, `/event/${invitation.customSlug}`, invitation.id)) throw new Error("Invitation URL is already reserved");
-    }
-    // Only an explicitly reserved renewal may replace the previous purchase.
-    // Old webhooks and accidental second charges cannot change the current term.
-    const previousTerm = invitationLifecycle(invitation, paidAt);
-    const renewal = Boolean(payment.renewalOfPaymentIntentId
-      && payment.renewalOfPaymentIntentId === invitation.stripePaymentIntentId
-      && ["PUBLISHED", "EXPIRED", "ARCHIVED"].includes(invitation.status)
-      && previousTerm?.phase === "archived");
-    const currentPurchase = invitation.stripePaymentIntentId === intent.id;
-    if (renewal || ((!invitation.paidAt || currentPurchase)
-      && !["ARCHIVED", "EXPIRED"].includes(invitation.status))) {
-      const access = paymentAccess(updated);
-      await tx.event.updateMany({ where: { id: invitation.id, ownerId: invitation.ownerId,
-        ...(renewal ? { stripePaymentIntentId: payment.renewalOfPaymentIntentId } : {
-          status: { notIn: ["ARCHIVED", "EXPIRED"] }, OR: [{ paidAt: null }, { stripePaymentIntentId: intent.id }],
-        }) }, data: {
-        paidAt, expiresAt, slug, status: access === "PUBLISHED" && expiresAt <= new Date() ? "EXPIRED" : access,
-        stripeCheckoutSessionId: checkout.id, stripePaymentIntentId: intent.id,
-      } });
-    }
-    const publicPath = registryReady ? invitationPath : legacyInvitationPath;
-    return { paymentId: payment.id, invitation: { id: invitation.id, slug, path: publicPath({ ...invitation, slug })! } };
+    return applyPaymentToInvitation(tx, updated, intent.id, checkout.id, registryReady);
   }, { timeout: 45000, maxWait: 10000 });
 }
 
@@ -133,4 +104,41 @@ export async function reconcileStripeObject(object: Stripe.Charge | Stripe.Refun
     return null;
   }
   return reconcileInvitationPayment(payment.id);
+}
+
+// Event's legacy identity columns hold namespaced references for other providers.
+export async function applyPaymentToInvitation(tx: Prisma.TransactionClient, updated: InvitationPayment, identity: string, checkoutId: string | null, registryReady: boolean) {
+  const paidAt = updated.paidAt!;
+  const expiresAt = updated.expiresAt!;
+    await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${updated.eventId} FOR UPDATE`);
+    const invitation = await tx.event.findFirst({ where: { id: updated.eventId, ownerId: updated.ownerId } });
+    if (!invitation) return { paymentId: updated.id, invitation: null };
+    let slug = invitation.slug || invitationSlug(invitation.name, invitation.id);
+    const baseSlug = slug;
+    let suffix = 2;
+    if (registryReady) {
+      while (!await reserveInvitationPath(tx, `/event/${slug}`, invitation.id)) slug = `${baseSlug}-${suffix++}`;
+      if (invitation.customSlug && !await reserveInvitationPath(tx, `/event/${invitation.customSlug}`, invitation.id)) throw new Error("Invitation URL is already reserved");
+    }
+    // Only an explicitly reserved renewal may replace the previous purchase.
+    // Old webhooks and accidental second charges cannot change the current term.
+    const previousTerm = invitationLifecycle(invitation, paidAt);
+    const renewal = Boolean(updated.renewalOfPaymentIntentId
+      && updated.renewalOfPaymentIntentId === invitation.stripePaymentIntentId
+      && ["PUBLISHED", "EXPIRED", "ARCHIVED"].includes(invitation.status)
+      && previousTerm?.phase === "archived");
+    const currentPurchase = invitation.stripePaymentIntentId === identity;
+    if (renewal || ((!invitation.paidAt || currentPurchase)
+      && !["ARCHIVED", "EXPIRED"].includes(invitation.status))) {
+      const access = paymentAccess(updated);
+      await tx.event.updateMany({ where: { id: invitation.id, ownerId: invitation.ownerId,
+        ...(renewal ? { stripePaymentIntentId: updated.renewalOfPaymentIntentId } : {
+          status: { notIn: ["ARCHIVED", "EXPIRED"] }, OR: [{ paidAt: null }, { stripePaymentIntentId: identity }],
+        }) }, data: {
+        paidAt, expiresAt, slug, status: access === "PUBLISHED" && expiresAt <= new Date() ? "EXPIRED" : access,
+        stripeCheckoutSessionId: checkoutId, stripePaymentIntentId: identity,
+      } });
+    }
+    const publicPath = registryReady ? invitationPath : legacyInvitationPath;
+    return { paymentId: updated.id, invitation: { id: invitation.id, slug, path: publicPath({ ...invitation, slug })! } };
 }

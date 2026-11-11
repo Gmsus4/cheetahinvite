@@ -78,7 +78,7 @@ test('optional primary location is not required when hidden or replaced by anoth
 
 test('block journey starts with cover and location before the remaining wedding details',()=>{
  const {guidedDetails,guidedSections,guidedContentSectionIds}=setup();
- assert.equal(guidedDetails('wedding').length,10);
+ assert.equal(guidedDetails('wedding').length,11);
  assert.ok(guidedDetails('wedding').every(section=>section.type!=='reception'));
  assert.equal(guidedDetails('wedding').find(section=>section.type==='ceremony').title,'Ceremonia');
  assert.ok(guidedDetails('wedding').every(section=>section.type!=='location'));
@@ -102,13 +102,13 @@ test('Maps URLs pasted in the old address field move to the exact link without p
 test('occasion presets enable relevant sections and use distinct celebration copy',()=>{
  const {guidedSections}=setup();
  const active=type=>guidedSections(type).filter(s=>s.enabled).map(s=>s.type);
- assert.deepEqual(active('wedding'),['cover','countdown','location','story','program','parents','gifts','rsvp']);
+ assert.deepEqual(active('wedding'),['cover','countdown','location','story','program','parents','gifts','rsvp','closing']);
  assert.match(guidedSections('wedding').find(s=>s.type==='program').content,/Ceremonia/);
- assert.deepEqual(active('birthday'),['cover','countdown','location','story','program','parents','gifts','rsvp']);
- assert.deepEqual(active('baby_shower'),['cover','countdown','location','story','program','parents','gifts','rsvp']);
- assert.deepEqual(active('graduation'),['cover','countdown','location','story','program','parents','rsvp']);
- assert.deepEqual(active('anniversary'),['cover','countdown','location','story','program','parents','gifts','rsvp']);
- assert.deepEqual(active('other'),['cover','countdown','location','story','program','parents','rsvp']);
+ assert.deepEqual(active('birthday'),['cover','countdown','location','story','program','parents','gifts','rsvp','closing']);
+ assert.deepEqual(active('baby_shower'),['cover','countdown','location','story','program','parents','gifts','rsvp','closing']);
+ assert.deepEqual(active('graduation'),['cover','countdown','location','story','program','parents','rsvp','closing']);
+ assert.deepEqual(active('anniversary'),['cover','countdown','location','story','program','parents','gifts','rsvp','closing']);
+ assert.deepEqual(active('other'),['cover','countdown','location','story','program','parents','rsvp','closing']);
  assert.match(guidedSections('birthday').find(s=>s.type==='program').content,/Pastel/);
  assert.match(guidedSections('baby_shower').find(s=>s.type==='gifts').content,/bebé/);
 });
@@ -139,7 +139,7 @@ test('changing occasion replaces untouched presets while preserving user data, e
  const switched=changeGuidedEventType(initial,'baby_shower');
  assert.equal(switched.name,'Nuestro baby shower');
  assert.match(switched.message,/dulce espera/);
- assert.deepEqual(switched.sections.filter(s=>s.enabled).map(s=>s.type),['cover','countdown','location','story','program','parents','gifts','rsvp']);
+ assert.deepEqual(switched.sections.filter(s=>s.enabled).map(s=>s.type),['cover','countdown','location','story','program','parents','gifts','rsvp','closing']);
  const customized={...initial,name:'Mi fiesta propia',hostNames:'Alex',message:'Mis palabras',eventDate:'2027-01-15',venue:'Mi lugar',imageUrl:'https://example.com/cover.jpg',sections:initial.sections.map(s=>s.type==='story'?{...s,content:'Mi historia',imageUrl:'https://example.com/story.jpg'}:s.type==='rsvp'?{...s,enabled:false}:s)};
  const changed=changeGuidedEventType(customized,'graduation');
  for(const field of ['name','hostNames','message','eventDate','venue','imageUrl'])assert.equal(changed[field],customized[field]);
@@ -152,9 +152,9 @@ test('opening saved events does not seed messages, enable missing sections or re
  const stored={id:'saved',eventType:'baby_shower',message:'',sections:[{id:'own',type:'story',title:'Mi título',content:'',detail:'',link:'',imageUrl:'',enabled:false}]};
  const values=initialGuidedValues(stored);
  assert.equal(values.message,'');
- assert.ok(values.sections.filter(s=>s.type!=='location'&&s.type!=='cover'&&s.type!=='countdown').every(s=>!s.enabled));
+ assert.ok(values.sections.filter(s=>s.type!=='location'&&s.type!=='cover'&&s.type!=='countdown'&&s.type!=='closing').every(s=>!s.enabled));
  assert.equal(values.sections.find(s=>s.type==='location').enabled,true);
- assert.ok(values.sections.every(s=>!s.content));
+ assert.ok(values.sections.filter(s=>s.type!=='closing').every(s=>!s.content));
  assert.deepEqual(values.sections[0],stored.sections[0]);
 });
 test('shared invitations prepare, save, validate publication and retain custom sections for all occasions',async()=>{
@@ -244,7 +244,7 @@ test('preview section picker lists disabled supported blocks only and is exhaust
 
 test('every occasion offers the same optional block catalog without enabling extra blocks by default',()=>{
  const {guidedSections,guidedContentSectionIds,availableGuidedSections}=setup();
- const catalog=['cover','countdown','location','story','ceremony','program','parents','dress_code','gifts','gallery','rsvp','music','custom'];
+ const catalog=['cover','countdown','location','story','ceremony','program','parents','dress_code','gifts','gallery','rsvp','music','custom','closing'];
  for(const eventType of ['wedding','birthday','graduation','baby_shower','anniversary','other']) {
   const sections=guidedSections(eventType);
   assert.deepEqual(sections.map(section=>section.type),catalog);

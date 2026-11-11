@@ -854,3 +854,27 @@ test('mobile framing reaches the cover, attached photos and carousel without cha
  fields[1].props.onChange('bottom-right');
  assert.deepEqual(updates, [{mobileImageFocus:'top-left'}, {desktopImageFocus:'bottom-right'}]);
 });
+
+
+test('closing block preserves legacy copy and supports editing, hiding and restoring', () => {
+  const load = loadComponents();
+  const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');
+  const { guidedSections, completeGuidedSections } = load('lib/guided-invitation.ts');
+  const base = { eventType: 'other', name: 'Encuentro', hostNames: 'Alex', date: '', venue: '', address: '', message: '', imageUrl: '', accent: '#58664E', sections: [] };
+  const render = sections => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...base, sections }));
+  assert.match(render([]), /Gracias por ser parte de esta celebración/);
+  for (const type of ['wedding', 'birthday', 'graduation', 'baby_shower', 'anniversary', 'other']) {
+    const closing = guidedSections(type).find(s => s.type === 'closing');
+    assert.equal(closing.enabled, true);
+    assert.ok(closing.title && closing.content);
+    assert.deepEqual(completeGuidedSections(type, []).find(s => s.type === 'closing'), closing);
+  }
+  const closing = { ...guidedSections('other').find(s => s.type === 'closing'), title: 'Hasta pronto', content: 'Nos vemos en la próxima' };
+  const html = render([closing]);
+  assert.match(html, /Hasta pronto/);
+  assert.match(html, /Nos vemos en la próxima/);
+  assert.equal((html.match(/Nos vemos en la próxima/g) || []).length, 1);
+  assert.ok(html.includes('<strong>Alex</strong>'));
+  assert.doesNotMatch(render([{ ...closing, enabled: false }]), /Hasta pronto|Nos vemos en la próxima/);
+  assert.deepEqual(completeGuidedSections('other', [{ ...closing, enabled: false }]).find(s => s.type === 'closing'), { ...closing, enabled: false });
+});

@@ -10,7 +10,7 @@ type EventContent = {
   defaultName: string;
   message: string;
   recommendedSections: SectionType[];
-  sections: Record<SectionType, SectionCopy>;
+  sections: Record<Exclude<SectionType, "closing">, SectionCopy>;
   demo: {
     name: string; hostNames: string; date: string; eventDateKey: string; eventTime: string;
     venue: string; address: string; accent: string; typography: string; bodyTypography: string;
@@ -173,7 +173,7 @@ export function invitationPresentation(eventType: string) {
 export function makeEventExampleSection(type: SectionType, eventType: string, id = `default-${type}`): InviteSection {
   return {
     id, type, detail: "", link: "", imageUrl: "", imageUrls: [], enabled: true,
-    ...getInvitationEventContent(eventType).sections[type],
+    ...(type === "closing" ? { title: invitationPresentation(eventType).closingKicker, content: invitationPresentation(eventType).closingMessage } : getInvitationEventContent(eventType).sections[type]),
   };
 }
 

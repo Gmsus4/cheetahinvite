@@ -186,7 +186,7 @@ test('an unauthenticated creation URL keeps its resume and event-type parameters
 
 test('an expired checkout session returns to its payment page after authentication', async () => {
   const f = fixture();
-  for (const name of ['@/prisma', '@/lib/stripe', '@/lib/payment-checkout', '@/lib/guided-invitation', '@/lib/invitation-lifecycle']) f.mocks.set(name, {});
+  for (const name of ['@/prisma', '@/lib/stripe', '@/lib/payment-checkout', '@/lib/external-payment-checkout', '@/lib/payment-providers', '@/lib/guided-invitation', '@/lib/invitation-lifecycle']) f.mocks.set(name, {});
   const { startCheckout } = f.load('app/dashboard/eventos/[id]/pago/actions.ts');
   await assert.rejects(startCheckout('existing-draft'), error => {
     const login = new URL(error.destination, 'https://site.test');

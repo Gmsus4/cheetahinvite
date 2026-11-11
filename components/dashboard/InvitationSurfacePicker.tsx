@@ -12,7 +12,8 @@ import { InvitationGlassBorderToggle } from "./InvitationGlassBorderToggle";
 
 
 
-export function InvitationSurfacePicker({ values, onChange, onBlurChange, onGlassBorderChange }: {
+export function InvitationSurfacePicker({ values, onChange, onBlurChange, onGlassBorderChange, embedded = false }: {
+  embedded?: boolean;
   values: Pick<EditorValues, "blurIntensity" | "backgroundBlurIntensity" | "backgroundDimIntensity" | "panelStyle" | "glassBorder" | "sectionCorners" | "accent" | "backgroundImageUrl" | "hostNames" | "name" | "typography" | "bodyTypography">;
   onChange(value: InvitationPanelStyle): void;
   onBlurChange(value: number): void;
@@ -30,7 +31,7 @@ export function InvitationSurfacePicker({ values, onChange, onBlurChange, onGlas
     "--surface-heading": getInvitationFont(values.typography).family,
     "--surface-body": getInvitationFont(values.bodyTypography).family,
   } as CSSProperties;
-  return <fieldset className={styles.picker} style={theme}>
+  return <fieldset className={`${styles.picker} ${embedded ? styles.embedded : ""}`} style={theme}>
     <legend className={styles.srOnly}>El fondo de tus secciones</legend>
     <div className={styles.heading}><span className={styles.headingIcon} aria-hidden="true"><FiLayers /></span><div><span className={styles.eyebrow}>EL TOQUE FINAL</span><h2>Un fondo a tu estilo</h2></div></div>
     <p className={styles.intro}>Texturas suaves, color y transparencia. Encuentra el acabado que acompaña tu celebración.</p>

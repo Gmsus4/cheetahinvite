@@ -304,6 +304,11 @@ model InvitationPayment {
   stripeCheckoutSessionId String? @unique
   stripePaymentIntentId   String? @unique
   stripeChargeId          String? @unique
+  provider                String @default("stripe")
+  providerCheckoutId      String? @unique
+  providerPaymentId       String? @unique
+  checkoutUrl             String?
+  stripeOxxo              Boolean @default(false)
   checkoutExpiresAt       DateTime
   paidAt                  DateTime?
   expiresAt               DateTime?

@@ -13,11 +13,11 @@ import { eventButtonAppearance } from './invitation-buttons';
 import { sharedInvitationId, sharedInvitationDesign } from './shared-invitation';
 
 export function guidedDetails(eventType: string) {
-  return (['story', 'ceremony', 'program', 'parents', 'dress_code', 'gifts', 'gallery', 'rsvp', 'music', 'custom'] as const).map(type => {
+  return (['story', 'ceremony', 'program', 'parents', 'dress_code', 'gifts', 'gallery', 'rsvp', 'music', 'custom', 'closing'] as const).map(type => {
     const weddingDetail = eventType === 'wedding' ? weddingDetails.find(detail => detail.type === type) : undefined;
     return weddingDetail ?? ({
-    type, title: invitationSectionPreset(eventType, type).title,
-    question: ({location:'¿Mostrar el lugar principal?', story:'¿Quieres compartir unas palabras?', ceremony:'¿Habrá una ceremonia?', reception:'¿Habrá otra sede para la celebración?', program:'¿Quieres compartir el programa?', parents:'¿Quieres mencionar a personas especiales?', dress_code:'¿Habrá código de vestimenta?', gifts:'¿Quieres incluir información de regalos?', gallery:'¿Quieres incluir una galería?', rsvp:'¿Quieres recibir confirmaciones?', music:'¿Quieres compartir una playlist?', custom:'¿Hay algo más que deban saber?'} as const)[type],
+    type, title: type === 'closing' ? 'Despedida' : invitationSectionPreset(eventType, type).title,
+    question: ({closing:'¿Quieres incluir una despedida?', location:'¿Mostrar el lugar principal?', story:'¿Quieres compartir unas palabras?', ceremony:'¿Habrá una ceremonia?', reception:'¿Habrá otra sede para la celebración?', program:'¿Quieres compartir el programa?', parents:'¿Quieres mencionar a personas especiales?', dress_code:'¿Habrá código de vestimenta?', gifts:'¿Quieres incluir información de regalos?', gallery:'¿Quieres incluir una galería?', rsvp:'¿Quieres recibir confirmaciones?', music:'¿Quieres compartir una playlist?', custom:'¿Hay algo más que deban saber?'} as const)[type],
     help: type === 'rsvp' ? 'Recibe respuestas en la invitación o mediante un enlace externo.' : 'Opcional. Activa esta sección para personalizarla.',
     });
   });
@@ -49,7 +49,7 @@ export function guidedInformationSectionIds(eventType: string, sections: InviteS
 export function completeGuidedSections(eventType: string, stored: InviteSection[]) {
   const previous = stored.map(section => section.type === 'location' ? { ...section, title: locationSectionTitle(section) } : section.type === 'rsvp' && !section.rsvpMode ? {...section, rsvpMode:'external' as const} : section);
   // Preserve the formerly automatic location block; other missing details stay disabled.
-  return [...previous, ...guidedSections(eventType).filter(section => !previous.some(old => old.type === section.type)).slice(0, Math.max(0, 15 - previous.length)).map(section => ({ ...section, enabled: section.type === 'location' ? usesPrimaryLocation(previous) : section.type === 'cover' || section.type === 'countdown', content: '' }))];
+  return [...previous, ...guidedSections(eventType).filter(section => !previous.some(old => old.type === section.type)).slice(0, Math.max(0, 16 - previous.length)).map(section => ({ ...section, enabled: section.type === 'location' ? usesPrimaryLocation(previous) : section.type === 'cover' || section.type === 'countdown' || section.type === 'closing', content: section.type === 'closing' ? section.content : '' }))];
 }
 export function initialGuidedValues(event: EventData): EditorValues {
   const type = event.eventType;

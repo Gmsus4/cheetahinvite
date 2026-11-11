@@ -39,6 +39,11 @@ function SectionContentFields({ section, onChange, uploadProps, allowSectionPhot
   const updateCompanionLimit = (value: number) => onChange({ maxCompanions: Number.isFinite(value) ? Math.min(RSVP_LIMITS.companions, Math.max(0, Math.trunc(value))) : 0 });
   const mediaClass = `guided-section-media${mediaClassName ? ` ${mediaClassName}` : ""}`;
   const surfaceControl = showStyleControls && allowSectionPhoto && <SectionSurfaceFields section={section} onChange={onChange} globalShowIcons={globalShowIcons} globalPanelStyle={globalPanelStyle} />;
+  if (section.type === "closing") return <>
+    <Field errors={fieldErrors} label="Frase de cierre" id={prefix + '-title'}><input id={prefix + '-title'} value={section.title} maxLength={120} onChange={e => onChange({ title: e.target.value })} /></Field>
+    <Field errors={fieldErrors} label="Mensaje de agradecimiento" id={prefix + '-content'}><textarea id={prefix + '-content'} value={section.content} maxLength={2000} rows={3} onChange={e => onChange({ content: e.target.value })} /></Field>
+    <small>Los nombres se toman automáticamente de los protagonistas de la invitación.</small>
+  </>;
   if (section.type === "countdown") return <>
     <Field errors={fieldErrors} label="Título de la sección" id={`${prefix}-title`}><input id={`${prefix}-title`} value={section.title} maxLength={100} onChange={e => onChange({ title: e.target.value })} /></Field>
     <small>La cuenta regresiva usa la fecha y la hora de «Fecha y lugar» y aparece dentro de la portada en escritorio, o debajo de ella en móvil, cuando hay una fecha definida.</small>

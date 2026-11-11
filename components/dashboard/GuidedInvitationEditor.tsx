@@ -37,6 +37,7 @@ import { invitationPreviewKey, parseInvitationPreview, storeInvitationPreview } 
 import { InvitationPrivacyFields } from "./InvitationPrivacyFields";
 import { CustomInvitationLinkField } from "./CustomInvitationLinkField";
 import styles from "./EventWorkspace.module.css";
+import { InvitationDateNotice } from "./InvitationDateNotice";
 import { DashboardHeader } from "./DashboardHeader";
 
 const steps = ["¿Quién celebra?", "¿Cuándo y dónde?", "Portada y fondo", "Dale tu estilo", "Personaliza los bloques", "Revisa tu invitación"];
@@ -378,6 +379,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
               <Field label="Nombre de la invitación" id="w-name" wide><input id="w-name" value={values.name} required minLength={2} maxLength={100} onChange={e => patch({ name: e.target.value })} /></Field>
               <p className="guided-help guided-wide">Empecemos por los protagonistas. Los demás detalles vienen después.</p>
             </div>}
+            {!exampleId && (step === 1 || step === finalStep) && <InvitationDateNotice date={values.eventDate} time={values.eventTime} expiresAt={event.expiresAt} />}
             {step === 1 && <div className="guided-data-grid">
               <Field label="Fecha" id="w-date"><input id="w-date" type="date" value={values.eventDate} onChange={e => patch({ eventDate: e.target.value, ...(!e.target.value ? { eventTime: '' } : {}) })} /></Field>
               <Field label="Hora" id="w-time" help={!values.eventDate ? 'Primero elige una fecha.' : undefined}><input id="w-time" type="time" disabled={!values.eventDate} value={values.eventTime} onChange={e => patch({ eventTime: e.target.value })} /></Field>
@@ -403,7 +405,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                   <button className="guided-blocks-toggle" type="button" aria-expanded={blocksExpanded} aria-controls="included-sections-list" onClick={() => setBlocksExpanded(expanded => !expanded)}>{blocksExpanded ? 'Ocultar bloques' : 'Ver todos los bloques'}<FiChevronDown aria-hidden="true" /></button>
                 </div>
                 <div className="guided-included-summary guided-block-list" id="included-sections-list" hidden={!blocksExpanded}>
-                  {includedSections.length ? <><p>Revisa los bloques en el orden en que aparecerán.</p><nav aria-label="Secciones incluidas en tu invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.title || extraDetailLabel(section)} aria-label={`Editar sección: ${section.title || extraDetailLabel(section)}`} aria-current={contentKey === section.id ? 'step' : undefined} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}>{section.title || extraDetailLabel(section)}</button>)}</nav></> : <p>Aún no hay secciones incluidas. Puedes activarlas durante el recorrido o agregar un detalle al final.</p>}
+                  {includedSections.length ? <><p>Revisa los bloques en el orden en que aparecerán.</p><nav aria-label="Secciones incluidas en tu invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.type === 'closing' ? 'Despedida' : section.title || extraDetailLabel(section)} aria-label={`Editar sección: ${section.type === 'closing' ? 'Despedida' : section.title || extraDetailLabel(section)}`} aria-current={contentKey === section.id ? 'step' : undefined} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}>{section.type === 'closing' ? 'Despedida' : section.title || extraDetailLabel(section)}</button>)}</nav></> : <p>Aún no hay secciones incluidas. Puedes activarlas durante el recorrido o agregar un detalle al final.</p>}
                 </div>
               </div>
               {contentKey === '__more' ? <section className="guided-more-details" aria-labelledby="more-details-title">
@@ -454,7 +456,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
               <section className="guided-included-summary" aria-labelledby="review-sections-title">
                 <div className="guided-included-heading"><h2 id="review-sections-title">Secciones de tu invitación</h2><span role="status">{includedSections.length} {includedSections.length === 1 ? 'sección incluida' : 'secciones incluidas'}</span></div>
                 <p>{includedSections.length ? 'Estas son las secciones que elegiste. Puedes abrir cualquiera para revisarla o hacer un cambio.' : 'Todavía no has incluido secciones. Puedes agregar los detalles que quieras compartir.'}</p>
-                <nav aria-label="Secciones elegidas para la invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.title || extraDetailLabel(section)} aria-label={`Revisar sección: ${section.title || extraDetailLabel(section)}`} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}>{section.title || extraDetailLabel(section)}</button>)}{!includedSections.length && <button type="button" disabled={busy || uploads > 0} onClick={() => goTo(4, '__more')}>Agregar detalles</button>}</nav>
+                <nav aria-label="Secciones elegidas para la invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.type === 'closing' ? 'Despedida' : section.title || extraDetailLabel(section)} aria-label={`Revisar sección: ${section.type === 'closing' ? 'Despedida' : section.title || extraDetailLabel(section)}`} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}>{section.type === 'closing' ? 'Despedida' : section.title || extraDetailLabel(section)}</button>)}{!includedSections.length && <button type="button" disabled={busy || uploads > 0} onClick={() => goTo(4, '__more')}>Agregar detalles</button>}</nav>
               </section>
               <div className="guided-checklist"><h2>{issues.length ? "Antes de publicar" : "Todo listo para compartir"}</h2>{issues.length ? <><p>{published ? "Revisa estos datos antes de publicar tus cambios:" : "Puedes guardar el borrador ahora. Para publicar, completa lo siguiente:"}</p><ul>{issues.map(issue => <li key={issue.message}><button type="button" data-target-step={issue.step} data-target-section={issue.sectionId} onClick={() => goToIssue(issue)}>{issue.message}<FiArrowRight /></button></li>)}</ul></> : <p>{guidedFlow ? 'Tu invitación está lista para publicar.' : 'Los datos principales están completos. Revisa la vista previa antes de continuar.'}</p>}</div>
               {!exampleId && (!guidedFlow || step === 6) && <InvitationPrivacyFields privacy={values.privacy ?? "UNSET"} pin={values.pin ?? ""} pinPending={Boolean(values.pinPending)} hasPin={hasPin} disabled={busy || uploads > 0} onChange={patch} />}
@@ -473,7 +475,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
 }
 
 function extraDetailLabel(section: InviteSection) {
-  return ({ countdown: 'Cuenta regresiva', cover: 'Portada', location: 'Lugar principal de la celebración', gallery: 'Galería de fotos', dress_code: 'Código de vestimenta', gifts: 'Regalos', ceremony: 'Ceremonia', reception: 'Celebración en otra sede', music: 'Playlist', custom: 'Información adicional', parents: 'Familia y personas especiales', program: 'Programa de actividades', story: 'Historia de la celebración', rsvp: 'Confirmación de asistencia' } as const)[section.type];
+  return ({ closing: 'Despedida', countdown: 'Cuenta regresiva', cover: 'Portada', location: 'Lugar principal de la celebración', gallery: 'Galería de fotos', dress_code: 'Código de vestimenta', gifts: 'Regalos', ceremony: 'Ceremonia', reception: 'Celebración en otra sede', music: 'Playlist', custom: 'Información adicional', parents: 'Familia y personas especiales', program: 'Programa de actividades', story: 'Historia de la celebración', rsvp: 'Confirmación de asistencia' } as const)[section.type];
 }
 
 function Field({ label, id, help, wide, children, errors = {} }: { errors?: Record<string, string>; label: string; id: string; help?: string; wide?: boolean; children: ReactNode }) {

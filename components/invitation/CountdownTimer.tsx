@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
+import { invitationTimestamp } from "@/lib/invitation-date";
 
 export function CountdownTimer({ date, time }: { date: string; time: string }) {
   const [now, setNow] = useState<number | null>(null);
-  const target = Date.parse(`${date}T${time}:00-06:00`);
+  const target = invitationTimestamp(date, time);
 
   useEffect(() => {
     const update = () => setNow(Date.now());

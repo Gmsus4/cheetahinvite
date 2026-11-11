@@ -19,7 +19,7 @@ export async function prepareInvitationCheckout(eventId: string, ownerId: string
     if ((event.paidAt || event.complimentaryAt) && !renewal) return null;
     if (eventPublicationIssues(event).length) throw new Error("Complete the invitation before checkout");
     const renewalOfPaymentIntentId = renewal ? event.stripePaymentIntentId : null;
-    const pending = await tx.invitationPayment.findFirst({ where: { eventId, ownerId, status: "PENDING", renewalOfPaymentIntentId }, orderBy: { createdAt: "desc" } });
+    const pending = await tx.invitationPayment.findFirst({ where: { eventId, ownerId, status: "PENDING", provider: "stripe", renewalOfPaymentIntentId }, orderBy: { createdAt: "desc" } });
     if (pending) return pending;
     const checkoutExpiresAt = new Date(Math.floor(Math.min(Date.now() + 60 * 60 * 1000,
       renewal ? invitationLifecycle(event)!.deletesAt.getTime() : Infinity) / 1000) * 1000);
@@ -28,6 +28,8 @@ export async function prepareInvitationCheckout(eventId: string, ownerId: string
       // Explicit expiry prevents an ambiguous create retry after Stripe's
       // idempotency retention from opening another payable session.
       checkoutExpiresAt, renewalOfPaymentIntentId, livemode: stripeLiveMode(),
+      stripeOxxo: currentPrice.currency === "mxn" && currentPrice.amount >= 1000 && currentPrice.amount <= 1000000 && process.env.STRIPE_OXXO_ENABLED === "true"
+        && (!renewal || invitationLifecycle(event)!.deletesAt.getTime() - checkoutExpiresAt.getTime() > 4 * 86400000),
     } });
   });
   if (!payment) return null;
@@ -65,7 +67,8 @@ export async function prepareInvitationCheckout(eventId: string, ownerId: string
   const origin = new URL(process.env.APP_URL!).origin;
   const metadata = { eventId, ownerId, paymentId: payment.id, product: "invitation-12-months" };
   const checkout = await stripe.checkout.sessions.create({
-    mode: "payment", allowed_payment_method_types: ["card"], client_reference_id: eventId,
+    mode: "payment", allowed_payment_method_types: payment.stripeOxxo ? ["card", "oxxo"] : ["card"],
+    ...(payment.stripeOxxo ? { payment_method_options: { oxxo: { expires_after_days: 1 } } } : {}), client_reference_id: eventId,
     metadata, payment_intent_data: { metadata }, expires_at: Math.floor(payment.checkoutExpiresAt.getTime() / 1000),
     line_items: [{ quantity: 1, price_data: { currency: payment.currency, unit_amount: payment.amount,
       product_data: { name: "Invitación digital · 12 meses", description: "Un pago por evento. Sin renovación automática." },

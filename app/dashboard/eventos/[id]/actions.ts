@@ -222,7 +222,7 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     message.length > 1200 || !/^#[0-9a-fA-F]{6}$/.test(accent) || !isInvitationFont(typography) || !isInvitationFont(bodyTypography) ||
     (eventDate && Number.isNaN(eventDate.getTime())) ||
     (eventTime && (!/^([01]\d|2[0-3]):[0-5]\d$/.test(eventTime) || !eventDate)) ||
-    !Array.isArray(sections) || sections.length > 15 ||
+    !Array.isArray(sections) || sections.length > 16 ||
     sections.some((section) => !isValidSection(section))
   ) return failure("validation", "Revisa los campos marcados antes de guardar. Tus cambios siguen en este dispositivo.");
 
@@ -312,7 +312,7 @@ function isValidSection(value: unknown): value is {
 } {
   if (!value || typeof value !== "object") return false;
   const section = value as Record<string, unknown>;
-  const types = ["countdown", "cover", "location", "story", "ceremony", "reception", "program", "parents", "dress_code", "gifts", "rsvp", "gallery", "music", "custom"];
+  const types = ["countdown", "cover", "location", "story", "ceremony", "reception", "program", "parents", "dress_code", "gifts", "rsvp", "gallery", "music", "custom", "closing"];
   const strings = ["id", "type", "title", "content", "detail", "link", "imageUrl"] as const;
   if (!strings.every((key) => typeof section[key] === "string")) return false;
   if (typeof section.enabled !== "boolean" || !types.includes(section.type as string)) return false;

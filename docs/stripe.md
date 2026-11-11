@@ -1,5 +1,8 @@
 # Pago y publicación con Stripe
 
+Para PayPal, Mercado Pago y la configuración de OXXO, consulta
+[payment-methods.md](payment-methods.md).
+
 El editor y la vista previa son privados. Publicar y compartir requieren un pago
 confirmado. El precio actual es $269 MXN por evento, IVA incluido, con 12 meses de vigencia y
 sin renovación automática. El importe está centralizado en `lib/invitation-payment.ts`.
