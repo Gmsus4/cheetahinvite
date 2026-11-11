@@ -10,7 +10,7 @@ let paymentId, eventId;
 (async () => {
   try {
     await prisma.user.create({ data: { id: ownerId, name: 'Payment integration fixture', invitationCount: 1 } });
-    eventId = (await prisma.event.create({ data: { ...f.eventDetails, ownerId, name: 'Payment fixture' } })).id;
+    eventId = (await prisma.event.create({ data: { ...f.eventDetails, ownerId, privacy: 'PUBLIC', name: 'Payment fixture' } })).id;
     const urls = await Promise.all([f.checkout.prepareInvitationCheckout(eventId, ownerId), f.checkout.prepareInvitationCheckout(eventId, ownerId)]);
     assert.equal(urls[0], urls[1]);
     const payments = await prisma.invitationPayment.findMany({ where: { ownerId } });
@@ -40,9 +40,50 @@ let paymentId, eventId;
     await prisma.event.delete({ where: { id: eventId } });
     await f.fulfillment.reconcileInvitationPayment(paymentId);
     assert.equal((await prisma.invitationPayment.findUnique({ where: { id: paymentId } })).refundedAmount, 26900);
+    // Exercise the external reservation/reconciliation lock order in PostgreSQL.
+    // OAuth and all PayPal operations remain simulated, including late approval.
+    const externalEvent = await prisma.event.create({ data: { ...f.eventDetails, ownerId, privacy: 'PUBLIC', name: 'Return URL fixture' } });
+    const originalFetch = global.fetch, originalOrigin = process.env.APP_URL, originalMode = process.env.PAYPAL_ENVIRONMENT;
+    const orders = new Map(); let externalCreates = 0, captureAttempts = 0;
+    process.env.PAYPAL_ENVIRONMENT = 'sandbox';
+    global.fetch = async (url, options) => {
+      const path = new URL(url).pathname;
+      if (path === '/v1/oauth2/token') return Response.json({ access_token: 'fixture' });
+      if (path === '/v2/checkout/orders' && options.method === 'POST') {
+        const data = JSON.parse(options.body), id = `order_${randomUUID()}`;
+        orders.set(id, { ...data, id, status: 'PAYER_ACTION_REQUIRED' }); externalCreates++;
+        return Response.json({ id, links: [{ rel: 'payer-action', href: `https://www.sandbox.paypal.com/checkoutnow?token=${id}` }] });
+      }
+      if (path.endsWith('/capture')) { captureAttempts++; throw Error('Retired order must not be captured'); }
+      const order = orders.get(path.split('/').at(-1));
+      assert.ok(order, 'Unknown mocked PayPal order'); return Response.json(order);
+    };
+    try {
+      const { prepareExternalCheckout } = f.load('lib/external-payment-checkout.ts');
+      const { reconcileExternalPayment } = f.load('lib/external-payment-fulfillment.ts');
+      const localUrls = await Promise.all([prepareExternalCheckout(externalEvent.id, ownerId, 'paypal'), prepareExternalCheckout(externalEvent.id, ownerId, 'paypal')]);
+      assert.equal(localUrls[0], localUrls[1]); assert.equal(externalCreates, 1);
+      const localAttempt = await prisma.invitationPayment.findFirst({ where: { eventId: externalEvent.id } });
+      assert.equal(localAttempt.checkoutOrigin, 'http://localhost:3000');
+      process.env.APP_URL = 'https://return-url-fixture.example.com';
+      const publicUrls = await Promise.all([prepareExternalCheckout(externalEvent.id, ownerId, 'paypal'), prepareExternalCheckout(externalEvent.id, ownerId, 'paypal')]);
+      assert.equal(publicUrls[0], publicUrls[1]); assert.notEqual(publicUrls[0], localUrls[0]); assert.equal(externalCreates, 2);
+      assert.equal((await prisma.invitationPayment.findUnique({ where: { id: localAttempt.id } })).status, 'EXPIRED');
+      const publicAttempt = await prisma.invitationPayment.findFirst({ where: { eventId: externalEvent.id, status: 'PENDING' } });
+      assert.equal(publicAttempt.checkoutOrigin, process.env.APP_URL);
+      const publicOrder = orders.get(publicAttempt.providerCheckoutId.slice('paypal:'.length));
+      assert.equal(new URL(publicOrder.payment_source.paypal.experience_context.return_url).origin, process.env.APP_URL);
+      orders.get(localAttempt.providerCheckoutId.slice('paypal:'.length)).status = 'APPROVED';
+      await Promise.all([reconcileExternalPayment(localAttempt.id), prepareExternalCheckout(externalEvent.id, ownerId, 'paypal')]);
+      assert.equal(captureAttempts, 0); assert.equal(externalCreates, 2);
+      assert.equal((await prisma.invitationPayment.findUnique({ where: { id: localAttempt.id } })).paidAt, null);
+    } finally {
+      global.fetch = originalFetch; process.env.APP_URL = originalOrigin;
+      if (originalMode === undefined) delete process.env.PAYPAL_ENVIRONMENT; else process.env.PAYPAL_ENVIRONMENT = originalMode;
+    }
     await prisma.user.delete({ where: { id: ownerId } });
     assert.ok(await prisma.invitationPayment.findUnique({ where: { id: paymentId } }));
-    console.log('PostgreSQL payment integration passed: concurrent Checkout and settlement, dispute recovery, rollback, refund and deletion retention. Stripe was simulated throughout.');
+    console.log('PostgreSQL payment integration passed: concurrent Checkout and settlement, dispute recovery, rollback, refund, cross-origin PayPal reservations, late approval and deletion retention. Providers were simulated throughout.');
   } finally {
     assert.ok(ownerId.startsWith('__payment_test_'));
     await prisma.invitationPayment.deleteMany({ where: { ownerId } });

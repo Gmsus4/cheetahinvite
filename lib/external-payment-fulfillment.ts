@@ -4,17 +4,10 @@ import { Prisma } from "@/generated/prisma/client";
 import { applyPaymentToInvitation } from "@/lib/payment-fulfillment";
 import { invitationLinkRegistryReady } from "@/lib/invitation-link-storage";
 import { addCalendarMonths } from "@/lib/invitation-lifecycle";
-import { mercadoPagoRequest, paypalRequest, providerLiveMode, isPaymentProvider } from "@/lib/payment-providers";
+import { mercadoPagoRequest, mercadoPagoPaymentEnvironmentMatches, paypalRequest, providerLiveMode, isPaymentProvider } from "@/lib/payment-providers";
 import { paypalRefundCaptureId } from "@/lib/paypal-references";
-
-export function minorUnits(value: unknown) {
-  const text = String(value);
-  if (!/^\d+(\.\d{1,2})?$/.test(text)) throw new Error("Invalid payment amount");
-  const [whole, fraction = ""] = text.split(".");
-  const amount = Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
-  if (!Number.isSafeInteger(amount)) throw new Error("Invalid payment amount");
-  return amount;
-}
+import { minorUnits } from "@/lib/payment-amount";
+import { isMercadoPagoOrderId, validateMercadoPagoOrder, mercadoPagoOrderSettlement } from "@/lib/mercadopago-orders";
 
 export async function reconcileExternalPayment(paymentId: string, minimumAgeMs = 0, notification: {
   paypalDisputeId?: string; paypalRefundId?: string; paypalApprovalReversed?: boolean; mercadoPagoPaymentId?: string;
@@ -97,6 +90,12 @@ export async function reconcileExternalPayment(paymentId: string, minimumAgeMs =
         disputes.push({ id, status: won ? "won" : dispute.status === "RESOLVED" ? "lost" : "under_review" });
       }
       disputeStatus = disputes.find(item => item.status === "lost")?.status ?? disputes.find(item => item.status !== "won")?.status ?? disputes[0]?.status ?? null;
+    } else if (isMercadoPagoOrderId(checkoutId)) {
+      const order = await mercadoPagoRequest(`/v1/orders/${encodeURIComponent(checkoutId)}`);
+      validateMercadoPagoOrder(order, checkoutId, payment);
+      const settlement = mercadoPagoOrderSettlement(order, payment.amount);
+      ({ paid, failed, identity, paidAt, refundedAmount, refundPendingAmount, disputeStatus } = settlement);
+      refunds.push(...settlement.refunds); disputes.push(...settlement.disputes);
     } else {
       const existingId = payment.providerPaymentId?.slice("mercadopago:".length) ?? notification.mercadoPagoPaymentId;
       const results = existingId ? [await mercadoPagoRequest(`/v1/payments/${encodeURIComponent(existingId)}`)]
@@ -104,8 +103,9 @@ export async function reconcileExternalPayment(paymentId: string, minimumAgeMs =
       // Prefer an approved charge over a newer declined retry.
       const remote = results.find((item: { status: string }) => ["approved", "refunded", "charged_back"].includes(item.status)) ?? results[0];
       if (remote) {
-        if (remote.external_reference !== payment.id || remote.live_mode !== payment.livemode
-          || remote.currency_id?.toLowerCase() !== payment.currency || minorUnits(remote.transaction_amount) !== payment.amount) throw new Error("Mercado Pago purchase mismatch");
+        if (remote.external_reference !== payment.id
+          || remote.currency_id?.toLowerCase() !== payment.currency || minorUnits(remote.transaction_amount) !== payment.amount
+          || !await mercadoPagoPaymentEnvironmentMatches(remote, payment.livemode)) throw new Error("Mercado Pago purchase mismatch");
         paid = ["approved", "refunded", "charged_back"].includes(remote.status);
         failed = ["rejected", "cancelled"].includes(remote.status);
         identity = `mercadopago:${remote.id}`;
@@ -121,7 +121,7 @@ export async function reconcileExternalPayment(paymentId: string, minimumAgeMs =
     if (!identity || !paidAt || !Number.isFinite(paidAt.getTime()) || (payment.providerPaymentId && payment.providerPaymentId !== identity)) throw new Error("Invalid payment identity or date");
     paidAt = payment.paidAt ?? paidAt;
     const expiresAt = payment.expiresAt ?? addCalendarMonths(paidAt, 12);
-    const updated = await tx.invitationPayment.update({ where: { id: payment.id }, data: { status: "PAID", providerPaymentId: identity, paidAt, expiresAt, refundedAmount, refundPendingAmount, disputeStatus, ...(payment.provider === "paypal" ? { disputes, refunds } : {}), lastSyncedAt: new Date() } });
+    const updated = await tx.invitationPayment.update({ where: { id: payment.id }, data: { status: "PAID", providerPaymentId: identity, paidAt, expiresAt, refundedAmount, refundPendingAmount, disputeStatus, ...(payment.provider === "paypal" || isMercadoPagoOrderId(checkoutId) ? { disputes, refunds } : {}), lastSyncedAt: new Date() } });
     return applyPaymentToInvitation(tx, updated, identity, null, registryReady);
   }, { timeout: 60000, maxWait: 10000 });
 }

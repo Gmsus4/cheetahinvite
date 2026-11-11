@@ -308,6 +308,7 @@ model InvitationPayment {
   providerCheckoutId      String? @unique
   providerPaymentId       String? @unique
   checkoutUrl             String?
+  checkoutOrigin          String?
   stripeOxxo              Boolean @default(false)
   checkoutExpiresAt       DateTime
   paidAt                  DateTime?
