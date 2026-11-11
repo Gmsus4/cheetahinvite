@@ -1,7 +1,8 @@
 import { Suspense } from "react";
+import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
-import { FiClock, FiCreditCard, FiUsers } from "react-icons/fi";
+import { FiCreditCard, FiImage, FiUsers } from "react-icons/fi";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { canEditInvitation } from "@/lib/invitation-lifecycle";
@@ -21,7 +22,7 @@ async function SettingsData({ params }: Pick<PageProps<"/dashboard/eventos/[id]/
   const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) redirect(`/login?callbackUrl=${encodeURIComponent(`/dashboard/eventos/${id}/ajustes`)}`);
-  const event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id }, select: { name: true, privacy: true, privacyVersion: true, pinHash: true, paidAt: true, complimentaryAt: true, expiresAt: true, status: true, isExample: true, stripePaymentIntentId: true } });
+  const event = await prisma.event.findFirst({ where: { id, ownerId: session.user.id }, select: { name: true, imageUrl: true, privacy: true, privacyVersion: true, pinHash: true, paidAt: true, complimentaryAt: true, expiresAt: true, status: true, isExample: true, stripePaymentIntentId: true } });
   if (!event) notFound();
   const editable = canEditInvitation(event);
   // eslint-disable-next-line react-hooks/purity -- Request-time server clock.
@@ -30,15 +31,15 @@ async function SettingsData({ params }: Pick<PageProps<"/dashboard/eventos/[id]/
   return <main className={styles.page}>
     <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} />
     <div className={styles.content}>
-      <header className={styles.heading}><span className={styles.eyebrow}>TU INVITACIÓN · AJUSTES</span><h1>Todo bajo tu control</h1><p>{event.name}</p></header>
+      <header className={styles.heading}><span className={styles.eyebrow}>TU INVITACIÓN</span><h1>Ajustes de la invitación</h1><div className={styles.eventIdentity}><span className={styles.eventThumbnail}>{event.imageUrl ? <Image src={event.imageUrl} alt="" width={40} height={40} unoptimized /> : <FiImage aria-hidden="true" />}</span><p>{event.name}</p></div></header>
       <div className={styles.grid}>
         {editable && <InvitationPrivacySettings eventId={id} initialPrivacy={event.privacy} initialVersion={event.privacyVersion} hasPin={Boolean(event.pinHash)} />}
         <div className={styles.sidebar}>
-          <section className={styles.privacy} aria-labelledby="invitation-term-heading">
-            <div className={styles.sectionHeading}><span className={styles.icon}><FiClock aria-hidden="true" /></span><div><h2 id="invitation-term-heading">Vigencia y renovación</h2><p>Tiempo disponible de tu invitación.</p></div></div>
+          <section className={styles.termSection} aria-labelledby="invitation-term-heading">
+            <h2 id="invitation-term-heading">Vigencia y renovación</h2>
             {event.expiresAt && (event.paidAt || event.complimentaryAt) ? <InvitationTerm event={termEvent} now={now} compact /> : <p className={styles.hint}>Tu año de vigencia comenzará cuando se confirme el pago. Después tendrás un mes de archivo para renovar antes de la eliminación automática.</p>}
-            {!editable && <p className={styles.hint}>Los cambios de esta invitación están desactivados. Revisa su estado en Pago y soporte.</p>}
           </section>
+          {!editable && <p className={styles.hint} role="status">Los cambios de esta invitación están desactivados. Revisa su estado en Pago y soporte.</p>}
           <nav className={styles.links} aria-label="Administrar invitación">
             <InvitationActionLink href={`/dashboard/eventos/${id}/asistencias`} title="Confirmaciones de asistencia" description="Consulta respuestas y acompañantes." icon={<FiUsers />} tone="lavender" compact />
             <InvitationActionLink href={`/dashboard/eventos/${id}/pago`} title="Pago y soporte" description="Revisa tu compra y encuentra ayuda." icon={<FiCreditCard />} compact />

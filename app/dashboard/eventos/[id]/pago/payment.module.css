@@ -82,6 +82,7 @@
 @media (max-width: 440px) { .content { width: calc(100% - 28px); } }
 .methods {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   min-width: 0;
   border: 0;
@@ -92,4 +93,106 @@
 .methods legend {
   margin-bottom: 12px;
   font-weight: 600;
+}
+
+.methods .providerButton {
+  gap: 12px;
+}
+.methods .providerButton svg { display: block; flex: 0 0 24px; width: 24px; height: 24px; }
+.methods .providerButton span { min-width: 0; }
+
+.priceSummary .price { margin-top: 16px; }
+.priceSummary .priceNote { margin-bottom: 12px; }
+.card .duration { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 18px; font-size: 14px; }
+.duration svg { flex: none; margin-top: 5px; color: var(--accent); }
+.checkout + .privateNote { margin-top: 14px; }
+.purchaseDetails { border-top: 1px solid var(--line); }
+.purchaseDetails > summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding-block: 8px; list-style: none; cursor: pointer; color: var(--ink); font-size: 14px; font-weight: 600; }
+.purchaseDetails > summary::-webkit-details-marker { display: none; }
+.purchaseDetails > summary svg { flex: none; }
+.purchaseDetails[open] > summary svg { transform: rotate(180deg); }
+.purchaseDetails .benefits { border: 0; margin: 0; padding: 8px 0 16px; }
+
+/* Compact mobile spacing, preserving typography. */
+@media(max-width:760px)  {
+  .content { width:calc(100% - 32px); margin-top:16px}
+  .heading { margin-bottom:20px}
+  .heading h1 { margin:8px 0 10px}
+  .layout,.sidebar { gap:12px}
+  .card { padding:18px 16px; border-radius:18px}
+  .cardHeading { gap:12px}
+  .card h2 { margin-block:12px 8px}
+  .card p { margin-bottom:14px}
+  .sectionTitle h2 { margin:0}
+  .price { margin-top:14px}
+  .benefits { gap:10px; margin-block:16px; padding-block:16px}
+  .reference { margin-top:16px; padding-top:14px}
+  .card :global(.payment-receipt)  { padding-top:14px}
+  .card :global(.payment-receipt-state)  { margin-bottom:12px}
+  .card :global(.payment-receipt dl>div)  { padding-block:10px; gap:4px}
+  .support { padding-top:12px}
+  .footer { margin-top:24px; padding-top:14px}
+  .priceSummary { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; margin: 12px 0 8px; }
+  .priceSummary .price { margin: 0; }
+  .priceSummary .priceNote { margin: 0; }
+  .card .duration { margin-bottom: 16px; }
+  .methods { gap: 8px; margin-bottom: 8px; }
+  .methods legend { margin-bottom: 8px; }
+  .methods .primary { width: 100%; min-width: 0; min-height: 46px; padding: 10px 12px; gap: 6px; white-space: normal; }
+}
+
+/* Keep payment and sharing prominent; secondary information opens on demand. */
+.mainColumn { gap: 16px; }
+.card.paymentCard { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.paymentCard .cardHeading { flex-wrap: wrap; gap: 8px 12px; margin-bottom: 14px; }
+.paymentCard .cardHeading h2 { margin: 0; }
+.paymentCard .status { padding: 6px 10px; }
+.priceSummary { display: grid; grid-template-columns: minmax(0,1fr); gap: 4px; margin: 12px 0; }
+.priceSummary .price, .priceSummary .priceNote { margin: 0; }
+.termSummary { margin-top: 16px; padding-block: 16px; border-top: 1px solid var(--line); }
+.courtesyActions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.purchaseDetails .reference { margin: 0; padding: 0 0 12px; border: 0; }
+.receiptDetails { min-width: 0; padding-inline: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.receiptDetails > summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding-block: 8px; list-style: none; cursor: pointer; }
+.receiptDetails > summary::-webkit-details-marker { display: none; }
+.receiptDetails > summary h2 { margin: 0; font-size: 23px; line-height: 1.3; letter-spacing: -.045em; }
+.receiptDetails > summary svg { flex: none; }
+.receiptDetails[open] > summary svg { transform: rotate(180deg); }
+.receiptDetails :global(.payment-receipt) { padding: 8px 0 14px; }
+.receiptDetails :global(.payment-receipt-state) { margin: 0 0 12px; font-size: 13px; }
+.receiptDetails :global(.payment-receipt-state[data-tone="negative"]) { color: var(--danger); }
+.receiptDetails :global(.payment-receipt-state[data-tone="positive"]) { color: var(--success); }
+.receiptDetails :global(.payment-receipt-state[data-tone="warning"]) { color: var(--accent); }
+.receiptDetails :global(.payment-receipt dl) { gap: 0; margin: 0 0 10px; font-size: 14px; }
+.receiptDetails :global(.payment-receipt dl > div) { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.2fr); gap: 12px; padding-block: 10px; border-top: 1px solid var(--line); }
+.receiptDetails :global(.payment-receipt dd) { max-width: none; margin: 0; text-align: right; overflow-wrap: anywhere; }
+.receiptDetails :global(.payment-receipt dt) { overflow-wrap: anywhere; }
+.quickLinks { gap: 10px; }
+.supportArea { padding-top: 16px; border-top: 1px solid var(--line); min-width: 0; }
+.supportArea h2 { margin: 0 0 12px; line-height: 1.3; letter-spacing: -.04em; }
+.supportArea p { margin: 0 0 12px; color: var(--muted); font-size: 15px; line-height: 1.8; }
+.supportArea .support { padding: 0; border: 0; }
+.supportArea .support > summary { min-height: 44px; padding-block: 8px; }
+.supportArea .support[open] > summary { margin-bottom: 12px; }
+.supportArea .support[open] > summary svg { transform: rotate(180deg); }
+.helpLink { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding-block: 8px; border-top: 1px solid var(--line); color: var(--ink); font-size: 14px; }
+.helpLink svg { flex: none; }
+.helpLink:hover { color: var(--accent); }
+@media (max-width: 760px) {
+  .heading { margin-bottom: 18px; }
+  .mainColumn { gap: 12px; }
+  .receiptDetails > summary h2 { font-size: 23px; }
+}
+
+/* Match the compact heading and open composition of invitation settings. */
+.page .heading { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,.7fr); align-items: baseline; gap: 4px 24px; margin-bottom: 24px; }
+.page .heading > .eyebrow { grid-column: 1 / -1; }
+.page .heading h1 { margin: 6px 0 0; font-size: clamp(26px,3.3vw,34px); }
+.page .heading .eventName { justify-self: end; margin: 0; color: var(--muted); font-size: 13px; font-weight: 400; text-align: right; }
+.paymentCard[data-published] .cardHeading { margin-bottom: 12px; }
+.paymentCard[data-published] .cardHeading h2 { font-size: 18px; line-height: 1.35; letter-spacing: -.03em; }
+@media(min-width:1024px) { .layout { gap: 36px; } }
+@media(max-width:700px) {
+  .page .heading { grid-template-columns: minmax(0,1fr); gap: 6px; margin-bottom: 20px; }
+  .page .heading .eventName { justify-self: start; text-align: left; }
 }

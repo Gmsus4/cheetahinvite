@@ -67,3 +67,24 @@
 @media (max-width: 440px) { .page { padding: 0 0 24px; }   .back { gap: 5px; font-size: 11px; } .stats { gap: 12px; } .stat { padding: 18px 14px; border-radius: 20px; } .stat dt { align-items: flex-start; flex-direction: column; } .stat dd { margin-top: 14px; font-size: 36px; } .stat small { font-size: 11px; } .collection { border-radius: 22px; } .collectionHeader { padding: 22px 18px; } .actions { width: 100%; } .actions :is(button,a) { width: 100%; } .collectionFooter { padding: 16px 18px; } .heading h1 { font-size: 34px; } }
 
 @media (max-width: 440px) { .content { width: calc(100% - 28px); } }
+
+/* Compact mobile spacing, preserving typography. */
+@media(max-width:760px)  {
+  .content { width:calc(100% - 32px); margin-top:16px}
+  .heading { margin-bottom:20px}
+  .heading h1 { margin:8px 0 10px}
+  .notice { gap:10px; padding:12px; margin-bottom:16px; border-radius:14px}
+  .stats { gap:10px; margin-bottom:18px}
+  .stat { padding:14px 12px; border-radius:16px}
+  .stat dt { flex-direction:row; align-items:center; gap:8px}
+  .statIcon { width:28px; height:28px}
+  .stat dd { margin:10px 0 2px}
+  .collection { border-radius:18px}
+  .collectionHeader { gap:14px; padding:16px}
+  .actions { display:flex; flex-wrap:wrap; gap:8px}
+  .actions :is(button,a)  { flex:1 1 120px; width:auto; padding-inline:12px}
+  .table :is(th,td)  { padding:12px}
+  .collectionFooter { padding:12px 16px}
+  .empty { padding:24px 16px}
+  .footer { margin-top:24px; padding-top:14px}
+}

@@ -16,3 +16,10 @@
 .card.compact .copy h2 { font-size: 13px; }
 .card.compact .copy p { margin-top: 3px; font-size: 11px; line-height: 1.5; }
 .compact .arrow { flex-basis: 28px; width: 28px; height: 28px; font-size: 14px; }
+
+/* Compact mobile spacing, preserving typography. */
+@media(max-width:700px)  {
+  .card { padding:16px; gap:12px; border-radius:16px}
+  .card .copy p { margin-top:4px}
+  .card.compact { padding:12px 14px}
+}

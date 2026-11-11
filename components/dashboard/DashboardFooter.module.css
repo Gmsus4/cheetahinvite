@@ -1,0 +1,28 @@
+.footer { position: relative; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--muted); font-family: var(--font-body),Arial,sans-serif; }
+.footer::before { position: absolute; top: -1px; left: 0; width: 48px; height: 2px; background: var(--orange); content: ""; }
+.main { display: flex; align-items: center; justify-content: space-between; gap: 20px 32px; }
+.identity { min-width: 0; }
+.brand { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--ink); }
+.brand > span:last-child { font-family: var(--font-poppins),Arial,sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -.05em; }
+.brand > span:last-child > span { color: var(--orange); }
+.identity p { margin: 2px 0 0; font-size: 12px; line-height: 1.7; }
+.support { display: flex; align-items: center; gap: 20px; min-height: 60px; color: var(--ink); }
+.support > span:first-child { display: grid; gap: 5px; min-width: 0; }
+.support strong { font-size: 13px; font-weight: 600; }
+.support small { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.arrow { display: grid; place-items: center; flex: 0 0 36px; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; color: var(--accent); }
+.arrow svg { width: 17px; height: 17px; }
+.support:hover .arrow { border-color: var(--accent-line); background: var(--accent-soft); }
+.support:hover strong { color: var(--accent); }
+.bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 24px; margin-top: 16px; font-size: 11px; }
+.bottom nav { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+.bottom a { display: inline-flex; align-items: center; min-height: 44px; }
+.bottom a:hover { color: var(--accent); }
+.footer a:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; border-radius: 8px; }
+@media(max-width:600px) {
+  .footer { margin-top: 28px; padding-top: 20px; }
+  .main { align-items: flex-start; flex-direction: column; gap: 18px; }
+  .support { justify-content: space-between; width: 100%; min-height: 48px; }
+  .bottom { align-items: flex-start; flex-direction: column; gap: 2px; margin-top: 16px; }
+  .bottom nav { gap: 4px 20px; }
+}

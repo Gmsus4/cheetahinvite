@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { FiArrowLeft, FiArrowRight, FiArrowUpRight, FiCreditCard, FiHelpCircle, FiInfo, FiRefreshCw, FiShoppingBag } from "react-icons/fi";
+import { FiArrowLeft, FiArrowRight, FiArrowUpRight, FiRefreshCw } from "react-icons/fi";
 import { BrandLoader } from "@/components/BrandLoader";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { PaymentReceipt } from "@/components/dashboard/PaymentReceipt";
+import { PurchaseDetailsDialog } from "@/components/dashboard/PurchaseDetailsDialog";
 import { SupportRequest } from "@/components/SupportRequest";
 import { getCurrentPrice } from "@/lib/site-pricing";
-import { isPreviousPriceAttempt } from "@/lib/payment-status";
+import { isPreviousPriceAttempt, paymentMoney, paymentStatusLabel } from "@/lib/payment-status";
 import { refreshPurchase } from "./actions";
 import "@/app/ayuda/soporte.css";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -34,24 +35,31 @@ async function PurchasesData({ searchParams }: PageProps<"/dashboard/compras">) 
   return <main className={styles.page}>
     <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} active="purchases" />
     <div className={styles.content}>
-      <div className={styles.heading}><span className={styles.eyebrow}>TU CUENTA · HISTORIAL DE COMPRAS</span><h1>Mis compras</h1><p>Cada celebración, en un solo lugar. Consulta tus pagos, reembolsos y disputas.</p></div>
-      <aside className={styles.info}><FiInfo aria-hidden="true" /><p>Tu historial de compras se conserva aunque elimines una invitación. Puedes consultar sus referencias y solicitar ayuda desde aquí.</p></aside>
+      <div className={styles.heading}><span className={styles.eyebrow}>TU CUENTA</span><h1>Mis compras</h1></div>
       {query.error && <p className={styles.notice} role="alert">No pudimos verificar el estado con el proveedor de pago. Inténtalo de nuevo más tarde; no necesitas volver a pagar.</p>}
-      {payments.length === 0 && <section className={styles.empty}><span><FiShoppingBag aria-hidden="true" /></span><h2>{page > 1 ? "No hay más compras en esta página" : "Tus celebraciones empiezan aquí"}</h2><p>{page > 1 ? "Vuelve a la página anterior para consultar tus compras más recientes." : "Cuando inicies el pago de una invitación, encontrarás aquí su estado y los detalles de tu compra."}</p><Link className={styles.primary} href={page > 1 ? `/dashboard/compras?page=${page - 1}` : "/dashboard"}>{page > 1 ? "Ver compras más recientes" : "Ver mis invitaciones"}<FiArrowRight aria-hidden="true" /></Link></section>}
+      {payments.length === 0 && <section className={styles.empty}><h2>{page > 1 ? "No hay más compras en esta página" : "Aún no tienes compras"}</h2><p>{page > 1 ? "Vuelve a la página anterior para consultar tus compras más recientes." : "Aquí aparecerán tus pagos cuando inicies la compra de una invitación."}</p><Link className={styles.primary} href={page > 1 ? `/dashboard/compras?page=${page - 1}` : "/dashboard"}>{page > 1 ? "Ver compras más recientes" : "Ver mis invitaciones"}<FiArrowRight aria-hidden="true" /></Link></section>}
       <div className={styles.grid}>
         {payments.slice(0, 20).map(payment => <article className={styles.card} key={payment.id}>
-          <div className={styles.cardHeading}><span className={styles.icon}><FiCreditCard aria-hidden="true" /></span><div><span className={styles.eyebrow}>TU CELEBRACIÓN</span><h2>{payment.eventName}</h2></div></div>
-          <PaymentReceipt payment={payment} />
-          {isPreviousPriceAttempt(payment, currentPrice) && <p className={styles.notice}>Este intento se inició antes del cambio de precio y aún no tiene un pago confirmado en la aplicación.{exists.has(payment.eventId) && <> El precio actual para publicar es <strong>{invitationPriceLabel} MXN, IVA incluido</strong>. {payment.provider === "stripe" ? "Al continuar, comprobaremos el estado del intento anterior antes de abrir el pago con el precio vigente." : "Un checkout vigente conserva su importe original hasta vencer."}</>}</p>}
-          <div className={styles.actions}>
-            {exists.has(payment.eventId) ? <Link className={styles.primary} href={`/dashboard/eventos/${payment.eventId}/pago`}>{isPreviousPriceAttempt(payment, currentPrice) && payment.provider === "stripe" ? `Continuar con el precio actual · ${invitationPriceLabel} MXN` : "Ver invitación y pago"}<FiArrowUpRight aria-hidden="true" /></Link> : <p className={styles.removed}>Invitación eliminada. Su enlace público ya no está disponible. Si hay un cobro pendiente de resolver, contacta con soporte.</p>}
-            {(payment.stripeCheckoutSessionId || payment.providerCheckoutId) && <form action={refreshPurchase.bind(null, payment.id)}><button className={styles.secondary} type="submit"><FiRefreshCw aria-hidden="true" /> Actualizar estado del pago</button></form>}
+          <div className={styles.identity}>
+            <h2>{payment.eventName}</h2>
+            <div className={styles.purchaseMeta}><span>{payment.provider === "paypal" ? "PayPal" : payment.provider === "mercadopago" ? "Mercado Pago" : "Stripe"}</span><time dateTime={payment.createdAt.toISOString()}>{new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeZone: "America/Mexico_City" }).format(payment.createdAt)}</time></div>
           </div>
-          <details className={styles.support}><summary><FiHelpCircle aria-hidden="true" />Solicitar ayuda con esta compra<FiArrowRight aria-hidden="true" /></summary><SupportRequest initialEmail={session.user.email ?? ""} eventId={payment.eventId} eventName={payment.eventName} paymentId={payment.id} /></details>
+          <div className={styles.purchaseSummary}>
+            <span className={styles.purchaseStatus} data-tone={payment.status === "EXPIRED" || payment.status === "FAILED" ? "negative" : payment.status === "PENDING" ? "warning" : paymentStatusLabel(payment) === "Pago confirmado" ? "positive" : "neutral"}>{isPreviousPriceAttempt(payment, currentPrice) ? "Intento pendiente · precio anterior" : paymentStatusLabel(payment)}{!payment.livemode && (!payment.id.startsWith("legacy:") || payment.lastSyncedAt) && " · Modo de prueba"}</span>
+          </div>
+          <strong className={styles.amount}>{paymentMoney(payment.amount, payment.currency)} {payment.currency.toUpperCase()}</strong>
+          <PurchaseDetailsDialog name={payment.eventName} receipt={<>
+            {!exists.has(payment.eventId) && <p className={styles.removed}>Invitación eliminada. Su enlace público ya no está disponible. Puedes solicitar ayuda en «Necesito ayuda».</p>}
+            {isPreviousPriceAttempt(payment, currentPrice) && <p className={styles.notice}>Este intento se inició antes del cambio de precio y aún no tiene un pago confirmado en la aplicación.{exists.has(payment.eventId) && <> El precio actual para publicar es <strong>{invitationPriceLabel} MXN, IVA incluido</strong>. {payment.provider === "stripe" ? "Al continuar, comprobaremos el estado del intento anterior antes de abrir el pago con el precio vigente." : "Un checkout vigente conserva su importe original hasta vencer."}</>}</p>}
+            <PaymentReceipt payment={payment} />
+          </>} support={<SupportRequest initialEmail={session.user.email ?? ""} eventId={payment.eventId} eventName={payment.eventName} paymentId={payment.id} />} actions={<>
+            {exists.has(payment.eventId) && <Link className={styles.primary} href={`/dashboard/eventos/${payment.eventId}/pago`}>{isPreviousPriceAttempt(payment, currentPrice) && payment.provider === "stripe" ? `Continuar con el precio actual · ${invitationPriceLabel} MXN` : "Ver invitación y pago"}<FiArrowUpRight aria-hidden="true" /></Link>}
+            {(payment.stripeCheckoutSessionId || payment.providerCheckoutId) && <form action={refreshPurchase.bind(null, payment.id)}><button className={styles.secondary} type="submit"><FiRefreshCw aria-hidden="true" /> Actualizar estado del pago</button></form>}
+          </>} />
         </article>)}
       </div>
       {(page > 1 || payments.length > 20) && <div className={styles.pagination}><span>Página {page}</span><nav aria-label="Páginas de compras">{page > 1 && <Link className={styles.secondary} href={`/dashboard/compras?page=${page - 1}`}><FiArrowLeft aria-hidden="true" /> Más recientes</Link>}{payments.length > 20 && <Link className={styles.secondary} href={`/dashboard/compras?page=${page + 1}`}>Anteriores <FiArrowRight aria-hidden="true" /></Link>}</nav></div>}
-      <footer className={styles.footer}><span>Todo listo para celebrar contigo.</span><Link href="/ayuda">¿Necesitas ayuda? <FiArrowUpRight aria-hidden="true" /></Link></footer>
+      <footer className={styles.footer}><span>El historial se conserva aunque elimines una invitación.</span><Link href="/ayuda">Ayuda con mis compras <FiArrowUpRight aria-hidden="true" /></Link></footer>
     </div>
   </main>;
 }

@@ -22,8 +22,8 @@ export function InvitationPrivacyFields({ privacy, pin, pinPending, hasPin, disa
     onChange(value === "PUBLIC" ? { privacy: value, pin: "", pinPending: false }
       : { privacy: value, ...(!hasPin && !pin ? { pin: generatePin(), pinPending: true } : {}) });
   }
-  return <section className={styles.privacy} aria-label="Privacidad de la invitación">
-    <div className={styles.sectionHeading}><span className={styles.icon}><FiLock aria-hidden="true" /></span><div><h2>¿Quién puede ver tu invitación?</h2><p>La opción elegida se guarda junto con tu invitación, también al continuar al pago.</p></div></div>
+  return <section className={`${styles.privacy} ${styles.compactPrivacy}`} aria-label="Privacidad de la invitación">
+    <div className={styles.sectionHeading}><div><h2>¿Quién puede ver tu invitación?</h2><p>Se guarda al guardar tu invitación o continuar al pago.</p></div></div>
     <div className={styles.choices} role="group" aria-label="Privacidad">
       <button type="button" aria-pressed={privacy === "PUBLIC"} disabled={disabled} onClick={() => select("PUBLIC")}><FiGlobe aria-hidden="true" /><strong>Pública</strong><span>Cualquier persona con el enlace puede verla.</span></button>
       <button type="button" aria-pressed={privacy === "PRIVATE"} disabled={disabled} onClick={() => select("PRIVATE")}><FiLock aria-hidden="true" /><strong>Protegida con PIN</strong><span>Solo se abre al introducir un PIN de seis dígitos.</span></button>

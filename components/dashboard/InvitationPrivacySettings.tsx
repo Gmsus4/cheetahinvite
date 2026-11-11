@@ -40,8 +40,8 @@ export function InvitationPrivacySettings({ eventId, initialPrivacy = "UNSET", i
     } catch { setError("No pudimos guardar los ajustes. Inténtalo de nuevo."); }
     finally { setBusy(false); }
   }
-  return <section className={styles.privacy} aria-label="Privacidad de la invitación">
-    <div className={styles.sectionHeading}><span className={styles.icon}><FiLock aria-hidden="true" /></span><div><h2>¿Quién puede ver tu invitación?</h2><p>Elige cómo entrarán tus invitados. Puedes cambiarlo cuando quieras.</p></div></div>
+  return <section className={`${styles.privacy} ${styles.compactPrivacy}`} aria-label="Privacidad de la invitación">
+    <div className={styles.sectionHeading}><div><h2>¿Quién puede ver tu invitación?</h2><p>Elige el acceso y guarda los cambios.</p></div></div>
     <div className={styles.choices} role="group" aria-label="Privacidad">
       <button type="button" aria-pressed={privacy === "PUBLIC"} disabled={busy} onClick={() => select("PUBLIC")}><FiGlobe aria-hidden="true" /><strong>Pública</strong><span>Cualquier persona con el enlace puede verla.</span></button>
       <button type="button" aria-pressed={privacy === "PRIVATE"} disabled={busy} onClick={() => select("PRIVATE")}><FiLock aria-hidden="true" /><strong>Protegida con PIN</strong><span>Solo se abre al introducir un PIN de seis dígitos.</span></button>

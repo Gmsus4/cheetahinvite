@@ -3,7 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
-import { FiArrowUpRight, FiCheck, FiHelpCircle, FiLock, FiMail, FiShield, FiUser } from "react-icons/fi";
+import { FiArrowUpRight, FiKey, FiMail, FiMessageCircle, FiShield } from "react-icons/fi";
+import { SiGoogle } from "react-icons/si";
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { BrandLoader } from "@/components/BrandLoader";
@@ -26,21 +27,24 @@ async function AccountSettings() {
   return <main className={styles.page}>
     <DashboardHeader name={name} email={account.email || ""} image={account.image || session.user.image} />
     <div className={styles.content}>
-      <div className={styles.heading}><span className={styles.eyebrow}>TU ESPACIO · TU CUENTA</span><h1>Ajustes de cuenta</h1><p>Consulta tus datos y las opciones de acceso a tu espacio para celebrar.</p></div>
+      <div className={styles.heading}><span className={styles.eyebrow}>TU ESPACIO PERSONAL</span><h1>Ajustes de cuenta</h1><p>Tu perfil y tus formas de entrar, en un solo lugar.</p></div>
       <div className={styles.grid}>
-        <section className={styles.card} aria-labelledby="account-details-heading">
-          <div className={styles.sectionHeading}><span className={styles.icon}><FiUser aria-hidden="true" /></span><div><span className={styles.eyebrow}>TUS DATOS</span><h2 id="account-details-heading">Información de tu cuenta</h2></div></div>
-          <div className={styles.profile}><span className={styles.avatar} aria-hidden="true">{initials}</span><div><strong>{name}</strong><span>Tu cuenta de Cheetah Invite</span></div></div>
-          <dl className={styles.details}><div><dt><FiUser aria-hidden="true" /> Nombre</dt><dd>{account.name || "Sin nombre"}</dd></div><div><dt><FiMail aria-hidden="true" /> Correo electrónico</dt><dd>{account.email || "Sin correo registrado"}</dd></div></dl>
+        <section className={styles.profileCard} aria-labelledby="account-details-heading">
+          <span className={styles.eyebrow}>TU PERFIL</span>
+          <div className={styles.profileIdentity}><span className={styles.avatar} aria-hidden="true">{initials}</span><div><h2 id="account-details-heading">{name}</h2><span className={styles.profileCaption}>Tu cuenta de Cheetah Invite</span></div></div>
+          <dl className={styles.details}><div><dt><FiMail aria-hidden="true" />Correo de tu cuenta</dt><dd>{account.email || "Sin correo registrado"}</dd></div></dl>
         </section>
-        <section className={styles.card} aria-labelledby="account-security-heading">
-          <div className={styles.sectionHeading}><span className={styles.icon}><FiShield aria-hidden="true" /></span><div><span className={styles.eyebrow}>TU ACCESO</span><h2 id="account-security-heading">Acceso y seguridad</h2></div></div>
-          <div className={styles.methods}>{account.passwordHash && <span><FiLock aria-hidden="true" /> Correo y contraseña</span>}{usesGoogle && <span><FiCheck aria-hidden="true" /> Cuenta de Google</span>}</div>
-          {account.passwordHash ? <><p>Para cambiar tu contraseña, solicita un enlace de recuperación en el correo de tu cuenta.</p><Link className={styles.primary} href="/recuperar-contrasena"><FiLock aria-hidden="true" /> Cambiar contraseña <FiArrowUpRight aria-hidden="true" /></Link></> : <p>{usesGoogle ? "Inicias sesión con Google. Gestiona tu contraseña y la seguridad de acceso desde tu cuenta de Google." : "Contacta con soporte si necesitas ayuda con tu acceso."}</p>}
+        <section className={styles.security} aria-labelledby="account-security-heading">
+          <div className={styles.sectionHeading}><span className={styles.securityIcon}><FiShield aria-hidden="true" /></span><div><h2 id="account-security-heading">Acceso y seguridad</h2><p>Así puedes iniciar sesión en tu cuenta.</p></div></div>
+          <ul className={styles.methods} aria-label="Métodos de acceso">
+            {account.passwordHash && <li><span className={styles.methodIcon}><FiKey aria-hidden="true" /></span><div><strong>Correo y contraseña</strong><span>Usa el correo asociado a tu perfil.</span></div></li>}
+            {usesGoogle && <li><span className={styles.methodIcon}><SiGoogle aria-hidden="true" /></span><div><strong>Cuenta de Google</strong><span>Accede con «Continuar con Google».</span></div></li>}
+          </ul>
+          {account.passwordHash ? <div className={styles.passwordAction}><p>¿Quieres cambiar tu contraseña? Te enviaremos un enlace de recuperación.</p><Link className={styles.primary} href="/recuperar-contrasena">Cambiar contraseña <FiArrowUpRight aria-hidden="true" /></Link></div> : <p className={styles.accessNote}>{usesGoogle ? "Gestiona tu contraseña y seguridad desde tu cuenta de Google." : "Contacta con soporte si necesitas ayuda con tu acceso."}</p>}
         </section>
       </div>
-      <aside className={styles.help}><span className={styles.helpIcon}><FiHelpCircle aria-hidden="true" /></span><div><h2>Estamos para ayudarte</h2><p>Si tienes un problema con tus datos o con el acceso a tu cuenta, escríbenos.</p></div><Link href="/ayuda">Ayuda con mi cuenta <FiArrowUpRight aria-hidden="true" /></Link></aside>
-      <footer className={styles.footer}><span>Todo listo para celebrar contigo.</span><nav aria-label="Información legal"><Link href="/terminos">Términos y condiciones</Link><Link href="/aviso-de-privacidad">Privacidad</Link></nav></footer>
+      <aside className={styles.help}><span className={styles.helpIcon}><FiMessageCircle aria-hidden="true" /></span><div><h2>¿Necesitas una mano?</h2><p>Te ayudamos con tus datos o el acceso a tu cuenta.</p></div><Link href="/ayuda">Contactar al equipo <FiArrowUpRight aria-hidden="true" /></Link></aside>
+      <footer className={styles.footer}><nav aria-label="Información legal"><Link href="/terminos">Términos y condiciones</Link><Link href="/aviso-de-privacidad">Privacidad</Link></nav></footer>
     </div>
   </main>;
 }

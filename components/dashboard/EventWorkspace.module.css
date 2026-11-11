@@ -305,7 +305,7 @@
 .workspace[data-intro-layout="true"] :global(.guided-layout) { display: block; width: min(1232px,100%); max-width: none; padding: 48px 24px 124px; }
 .workspace[data-intro-layout="true"] :global(.guided-workspace) { display: grid; grid-template-columns: minmax(0,.85fr) minmax(0,1.3fr); align-items: start; column-gap: clamp(36px,5vw,76px); row-gap: 20px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 /* Match the initial header (80px) and layout inset (48px) to prevent a scroll shift. */
-.workspace[data-intro-layout="true"] :global(.guided-heading) { position: sticky; top: 128px; grid-column: 1; align-self: start; margin: 0; padding-top: 38px; }
+.workspace[data-intro-layout="true"] :global(.guided-heading) { position: sticky; top: 128px; grid-column: 1; align-self: start; margin: 0; padding-top: 0; }
 .workspace[data-intro-layout="true"] :global(.guided-heading h1) { margin: 23px 0 24px; font-size: clamp(40px,4.2vw,58px); line-height: 1.14; font-weight: 600; letter-spacing: -.055em; text-wrap: balance; }
 .workspace[data-intro-layout="true"] :global(.guided-heading h1 em) { display: block; color: var(--orange); font-style: normal; }
 .workspace[data-intro-layout="true"] :global(.guided-heading > p) { max-width: 350px; margin: 0; font-size: 15px; line-height: 1.85; }
@@ -392,7 +392,7 @@
   .mobileSaveButton:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
   .mobileSaveButton:disabled { opacity: .5; cursor: default; }
   .mobileStepsSuffix { display: inline; }
-  .workspace[data-intro-layout="true"] .journeyNavigation > :global(.guided-back) { grid-column: 1; grid-row: 1; width: 40px; height: 40px; padding: 0; border: 1px solid var(--line); border-radius: 50%; display: grid; place-items: center; }
+  .workspace[data-intro-layout="true"] .journeyNavigation > :global(.guided-back) { grid-column: 1; grid-row: 1; box-sizing: border-box; width: 40px; min-width: 40px; height: 40px; min-height: 40px; aspect-ratio: 1; padding: 0; border: 1px solid var(--line); border-radius: 50%; display: grid; place-items: center; }
   .workspace[data-intro-layout="true"] .journeyNavigation > :global(.guided-progress) { grid-column: 2; grid-row: 1; justify-self: start; }
   .workspace[data-intro-layout="true"] .journeyNavigation > :global(.button[type="submit"]),
   .workspace[data-intro-layout="true"] .journeyNavigation > :global(.guided-footer-actions) { grid-column: 4; grid-row: 1; }
@@ -421,4 +421,35 @@
   .workspace[data-intro-layout="true"] .journeyNavigation > :global(.button[type="submit"]),
   .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions .button) { min-height: 40px; height: 40px; padding-block: 8px; line-height: 1.3; }
   .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions .button.guided-save-compact) { flex-basis: 40px; width: 40px; min-width: 40px; height: 40px; padding: 0; }
+}
+
+/* Compact review rows and disclosure, without reducing the type scale. */
+.workspace .reviewSummary > div { grid-template-columns: 112px minmax(0,1fr); align-items: center; gap: 12px; padding: 2px 0; min-height: 44px; }
+.workspace .reviewSummary dt { padding-top: 0; }
+.workspace .reviewSummary dd { gap: 10px; }
+.reviewValue { min-width: 0; overflow-wrap: anywhere; }
+.workspace .reviewSummary button { min-height: 44px; padding: 8px 0 8px 8px; }
+.workspace .includedSections { padding: 0 14px; }
+.includedToggle { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 0; list-style: none; cursor: pointer; }
+.includedToggle::-webkit-details-marker { display: none; }
+.includedToggle h2 { flex: 1; min-width: 0; }
+.includedToggle > span { flex: none; color: var(--muted); font-size: 11px; }
+.includedToggle > svg { flex: none; width: 16px; height: 16px; color: var(--muted); }
+.includedSections[open] > .includedToggle > svg { transform: rotate(180deg); }
+.includedToggle:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; border-radius: 8px; }
+.workspace .includedSections > p { margin-top: 0; }
+.workspace .includedSections nav { padding-bottom: 14px; }
+.workspace .includedSections nav button { min-height: 44px; white-space: normal; text-align: left; }
+@media(max-width:600px) {
+  .workspace .reviewSummary > div { grid-template-columns: 82px minmax(0,1fr); gap: 10px; }
+}
+
+/* Compact mobile spacing, preserving typography. */
+@media(max-width:600px)  {
+  .workspace[data-intro-layout="true"] :global(.guided-layout)  { padding-top:16px; padding-inline:16px}
+  .workspace[data-intro-layout="true"] :global(.guided-workspace)  { row-gap:18px}
+  .workspace :global(.guided-heading)  { margin-bottom:18px}
+  .workspace :global(.guided-fields)  { gap:18px}
+  .workspace :global(.guided-photo-field)  { padding:16px; border-radius:16px}
+  .workspace :global(.guided-occasion),.workspace :global(.guided-review-design)  { padding:14px}
 }

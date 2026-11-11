@@ -1,18 +1,24 @@
-.ready { display: grid; gap: 18px; min-width: 0; }
-.linkBox { display: grid; gap: 12px; padding: 20px; border: 1px solid var(--accent-line); border-radius: 18px; background: var(--accent-soft); min-width: 0; }
-.linkBox label { color: var(--ink); font-size: 13px; font-weight: 600; }
+.ready { display: grid; gap: 12px; min-width: 0; }
+.linkBox { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; min-width: 0; }
+.linkBox label { grid-column: 1 / -1; color: var(--ink); font-size: 13px; font-weight: 600; }
 .linkBox input { display: block; width: 100%; min-width: 0; min-height: 48px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: 13px/1.5 var(--font-body),Arial,sans-serif; }
-.primary { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; border: 0; border-radius: 999px; background: var(--orange); color: var(--on-inverse); font: 600 14px var(--font-body),Arial,sans-serif; cursor: pointer; }
+.primary { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 10px 14px; border: 0; border-radius: 10px; background: var(--orange); color: var(--on-inverse); font: 600 14px var(--font-body),Arial,sans-serif; cursor: pointer; }
+.primary svg { flex: none; width: 16px; height: 16px; }
 .primary:hover { background: var(--orange-hover); }
-.feedback { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.feedback { grid-column: 1 / -1; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.feedback:empty { display: none; }
 .actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
-.actions a { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; min-height: 48px; border: 1px solid var(--line); border-radius: 12px; color: var(--ink); font-size: 13px; text-align: center; line-height: 1.5; }
+.actions a { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); font-size: 13px; text-align: center; line-height: 1.5; }
+.actions svg { flex: none; }
 .actions a:hover { background: var(--surface-muted); }
 .actions a[aria-disabled="true"] { opacity: .6; pointer-events: none; }
-.ready .hint { margin: -8px 0 0; font-size: 12px; line-height: 1.6; }
+.ready .hint { margin: -4px 0 0; font-size: 12px; line-height: 1.6; }
 .reminder,.responses { display: flex; align-items: flex-start; gap: 12px; padding: 20px 0 0; border-top: 1px solid var(--line); }
 .reminder > svg,.responses > svg { flex: none; margin-top: 3px; color: var(--accent); font-size: 19px; }
 .ready h3 { margin: 0 0 8px; color: var(--ink); font-size: 15px; line-height: 1.5; }
 .ready .reminder p,.ready .responses p { margin: 0 0 10px; font-size: 13px; line-height: 1.7; }
 .reminder a,.responses a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--accent); font-size: 13px; line-height: 1.6; }
-@media(max-width:440px) { .actions { grid-template-columns: minmax(0,1fr); } .linkBox { padding: 16px; } }
+@media(max-width:400px) {
+  .copyLabel { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .primary { width: 48px; padding: 0; }
+}

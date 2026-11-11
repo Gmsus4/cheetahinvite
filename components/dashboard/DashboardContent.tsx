@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { invitationPath } from "@/lib/invitation-url";
-import { supportMailto } from "@/lib/support";
 import { isInvitationPublished } from "@/lib/invitation-payment";
 import { canEditInvitation, invitationLifecycle } from "@/lib/invitation-lifecycle";
 import {
@@ -11,7 +10,6 @@ import {
   FiEdit2,
   FiGift,
   FiPlus,
-  FiHelpCircle,
   FiSettings,
   FiSliders,
   FiLock,
@@ -19,6 +17,7 @@ import {
   FiCopy,
 } from "react-icons/fi";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { DashboardFooter } from "@/components/dashboard/DashboardFooter";
 import { CopyInvitationLink } from "@/components/dashboard/CopyInvitationLink";
 import { DeleteInvitationButton } from "@/components/dashboard/DeleteInvitationButton";
 import { CourtesyNotice } from "@/components/dashboard/CourtesyNotice";
@@ -100,9 +99,9 @@ export function DashboardContent({ ownerId, userName, userEmail, userImage, even
               <h1>¡Hola, <em>{firstName}!</em></h1>
               <p className="dashboard-subtitle">Cada celebración empieza con una invitación. Aquí puedes crear, editar y compartir las tuyas.</p>
             </div>
-            {availableSlots > 0 ? <Link className="button dashboard-create-button" href="/crear">
+            {availableSlots > 0 && <Link className="button dashboard-create-button" href="/crear">
               Nueva invitación <FiArrowUpRight aria-hidden="true" />
-            </Link> : <span className="dashboard-capacity-full">Tus {ACCOUNT_LIMITS.invitations} espacios están ocupados</span>}
+            </Link>}
           </div>
           <div className="dashboard-draft-recovery"><CreationDraftResume ownerId={ownerId} /></div>
           {unreadCourtesyEvents.length > 0 && <section className="dashboard-courtesy-notices" aria-label="Cortesías recibidas">
@@ -123,15 +122,15 @@ export function DashboardContent({ ownerId, userName, userEmail, userImage, even
                     <div className={`dashboard-invitation-cover${event.imageUrl ? " has-image" : ""}`}>
                       {event.imageUrl ? <Image src={event.imageUrl} alt={`Portada de ${event.name}`} fill unoptimized sizes="(max-width: 640px) 100vw, (max-width: 1050px) 50vw, 33vw" /> : <FiGift className="dashboard-cover-gift" aria-hidden="true" />}
                       <span className={`dashboard-status status-${event.status.toLowerCase()}`}><i aria-hidden="true" />{["PUBLISHED", "EXPIRED"].includes(event.status) && invitationLifecycle(event, new Date(now))?.phase !== "active" ? "Archivado" : statusLabels[event.status]}</span>
-                      <span className="dashboard-invitation-number">INVITACIÓN {String(index + 1).padStart(2, "0")}</span>
-                    </div>
-                    <div className="dashboard-invitation-body">
                       <div className="dashboard-invitation-type-row"><span className="dashboard-invitation-type">{eventLabels[event.eventType] ?? event.eventType}</span>{courtesyIds.has(event.id) && <span className="dashboard-courtesy-badge"><FiGift aria-hidden="true" /> Cortesía</span>}</div>
                       <h3>{event.name}</h3>
                       <div className="dashboard-invitation-meta">
                         <span className="dashboard-invitation-date"><FiCalendar aria-hidden="true" /> {formatDate(event.eventDate)}</span>
                         {event.privacy === "PRIVATE" && <span className="dashboard-invitation-privacy"><FiLock aria-hidden="true" /> Protegida con PIN</span>}
                       </div>
+                      <div className="dashboard-cover-footer"><span className="dashboard-invitation-number">INVITACIÓN {String(index + 1).padStart(2, "0")}</span><small className="dashboard-card-updated">Actualizada el {formatDate(event.updatedAt)}</small></div>
+                    </div>
+                    <div className="dashboard-invitation-body">
                       <div className="dashboard-invitation-actions">
                         <Link className="dashboard-card-edit" href={`/dashboard/eventos/${event.id}${canEditInvitation(event, new Date(now)) ? "" : "/pago"}`} aria-label={`${canEditInvitation(event, new Date(now)) ? "Editar información" : "Ver vigencia"}: ${event.name}`}><FiEdit2 aria-hidden="true" /> {canEditInvitation(event, new Date(now)) ? "Editar información" : "Ver vigencia"}</Link>
                         {canEditInvitation(event, new Date(now)) && <Link className="dashboard-card-payment dashboard-card-design" href={`/dashboard/eventos/${event.id}/show?from=dashboard`} target="_blank" rel="noopener noreferrer" aria-label={`Editar diseño: ${event.name}`}><FiSliders aria-hidden="true" /> Editar diseño</Link>}
@@ -140,11 +139,10 @@ export function DashboardContent({ ownerId, userName, userEmail, userImage, even
                             <button className="dashboard-event-open" type="button" disabled title="Disponible cuando tu invitación esté publicada" aria-label="Ver invitación: disponible cuando esté publicada"><FiExternalLink aria-hidden="true" /><span>Ver</span></button>
                             <button className="dashboard-event-share" type="button" disabled title="Disponible cuando tu invitación esté publicada" aria-label="Copiar enlace: disponible cuando esté publicada"><FiCopy aria-hidden="true" /><span>Copiar enlace</span></button>
                           </>}
-                          <Link className="dashboard-event-open dashboard-card-settings" href={`/dashboard/eventos/${event.id}/ajustes`} aria-label={`Ajustes de ${event.name}`}><FiSettings aria-hidden="true" /><span>Ajustes</span></Link>
+                          <Link className="dashboard-event-open dashboard-card-settings" href={`/dashboard/eventos/${event.id}/ajustes`} aria-label={`Ajustes de ${event.name}`} title="Ajustes"><FiSettings aria-hidden="true" /><span>Ajustes</span></Link>
+                          <DeleteInvitationButton eventId={event.id} eventName={event.name} />
                         </div>
                       </div>
-                      <div className="dashboard-card-footer"><a href={supportMailto({ email: userEmail, eventId: event.id, eventName: event.name })} aria-label={`Pedir soporte para ${event.name}`}><FiHelpCircle aria-hidden="true" /> Ayuda</a><DeleteInvitationButton eventId={event.id} eventName={event.name} /></div>
-                      <small className="dashboard-card-updated">Actualizada el {formatDate(event.updatedAt)}</small>
                     </div>
                   </article>
                 ))}
@@ -156,17 +154,9 @@ export function DashboardContent({ ownerId, userName, userEmail, userImage, even
                   <span className="dashboard-slot-cta">Crear invitación <FiArrowUpRight aria-hidden="true" /></span>
                 </Link>)}
               </div>
-            <p className="dashboard-slot-explanation">Puedes tener hasta {ACCOUNT_LIMITS.invitations} invitaciones en tu cuenta.{availableSlots === 0 ? " Si necesitas crear otra, primero elimina una que ya no uses." : ` Te ${availableSlots === 1 ? "queda 1 espacio disponible" : `quedan ${availableSlots} espacios disponibles`}.`}</p>
           </section>
 
-          <footer className="dashboard-footer">
-            <span>Hecho para celebrar cada historia.</span>
-            <nav aria-label="Información legal">
-              <Link href="/ayuda">Ayuda y soporte</Link>
-              <Link href="/terminos">Términos</Link>
-              <Link href="/aviso-de-privacidad">Privacidad</Link>
-            </nav>
-          </footer>
+          <DashboardFooter />
         </div>
       </main>
     </div>

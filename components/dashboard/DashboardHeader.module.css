@@ -28,3 +28,9 @@
   .guestLabel { display: none; }
   .guestShortLabel { display: inline; }
 }
+
+/* Compact mobile spacing, preserving typography. */
+@media(max-width:760px)  {
+  .header { padding-block:8px}
+  .shell { min-height:56px; padding-block:5px; border-radius:20px}
+}
