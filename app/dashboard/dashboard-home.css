@@ -73,7 +73,7 @@
 .dashboard-home-style .dashboard-card-footer > a { min-height: 30px; color: var(--ink); font-size: 10px; }
 .dashboard-page.dashboard-home-style .dashboard-invitation-card .dashboard-card-footer .dashboard-event-delete { min-height: 30px; padding: 4px 8px; font-size: 10px; }
 .dashboard-home-style .dashboard-card-updated { margin-top: 6px; font-size: 9px; }
-.dashboard-home-style .dashboard-invitation-slot { min-height: 400px; padding: 30px 24px; border: 1px dashed var(--line); border-radius: 26px; background: color-mix(in srgb, var(--surface) 50%, transparent); }
+.dashboard-home-style .dashboard-invitation-slot { min-height: 0; padding: 30px 24px; border: 1px dashed var(--line); border-radius: 26px; background: color-mix(in srgb, var(--surface) 50%, transparent); }
 .dashboard-home-style .dashboard-invitation-slot:first-child { border: 1px solid var(--orange); background: var(--surface); }
 .dashboard-home-style .dashboard-invitation-slot:hover { border-color: var(--orange); background: var(--surface); }
 .dashboard-home-style .dashboard-slot-number { margin-bottom: 28px; color: var(--muted); font-size: 9px; }
@@ -210,3 +210,11 @@
 .dashboard-home-style .dashboard-invitation-cover .dashboard-invitation-number { position: static; color: rgb(255 255 255 / .8); font-size: 9px; letter-spacing: .04em; }
 .dashboard-home-style .dashboard-invitation-cover .dashboard-card-updated { margin: 0; color: rgb(255 255 255 / .8); font-size: 9px; }
 .dashboard-home-style .dashboard-invitation-body { padding: 8px 4px 0; }
+@media(min-width:761px) {
+  .dashboard-home-style .dashboard-invitation-slot { display: grid; grid-template-columns: 44px minmax(0,1fr); align-content: center; justify-items: start; gap: 6px 12px; padding: 20px; text-align: left; }
+  .dashboard-home-style .dashboard-slot-plus { grid-column: 1; grid-row: 1 / 4; align-self: center; width: 44px; height: 44px; margin: 0; }
+  .dashboard-home-style .dashboard-slot-number { grid-column: 2; margin: 0; }
+  .dashboard-home-style .dashboard-invitation-slot h3 { grid-column: 2; margin: 0; }
+  .dashboard-home-style .dashboard-invitation-slot p { grid-column: 2; max-width: none; margin: 0; }
+  .dashboard-home-style .dashboard-slot-cta { grid-column: 2; margin-top: 6px; min-height: 44px; padding: 10px 14px; }
+}

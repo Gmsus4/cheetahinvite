@@ -1,5 +1,7 @@
 "use client";
 
+import { invitationSectionLabels } from "@/lib/invitation-sections";
+
 import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { FiArrowLeft, FiCheck, FiChevronDown, FiLayers, FiType, FiStar, FiEdit3, FiImage, FiMapPin, FiPlus, FiSave, FiSliders, FiX } from "react-icons/fi";
 import { updateEvent } from "@/app/dashboard/eventos/[id]/actions";
@@ -145,7 +147,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
       <fieldset className={styles.fields} disabled={busy}>
         {target.kind === "add-section" && <>
           <p className={styles.sectionIntro}>Elige una sección para agregarla y completar su información.</p>
-          <div className={styles.sectionOptions}>{availableSections.map(item => <button key={item.id} type="button" aria-label={`Agregar ${item.type === 'closing' ? 'Despedida' : item.title}`} onClick={() => addSection(item.id)}><span><strong>{item.type === 'closing' ? 'Despedida' : item.title}</strong><small>{item.type === "countdown" ? "Los días, horas y minutos que faltan para tu evento." : item.type === "location" ? "El lugar, la dirección y el mapa del evento." : guidedDetails(values.eventType).find(detail => detail.type === item.type)?.help}</small></span><FiPlus aria-hidden="true" /></button>)}</div>
+          <div className={styles.sectionOptions}>{availableSections.map(item => <button key={item.id} type="button" aria-label={`Agregar ${invitationSectionLabels[item.type]}`} onClick={() => addSection(item.id)}><span><strong>{invitationSectionLabels[item.type]}</strong><small>{item.type === "countdown" ? "Los días, horas y minutos que faltan para tu evento." : item.type === "location" ? "El lugar, la dirección y el mapa del evento." : guidedDetails(values.eventType).find(detail => detail.type === item.type)?.help}</small></span><FiPlus aria-hidden="true" /></button>)}</div>
           {!availableSections.length && <p>Ya incluiste todas las secciones disponibles.</p>}
         </>}
         {target.kind === "cover" && <>
@@ -222,7 +224,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
 }
 
 function editLabel(target: InvitationEditTarget, section?: InviteSection) {
-  if (target.kind === "section") return section?.type === "closing" ? "Despedida" : section?.title || "Sección";
+  if (target.kind === "section") return section ? invitationSectionLabels[section.type] : "Sección";
   if (target.kind === "section-photo") return `${section?.type === "gallery" ? "Fotos" : "Foto"} de ${section?.title || "la sección"}`;
   if (target.kind === "section-surface") return `Estilo de ${section?.title || "la sección"}`;
   if (target.kind === "section-visibility") return `Visibilidad de ${section?.title || "la sección"}`;

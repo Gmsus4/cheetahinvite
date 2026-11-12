@@ -1,8 +1,11 @@
 "use client";
 
+import { invitationSectionLabels } from "@/lib/invitation-sections";
+
 import { cloneElement, isValidElement, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { LuRocket } from "react-icons/lu";
 import { useRouter } from "next/navigation";
-import { FiArrowLeft, FiArrowRight, FiImage, FiChevronDown, FiCheck, FiEye, FiList, FiLock, FiSave, FiSend, FiSliders, FiUsers, FiMapPin, FiPlus } from "react-icons/fi";
+import { FiArrowLeft, FiArrowRight, FiImage, FiChevronDown, FiCheck, FiEye, FiGrid, FiLock, FiSave, FiSliders, FiUsers, FiMapPin, FiPlus } from "react-icons/fi";
 import { prepareEvent } from "@/app/crear/actions";
 import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 
@@ -42,7 +45,7 @@ import { DashboardHeader } from "./DashboardHeader";
 
 const steps = ["¿Quién celebra?", "¿Cuándo y dónde?", "Portada y fondo", "Dale tu estilo", "Personaliza los bloques", "Revisa tu invitación"];
 const stepLabels = ["Quién celebra", "Fecha y lugar", "Portada y fondo", "Dale tu estilo", "Bloques", "Revisión"];
-const stepIcons = [FiUsers, FiMapPin, FiImage, FiSliders, FiList, FiSend];
+const stepIcons = [FiUsers, FiMapPin, FiImage, FiSliders, FiGrid, LuRocket];
 const descriptions = ["Empecemos por las personas que hacen especial esta celebración.", "Comparte los datos que ya tengas. Puedes completar el resto después.", "Elige la imagen principal de tu invitación y una foto de fondo. Podrás agregar más fotografías en los bloques.", "Dale tu toque, un detalle a la vez. Puedes conservar las opciones seleccionadas.", "La apariencia ya está lista. Completa y personaliza cada bloque a tu ritmo.", "Así recibirán la invitación las personas que más quieres."];
 const lastStep = steps.length - 1;
 const introTitles = [<>¿Quién <em>celebra?</em></>, <>¿Cuándo <em>y dónde?</em></>, <>Portada <em>y fondo</em></>, <>Dale <em>tu estilo</em></>, <>Personaliza <em>los bloques</em></>, <>Revisa <em>tu invitación</em></>];
@@ -328,11 +331,11 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   function submit(event: FormEvent) { event.preventDefault(); if (step < finalStep) continueJourney(); else void save(); }
   const uploadBusy = (active: boolean) => setUploads(current => current + (active ? 1 : -1));
   const uploadProps = { eventId: event.id, ensureEvent: creation ? () => ensureEvent() : undefined, onBusyChange: uploadBusy };
-  const CurrentStepIcon = guidedFlow && step === 5 ? FiSliders : stepIcons[step] ?? FiSend;
+  const CurrentStepIcon = guidedFlow && step === 5 ? FiSliders : stepIcons[step] ?? LuRocket;
   const progress = <nav className="guided-progress guided-journey-progress" data-grouped="true" data-expanded={mobileStepsExpanded} aria-label="Pasos de tu invitación" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setMobileStepsExpanded(false); }} onKeyDown={event => { if (event.key === 'Escape') { setMobileStepsExpanded(false); event.currentTarget.querySelector<HTMLButtonElement>('.guided-steps-toggle')?.focus(); } }}>
     <button className="guided-steps-toggle" type="button" aria-expanded={mobileStepsExpanded} aria-controls="guided-step-options" aria-label={`Paso ${flowPosition + 1} de ${flowSteps.length}: ${stepLabel(step)}. ${mobileStepsExpanded ? 'Ocultar' : 'Mostrar'} todos los pasos`} onClick={() => setMobileStepsExpanded(current => !current)}><CurrentStepIcon aria-hidden="true" /><span>{flowPosition + 1} / {flowSteps.length}<span className={styles.mobileStepsSuffix}> pasos</span></span><FiChevronDown aria-hidden="true" /></button>
     <ol id="guided-step-options" hidden={!mobileStepsExpanded}>{flowSteps.map((id, index) => {
-      const Icon = guidedFlow && id === 5 ? FiSliders : stepIcons[id] ?? FiSend;
+      const Icon = guidedFlow && id === 5 ? FiSliders : stepIcons[id] ?? LuRocket;
       const label = stepLabel(id);
       return <li key={id}><button type="button" aria-label={`Paso ${index + 1}: ${label}`} aria-current={step === id ? 'step' : undefined} disabled={busy || uploads > 0} onClick={() => goTo(id)}><span aria-hidden="true"><Icon /></span><strong>{label}</strong></button></li>;
     })}</ol>
@@ -404,7 +407,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                   <button className="guided-blocks-toggle" type="button" aria-expanded={blocksExpanded} aria-controls="included-sections-list" onClick={() => setBlocksExpanded(expanded => !expanded)}>{blocksExpanded ? 'Ocultar bloques' : 'Ver todos los bloques'}<FiChevronDown aria-hidden="true" /></button>
                 </div>
                 <div className="guided-included-summary guided-block-list" id="included-sections-list" hidden={!blocksExpanded}>
-                  {includedSections.length ? <><p>Revisa los bloques en el orden en que aparecerán.</p><nav aria-label="Secciones incluidas en tu invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.type === 'closing' ? 'Despedida' : section.title || extraDetailLabel(section)} aria-label={`Editar sección: ${section.type === 'closing' ? 'Despedida' : section.title || extraDetailLabel(section)}`} aria-current={contentKey === section.id ? 'step' : undefined} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}>{section.type === 'closing' ? 'Despedida' : section.title || extraDetailLabel(section)}</button>)}</nav></> : <p>Aún no hay secciones incluidas. Puedes activarlas durante el recorrido o agregar un detalle al final.</p>}
+                  {includedSections.length ? <><p>Revisa los bloques en el orden en que aparecerán.</p><nav aria-label="Secciones incluidas en tu invitación">{includedSections.map(section => <button key={section.id} type="button" title={extraDetailLabel(section)} aria-label={`Editar sección: ${extraDetailLabel(section)}`} aria-current={contentKey === section.id ? 'step' : undefined} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}><SectionSummaryLabel section={section} /></button>)}</nav></> : <p>Aún no hay secciones incluidas. Puedes activarlas durante el recorrido o agregar un detalle al final.</p>}
                 </div>
               </div>
               {contentKey === '__more' ? <section className="guided-more-details" aria-labelledby="more-details-title">
@@ -455,7 +458,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
               <details className={`guided-included-summary ${styles.includedSections}`}>
                 <summary className={styles.includedToggle}><h2>Secciones de tu invitación</h2><span>{includedSections.length} {includedSections.length === 1 ? 'sección' : 'secciones'}</span><FiChevronDown aria-hidden="true" /></summary>
                 <p>{includedSections.length ? 'Estas son las secciones que elegiste. Puedes abrir cualquiera para revisarla o hacer un cambio.' : 'Todavía no has incluido secciones. Puedes agregar los detalles que quieras compartir.'}</p>
-                <nav aria-label="Secciones elegidas para la invitación">{includedSections.map(section => <button key={section.id} type="button" title={section.type === 'closing' ? 'Despedida' : section.title || extraDetailLabel(section)} aria-label={`Revisar sección: ${section.type === 'closing' ? 'Despedida' : section.title || extraDetailLabel(section)}`} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}>{section.type === 'closing' ? 'Despedida' : section.title || extraDetailLabel(section)}</button>)}{!includedSections.length && <button type="button" disabled={busy || uploads > 0} onClick={() => goTo(4, '__more')}>Agregar detalles</button>}</nav>
+                <nav aria-label="Secciones elegidas para la invitación">{includedSections.map(section => <button key={section.id} type="button" title={extraDetailLabel(section)} aria-label={`Revisar sección: ${extraDetailLabel(section)}`} disabled={busy || uploads > 0} onClick={() => goTo(4, section.id)}><SectionSummaryLabel section={section} /></button>)}{!includedSections.length && <button type="button" disabled={busy || uploads > 0} onClick={() => goTo(4, '__more')}>Agregar detalles</button>}</nav>
               </details>
               <dl className={`guided-review ${styles.reviewSummary}`}>{[["Protagonistas", values.hostNames || "Por definir"], ["Fecha y hora", `${date}${values.eventTime ? ` · ${values.eventTime}` : ""}`], ["Lugar", values.venue || "Por definir"], ["Dirección", values.address || "Por definir"]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd><span className={styles.reviewValue}>{value}</span><button type="button" onClick={() => goTo(label === "Protagonistas" ? 0 : 1)} aria-label={`Editar ${label.toLowerCase()}`}>Editar</button></dd></div>)}</dl>
               {issues.length > 0 && <div className="guided-checklist"><h2>Antes de publicar</h2><p>{published ? "Revisa estos datos antes de publicar tus cambios:" : "Puedes guardar el borrador ahora. Para publicar, completa lo siguiente:"}</p><ul>{issues.map(issue => <li key={issue.message}><button type="button" data-target-step={issue.step} data-target-section={issue.sectionId} onClick={() => goToIssue(issue)}>{issue.message}<FiArrowRight /></button></li>)}</ul></div>}
@@ -473,8 +476,15 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   </main>;
 }
 
+function SectionSummaryLabel({ section }: { section: InviteSection }) {
+  const label = extraDetailLabel(section);
+  const title = section.title.trim();
+  const showTitle = title && title.toLocaleLowerCase('es') !== label.toLocaleLowerCase('es');
+  return <span className="guided-section-summary-label"><strong>{label}</strong>{showTitle && <small>{title}</small>}</span>;
+}
+
 function extraDetailLabel(section: InviteSection) {
-  return ({ closing: 'Despedida', countdown: 'Cuenta regresiva', cover: 'Portada', location: 'Lugar principal de la celebración', gallery: 'Galería de fotos', dress_code: 'Código de vestimenta', gifts: 'Regalos', ceremony: 'Ceremonia', reception: 'Celebración en otra sede', music: 'Playlist', custom: 'Información adicional', parents: 'Familia y personas especiales', program: 'Programa de actividades', story: 'Historia de la celebración', rsvp: 'Confirmación de asistencia' } as const)[section.type];
+  return invitationSectionLabels[section.type];
 }
 
 function Field({ label, id, help, wide, children, errors = {} }: { errors?: Record<string, string>; label: string; id: string; help?: string; wide?: boolean; children: ReactNode }) {

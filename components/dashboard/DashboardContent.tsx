@@ -151,7 +151,6 @@ export function DashboardContent({ ownerId, userName, userEmail, userImage, even
                   <span className="dashboard-slot-plus"><FiPlus aria-hidden="true" /></span>
                   <h3>{events.length === 0 && index === 0 ? "Tu primera invitación" : "Tu próxima celebración"}</h3>
                   <p>Un nuevo momento merece su propia invitación. Dale tu estilo y compártelo.</p>
-                  <span className="dashboard-slot-cta">Crear invitación <FiArrowUpRight aria-hidden="true" /></span>
                 </Link>)}
               </div>
           </section>

@@ -21,7 +21,15 @@ export const weddingDetails: { type: SectionType; title: string; question: strin
   { type: "rsvp", title: "¿Nos acompañas?", question: "¿Quieren recibir confirmaciones?", help: "Sus invitados podrán responder aquí o desde un enlace de WhatsApp." },
 ];
 
+export const invitationSectionLabels: Record<SectionType, string> = {
+  cover: "Portada", countdown: "Cuenta regresiva", location: "Lugar del evento",
+  story: "Presentación del evento", ceremony: "Ceremonia", reception: "Otra sede",
+  program: "Itinerario", parents: "Personas especiales", dress_code: "Código de vestimenta",
+  gifts: "Regalos", gallery: "Galería de fotos", music: "Playlist",
+  custom: "Información adicional", rsvp: "Confirmación de asistencia", closing: "Despedida",
+};
+
 export function orderedInvitationSections(sections: InviteSection[]) {
   const ordered = weddingDetails.flatMap(detail => sections.filter(section => section.type === detail.type));
-  return [...ordered, ...sections.filter(section => !ordered.includes(section))];
+  return [...ordered.filter(section => section.type !== "rsvp" && section.type !== "closing"), ...sections.filter(section => !ordered.includes(section) && section.type !== "rsvp" && section.type !== "closing"), ...sections.filter(section => section.type === "rsvp"), ...sections.filter(section => section.type === "closing")];
 }

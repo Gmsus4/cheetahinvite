@@ -4,7 +4,7 @@ import { invitationStyleStepIndex } from "./invitation-style-journey";
 import { normalizeEventLocations } from "./invitation-locations";
 import { invitationGoogleMapsUrl } from "./invitation-links";
 import { isInvitationPanelStyle, isInvitationBlurIntensity, isInvitationSectionCorners } from "./invitation-editor";
-import { weddingDetails, usesPrimaryLocation, locationSectionTitle } from "./invitation-sections";
+import { weddingDetails, usesPrimaryLocation, locationSectionTitle, invitationSectionLabels } from "./invitation-sections";
 import type { EventData, EditorValues, EditorWizard, InviteSection } from './invitation-editor';
 import { recommendedInvitationFonts } from './invitation-fonts';
 import { getInvitationEventContent } from './invitation-event-content';
@@ -13,12 +13,12 @@ import { eventButtonAppearance } from './invitation-buttons';
 import { sharedInvitationId, sharedInvitationDesign } from './shared-invitation';
 
 export function guidedDetails(eventType: string) {
-  return (['story', 'ceremony', 'program', 'parents', 'dress_code', 'gifts', 'gallery', 'rsvp', 'music', 'custom', 'closing'] as const).map(type => {
+  return (['story', 'ceremony', 'program', 'parents', 'dress_code', 'gifts', 'gallery', 'music', 'custom', 'rsvp', 'closing'] as const).map(type => {
     const weddingDetail = eventType === 'wedding' ? weddingDetails.find(detail => detail.type === type) : undefined;
-    return weddingDetail ?? ({
-    type, title: type === 'closing' ? 'Despedida' : invitationSectionPreset(eventType, type).title,
-    question: ({closing:'¿Quieres incluir una despedida?', location:'¿Mostrar el lugar principal?', story:'¿Quieres compartir unas palabras?', ceremony:'¿Habrá una ceremonia?', reception:'¿Habrá otra sede para la celebración?', program:'¿Quieres compartir el programa?', parents:'¿Quieres mencionar a personas especiales?', dress_code:'¿Habrá código de vestimenta?', gifts:'¿Quieres incluir información de regalos?', gallery:'¿Quieres incluir una galería?', rsvp:'¿Quieres recibir confirmaciones?', music:'¿Quieres compartir una playlist?', custom:'¿Hay algo más que deban saber?'} as const)[type],
-    help: type === 'rsvp' ? 'Recibe respuestas en la invitación o mediante un enlace externo.' : 'Opcional. Activa esta sección para personalizarla.',
+    return ({
+    type, title: invitationSectionLabels[type],
+    question: weddingDetail?.question ?? ({closing:'¿Quieres incluir una despedida?', location:'¿Mostrar el lugar principal?', story:'¿Quieres compartir unas palabras?', ceremony:'¿Habrá una ceremonia?', reception:'¿Habrá otra sede para la celebración?', program:'¿Quieres compartir el programa?', parents:'¿Quieres mencionar a personas especiales?', dress_code:'¿Habrá código de vestimenta?', gifts:'¿Quieres incluir información de regalos?', gallery:'¿Quieres incluir una galería?', rsvp:'¿Quieres recibir confirmaciones?', music:'¿Quieres compartir una playlist?', custom:'¿Hay algo más que deban saber?'} as const)[type],
+    help: weddingDetail?.help ?? (type === 'rsvp' ? 'Recibe respuestas en la invitación o mediante un enlace externo.' : 'Opcional. Activa esta sección para personalizarla.'),
     });
   });
 }
