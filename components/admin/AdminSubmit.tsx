@@ -4,7 +4,7 @@ import { createPortal, useFormStatus } from "react-dom";
 import { FiArrowUpRight, FiCheckCircle, FiLoader, FiX } from "react-icons/fi";
 import styles from "./AdminSubmit.module.css";
 
-export function AdminSubmit({ children, pendingLabel = "Guardando…", secondary = false, confirmMessage, confirmTitle = "Confirmar acción" }: { children: ReactNode; pendingLabel?: string; secondary?: boolean; confirmMessage?: string; confirmTitle?: string }) {
+export function AdminSubmit({ children, pendingLabel = "Guardando…", secondary = false, confirmMessage, confirmTitle = "Confirmar acción", icon, iconLabel, className, disabled = false }: { children: ReactNode; pendingLabel?: string; secondary?: boolean; confirmMessage?: string; confirmTitle?: string; icon?: ReactNode; iconLabel?: string; className?: string; disabled?: boolean }) {
   const { pending } = useFormStatus();
   const button = useRef<HTMLButtonElement>(null);
   const submitted = useRef(false);
@@ -20,14 +20,14 @@ export function AdminSubmit({ children, pendingLabel = "Guardando…", secondary
   }
 
   return <>
-    <button ref={button} className={`admin-button${secondary ? " secondary" : ""}`} type="submit" disabled={pending} aria-haspopup={confirmMessage ? "dialog" : undefined} onClick={event => {
+    <button ref={button} className={className ?? `admin-button${secondary ? " secondary" : ""}`} type="submit" disabled={pending || disabled} aria-label={iconLabel} title={iconLabel} aria-haspopup={confirmMessage ? "dialog" : undefined} onClick={event => {
       if (!confirmMessage) return;
       event.preventDefault();
       if (event.currentTarget.form?.reportValidity()) {
         submitted.current = false;
         setConfirming(true);
       }
-    }}>{pending ? <><FiLoader aria-hidden="true" />{pendingLabel}</> : <>{children}<FiArrowUpRight aria-hidden="true" /></>}</button>
+    }}>{pending ? <><FiLoader aria-hidden="true" />{!iconLabel && pendingLabel}</> : icon ?? <>{children}<FiArrowUpRight aria-hidden="true" /></>}</button>
     {confirming && confirmMessage && createPortal(<AdminConfirmation title={confirmTitle} message={confirmMessage} label={children} onConfirm={confirm} onCancel={() => setConfirming(false)} />, document.body)}
   </>;
 }

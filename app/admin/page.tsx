@@ -5,6 +5,7 @@ import { prisma } from "@/prisma";
 import { getCurrentPrice } from "@/lib/site-pricing";
 import { paymentMoney } from "@/lib/payment-status";
 import { AdminPageBoundary, AdminHeading, adminDate } from "@/components/admin/AdminUI";
+import styles from "./overview.module.css";
 
 const auditLabels: Record<string, string> = { "admin.grant": "Acceso de administrador asignado", "admin.revoke": "Acceso de administrador retirado", "example.duplicate": "Ejemplo duplicado como borrador", "price.create": "Cambio de precio", "price.cancel": "Precio programado cancelado", "example.create": "Nuevo borrador de ejemplo", "example.settings": "Presentación de ejemplo actualizada", "example.publish": "Ejemplo publicado", "example.unpublish": "Ejemplo retirado del sitio", "example.delete": "Borrador eliminado", "examples.source": "Origen de ejemplos actualizado", "courtesy.grant": "Cortesía otorgada", "courtesy.revoke": "Cortesía retirada" };
 
@@ -28,14 +29,14 @@ async function AdminHomeData() {
     { label: "Invitaciones", value: String(events), caption: "Eventos creados por cuentas del sitio", Icon: FiMail },
     { label: "Cortesías vigentes", value: String(courtesy), caption: "Autorizaciones vigentes sin cobro", Icon: FiGift },
   ];
-  return <>
-    <AdminHeading title="Todo para seguir creciendo." description="Tu escaparate, tus clientes y cada celebración, en un solo lugar." />
-    <div className="admin-stats">{stats.map(({ label, value, caption, Icon }) => <article key={label} className="admin-stat"><span className="admin-stat-label">{label}<Icon aria-hidden="true" /></span><strong>{value}</strong><small>{caption}</small></article>)}</div>
-    <div className="admin-grid">
-      <section className="admin-card"><span className="admin-eyebrow">PRECIO DE PUBLICACIÓN</span><div className="admin-price-amount">{price.label}<small style={{ fontSize: 13, letterSpacing: 0 }}> MXN</small></div><p>IVA incluido · {price.months} meses de vigencia por invitación.</p><Link className="admin-button secondary" href="/admin/precio">Gestionar precio<FiArrowUpRight /></Link></section>
-      <section className="admin-card"><span className="admin-eyebrow">TU ESCAPARATE</span><h2 style={{ marginTop: 14 }}>Cada ejemplo lleva tu sello.</h2><p>Crea tus ejemplos con el editor del sitio. Decide cuándo publicarlos y en qué orden aparecen.</p><Link className="admin-button" href="/admin/disenos">Diseños y ejemplos<FiArrowUpRight /></Link></section>
+  return <div className={styles.overview}>
+    <AdminHeading title="Resumen del negocio" description="Clientes, publicaciones y movimientos recientes."><Link className={styles.textLink} href="/admin/estadisticas">Ver estadísticas<FiArrowUpRight aria-hidden="true" /></Link></AdminHeading>
+    <dl className={styles.metrics}>{stats.map(({ label, value, caption, Icon }) => <div key={label} className={styles.metric}><dt>{label}<Icon aria-hidden="true" /></dt><dd><strong>{value}</strong><small>{caption}</small></dd></div>)}</dl>
+    <div className={styles.management}>
+      <section className={styles.price} aria-labelledby="admin-price-heading"><h2 id="admin-price-heading">Precio de publicación</h2><div className={styles.priceRow}><strong>{price.label}<small> MXN</small></strong><Link className={styles.textLink} href="/admin/precio">Gestionar<FiArrowUpRight aria-hidden="true" /></Link></div><p>IVA incluido · {price.months} meses de vigencia por invitación.</p></section>
+      <section className={styles.catalog} aria-labelledby="admin-catalog-heading"><div className={styles.sectionHeading}><span className={styles.catalogIcon}><FiLayers aria-hidden="true" /></span><h2 id="admin-catalog-heading">Diseños y ejemplos</h2></div><p>Crea ejemplos, revisa tus borradores y decide cuáles aparecen en el sitio.</p><Link className="admin-button" href="/admin/disenos">Gestionar catálogo<FiArrowUpRight aria-hidden="true" /></Link></section>
     </div>
-    <h2 className="admin-section-title">Actividad reciente</h2>
+    <div className={styles.activityHeading}><h2>Actividad reciente</h2><span>{audit.length ? `${audit.length} últimos cambios` : "Sin movimientos"}</span></div>
     {audit.length ? <div className="admin-table-wrap"><table className="admin-table"><caption className="admin-visually-hidden">Historial de cambios administrativos</caption><thead><tr><th>Acción</th><th>Fecha</th><th>Referencia</th></tr></thead><tbody>{audit.map(entry => <tr key={entry.id}><td>{auditLabels[entry.action] || entry.action}</td><td>{adminDate(entry.createdAt)}</td><td><small>{entry.targetId}</small></td></tr>)}</tbody></table></div> : <p className="admin-help">Los cambios de precio, ejemplos y cortesías aparecerán aquí cuando empieces a usar la administración.</p>}
-  </>;
+  </div>;
 }

@@ -1,4 +1,6 @@
 "use server";
+import { isInvitationImagePalette } from "@/lib/invitation-image-palette";
+import { isInvitationTextColor, isInvitationTextColorMode } from "@/lib/invitation-text-color";
 import { validCompanionLimit } from "@/lib/rsvp";
 
 import { eventPublicationIssues } from "@/lib/guided-invitation";
@@ -27,6 +29,7 @@ import { isValidInvitationSlug, normalizeInvitationSlug } from "@/lib/invitation
 import { isInvitationTemplate } from "@/lib/invitation-templates";
 import { isInvitationTexture } from "@/lib/invitation-textures";
 import { sharedInvitationId, sharedInvitationDesign, invitationPalette } from "@/lib/shared-invitation";
+import { heroPreviewImages } from "@/lib/hero-preview-images";
 import { ImageStorageError, queueEventImages, scheduleCloudinaryCleanup, syncCloudinaryImages, withImageLock } from "@/lib/cloudinary-storage";
 
 export async function deleteEvent(eventId: string) {
@@ -198,6 +201,14 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
   const rawGlassBorder = formData.get("glassBorder") ?? "true";
   if (rawGlassBorder !== "true" && rawGlassBorder !== "false") return failure("validation", "Elige si quieres mostrar el borde del cristal.");
   const glassBorder = rawGlassBorder === "true";
+  let imagePalette: unknown = null;
+  if (formData.has("imagePalette")) {
+    try { imagePalette = JSON.parse(String(formData.get("imagePalette"))); } catch { return failure("validation", "La paleta de la imagen no es válida."); }
+    if (imagePalette !== null && !isInvitationImagePalette(imagePalette)) return failure("validation", "La paleta debe incluir un tono claro, uno oscuro y tres acentos válidos.");
+  }
+  const textColorMode = formData.get("textColorMode") ?? "auto";
+  const textColor = formData.get("textColor") ?? "#FFFFFF";
+  if (!isInvitationTextColorMode(textColorMode) || !isInvitationTextColor(textColor)) return failure("validation", "Elige un color de texto válido (por ejemplo, #FFFFFF).");
   const sectionCorners = formData.get("sectionCorners") ?? "rounded";
   if (!isInvitationSectionCorners(sectionCorners)) return failure("validation", "Elige una forma válida para las esquinas de las secciones.");
   const panelStyle = formData.get("panelStyle") ?? "auto";
@@ -228,10 +239,7 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
 
   for (const photoUrl of [imageUrl, backgroundImageUrl]) {
     if (!photoUrl) continue;
-    try {
-      const url = new URL(photoUrl);
-      if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error();
-    } catch {
+    if (!isInvitationImageUrl(photoUrl)) {
       return failure("validation", "Usa una imagen válida que comience con http:// o https://.");
     }
   }
@@ -240,9 +248,12 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
   const orderedSections = orderedInvitationSections(sections as InviteSection[]);
   const curated = {
     templateId: sharedInvitationId,
-    accent: invitationPalette(accent).accent, typography, bodyTypography,
+    accent: invitationPalette(accent, imagePalette).accent, typography, bodyTypography,
     ...(formData.has("showSectionIcons") ? { showSectionIcons } : {}),
     ...(formData.has("glassBorder") ? { glassBorder } : {}),
+    ...(formData.has("imagePalette") ? { imagePalette: imagePalette === null ? Prisma.DbNull : imagePalette as Prisma.InputJsonValue } : {}),
+    ...(formData.has("textColorMode") ? { textColorMode } : {}),
+    ...(formData.has("textColor") ? { textColor } : {}),
     ...(formData.has("sectionCorners") ? { sectionCorners } : {}),
     ...(formData.has("panelStyle") ? { panelStyle } : {}),
     ...(formData.has("coverLayout") ? { coverLayout } : {}),
@@ -324,27 +335,28 @@ function isValidSection(value: unknown): value is {
   if (section.whatsappPhone !== undefined && (section.type !== "rsvp" || typeof section.whatsappPhone !== "string" || section.whatsappPhone.length > 40)) return false;
   if (section.whatsappMessage !== undefined && (section.type !== "rsvp" || typeof section.whatsappMessage !== "string" || section.whatsappMessage.length > 200)) return false;
   if (section.layout !== undefined && !["auto", "split", "centered", "card"].includes(section.layout as string)) return false;
+  if (section.textMargin !== undefined && !["default", "wide", "none"].includes(section.textMargin as string)) return false;
+  if (section.photoMargin !== undefined && !["default", "wide", "none"].includes(section.photoMargin as string)) return false;
+  if (section.margin !== undefined && !["default", "wide", "none"].includes(section.margin as string)) return false;
+  if (section.textColorMode !== undefined && !isInvitationTextColorMode(section.textColorMode)) return false;
+  if (section.textColor !== undefined && !isInvitationTextColor(section.textColor)) return false;
   if (section.textAlign !== undefined && !["auto", "left", "center", "right"].includes(section.textAlign as string)) return false;
   if (section.desktopImageFocus !== undefined && !isMobileImageFocus(section.desktopImageFocus)) return false;
   if (section.mobileImageFocus !== undefined && !isMobileImageFocus(section.mobileImageFocus)) return false;
   if (section.imagePosition !== undefined && !["before", "after"].includes(section.imagePosition as string)) return false;
   if (section.panelStyle !== undefined && !isInvitationPanelStyle(section.panelStyle)) return false;
-  if (section.imageUrls !== undefined && (!Array.isArray(section.imageUrls) || section.imageUrls.length > ACCOUNT_LIMITS.imagesPerGallery || section.imageUrls.some((url) => typeof url !== "string" || url.length > 1000 || !isHttpUrl(url)))) return false;
+  if (section.imageUrls !== undefined && (!Array.isArray(section.imageUrls) || section.imageUrls.length > ACCOUNT_LIMITS.imagesPerGallery || section.imageUrls.some((url) => typeof url !== "string" || url.length > 1000 || !isInvitationImageUrl(url)))) return false;
   if (section.type === "location" && section.link && !invitationExternalUrl(section.link as string)) return false;
   if (section.link && !invitationSectionUrl(section.type as string, section.link as string)) return false;
   for (const value of [section.imageUrl] as string[]) {
     if (!value) continue;
-    try {
-      const url = new URL(value);
-      if (url.protocol !== "http:" && url.protocol !== "https:") return false;
-    } catch {
-      return false;
-    }
+    if (!isInvitationImageUrl(value)) return false;
   }
   return true;
 }
 
-function isHttpUrl(value: string) {
+function isInvitationImageUrl(value: string) {
+  if (Object.hasOwn(heroPreviewImages, value)) return true;
   try {
     const url = new URL(value);
     return url.protocol === "http:" || url.protocol === "https:";

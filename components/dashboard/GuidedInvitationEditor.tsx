@@ -50,9 +50,13 @@ const descriptions = ["Empecemos por las personas que hacen especial esta celebr
 const lastStep = steps.length - 1;
 const introTitles = [<>¿Quién <em>celebra?</em></>, <>¿Cuándo <em>y dónde?</em></>, <>Portada <em>y fondo</em></>, <>Dale <em>tu estilo</em></>, <>Personaliza <em>los bloques</em></>, <>Revisa <em>tu invitación</em></>];
 
-export function GuidedInvitationEditor({ event, creation = false, error, account, exampleId, priceLabel = invitationPriceLabel }: { event: EventData; creation?: boolean; exampleId?: string; priceLabel?: string; saved: boolean; published: boolean; error: string; account?: { name: string; email: string; image?: string | null } }) {
+export function GuidedInvitationEditor({ event, creation = false, error, account, exampleId, exampleCreation = false, priceLabel = invitationPriceLabel }: { event: EventData; creation?: boolean; exampleId?: string; exampleCreation?: boolean; priceLabel?: string; saved: boolean; published: boolean; error: string; account?: { name: string; email: string; image?: string | null } }) {
   const router = useRouter();
-  const guidedFlow = !exampleId;
+  // Only initial creation includes the visual design handoff.
+  const guidedFlow = true;
+  const designJourney = creation || Boolean(exampleId && exampleCreation);
+  const requiredInformation = creation || Boolean(exampleId);
+  const reviewLabel = exampleId ? "Revisar ejemplo" : "Revisar y publicar";
   const [values, setValues] = useState<EditorValues>(() => ({ ...initialGuidedValues(event), privacy: isInvitationPrivacy(event.privacy) ? event.privacy : "UNSET", pin: "", pinPending: false }));
   const [step, setStep] = useState(0);
   const [activeSection, setActiveSection] = useState("__cover");
@@ -67,12 +71,12 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const [preparingPreview, setPreparingPreview] = useState(false);
   const [visualSession, setVisualSession] = useState<{ tab: Window; eventId: string; token: string; snapshot: string } | null>(null);
   const [validationAttempted, setValidationAttempted] = useState(false);
-  const requiredIssues = creation ? creationRequiredFields(values) : [];
+  const requiredIssues = requiredInformation ? creationRequiredFields(values) : [];
   const fieldErrors = Object.fromEntries((validationAttempted ? requiredIssues : []).map(issue => [issue.field, issue.message]));
-  const flowSteps = guidedFlow ? creation ? [0, 1, 4, 5, 6] : [0, 1, 4, 6] : [0, 1, 2, 3, 4, 5];
+  const flowSteps = designJourney ? [0, 1, 4, 5, 6] : [0, 1, 4, 6];
   const flowPosition = flowSteps.indexOf(step);
   const finalStep = guidedFlow ? 6 : lastStep;
-  const stepLabel = (id: number) => guidedFlow ? ({ 4: 'Información de los bloques', 5: 'Personaliza tu diseño', 6: 'Revisa y publica' } as Record<number, string>)[id] ?? stepLabels[id] : stepLabels[id];
+  const stepLabel = (id: number) => guidedFlow ? ({ 4: 'Información de los bloques', 5: 'Personaliza tu diseño', 6: exampleId ? 'Revisa el ejemplo' : 'Revisa y publica' } as Record<number, string>)[id] ?? stepLabels[id] : stepLabels[id];
   const form = useRef<HTMLFormElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const scrollToTop = useRef(false);
@@ -128,7 +132,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
           const incomingAcknowledged = { ...incoming, privacy: acknowledged.privacy, pin: acknowledged.pin, pinPending: acknowledged.pinPending };
           if (persistence.acceptExternalSave(JSON.stringify(incomingAcknowledged), saved.version, saved.privacyVersion ?? persistence.getPrivacyVersion(), expectedSnapshot)) {
             expectedSnapshot = JSON.stringify(incoming);
-            persistence.update(expectedSnapshot, false, { step: creation ? 5 : 6, activeExtra: null, flow: "content-v6" }, manualOnly);
+            persistence.update(expectedSnapshot, false, { step: designJourney ? 5 : 6, activeExtra: null, flow: "content-v6" }, manualOnly);
             setValues(incoming);
           } else {
             persistence.acceptFailure({ ok: false, code: 'conflict', message: 'El diseño cambió en otra pestaña. Revisa la versión guardada antes de continuar.', version: saved.version, privacyVersion: saved.privacyVersion });
@@ -137,7 +141,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
       } catch { persistence.reportError('No pudimos recuperar el diseño guardado. Reabre la invitación antes de publicar.'); }
       if (visualSession.tab.closed) {
         setVisualSession(null);
-        setNotice('Ya puedes continuar a revisar tu invitación y publicarla.');
+        setNotice(exampleId ? 'Ya puedes revisar tu ejemplo. Guarda el borrador y publícalo desde Administración cuando esté listo.' : 'Ya puedes continuar a revisar tu invitación y publicarla.');
       }
     };
     const onStorage = (event: StorageEvent) => { if (event.key === key) synchronize(); };
@@ -146,7 +150,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     const timer = window.setInterval(synchronize, 1000);
     synchronize();
     return () => { window.removeEventListener('storage', onStorage); window.removeEventListener('focus', synchronize); window.clearInterval(timer); };
-  }, [visualSession, event.ownerId, persistence, manualOnly, creation]);
+  }, [visualSession, event.ownerId, persistence, manualOnly, designJourney, exampleId]);
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
     if (scrollToTop.current) {
@@ -157,7 +161,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const busy = saving || preparingPreview || !protection.ready || Boolean(protection.recovery) || Boolean(visualSession);
   const signInHref = authPageHref("/login", creation
     ? persistence.getEventId() ? `/crear?resume=${encodeURIComponent(persistence.getEventId())}` : "/crear"
-    : `/dashboard/eventos/${event.id}`);
+    : exampleId ? `/admin/disenos/${exampleId}/editar${exampleCreation ? "?initial=1" : ""}` : `/dashboard/eventos/${event.id}`);
   const dirty = snapshot !== protection.acknowledged || protection.code === "conflict";
   const design = sharedInvitationDesign;
   const details = guidedDetails(values.eventType);
@@ -176,7 +180,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const acknowledgedValues = JSON.parse(protection.acknowledged) as EditorValues;
   const hasPin = protection.lastSaved ? acknowledgedValues.privacy === "PRIVATE" : event.privacy === "PRIVATE";
   const privacyIssue = !exampleId ? invitationPrivacyIssue(values.privacy ?? "UNSET", values.pin ?? "", Boolean(values.pinPending), hasPin) : null;
-  const issues: ReturnType<typeof guidedPublicationIssues> = [...(creation ? creationRequiredFields(values, true).map(({step, message, sectionId}) => ({step, message, sectionId})) : guidedPublicationIssues(values)), ...(privacyIssue ? [{ step: finalStep, message: privacyIssue }] : [])];
+  const issues: ReturnType<typeof guidedPublicationIssues> = [...(requiredInformation ? creationRequiredFields(values, true).map(({step, message, sectionId}) => ({step, message, sectionId})) : guidedPublicationIssues(values)), ...(privacyIssue ? [{ step: finalStep, message: privacyIssue }] : [])];
   const informationIssues = issues.filter(issue => issue.step !== finalStep && (!guidedFlow || !values.sections.some(section => section.id === issue.sectionId && section.type === 'gallery')));
   const published = isInvitationPublished(event);
   const changesSaved = protection.ready && !protection.recovery && !protection.error && !dirty && !saving && !protection.saving && uploads === 0 && (!creation || initiallySaved || protection.lastSaved);
@@ -196,7 +200,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     return true;
   }
   function validateCurrent() {
-    if (creation) {
+    if (requiredInformation) {
       const errors = requiredIssues.filter(issue => step <= 1 ? issue.step === step : step === 4 ? issue.step === 4 && (contentKey === '__more' || issue.sectionId === contentKey) : true);
       if (showRequiredErrors(errors)) return false;
     }
@@ -214,7 +218,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     if (sectionId && target === 4) { setActiveSection(sectionId); setAddingDetail(false); }
     if (target === 3 && sectionId) setAppearanceStep(invitationStyleStepIndex(sectionId));
     scrollToTop.current = true;
-    setStep(guidedFlow && !flowSteps.includes(target) ? creation ? 5 : 6 : target);
+    setStep(guidedFlow && !flowSteps.includes(target) ? designJourney ? 5 : 6 : target);
   }
   function goToIssue(issue: { step: number; sectionId?: string }) {
     if (guidedFlow && values.sections.some(section => section.id === issue.sectionId && section.type === 'gallery')) void openPrivatePreview();
@@ -253,7 +257,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     const restored = { ...recovered, ...locations, texture: "none", sections: completeGuidedSections(recovered.eventType, locations.sections) };
     setValues({ privacy: isInvitationPrivacy(event.privacy) ? event.privacy : "UNSET", pin: "", pinPending: false, ...restored, texture: "none" });
     const restoredStep = guidedRecoveryStep(record.wizard);
-    setStep(guidedFlow && !flowSteps.includes(restoredStep) ? creation ? 5 : 6 : !guidedFlow && restoredStep === 6 ? lastStep : restoredStep);
+    setStep(guidedFlow && !flowSteps.includes(restoredStep) ? designJourney ? 5 : 6 : !guidedFlow && restoredStep === 6 ? lastStep : restoredStep);
     setActiveSection(guidedRecoverySection(record.wizard, restored.sections));
     setAddingDetail((record.wizard.flow === "content-v4" || record.wizard.flow === "content-v5" || record.wizard.flow === "content-v6") && Boolean(record.wizard.activeExtra?.startsWith("__add:")));
     setAppearanceStep(guidedRecoveryAppearanceStep(record.wizard));
@@ -293,7 +297,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   }
   async function openPrivatePreview() {
     if (busy || uploads > 0 || previewInFlight.current) return;
-    if (guidedFlow && informationIssues.length) { setStep(creation ? 5 : 6); setNotice('Completa la información pendiente antes de personalizar.'); return; }
+    if (guidedFlow && informationIssues.length) { setStep(designJourney ? 5 : 6); setNotice('Completa la información pendiente antes de personalizar.'); return; }
     previewInFlight.current = true;
     let preview: Window | null = null;
     setPreparingPreview(true); setNotice("");
@@ -344,7 +348,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const journeyNavigation = <div className={`guided-bottom-bar ${styles.journeyNavigation}`}>
             <button className="guided-back" type="button" aria-label="Paso anterior" disabled={step === 0 || busy || uploads > 0} onClick={previousJourney}><FiArrowLeft /><span className="guided-bottom-label">Anterior</span></button>
             {progress}
-            {step < finalStep ? <button className="button" type="submit" form="guided-invitation-form" aria-label={guidedFlow && step === 5 ? 'Revisar y publicar' : step === 3 ? appearanceStep < invitationStyleSteps.length - 1 ? `Continuar a ${invitationStyleSteps[appearanceStep + 1].label}` : "Continuar a Personaliza los bloques" : "Continuar al siguiente paso"} disabled={busy || uploads > 0}><span className="guided-bottom-label">{guidedFlow && step === 5 ? 'Revisar y publicar' : continueLabel}</span><FiArrowRight /></button> : <div className="guided-footer-actions">
+            {step < finalStep ? <button className="button" type="submit" form="guided-invitation-form" aria-label={guidedFlow && step === 5 ? reviewLabel : step === 3 ? appearanceStep < invitationStyleSteps.length - 1 ? `Continuar a ${invitationStyleSteps[appearanceStep + 1].label}` : "Continuar a Personaliza los bloques" : "Continuar al siguiente paso"} disabled={busy || uploads > 0}><span className="guided-bottom-label">{guidedFlow && step === 5 ? reviewLabel : continueLabel}</span><FiArrowRight /></button> : <div className="guided-footer-actions">
               <button className={`button${!exampleId && !event.paidAt && !published ? " guided-save-compact" : ""}`} type="button" aria-label={saveLabel} title={saveLabel} data-save-state={changesSaved ? "saved" : undefined} disabled={busy || uploads > 0 || changesSaved || (!creation && !dirty)} onClick={() => void save()}>{changesSaved ? <FiCheck aria-hidden="true" /> : <FiSave aria-hidden="true" />}<span className="guided-bottom-label" role="status">{saveLabel}</span></button>
               {!exampleId && !event.paidAt && !published && <button className="button guided-publish" type="button" aria-label={event.complimentaryAt ? "Publicar con mi cortesía" : "Guardar y continuar al pago"} title={issues.length ? "Completa los datos indicados antes de publicar" : undefined} disabled={busy || uploads > 0 || issues.length > 0} onClick={() => void save(true)}><span className="guided-bottom-label">{saving ? "Guardando…" : event.complimentaryAt ? "Publicar cortesía" : "Continuar al pago"}</span><span className="guided-mobile-payment-label">{event.complimentaryAt ? "Publicar" : "Pagar"}</span><FiArrowRight aria-hidden="true" /></button>}
             </div>}
@@ -367,7 +371,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     <DashboardHeader name={account?.name || "Usuario"} email={account?.email || ""} image={account?.image} guard={confirmNavigation} />
     <div className="guided-layout">
       <div className="guided-workspace">
-        <div className="guided-heading"><span className="guided-eyebrow">{guidedFlow ? step >= 5 ? 'PARTE 2 · DISEÑO Y PUBLICACIÓN' : 'PARTE 1 · INFORMACIÓN DEL EVENTO' : "TU INVITACIÓN"} · PASO {flowPosition + 1} DE {flowSteps.length}</span><h1 ref={heading} tabIndex={-1}>{guidedFlow && step === 4 ? <>Información de <em>los bloques</em></> : guidedFlow && step === 5 ? <>Personaliza <em>tu diseño</em></> : step === 6 ? <>Revisa <em>y publica</em></> : introTitles[step]}</h1><p>{guidedFlow && step === 4 ? creation ? 'Completa el contenido y elige qué bloques incluir. El diseño viene después.' : 'Completa el contenido y elige qué bloques incluir. Puedes editar el diseño desde el dashboard.' : guidedFlow && step === 5 ? 'Dale tu estilo a la invitación con el editor visual.' : step === 6 ? published ? 'Revisa la información y el acceso antes de publicar tus cambios.' : 'Revisa la información, elige quién puede ver tu invitación y continúa al pago para publicarla.' : descriptions[step]}</p>{journeyNavigation}{step === 0 && <div className={styles.introNote}><span><FiCheck aria-hidden="true" /></span><p>Puedes empezar ahora y completar los detalles después.</p></div>}</div>
+        <div className="guided-heading"><span className="guided-eyebrow">{guidedFlow ? step >= 5 ? exampleId ? designJourney ? 'PARTE 2 · DISEÑO Y REVISIÓN' : 'REVISIÓN DEL EJEMPLO' : 'PARTE 2 · DISEÑO Y PUBLICACIÓN' : 'PARTE 1 · INFORMACIÓN DEL EVENTO' : "TU INVITACIÓN"} · PASO {flowPosition + 1} DE {flowSteps.length}</span><h1 ref={heading} tabIndex={-1}>{guidedFlow && step === 4 ? <>Información de <em>los bloques</em></> : guidedFlow && step === 5 ? <>Personaliza <em>tu diseño</em></> : step === 6 ? exampleId ? <>Revisa <em>tu ejemplo</em></> : <>Revisa <em>y publica</em></> : introTitles[step]}</h1><p>{guidedFlow && step === 4 ? designJourney ? 'Completa el contenido y elige qué bloques incluir. El diseño viene después.' : exampleId ? 'Completa el contenido y elige qué bloques incluir. Puedes editar el diseño desde la colección de ejemplos.' : 'Completa el contenido y elige qué bloques incluir. Puedes editar el diseño desde el dashboard.' : guidedFlow && step === 5 ? 'Dale tu estilo a la invitación con el editor visual.' : step === 6 ? exampleId ? 'Revisa los datos del ejemplo y guarda el borrador. La publicación se realiza desde Administración.' : published ? 'Revisa la información y el acceso antes de publicar tus cambios.' : 'Revisa la información, elige quién puede ver tu invitación y continúa al pago para publicarla.' : descriptions[step]}</p>{journeyNavigation}{step === 0 && <div className={styles.introNote}><span><FiCheck aria-hidden="true" /></span><p>Puedes empezar ahora y completar los detalles después.</p></div>}</div>
         <div className={styles.formArea}>
         {visualSession && <div className="guided-notice" role="status"><p>El editor visual está abierto en otra pestaña. Guarda tus cambios allí y usa la flecha de regreso para continuar aquí.</p><button type="button" className="button" onClick={() => visualSession.tab.focus()}>Ir al editor visual</button></div>}
         {protection.localWarning && <p className="guided-alert" role="status">El navegador no permite guardar una copia local. Guarda tu borrador antes de salir.</p>}
@@ -439,11 +443,11 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
               </>}
             </>}
             {step === 3 && <InvitationStyleJourney values={values} step={appearanceStep} onStepChange={goToAppearance} onChange={patch} />}
-            {creation && step === 5 && <section className="guided-more-details" aria-labelledby="invitation-design-title">
+            {designJourney && step === 5 && <section className="guided-more-details" aria-labelledby="invitation-design-title">
               <h2 id="invitation-design-title">Edita tu invitación de forma visual</h2>
               <p>Elige fotos, fondo, colores y letras directamente sobre tu invitación. El editor se abrirá en otra pestaña.</p>
               <button className={`button ${styles.designButton}`} type="button" aria-label="Editar diseño en una nueva pestaña" disabled={busy || uploads > 0 || informationIssues.length > 0} onClick={() => void openPrivatePreview()}><FiEye aria-hidden="true" />{preparingPreview ? 'Abriendo editor…' : 'Editar diseño'}</button>
-              <p>Guarda tus cambios en el editor visual y usa su flecha de regreso. Después pulsa «Revisar y publicar» para ver el resumen y continuar al pago.</p>
+              <p>{exampleId ? "Guarda los cambios en el editor visual y usa su flecha de regreso. Después pulsa «Revisar ejemplo» para comprobar los datos y guardar el borrador." : "Guarda tus cambios en el editor visual y usa su flecha de regreso. Después pulsa «Revisar y publicar» para ver el resumen y continuar al pago."}</p>
               {informationIssues.length > 0 && <div className="guided-checklist"><h3>Completa estos datos para editar el diseño</h3><ul>{informationIssues.map(issue => <li key={issue.message}><button type="button" onClick={() => goToIssue(issue)}>{issue.message}<FiArrowRight /></button></li>)}</ul></div>}
             </section>}
             {((!guidedFlow && step === lastStep) || (guidedFlow && step === 6)) && <>

@@ -105,7 +105,7 @@ function createFixture() {
       if (name === 'next/navigation') return { redirect: url => { throw Object.assign(Error('redirect'), { url }); }, notFound: () => { throw Object.assign(Error('not-found'), { status: 404 }); } };
       if (name === '@/auth') return { auth: async () => fixture.owner ? { user: { id: fixture.owner, role: state.users.get(fixture.owner)?.role } } : null };
       if (name === '@/prisma') return { prisma };
-      if (name === '@/generated/prisma/client') return { Prisma: { sql: (strings, ...values) => ({ strings, values }) } };
+      if (name === '@/generated/prisma/client') return { Prisma: { DbNull: null, sql: (strings, ...values) => ({ strings, values }) } };
       if (name.startsWith('@/')) return load(path.resolve(name.slice(2)) + '.ts');
       if (name.startsWith('.')) return load(path.resolve(path.dirname(absolute), name) + '.ts');
       return require(name);

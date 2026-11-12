@@ -1,0 +1,12 @@
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.extracted { margin-top: 20px; }
+.extracted h2 { margin: 0 0 8px; font-size: 15px; }
+.extracted > p { margin: 0 0 14px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.tones { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 8px; }
+.tones button { display: flex; min-width: 0; flex-direction: column; align-items: stretch; gap: 5px; padding: 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+.tones button[aria-pressed="true"] { border-color: var(--orange); box-shadow: inset 0 0 0 1px var(--orange); }
+.tones button:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+.tones i { height: 64px; border: 1px solid #8884; border-radius: 5px; }
+.tones button strong { flex: none; font-size: 11px; }
+.tones button > span { font-size: 10px; font-variant-numeric: tabular-nums; }
+@media(max-width:420px) { .tones { grid-template-columns: repeat(3,minmax(0,1fr)); } }

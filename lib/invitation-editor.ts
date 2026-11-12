@@ -1,7 +1,16 @@
+import { isInvitationImagePalette, type InvitationImagePalette } from "@/lib/invitation-image-palette";
 import { validCompanionLimit } from "@/lib/rsvp";
 import type { InvitationButtonAppearance } from "@/lib/invitation-buttons";
 import { isInvitationCoverLayout, type InvitationCoverLayout } from "@/lib/invitation-cover-layout";
 import { isInvitationPrivacy, type InvitationPrivacy } from "@/lib/invitation-privacy";
+
+export type InvitationTextColorMode = "auto" | "white" | "black" | "palette" | "opposite" | "custom";
+export function isInvitationTextColorMode(value: unknown): value is InvitationTextColorMode {
+  return typeof value === "string" && ["auto", "white", "black", "palette", "opposite", "custom"].includes(value);
+}
+export function isInvitationTextColor(value: unknown): value is string {
+  return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
+}
 
 export type InvitationSectionCorners = "square" | "soft" | "rounded";
 export function isInvitationSectionCorners(value: unknown): value is InvitationSectionCorners {
@@ -17,6 +26,10 @@ export function isInvitationBlurIntensity(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 100;
 }
 export type SectionType = "countdown" | "cover" | "location" | "story" | "ceremony" | "reception" | "program" | "parents" | "dress_code" | "gifts" | "rsvp" | "gallery" | "music" | "custom" | "closing";
+export type SectionMargin = "default" | "wide" | "none";
+export function isSectionMargin(value: unknown): value is SectionMargin {
+  return typeof value === "string" && ["default", "wide", "none"].includes(value);
+}
 export type SectionTextAlign = "auto" | "left" | "center" | "right";
 export type MobileImageFocus = "top" | "center" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
 export function isMobileImageFocus(value: unknown): value is MobileImageFocus {
@@ -25,11 +38,11 @@ export function isMobileImageFocus(value: unknown): value is MobileImageFocus {
 export function isSectionTextAlign(value: unknown): value is SectionTextAlign {
   return typeof value === "string" && ["auto", "left", "center", "right"].includes(value);
 }
-export type InviteSection = { id: string; type: SectionType; title: string; titleCustomized?: boolean; showIcon?: boolean; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; mobileImageFocus?: MobileImageFocus; desktopImageFocus?: MobileImageFocus; panelStyle?: InvitationPanelStyle; textAlign?: SectionTextAlign; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; maxCompanions?: number; whatsappPhone?: string; whatsappMessage?: string; enabled: boolean };
+export type InviteSection = { id: string; type: SectionType; title: string; titleCustomized?: boolean; showIcon?: boolean; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; mobileImageFocus?: MobileImageFocus; desktopImageFocus?: MobileImageFocus; panelStyle?: InvitationPanelStyle; textColorMode?: InvitationTextColorMode; textColor?: string; textAlign?: SectionTextAlign; margin?: SectionMargin; textMargin?: SectionMargin; photoMargin?: SectionMargin; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; maxCompanions?: number; whatsappPhone?: string; whatsappMessage?: string; enabled: boolean };
 export type EditorValues = {
   privacy?: InvitationPrivacy; pin?: string; pinPending?: boolean;
   name: string; eventType: string; eventDate: string; eventTime: string; hostNames: string; venue: string; address: string;
-  message: string; imageUrl: string; backgroundImageUrl?: string; panelStyle?: InvitationPanelStyle; coverLayout?: InvitationCoverLayout; glassBorder?: boolean; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; showSectionIcons?: boolean; sectionCorners?: InvitationSectionCorners; accent: string; typography: string; bodyTypography: string; sections: InviteSection[];
+  message: string; imageUrl: string; backgroundImageUrl?: string; imagePalette?: InvitationImagePalette | null; textColorMode?: InvitationTextColorMode; textColor?: string; panelStyle?: InvitationPanelStyle; coverLayout?: InvitationCoverLayout; glassBorder?: boolean; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; showSectionIcons?: boolean; sectionCorners?: InvitationSectionCorners; accent: string; typography: string; bodyTypography: string; sections: InviteSection[];
   customSlug: string; templateId: string; texture: string; heroHorizontal: string; heroVertical: string; buttonAppearance: InvitationButtonAppearance;
 };
 export type EditorSaveResult = { ok: true; eventId: string; version: number; privacyVersion?: number } | {
@@ -90,6 +103,9 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
       || (values.pinPending !== undefined && typeof values.pinPending !== "boolean")
       || (values.showSectionIcons !== undefined && typeof values.showSectionIcons !== "boolean")
       || (values.glassBorder !== undefined && typeof values.glassBorder !== "boolean")
+      || (values.imagePalette !== undefined && values.imagePalette !== null && !isInvitationImagePalette(values.imagePalette))
+      || (values.textColorMode !== undefined && !isInvitationTextColorMode(values.textColorMode))
+      || (values.textColor !== undefined && !isInvitationTextColor(values.textColor))
       || (values.sectionCorners !== undefined && !isInvitationSectionCorners(values.sectionCorners))
       || (values.coverLayout !== undefined && !isInvitationCoverLayout(values.coverLayout))
       || (values.blurIntensity !== undefined && !isInvitationBlurIntensity(values.blurIntensity))
@@ -111,6 +127,11 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
       || (section.mobileImageFocus !== undefined && !isMobileImageFocus(section.mobileImageFocus))
       || (section.imagePosition !== undefined && !["before", "after"].includes(section.imagePosition))
       || (section.panelStyle !== undefined && !isInvitationPanelStyle(section.panelStyle))
+      || (section.margin !== undefined && !isSectionMargin(section.margin))
+      || (section.textMargin !== undefined && !isSectionMargin(section.textMargin))
+      || (section.photoMargin !== undefined && !isSectionMargin(section.photoMargin))
+      || (section.textColorMode !== undefined && !isInvitationTextColorMode(section.textColorMode))
+      || (section.textColor !== undefined && !isInvitationTextColor(section.textColor))
       || (section.textAlign !== undefined && !isSectionTextAlign(section.textAlign))
       || !["id", "title", "content", "detail", "link", "imageUrl"].every(key => typeof section[key as keyof InviteSection] === "string")
       || (section.imageUrls !== undefined && (!Array.isArray(section.imageUrls) || section.imageUrls.length > 12 || section.imageUrls.some(url => typeof url !== "string"))))) return null;
@@ -123,15 +144,15 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
 export type EventData = {
   isExample?: boolean; complimentaryAt?: Date | null;
   id: string; ownerId: string; privacy?: string; privacyVersion?: number; contentVersion: number; customSlug: string | null; templateId: string; texture: string; name: string; eventType: string; eventDate: Date | null; eventTime: string | null; hostNames: string | null; paidAt: Date | null; expiresAt: Date | null; status: "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED" | "EXPIRED" | "ARCHIVED" | "SUSPENDED" | "REFUNDED"; slug: string | null;
-  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; backgroundImageUrl?: string | null; panelStyle?: string; coverLayout?: string; glassBorder?: boolean; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; showSectionIcons?: boolean; sectionCorners?: string; imageUploads: number; accent: string; typography: string; bodyTypography: string; heroHorizontal?: string; heroVertical?: string; buttonShape?: string; buttonFilled?: boolean; buttonIcons?: boolean; buttonBorder?: boolean; buttonBold?: boolean; sections: unknown;
+  venue: string | null; address: string | null; message: string | null; imageUrl: string | null; backgroundImageUrl?: string | null; imagePalette?: unknown; textColorMode?: string; textColor?: string; panelStyle?: string; coverLayout?: string; glassBorder?: boolean; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; showSectionIcons?: boolean; sectionCorners?: string; imageUploads: number; accent: string; typography: string; bodyTypography: string; heroHorizontal?: string; heroVertical?: string; buttonShape?: string; buttonFilled?: boolean; buttonIcons?: boolean; buttonBorder?: boolean; buttonBold?: boolean; sections: unknown;
 };
 
 export type InvitationProps = {
-  eventType: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string; panelStyle?: InvitationPanelStyle; coverLayout?: InvitationCoverLayout; glassBorder?: boolean; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; showSectionIcons?: boolean; sectionCorners?: InvitationSectionCorners;
+  eventType: string; accent: string; name: string; hostNames: string; date: string; eventDateKey?: string; imagePalette?: InvitationImagePalette | null; textColorMode?: InvitationTextColorMode; textColor?: string; panelStyle?: InvitationPanelStyle; coverLayout?: InvitationCoverLayout; glassBorder?: boolean; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; showSectionIcons?: boolean; sectionCorners?: InvitationSectionCorners;
   typography?: string; bodyTypography?: string; eventTime?: string; venue: string; address: string;
   message: string; imageUrl: string; backgroundImageUrl?: string; sections: InviteSection[]; publicEventId?: string;
 };
 
 export type InvitationEditTarget =
   | { kind: "cover" | "date" | "location" | "cover-photo" | "background" | "appearance" | "add-section" }
-  | { kind: "section" | "section-photo" | "section-surface" | "section-alignment" | "section-visibility"; sectionId: string };
+  | { kind: "section" | "section-photo" | "section-surface" | "section-alignment" | "section-margin" | "section-photo-margin" | "section-visibility"; sectionId: string };

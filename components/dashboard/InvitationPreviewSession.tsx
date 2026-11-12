@@ -34,7 +34,7 @@ function IncomingPreview({ event, returnLink, previewToken }: Props) {
     snapshot: JSON.stringify(initialGuidedValues(event)), version: event.contentVersion, privacyVersion: event.privacyVersion ?? 0,
   } : {}) };
   const creationFlow = changes.creationFlow === true && !event.isExample;
-  const guidedFlow = (creationFlow || changes.editorFlow === true) && !event.isExample;
+  const guidedFlow = creationFlow || changes.editorFlow === true;
   const creationReturn = creationFlow ? { href: `/crear?resume=${encodeURIComponent(event.id)}`, title: 'Cerrar el editor visual y volver a crear', label: 'Volver a crear' } : { ...returnLink, title: 'Cerrar el editor visual y volver a editar', label: 'Volver a editar' };
   return <InvitationShowEditor event={event} returnLink={guidedFlow ? creationReturn : returnLink} initialChanges={initialChanges} onReturn={guidedFlow ? () => closeAndReturn(creationReturn.href) : undefined} onSaved={(snapshot, version, privacyVersion) => {
     // Refreshing this /show URL should use the version just saved explicitly.

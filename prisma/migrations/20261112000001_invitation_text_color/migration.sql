@@ -1,0 +1,3 @@
+ALTER TABLE "Event"
+  ADD COLUMN "textColorMode" TEXT NOT NULL DEFAULT 'white',
+  ADD COLUMN "textColor" TEXT NOT NULL DEFAULT '#FFFFFF';

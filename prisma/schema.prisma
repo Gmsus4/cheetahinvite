@@ -64,6 +64,9 @@ model Event {
   glassBorder Boolean @default(true)
   showSectionIcons Boolean @default(true)
   sectionCorners String @default("rounded")
+  imagePalette Json?
+  textColorMode String @default("auto")
+  textColor String @default("#FFFFFF")
   blurIntensity Int        @default(50)
   backgroundBlurIntensity Int @default(0)
   backgroundDimIntensity Int @default(0)

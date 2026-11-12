@@ -14,14 +14,14 @@ import { InvitationGlassBorderToggle } from "./InvitationGlassBorderToggle";
 
 export function InvitationSurfacePicker({ values, onChange, onBlurChange, onGlassBorderChange, embedded = false }: {
   embedded?: boolean;
-  values: Pick<EditorValues, "blurIntensity" | "backgroundBlurIntensity" | "backgroundDimIntensity" | "panelStyle" | "glassBorder" | "sectionCorners" | "accent" | "backgroundImageUrl" | "hostNames" | "name" | "typography" | "bodyTypography">;
+  values: Pick<EditorValues, "imagePalette" | "textColorMode" | "textColor" | "blurIntensity" | "backgroundBlurIntensity" | "backgroundDimIntensity" | "panelStyle" | "glassBorder" | "sectionCorners" | "accent" | "backgroundImageUrl" | "hostNames" | "name" | "typography" | "bodyTypography">;
   onChange(value: InvitationPanelStyle): void;
   onBlurChange(value: number): void;
   onGlassBorderChange(value: boolean): void;
 }) {
   const sliderId = useId();
   const intensity = values.blurIntensity ?? 50;
-  const palette = invitationPalette(values.accent);
+  const palette = invitationPalette(values.accent, values.imagePalette);
   const selected = values.panelStyle ?? "auto";
   const theme = {
     ...atmosphereStyle(values.accent, values),

@@ -1,0 +1,8 @@
+.settings { display: grid; gap: 20px; min-width: 0; }
+.settings section + section { padding-top: 18px; border-top: 1px solid var(--line); }
+.settings h3 { margin: 0 0 12px; font: 600 17px/1.4 var(--font-poppins),Arial,sans-serif; letter-spacing: -.035em; }
+.settings p { margin: 0 0 12px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.settings .pending { color: var(--orange); }
+.link { overflow-wrap: anywhere; }
+.fields { display: grid; grid-template-columns: minmax(0,1fr) 90px; gap: 12px; }
+.actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }

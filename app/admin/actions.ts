@@ -80,10 +80,10 @@ export async function createExample(form: FormData) {
     id = example.id;
   } catch { done("/admin/disenos", "No pudimos crear el borrador. Usa otro enlace o revisa el límite de 100 ejemplos."); }
   invalidateAdmin();
-  redirect(`/admin/disenos/${id}/editar`);
+  redirect(`/admin/disenos/${id}/editar?initial=1`);
 }
 
-export async function duplicateExample(id: string) {
+export async function duplicateExample(id: string, form?: FormData) {
   const actor = await requireAdmin();
   let copyId = "";
   await withImageLock(actor.id, async tx => {
@@ -97,6 +97,8 @@ export async function duplicateExample(id: string) {
       message: event.message, imageUrl: event.imageUrl, backgroundImageUrl: event.backgroundImageUrl, backgroundBlurIntensity: event.backgroundBlurIntensity, backgroundDimIntensity: event.backgroundDimIntensity,
       accent: event.accent, typography: event.typography, bodyTypography: event.bodyTypography,
       coverLayout: event.coverLayout, panelStyle: event.panelStyle, blurIntensity: event.blurIntensity, showSectionIcons: event.showSectionIcons, glassBorder: event.glassBorder,
+      imagePalette: event.imagePalette ?? Prisma.DbNull,
+      textColorMode: event.textColorMode, textColor: event.textColor,
       sectionCorners: event.sectionCorners, sections: event.sections as Prisma.InputJsonValue,
     } });
     const example = await tx.showcaseExample.create({ data: { eventId: copy.id, label, slug: `${source.slug.slice(0, 65)}-${randomUUID().slice(0, 8)}` } });
@@ -105,25 +107,33 @@ export async function duplicateExample(id: string) {
   });
   if (!copyId) done("/admin/disenos", "No pudimos duplicar el ejemplo. Revisa su propietario y el límite de la colección.");
   invalidateAdmin();
+  if (form?.get("returnTo") === "collection") done("/admin/disenos");
   redirect(`/admin/disenos/${copyId}`);
 }
 
 export async function saveExampleSettings(id: string, form: FormData) {
+  const result = await saveExampleCardSettings(id, form);
+  const destination = form.get("returnTo") === "collection" ? "/admin/disenos" : `/admin/disenos/${id}`;
+  done(destination, result.error);
+}
+
+export async function saveExampleCardSettings(id: string, form: FormData): Promise<{ error?: string }> {
   const actor = await requireAdmin();
   const label = adminText(form, "label", 100);
   const rawPosition = form.get("position");
   const position = typeof rawPosition === "string" && /^\d{1,4}$/.test(rawPosition) ? Number(rawPosition) : NaN;
-  if (label.length < 2 || !Number.isInteger(position)) done(`/admin/disenos/${id}`, "Revisa el nombre y el orden del ejemplo.");
+  if (label.length < 2 || !Number.isInteger(position)) return { error: "Revisa el nombre y el orden del ejemplo." };
   await prisma.$transaction(async tx => {
     await tx.showcaseExample.update({ where: { id }, data: { label, position, showInHero: form.get("showInHero") === "on" } });
     await tx.adminAudit.create({ data: { actorId: actor.id, action: "example.settings", targetId: id, detail: { label, position } } });
   });
   invalidateAdmin();
-  done(`/admin/disenos/${id}`);
+  return {};
 }
 
 export async function publishExample(id: string, form: FormData) {
   const actor = await requireAdmin();
+  const destination = form?.get("returnTo") === "collection" ? "/admin/disenos" : `/admin/disenos/${id}`;
   let error = "";
   await withImageLock(actor.id, async tx => {
     const example = await tx.showcaseExample.findUnique({ where: { id } });
@@ -137,20 +147,21 @@ export async function publishExample(id: string, form: FormData) {
     await syncCloudinaryImages(tx, actor.id, event.id, event, event);
     await tx.adminAudit.create({ data: { actorId: actor.id, action: "example.publish", targetId: id, detail: { version: event.contentVersion } } });
   });
-  if (error) done(`/admin/disenos/${id}`, error);
+  if (error) done(destination, error);
   scheduleCloudinaryCleanup(actor.id);
   invalidateAdmin();
-  done(`/admin/disenos/${id}`);
+  done(destination);
 }
 
-export async function unpublishExample(id: string) {
+export async function unpublishExample(id: string, form?: FormData) {
   const actor = await requireAdmin();
+  const destination = form?.get("returnTo") === "collection" ? "/admin/disenos" : `/admin/disenos/${id}`;
   await prisma.$transaction(async tx => {
     await tx.showcaseExample.update({ where: { id }, data: { publishedAt: null } });
     await tx.adminAudit.create({ data: { actorId: actor.id, action: "example.unpublish", targetId: id, detail: {} } });
   });
   invalidateAdmin();
-  done(`/admin/disenos/${id}`);
+  done(destination);
 }
 
 export async function toggleCustomExamples(form: FormData) {

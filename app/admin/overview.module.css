@@ -1,0 +1,45 @@
+.overview { min-width: 0; }
+.overview :global(.admin-heading) { align-items: center; gap: 12px 24px; margin-bottom: 20px; }
+.overview :global(.admin-heading h1) { margin: 6px 0 8px; font-size: clamp(30px,3.3vw,38px); }
+.overview :global(.admin-heading p) { line-height: 1.7; }
+.textLink { display: inline-flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; color: var(--ink); font-size: 12px; font-weight: 600; }
+.textLink svg { flex: none; width: 15px; height: 15px; color: var(--orange); }
+.textLink:hover { color: var(--orange); }
+.metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); margin: 0 0 24px; padding: 0; border-block: 1px solid var(--line); }
+.metric { min-width: 0; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.metric:not(:nth-child(3n)) { border-right: 1px solid var(--line); }
+.metric:nth-last-child(-n+3) { border-bottom: 0; }
+.metric dt { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.metric dt svg { flex: none; width: 16px; height: 16px; color: var(--orange); }
+.metric dd { display: grid; gap: 4px; margin: 8px 0 0; }
+.metric strong { font-family: var(--font-poppins),Arial,sans-serif; font-size: clamp(25px,2.6vw,35px); font-weight: 600; line-height: 1.2; letter-spacing: -.05em; overflow-wrap: anywhere; }
+.metric small { color: var(--muted); font-size: 10px; line-height: 1.6; }
+.management { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 28px; align-items: start; }
+.price { position: relative; min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(135deg,var(--accent-soft),var(--surface) 80%); }
+.price h2,.catalog h2,.activityHeading h2 { margin: 0; font-family: var(--font-poppins),Arial,sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -.035em; line-height: 1.35; }
+.priceRow { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; margin-top: 8px; }
+.priceRow > strong { font-family: var(--font-poppins),Arial,sans-serif; font-size: 38px; line-height: 1.2; font-weight: 600; letter-spacing: -.05em; }
+.priceRow > strong small { font-family: var(--font-body),Arial,sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0; }
+.price p,.catalog p { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.catalog { min-width: 0; padding-top: 4px; }
+.sectionHeading { display: flex; align-items: center; gap: 10px; }
+.catalogIcon { display: grid; place-items: center; flex: 0 0 34px; height: 34px; border-radius: 10px; background: var(--surface-muted); color: var(--orange); }
+.catalog :global(.admin-button) { margin-top: 12px; min-height: 44px; padding: 10px 14px; border-radius: 12px; }
+.activityHeading { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; margin: 24px 0 12px; }
+.activityHeading > span { color: var(--muted); font-size: 11px; }
+.overview :global(.admin-table-wrap) { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
+.overview :global(.admin-table th) { background: transparent; }
+.overview :global(.admin-table :is(th,td)) { padding: 10px 12px; }
+.overview :global(.admin-table td:first-child) { min-width: 160px; }
+.overview :global(.admin-table td small) { max-width: 220px; }
+@media(max-width:600px) {
+  .overview :global(.admin-heading) { align-items: flex-start; gap: 4px; margin-bottom: 16px; }
+  .metrics { grid-template-columns: repeat(2,minmax(0,1fr)); margin-bottom: 20px; }
+  .metric,.metric:nth-last-child(-n+3) { padding: 12px; border-bottom: 1px solid var(--line); border-right: 0; }
+  .metric:nth-child(odd) { border-right: 1px solid var(--line); }
+  .metric:nth-child(even) { border-right: 0; }
+  .metric:nth-last-child(-n+2) { border-bottom: 0; }
+  .metric strong { font-size: 26px; }
+  .management { grid-template-columns: minmax(0,1fr); gap: 20px; }
+  .price { padding: 16px; }
+}

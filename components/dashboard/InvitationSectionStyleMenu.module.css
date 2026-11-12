@@ -9,6 +9,13 @@
 .option:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
 .option:disabled { opacity: .4; cursor: not-allowed; }
 .option > svg { width: 22px; height: 22px; }
+.colorSwatch { width: 22px; height: 22px; border: 1px solid #aaa; border-radius: 50%; }
+.customColor { display: flex; flex-direction: column; align-items: flex-start; overflow-wrap: anywhere; gap: 12px; max-width: 100%; padding: 10px; border-radius: 10px; background: #191919; color: #fff; font: 12px/1.5 var(--font-body), Arial, sans-serif; pointer-events: auto; }
+.customColor input { width: 44px; height: 44px; padding: 3px; border: 1px solid #777; border-radius: 8px; background: #191919; cursor: pointer; }
+.contrast { overflow-wrap: anywhere; width: min(240px,100%); margin: 0; padding: 10px; border-radius: 10px; background: #191919; color: #fff; font: 12px/1.6 var(--font-body), Arial, sans-serif; }
+.paletteTones { display: flex; flex-wrap: wrap; gap: 8px; width: min(240px,100%); padding: 4px; pointer-events: auto; }
+.paletteTones button { flex: 0 0 44px; width: 44px; height: 44px; border: 1px solid #888; border-radius: 50%; cursor: pointer; }
+.paletteTones button[aria-pressed="true"] { outline: 2px solid var(--orange); outline-offset: 2px; }
 .option > .droplet { position: absolute; right: 7px; bottom: 9px; width: 12px; height: 12px; padding: 1px; background: inherit; }
 .tooltip { position: absolute; top: 50%; left: calc(100% + 8px); width: max-content; max-width: var(--style-tooltip-width, 248px); padding: 7px 10px; transform: translateY(-50%); border-radius: 8px; background: #191919; color: #fff; font: 500 12px/1.4 var(--font-body), Arial, sans-serif; text-align: left; opacity: 0; visibility: hidden; pointer-events: none; }
 .option:is(:hover, :focus-visible) > .tooltip { opacity: 1; visibility: visible; }

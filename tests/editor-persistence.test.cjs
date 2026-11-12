@@ -628,3 +628,78 @@ test('canceling to a pending snapshot preserves a conflict and guards saves in f
   complete({ ok: true, eventId: 'event', version: 8 });
   await saving;
 });
+
+test('local backups preserve per-section margins and accept legacy sections', () => {
+  for (const margin of [undefined, 'default', 'wide', 'none', '12px', null, 3]) {
+    const snapshot = JSON.parse(values('Fiesta'));
+    snapshot.sections = [{id:'story',type:'story',title:'Historia',content:'',detail:'',link:'',imageUrl:'',enabled:true,margin}];
+    const now = Date.now();
+    const record = {schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:now,wizard:{step:2,activeExtra:'story'},snapshot:JSON.stringify(snapshot)};
+    const parsed = parseEditorDraft(JSON.stringify(record),'owner','event',now);
+    if (margin === undefined || ['default','wide','none'].includes(margin)) {
+      assert.ok(parsed);
+      assert.equal(JSON.parse(parsed.snapshot).sections[0].margin, margin);
+      assert.equal(JSON.parse(editorFormData(record.snapshot,0).get('sections'))[0].margin, margin);
+    } else assert.equal(parsed, null);
+  }
+});
+
+test('local backups retain independent text and photo margins', () => {
+  for(const textMargin of ['default','wide','none']) for(const photoMargin of ['default','wide','none']) {
+    const snapshot=JSON.parse(values('Fiesta'));
+    snapshot.sections=[{id:'story',type:'story',title:'Historia',content:'',detail:'',link:'',imageUrl:'',enabled:true,textMargin,photoMargin}];
+    const now=Date.now();
+    const record={schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:now,wizard:{step:2,activeExtra:'story'},snapshot:JSON.stringify(snapshot)};
+    const recovered=parseEditorDraft(JSON.stringify(record),'owner','event',now);
+    assert.ok(recovered);
+    assert.equal(JSON.parse(recovered.snapshot).sections[0].textMargin,textMargin);
+    assert.equal(JSON.parse(recovered.snapshot).sections[0].photoMargin,photoMargin);
+    for(const field of ['textMargin','photoMargin']) {
+      const invalid=JSON.parse(record.snapshot);invalid.sections[0][field]='invalid';
+      assert.equal(parseEditorDraft(JSON.stringify({...record,snapshot:JSON.stringify(invalid)}),'owner','event',now),null);
+    }
+  }
+});
+
+test('draft recovery preserves text color preferences and rejects malformed colors', () => {
+  for(const textColorMode of [undefined,'white','black','palette','custom','invalid',null]) for(const textColor of [undefined,'#AA1234','red',null]) {
+    const snapshot={...JSON.parse(values('Fiesta')),textColorMode,textColor};
+    const now=Date.now();
+    const record={schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:now,wizard:{step:2,activeExtra:null},snapshot:JSON.stringify(snapshot)};
+    const parsed=parseEditorDraft(JSON.stringify(record),'owner','event',now);
+    const validMode=textColorMode===undefined || ['white','black','palette','custom'].includes(textColorMode);
+    const validColor=textColor===undefined || textColor==='#AA1234';
+    if(validMode && validColor) {
+      assert.ok(parsed);assert.equal(JSON.parse(parsed.snapshot).textColorMode,textColorMode);assert.equal(JSON.parse(parsed.snapshot).textColor,textColor);
+    } else assert.equal(parsed,null);
+  }
+});
+
+test('device recovery preserves section text colors and validates the new modes', () => {
+  for(const textColorMode of [undefined,'auto','white','black','palette','opposite','custom','invalid',null]) {
+    const snapshot=JSON.parse(values('Fiesta'));
+    snapshot.sections=[{id:'story',type:'story',title:'Historia',content:'Texto',detail:'',link:'',imageUrl:'',enabled:true,textColorMode,textColor:'#123ABC'}];
+    const now=Date.now();
+    const record={schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:now,wizard:{step:2,activeExtra:'story'},snapshot:JSON.stringify(snapshot)};
+    const parsed=parseEditorDraft(JSON.stringify(record),'owner','event',now);
+    if(textColorMode==='invalid'||textColorMode===null)assert.equal(parsed,null);
+    else {
+      assert.ok(parsed);assert.equal(JSON.parse(parsed.snapshot).sections[0].textColorMode,textColorMode);
+      snapshot.sections[0].textColor='not-a-color';
+      assert.equal(parseEditorDraft(JSON.stringify({...record,snapshot:JSON.stringify(snapshot)}),'owner','event',now),null);
+    }
+  }
+});
+
+test('local recovery retains complete image palettes and rejects malformed or oversized tone lists',()=>{
+ const palette={light:'#F2E7C4',dark:'#593203',accents:['#F28A2E','#F26E22','#F2B950']};
+ for(const imagePalette of [undefined,null,palette,{...palette,accents:['red']},{...palette,light:palette.dark},{...palette,source:'untrusted'}]) {
+  const now=Date.now();const snapshot=JSON.stringify({...JSON.parse(values('Fiesta')),imagePalette});
+  const record={schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:now,wizard:{step:2,activeExtra:null},snapshot};
+  const parsed=parseEditorDraft(JSON.stringify(record),'owner','event',now);
+  if(imagePalette===undefined||imagePalette===null||imagePalette===palette) {
+   assert.ok(parsed);assert.deepEqual(JSON.parse(parsed.snapshot).imagePalette,imagePalette);
+   if(imagePalette!==undefined)assert.deepEqual(JSON.parse(editorFormData(snapshot,0).get('imagePalette')),imagePalette);
+  } else assert.equal(parsed,null);
+ }
+});

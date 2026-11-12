@@ -6,10 +6,10 @@
 .celebration-invitation {
   --wa-ink: #fffaf2;
   --wa-soft: #eee7dc;
-  --invite-accent: #eee7dc;
-  --invite-action: #fffaf2;
-  --invite-ink: #fffaf2;
-  --invite-muted: #eee7dc;
+  --invite-accent: var(--wa-soft);
+  --invite-action: var(--wa-ink);
+  --invite-ink: var(--wa-ink);
+  --invite-muted: var(--wa-soft);
   --invite-paper: var(--wa-base);
   --invite-body-font: var(--wa-body);
   position: relative;
@@ -125,7 +125,7 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
 .celebration-invitation .wa-footer small { display: block; margin-top: 34px; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; }
 .celebration-invitation .invite-rsvp-form { --rsvp-border: #fffaf240; --rsvp-tint: #fffaf215; width: 100%; margin: 26px 0 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--wa-ink); box-shadow: none; font-size: 13px; }
 .celebration-invitation .invite-rsvp-form :is(input,.invite-rsvp-button,.invite-rsvp-companions,.invite-rsvp-counter button) { border-color: #fffaf240; background: #00000020; color: var(--wa-ink); }
-.celebration-invitation .invite-rsvp-form input::placeholder { color: #eee7dcb3; }
+.celebration-invitation .invite-rsvp-form input::placeholder { color: color-mix(in srgb,var(--wa-soft) 70%,transparent); }
 .celebration-invitation .invite-rsvp-form :is(.invite-rsvp-submit,.invite-rsvp-choice[aria-pressed="true"]) { background: var(--wa-ink); color: var(--wa-base); border-color: var(--wa-ink); }
 .celebration-invitation .invite-rsvp-choice[aria-pressed="true"] .invite-rsvp-choice-icon { background: var(--wa-base); color: var(--wa-ink); }
 .celebration-invitation .invite-rsvp-form :is(.invite-rsvp-note,small,.invite-rsvp-total,.invite-rsvp-companions-copy small,.invite-rsvp-companions-heading small) { color: var(--wa-soft); }
@@ -342,3 +342,39 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
 .celebration-invitation .wa-footer { position: relative; }
 .celebration-invitation .wa-footer[data-text-align]:not([data-text-align="auto"]) { text-align: var(--wa-text-align); }
 .celebration-invitation .wa-footer p { white-space: pre-line; }
+/* Independent mobile margins for content and photos. The fixed backdrop stays
+   outside the sizing container, and desktop keeps its original composition. */
+@media(max-width:959px) {
+  .celebration-invitation .wa-content-frame { container-type: inline-size; }
+  .celebration-invitation .wa-column { --wa-edge-space: max(20px, calc((100cqw - 560px) / 2)); }
+  .celebration-invitation :is(.wa-panel,.wa-footer,.wa-cover-heading)[data-margin="wide"],
+  .celebration-invitation .wa-section-media[data-photo-margin="wide"] { margin-inline: 20px; }
+  .celebration-invitation :is(.wa-panel,.wa-footer)[data-margin="none"],
+  .celebration-invitation .wa-section-media[data-photo-margin="none"] { margin-inline: calc(-1 * var(--wa-edge-space)); }
+  .celebration-invitation .wa-shell .wa-panel[data-margin="none"],
+  .celebration-invitation .wa-shell .wa-section-media[data-photo-margin="none"] :is(.wa-section-photo,.wa-photo-grid figure,.wa-carousel-viewport) { border-radius: 0; }
+
+  /* Cover media and text sit inside an additional inset. Only the selected
+     element expands; its sibling retains its own width and corner choice. */
+  .celebration-invitation .wa-intro { --wa-cover-inset: 16px; }
+  .celebration-invitation .wa-intro[data-cover-layout="stacked"] { --wa-cover-inset: clamp(16px,4vw,40px); }
+  .celebration-invitation .wa-intro[data-cover-layout="overlay"] { --wa-cover-inset: clamp(24px,5vw,60px); }
+  .celebration-invitation .wa-intro:has([data-margin="none"], [data-photo-margin="none"]),
+  .celebration-invitation .wa-cover:has([data-margin="none"], [data-photo-margin="none"]) { overflow: visible; }
+  .celebration-invitation .wa-intro .wa-cover-heading[data-margin="wide"] { width: calc(100% - 40px); }
+  .celebration-invitation .wa-intro .wa-cover-heading[data-margin="none"],
+  .celebration-invitation .wa-intro :is(.wa-portrait,.wa-no-photo)[data-photo-margin="none"] {
+    width: calc(100% + 2 * (var(--wa-edge-space) + var(--wa-cover-inset)));
+    max-width: none;
+    margin-inline: calc(-1 * (var(--wa-edge-space) + var(--wa-cover-inset)));
+  }
+  .celebration-invitation .wa-intro :is(.wa-portrait,.wa-no-photo)[data-photo-margin="wide"] { width: calc(100% - 40px); margin-inline: 20px; }
+  .celebration-invitation .wa-shell .wa-intro :is(.wa-portrait,.wa-no-photo)[data-photo-margin="none"] { border-radius: 0; }
+  .celebration-invitation .wa-intro[data-cover-layout="overlay"] .wa-portrait[data-photo-margin="none"] { left: calc(-1 * var(--wa-edge-space)); right: calc(-1 * var(--wa-edge-space)); width: auto; margin-inline: 0; }
+  .celebration-invitation .wa-intro[data-cover-layout="overlay"] .wa-portrait[data-photo-margin="wide"] { left: 20px; right: 20px; width: auto; margin-inline: 0; }
+}
+@media(max-width:600px) {
+  .celebration-invitation .wa-column { --wa-edge-space: 12px; }
+  .celebration-invitation .wa-intro { --wa-cover-inset: 12px; }
+  .celebration-invitation .wa-intro[data-cover-layout="overlay"] { --wa-cover-inset: 20px; }
+}

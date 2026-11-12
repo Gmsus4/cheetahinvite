@@ -8,6 +8,7 @@ import { InvitationWhatsAppFields } from "./InvitationWhatsAppFields";
 import { InvitationProgramFields } from "./InvitationProgramFields";
 import { RSVP_LIMITS, rsvpCompanionLimit } from "@/lib/rsvp";
 import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
+import { InvitationSectionMarginPicker } from "./InvitationSectionMarginPicker";
 import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
 
 type SectionFieldsProps = { fieldErrors?: Record<string, string>; deferGalleryPhotos?: boolean; globalPanelStyle?: InvitationPanelStyle; globalShowIcons?: boolean; section: InviteSection; onChange(changes: Partial<InviteSection>): void; uploadProps: { eventId: string; ensureEvent?: () => Promise<string>; onBusyChange(active: boolean): void }; allowSectionPhoto?: boolean; showStyleControls?: boolean; mediaClassName?: string; locationFields?: ReactNode };
@@ -30,7 +31,13 @@ export function SectionTextAlignmentFields({ section, onChange }: Pick<SectionFi
 }
 
 export function SectionFields(props: SectionFieldsProps) {
-  return <><SectionContentFields {...props} />{props.showStyleControls !== false && <SectionTextAlignmentFields section={props.section} onChange={props.onChange} />}</>;
+  return <>
+    <SectionContentFields {...props} />
+    {props.showStyleControls !== false && <>
+      <SectionTextAlignmentFields section={props.section} onChange={props.onChange} />
+      <InvitationSectionMarginPicker section={props.section} onChange={props.onChange} />
+    </>}
+  </>;
 }
 
 function SectionContentFields({ section, onChange, uploadProps, allowSectionPhoto = false, showStyleControls = true, globalShowIcons = true, globalPanelStyle = "auto", mediaClassName, locationFields, deferGalleryPhotos = false, fieldErrors = {} }: SectionFieldsProps) {

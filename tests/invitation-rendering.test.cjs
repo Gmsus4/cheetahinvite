@@ -878,3 +878,289 @@ test('closing block preserves legacy copy and supports editing, hiding and resto
   assert.doesNotMatch(render([{ ...closing, enabled: false }]), /Hasta pronto|Nos vemos en la próxima/);
   assert.deepEqual(completeGuidedSections('other', [{ ...closing, enabled: false }]).find(s => s.type === 'closing'), { ...closing, enabled: false });
 });
+
+test('section margin choices reach public rendering and each block has a borders control', () => {
+  const load = loadComponents();
+  const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');
+  const section = {title:'Historia',content:'Texto',detail:'',link:'',imageUrl:'/photo.webp',enabled:true};
+  const base = {eventType:'wedding',name:'Fiesta',hostNames:'Alex',date:'20 de noviembre',eventDateKey:'2027-11-20',venue:'Jardín',address:'',message:'',imageUrl:'/cover.webp',accent:'#58664E'};
+  for (const margin of [undefined, 'default', 'wide', 'none']) {
+    const sections = ['cover','countdown','location','story','gallery','closing'].map(type => ({...section,id:type,type,margin}));
+    const html = renderToStaticMarkup(React.createElement(CelebrationInvitation,{...base,sections}));
+    assert.equal((html.match(/data-margin=/g)||[]).length, margin ? 6 : 0);
+    assert.doesNotMatch(html, /Editar bordes/);
+    const editor = renderToStaticMarkup(React.createElement(CelebrationInvitation,{...base,sections,onEdit(){}}));
+    assert.equal((editor.match(/aria-label="Editar bordes del contenido de Historia"/g)||[]).length,6);
+    assert.match(html, /class="wa-section-row"[^>]*data-has-media="true"/);
+  }
+  const { InvitationSectionMarginPicker } = load('components/dashboard/InvitationSectionMarginPicker.tsx');
+  const picker = renderToStaticMarkup(React.createElement(InvitationSectionMarginPicker,{section:{...section,id:'story',type:'story'},onChange(){}}));
+  assert.match(picker, /aria-pressed="true"[^>]*>.*?Por defecto/);
+  assert.match(picker, /Más espacio/);
+  assert.match(picker, /Sin espacio/);
+});
+
+test('photo and content margins are independently editable and rendered on their own elements', () => {
+  const load = loadComponents();
+  const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');
+  const { InvitationSectionMarginPicker } = load('components/dashboard/InvitationSectionMarginPicker.tsx');
+  const section={id:'story',type:'story',title:'Historia',content:'Texto',detail:'',link:'',imageUrl:'/photo.webp',enabled:true,margin:'wide'};
+  const changes=[];
+  const picker=InvitationSectionMarginPicker({section,onChange:patch=>changes.push(patch)});
+  const groups=picker.props.children[1];
+  groups[0].props.children[1].props.children[2].props.onClick();
+  groups[1].props.children[1].props.children[0].props.onClick();
+  assert.deepEqual(changes,[{textMargin:'none'},{photoMargin:'default'}]);
+  const base={name:'Fiesta',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'/cover.webp',accent:'#58664E'};
+  for(const textMargin of ['default','wide','none']) for(const photoMargin of ['default','wide','none']) {
+    const sections=[{...section,textMargin,photoMargin},{...section,id:'cover',type:'cover',textMargin,photoMargin}];
+    const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,{...base,sections}));
+    assert.match(html,new RegExp('class="wa-panel wa-section wa-story" data-margin="'+textMargin+'"'));
+    assert.match(html,new RegExp('class="wa-section-media" data-photo-margin="'+photoMargin+'"'));
+    assert.match(html,new RegExp('class="wa-cover-heading" data-margin="'+textMargin+'"'));
+    assert.match(html,new RegExp('class="wa-portrait" data-photo-margin="'+photoMargin+'"'));
+    assert.doesNotMatch(html,/class="wa-section-row" data-margin=/);
+  }
+});
+
+test('image and content expand icons open only their own margin settings', () => {
+  const load=loadComponents({useRef:()=>({current:null}),useEffect(){}});
+  const {CelebrationInvitation}=load('components/invitation/CelebrationInvitation.tsx');
+  const {InvitationSectionMarginPicker}=load('components/dashboard/InvitationSectionMarginPicker.tsx');
+  const base={name:'Fiesta',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'/cover.webp',accent:'#58664E'};
+  const section={title:'Historia',content:'Texto',detail:'',link:'',imageUrl:'/photo.webp',enabled:true};
+  const sections=[{...section,id:'cover',type:'cover'},{...section,id:'story',type:'story'},{...section,id:'gallery',type:'gallery'}];
+  const clicked=[];
+  const tree=CelebrationInvitation({...base,sections,preview:true,onEdit:target=>clicked.push(target)});
+  function visit(node) {
+    if(!node || typeof node!=='object')return;
+    if(Array.isArray(node)){node.forEach(visit);return;}
+    if(typeof node.type==='function') {
+      if(['PhotoControls','EditControl','MarginControl','AtmosphereSection'].includes(node.type.name))visit(node.type(node.props));
+      return;
+    }
+    if(node.type==='button' && node.props.className.includes('wa-edit-margin'))node.props.onClick();
+    visit(node.props?.children);
+  }
+  visit(tree);
+  for(const sectionId of ['cover','story','gallery']) {
+    assert.ok(clicked.some(target=>target.kind==='section-margin'&&target.sectionId===sectionId));
+    assert.ok(clicked.some(target=>target.kind==='section-photo-margin'&&target.sectionId===sectionId));
+  }
+  for(const [scope,field,other] of [['photo','photoMargin','Bordes del contenido'],['text','textMargin','Bordes de las fotos']]) {
+    const changes=[];
+    const picker=InvitationSectionMarginPicker({section:sections[1],scope,onChange:patch=>changes.push(patch)});
+    const groups=picker.props.children[1];
+    assert.equal(groups.length,1);
+    groups[0].props.children[1].props.children[2].props.onClick();
+    assert.deepEqual(changes,[{[field]:'none'}]);
+    const html=renderToStaticMarkup(picker);
+    assert.doesNotMatch(html,new RegExp(other));
+  }
+});
+
+test('margin shortcuts use inline popovers and update only the selected photo or content margin', () => {
+  const load=loadComponents({useRef:()=>({current:null}),useEffect(){},useLayoutEffect(){},useState:value=>[value,()=>{}],useId:()=> 'margin-options'});
+  const {InvitationSectionStyleMenu}=load('components/dashboard/InvitationSectionStyleMenu.tsx');
+  const section={id:'story',type:'story',title:'Historia',content:'Texto',detail:'',link:'',imageUrl:'/photo.webp',enabled:true,margin:'none',textMargin:'default',photoMargin:'wide'};
+  for(const [mode,field,selected] of [['text-margin','textMargin',0],['photo-margin','photoMargin',1]]) {
+    const changes=[];
+    const tree=InvitationSectionStyleMenu({section,mode,label:'Bordes',values:{panelStyle:'color'},disabled:false,onChange:patch=>changes.push(patch)});
+    const [trigger,panel]=tree.props.children;
+    assert.equal(trigger.props.popoverTarget,'margin-options');
+    assert.equal(trigger.props['aria-haspopup'],undefined);
+    assert.equal(trigger.props.disabled,false);
+    assert.equal(panel.props.popover,'auto');
+    assert.equal(panel.props.role,'group');
+    const choices=panel.props.children[0];
+    assert.equal(choices.length,3);
+    choices.forEach((choice,index)=>assert.equal(choice.props['aria-pressed'],index===selected));
+    choices.forEach(choice=>choice.props.onClick());
+    assert.deepEqual(changes,[{[field]:'default'},{[field]:'wide'},{[field]:'none'}]);
+    const locked=InvitationSectionStyleMenu({section,mode,label:'Bordes',values:{},disabled:true,onChange:patch=>changes.push(patch)});
+    locked.props.children[1].props.children[0][0].props.onClick();
+    assert.equal(changes.length,3);
+  }
+  const {CelebrationInvitation}=loadComponents()('components/invitation/CelebrationInvitation.tsx');
+  const base={name:'Fiesta',hostNames:'Alex',date:'',venue:'Jardín',address:'',message:'',imageUrl:'/cover.webp',accent:'#58664E',eventDateKey:'2027-11-20'};
+  const sections=['cover','countdown','location','story','gallery','closing'].map(type=>({...section,id:type,type}));
+  const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,{...base,sections,onEdit(){},renderMarginControl:(item,label,photo)=>React.createElement('button',{'data-margin-menu':photo?'photo':'text','aria-label':label,'data-section':item.id})}));
+  assert.equal((html.match(/data-margin-menu="text"/g)||[]).length,6);
+  assert.equal((html.match(/data-margin-menu="photo"/g)||[]).length,4);
+  assert.doesNotMatch(html,/wa-edit-margin[^>]*aria-haspopup="dialog"/);
+});
+
+test('open quick menus stay aligned with their trigger after changing margins', () => {
+  const previousWindow=global.window;
+  global.window={innerWidth:390,innerHeight:844};
+  try {
+    for(const mode of ['text-margin','photo-margin']) {
+      const layouts=[];
+      const load=loadComponents({useRef:()=>({current:null}),useEffect(){},useLayoutEffect:effect=>layouts.push(effect),useState:()=>[true,()=>{}],useId:()=> 'moving-menu'});
+      const {InvitationSectionStyleMenu}=load('components/dashboard/InvitationSectionStyleMenu.tsx');
+      const section={id:'story',type:'story',title:'Historia',content:'Texto',detail:'',link:'',imageUrl:'',enabled:true};
+      const tree=InvitationSectionStyleMenu({section,mode,label:'Bordes',values:{},disabled:false,onChange(){}});
+      const [trigger,panel]=tree.props.children;
+      let bounds={left:180,bottom:54};
+      trigger.props.ref.current={getBoundingClientRect:()=>bounds};
+      const style={setProperty(){}};
+      panel.props.ref.current={style};
+      assert.ok(layouts.length>0);
+      layouts.forEach(effect=>effect());
+      assert.equal(style.left,'180px');
+      assert.equal(style.top,'62px');
+      bounds={left:210,bottom:106};
+      layouts.forEach(effect=>effect());
+      assert.equal(style.left,'210px');
+      assert.equal(style.top,'114px');
+      assert.equal(style.width,'168px');
+    }
+  } finally {
+    if(previousWindow===undefined)delete global.window;
+    else global.window=previousWindow;
+  }
+});
+
+test('popover opening waits for native operations and coalesces pointer and focus requests', async () => {
+  const previousWindow=global.window;
+  global.window={clearTimeout(){}};
+  try {
+    const load=loadComponents({useRef:value=>({current:value}),useEffect(){},useLayoutEffect(){},useState:value=>[value,()=>{}],useId:()=> 'safe-menu'});
+    const {InvitationSectionStyleMenu}=load('components/dashboard/InvitationSectionStyleMenu.tsx');
+    const section={id:'story',type:'story',title:'Historia',content:'',detail:'',link:'',imageUrl:'',enabled:true};
+    const tree=InvitationSectionStyleMenu({section,mode:'text-margin',label:'Bordes',values:{},disabled:false,onChange(){}});
+    const [trigger,panel]=tree.props.children;
+    let showing=true,open=false,calls=0;
+    const menu={isConnected:true,matches:()=>open,showPopover(){
+      assert.equal(showing,false,'Must wait until the previous native show operation finishes');
+      calls++;
+      showing=true;
+      // Native focus restoration can synchronously re-enter the focus handler.
+      trigger.props.onFocus();
+      open=true;
+      showing=false;
+    }};
+    panel.props.ref.current=menu;
+    trigger.props.onFocus();
+    trigger.props.onPointerEnter({pointerType:'mouse'});
+    assert.equal(calls,0);
+    showing=false;
+    await Promise.resolve();
+    await Promise.resolve();
+    assert.equal(calls,1);
+    trigger.props.onFocus();
+    await Promise.resolve();
+    assert.equal(calls,1);
+    open=false;menu.isConnected=false;
+    trigger.props.onFocus();
+    await Promise.resolve();
+    assert.equal(calls,1,'Detached popovers cannot be opened');
+  } finally {
+    if(previousWindow===undefined)delete global.window;
+    else global.window=previousWindow;
+  }
+});
+
+test('global text color reaches invitations and the picker warns about low or unverified contrast', () => {
+  const load=loadComponents();
+  const {CelebrationInvitation}=load('components/invitation/CelebrationInvitation.tsx');
+  const {InvitationTextColorPicker}=load('components/dashboard/InvitationTextColorPicker.tsx');
+  const base={name:'Fiesta',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'',accent:'#58664E',sections:[]};
+  for(const [textColorMode,expected] of [['black','#000000'],['white','#FFFFFF'],['palette','#58664E'],['custom','#12AB34']]) {
+    const props={...base,textColorMode,textColor:'#12AB34'};
+    const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,props));
+    assert.ok(html.includes('--wa-ink:'+expected));
+    assert.ok(html.includes('--wa-soft:'+expected));
+    const picker=renderToStaticMarkup(React.createElement(InvitationTextColorPicker,{values:props,onChange(){}}));
+    assert.match(picker,/Color del texto/);
+    if(textColorMode==='black')assert.match(picker,/Contraste bajo/);
+    if(textColorMode==='white')assert.match(picker,/Buen contraste estimado/);
+    if(textColorMode==='custom')assert.match(picker,/type="color"/);
+  }
+  const pending=renderToStaticMarkup(React.createElement(InvitationTextColorPicker,{values:{...base,textColorMode:'white',backgroundImageUrl:'/photo.webp'},onChange(){}}));
+  assert.match(pending,/Analizando contraste de las fotos/);
+  assert.doesNotMatch(pending,/Buen contraste estimado/);
+  const hooks=loadComponents({useEffect(){},useId:()=> 'text-color',useState:value=>[value,()=>{}]});
+  const {InvitationTextColorPicker:Picker}=hooks('components/dashboard/InvitationTextColorPicker.tsx');
+  const changes=[];
+  const tree=Picker({values:base,onChange:patch=>changes.push(patch)});
+  tree.props.children[2].props.children.forEach(button=>button.props.onClick());
+  assert.deepEqual(changes,[{textColorMode:'auto'},{textColorMode:'black'},{textColorMode:'white'},{textColorMode:'palette'},{textColorMode:'opposite'},{textColorMode:'custom'}]);
+});
+
+test('photo contrast warnings never claim success when sampling fails or a sampled region hides the text', () => {
+  const values={accent:'#58664E',textColorMode:'white',textColor:'#FFFFFF',backgroundImageUrl:'/background.webp',imageUrl:''};
+  for(const failed of [false,true]) {
+    const sample={key:JSON.stringify(['/background.webp','']),backgrounds:failed?[]:['#FFFFFF'],overlay:[],failed};
+    const load=loadComponents({useEffect(){},useId:()=> 'contrast',useState:()=>[sample,()=>{}]});
+    const {InvitationTextColorPicker}=load('components/dashboard/InvitationTextColorPicker.tsx');
+    const html=renderToStaticMarkup(React.createElement(InvitationTextColorPicker,{values,onChange(){}}));
+    assert.doesNotMatch(html,/Buen contraste estimado/);
+    if(failed)assert.match(html,/Contraste de la foto sin verificar/);
+    else assert.match(html,/Contraste bajo/);
+  }
+});
+
+test('per-section text colors render independently across all blocks and global settings override without erasing them', () => {
+  const load=loadComponents();
+  const {CelebrationInvitation}=load('components/invitation/CelebrationInvitation.tsx');
+  const base={name:'Fiesta',hostNames:'Alex',date:'',eventDateKey:'2027-11-20',venue:'Jardín',address:'',message:'',imageUrl:'',accent:'#58664E'};
+  const sections=['cover','countdown','location','story','closing'].map((type,index)=>({id:type,type,title:'Bloque',content:'Texto',detail:'',link:'',imageUrl:'',enabled:true,textColorMode:'custom',textColor:['#AABBCC','#123456','#ABC123','#FED123','#123FED'][index]}));
+  for(const textColorMode of ['auto','black','auto']) {
+    const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,{...base,sections,textColorMode,onEdit(){},renderTextColorControl:(section,label)=>React.createElement('button',{'data-text-color-section':section.id,'aria-label':label})}));
+    for(const section of sections) {
+      assert.ok(html.includes('--wa-ink:'+(textColorMode==='auto'?section.textColor:'#000000')));
+      assert.ok(html.includes('data-text-color-section="'+section.id+'"'));
+    }
+  }
+  const menus=loadComponents({useEffect(){},useLayoutEffect(){},useId:()=> 'section-color',useRef:value=>({current:value}),useState:value=>[value,()=>{}]});
+  const {InvitationSectionStyleMenu}=menus('components/dashboard/InvitationSectionStyleMenu.tsx');
+  for(const globalMode of ['auto','white','black','palette','opposite','custom']) {
+    const changes=[];
+    const menu=InvitationSectionStyleMenu({section:sections[0],label:'Color',values:{...base,textColorMode:globalMode,textColor:'#FFFFFF'},disabled:false,mode:'text-color',onChange:patch=>changes.push(patch)});
+    const [trigger,panel]=menu.props.children;
+    assert.equal(trigger.props.disabled,globalMode!=='auto');
+    const options=panel.props.children[0];
+    assert.equal(options.length,6);
+    options.forEach(option=>option.props.onClick());
+    if(globalMode==='auto') {
+      assert.deepEqual(changes.map(change=>change.textColorMode),['auto','white','black','palette','opposite','custom']);
+      const custom=panel.props.children[1];
+      const input=custom.props.children[1];
+      input.props.onChange({target:{value:'#112233'}});
+      assert.deepEqual(changes.at(-1),{textColor:'#112233'});
+    } else {
+      assert.equal(changes.length,0);
+      assert.match(trigger.props.title,/Por defecto/);
+    }
+  }
+});
+
+test('the five extracted tones are selectable for both the background and text without discarding the palette',()=>{
+  const palette={light:'#F2E7C4',dark:'#593203',accents:['#F28A2E','#F26E22','#F2B950']};
+  const load=loadComponents({useEffect(){},useState:value=>[value,()=>{}],useRef:value=>({current:value}),useId:()=> 'palette-tones'});
+  const {InvitationPalettePicker}=load('components/dashboard/InvitationPalettePicker.tsx');
+  const {InvitationTextColorPicker}=load('components/dashboard/InvitationTextColorPicker.tsx');
+  const changes=[];
+  const picker=InvitationPalettePicker({palettes:[],accent:palette.light,imagePalette:palette,onChange:(...args)=>changes.push(args)});
+  const colors=picker.props.children[5].props.children[2].props.children;
+  assert.equal(colors.length,5);
+  colors.forEach(button=>button.props.onClick());
+  assert.deepEqual(changes.map(([accent])=>accent),[palette.light,palette.dark,...palette.accents]);
+  assert.ok(changes.every(([,data])=>data===palette));
+  picker.props.children[2].props.children[0].props.children[0].props.onChange();
+  assert.equal(changes.at(-1)[1],null);
+  const updates=[];
+  const text=InvitationTextColorPicker({values:{accent:palette.light,imagePalette:palette,textColorMode:'palette',imageUrl:''},onChange:patch=>updates.push(patch)});
+  const textTones=text.props.children[4].props.children;
+  assert.equal(textTones.length,5);
+  textTones.forEach(button=>button.props.onClick());
+  assert.deepEqual(updates.map(patch=>patch.textColor),[palette.light,palette.dark,...palette.accents]);
+  const html=renderToStaticMarkup(picker);
+  assert.match(html,/type="file"/);
+  assert.match(html,/Elegir otra imagen/);
+  assert.match(html,/Claro/);assert.match(html,/Oscuro/);assert.match(html,/Acento 3/);
+  const {CelebrationInvitation}=loadComponents()('components/invitation/CelebrationInvitation.tsx');
+  const invitation=renderToStaticMarkup(React.createElement(CelebrationInvitation,{name:'Fiesta',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'',sections:[],accent:palette.light,imagePalette:palette,textColorMode:'opposite'}));
+  assert.ok(invitation.includes('--wa-base:'+palette.light));assert.ok(invitation.includes('--wa-ink:'+palette.dark));
+});

@@ -13,7 +13,7 @@
 .workspace :global(.wa-edit-button) { position: absolute; z-index: 5; top: 10px; right: 10px; display: inline-flex; flex: 0 0 44px; align-items: center; justify-content: center; width: 44px; height: 44px; min-width: 44px; min-height: 44px; margin: 0; padding: 0; border: 0; border-radius: 50%; background: #191919; color: #fff; box-shadow: none; font: 500 12px/1.4 var(--font-body), Arial, sans-serif; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .18s, background .18s; }
 .workspace :global(.wa-edit-button):hover { background: #292929; }
 .workspace :global(.wa-edit-button) > span { position: absolute; z-index: 6; top: calc(100% + 8px); right: 0; width: max-content; padding: 7px 10px; border-radius: 8px; background: #191919; color: #fff; font: 500 12px/1.4 var(--font-body), Arial, sans-serif; white-space: nowrap; opacity: 0; visibility: hidden; pointer-events: none; }
-.workspace :global(.wa-edit-surface) > span, .workspace :global(.wa-edit-alignment) > span { top: auto; bottom: calc(100% + 8px); }
+.workspace :global(.wa-edit-surface) > span, .workspace :global(.wa-edit-alignment) > span, .workspace :global(.wa-edit-margin) > span, .workspace :global(.wa-edit-color) > span { top: auto; bottom: calc(100% + 8px); }
 .workspace :global(.wa-edit-button):is(:hover, :focus-visible) > span { opacity: 1; visibility: visible; }
 .workspace :global([data-editable]):hover > :global(.wa-edit-button), .workspace :global([data-editable]):focus-within > :global(.wa-edit-button) { opacity: 1; pointer-events: auto; }
 .workspace :global(.wa-edit-actions) { position: absolute; z-index: 5; top: 10px; right: 10px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: calc(100% - 20px); opacity: 0; pointer-events: none; transition: opacity .18s; }
@@ -202,3 +202,6 @@
   .appearanceContent { gap:18px; padding-bottom:18px}
   .appearanceContent>section+section { padding-top:16px}
 }
+/* Reserve the space used by block actions even when six buttons wrap on narrow blocks. */
+.workspace :global(.wa-panel[data-editable]):has(> :global(.wa-edit-actions) > :global(.wa-edit-margin)) { padding-top: 16px; }
+.workspace :global(.wa-panel) > :global(.wa-edit-actions):has(> :global(.wa-edit-margin)) { position: relative; top: auto; right: auto; width: 100%; max-width: none; margin-bottom: 20px; }

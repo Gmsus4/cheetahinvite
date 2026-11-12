@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { EventTypePicker } from './EventTypePicker';
 
-type EditorProps = { event: EventData; saved: boolean; error: string; published: boolean; creation?: boolean; exampleId?: string; priceLabel?: string; account?: { name: string; email: string; image?: string | null } };
+type EditorProps = { event: EventData; saved: boolean; error: string; published: boolean; creation?: boolean; exampleId?: string; exampleCreation?: boolean; priceLabel?: string; account?: { name: string; email: string; image?: string | null } };
 export function EventEditor(props: EditorProps) {
   const { bfcacheId } = useRouter();
   const sessionKey = props.creation ? bfcacheId : props.event.id;

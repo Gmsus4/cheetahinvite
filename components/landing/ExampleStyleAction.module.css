@@ -1,0 +1,6 @@
+.spacer { height: 100px; }
+.bar { position: fixed; z-index: 50; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); }
+.link { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 52px; padding: 14px 22px; border: 1px solid rgb(255 255 255 / .2); border-radius: 999px; background: var(--orange); color: var(--on-inverse); box-shadow: 0 6px 24px rgb(0 0 0 / .18); font: 600 14px/1.4 Arial, sans-serif; text-align: center; }
+.link:hover { background: var(--orange-hover); }
+.link:focus-visible { outline: 3px solid var(--orange); outline-offset: 4px; }
+.link svg { width: 20px; height: 20px; flex-shrink: 0; }

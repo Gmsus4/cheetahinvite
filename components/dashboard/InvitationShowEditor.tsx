@@ -17,9 +17,11 @@ import { EditorLeaveDialog } from "./EditorLeaveDialog";
 import { EditorProtectedLink } from "./EditorProtectedLink";
 import { EditorRecoveryDialog } from "./EditorRecoveryDialog";
 import { InvitationFontSelect } from "./InvitationFontSelect";
+import { InvitationTextColorPicker } from "./InvitationTextColorPicker";
 import { InvitationPalettePicker } from "./InvitationPalettePicker";
 import { SectionFields, SectionTextAlignmentFields, SectionPhotoFields, SectionSurfaceFields } from "./InvitationSectionFields";
 import { InvitationIconsPicker } from "./InvitationIconsPicker";
+import { InvitationSectionMarginPicker } from "./InvitationSectionMarginPicker";
 import { InvitationCornersPicker } from "./InvitationCornersPicker";
 import { InvitationSurfacePicker } from "./InvitationSurfacePicker";
 import { InvitationBackgroundBlurControl } from "./InvitationBackgroundBlurControl";
@@ -65,7 +67,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
   const editingDisabled = busy || !state.ready || Boolean(state.recovery);
   const dirty = snapshot !== state.acknowledged || state.code === "conflict";
   const published = isInvitationPublished(event);
-  const saveLabel = published ? "Publicar cambios" : event.isExample ? "Guardar diseño" : "Guardar borrador";
+  const saveLabel = published ? "Publicar cambios" : "Guardar borrador";
   const savingLabel = published ? "Publicando…" : "Guardando…";
   const availableSections = availableGuidedSections(values.eventType, values.sections);
   const locationSection = values.sections.find(item => item.type === "location");
@@ -117,7 +119,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
       onSaved?.(controller.getSnapshot().acknowledged, result.version, result.privacyVersion);
       if (returnAfterSave) { setReturnRequested(false); onReturn?.(); return; }
       setTarget(null);
-      setNotice(published ? "Cambios publicados. Tus invitados ya pueden verlos." : event.isExample ? "Diseño guardado" : "Borrador guardado. Todavía no se ha publicado.");
+      setNotice(published ? "Cambios publicados. Tus invitados ya pueden verlos." : event.isExample ? "Diseño guardado en el borrador. Vuelve a Diseños y ejemplos y pulsa «Publicar cambios» para actualizar la versión pública." : "Borrador guardado. Todavía no se ha publicado.");
     });
   }
 
@@ -136,6 +138,8 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
     </nav>
     <CelebrationInvitation {...values} date={date} eventDateKey={values.eventDate} onEdit={open}
       renderStyleControl={(item, styleLabel) => <InvitationSectionStyleMenu section={item} label={styleLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
+      renderTextColorControl={(item, colorLabel) => <InvitationSectionStyleMenu mode="text-color" section={item} label={colorLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
+      renderMarginControl={(item, marginLabel, photo) => <InvitationSectionStyleMenu mode={photo ? "photo-margin" : "text-margin"} section={item} label={marginLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
       renderAlignmentControl={(item, alignmentLabel) => <InvitationSectionStyleMenu mode="alignment" section={item} label={alignmentLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
     />
     <div className={styles.notice} role="status">{notice && <><FiCheck aria-hidden="true" />{notice}</>}</div>
@@ -189,7 +193,8 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
             <InvitationCornersPicker value={values.sectionCorners} onChange={sectionCorners => patch({ sectionCorners })} />
           </AppearanceGroup>
           <AppearanceGroup title="Color y tipografía" description="El color de tu celebración y sus letras" icon={<FiType />} >
-            <InvitationPalettePicker palettes={sharedInvitationDesign.palettes} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={accent => patch({ accent })} />
+            <InvitationPalettePicker palettes={sharedInvitationDesign.palettes} imagePalette={values.imagePalette} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={(accent, imagePalette) => patch({ accent, imagePalette: imagePalette ?? null })} />
+            <InvitationTextColorPicker values={values} onChange={patch} />
           <InvitationFontSelect role="heading" eventType={values.eventType} value={values.typography} onChange={typography => patch({ typography })} />
           <InvitationFontSelect role="body" eventType={values.eventType} value={values.bodyTypography} onChange={bodyTypography => patch({ bodyTypography })} />
           </AppearanceGroup>
@@ -207,6 +212,8 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
           <label className="guided-toggle guided-include-toggle" htmlFor="show-section-enabled"><span><strong>Incluir en mi invitación</strong><small>{section.enabled ? "Esta sección aparece en tu invitación." : "Esta sección está desactivada. Puedes recuperarla desde el botón +."}</small></span><input id="show-section-enabled" type="checkbox" role="switch" checked={section.enabled} onChange={event => changeSection({ enabled: event.target.checked })} /><span className="guided-switch" aria-hidden="true" /></label>
           <p className={styles.sectionIntro}>Conservaremos el texto, las fotos y el estilo de esta sección aunque la desactives.</p>
         </>}
+        {section && target.kind === "section-photo-margin" && <InvitationSectionMarginPicker section={section} scope="photo" onChange={changeSection} />}
+        {section && target.kind === "section-margin" && <InvitationSectionMarginPicker section={section} scope="text" onChange={changeSection} />}
         {section && target.kind === "section-alignment" && <SectionTextAlignmentFields section={section} onChange={changeSection} />}
       </fieldset>
       {state.error && <div className={styles.error} role="alert"><p>{state.error}</p>
@@ -228,6 +235,8 @@ function editLabel(target: InvitationEditTarget, section?: InviteSection) {
   if (target.kind === "section-photo") return `${section?.type === "gallery" ? "Fotos" : "Foto"} de ${section?.title || "la sección"}`;
   if (target.kind === "section-surface") return `Estilo de ${section?.title || "la sección"}`;
   if (target.kind === "section-visibility") return `Visibilidad de ${section?.title || "la sección"}`;
+  if (target.kind === "section-photo-margin") return `Bordes de las fotos de ${section?.title || "la sección"}`;
+  if (target.kind === "section-margin") return `Bordes del contenido de ${section?.title || "la sección"}`;
   if (target.kind === "section-alignment") return `Alineación de ${section?.title || "la sección"}`;
   return ({ cover: "Portada", date: "Fecha y hora", location: "Fecha y lugar", "cover-photo": "Foto de portada", background: "Foto de fondo", appearance: "Apariencia", "add-section": "Agregar secciones" })[target.kind];
 }

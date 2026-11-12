@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
-import { FiCheck } from "react-icons/fi";
+import { FiCheck, FiChevronLeft, FiChevronRight, FiExternalLink } from "react-icons/fi";
 import { InvitationExampleFrame } from "./InvitationExampleFrame";
+import { HeroInvitationPhone } from "./HeroInvitationPhone";
 import { trackLandingEvent } from "@/lib/client-analytics";
 
 type Example = { slug: string; label: string };
@@ -16,6 +16,15 @@ export function HeroInvitationExamples({ examples }: { examples: EventExample[] 
 
   const categories = examples.filter((item, index) => examples.findIndex(other => other.eventType === item.eventType) === index);
   const variants = examples.filter(example => example.eventType === selected.eventType);
+  const availableExamples = examples.filter(example => example.available);
+
+  function changeDesign(direction: -1 | 1) {
+    if (availableExamples.length < 2) return;
+    const index = availableExamples.findIndex(example => example.slug === selected?.slug);
+    const next = availableExamples[(index + direction + availableExamples.length) % availableExamples.length];
+    setSelectedSlug(next.slug);
+    trackLandingEvent("example_select", next.slug);
+  }
 
   return <>
     <div className="hero-example-caption">
@@ -38,20 +47,18 @@ export function HeroInvitationExamples({ examples }: { examples: EventExample[] 
         <span className="hero-example-hint" role="status"><FiCheck aria-hidden="true" /> {selected.label} · datos de ejemplo</span>
       </div>
     </div>
-    <div className="hero-example-phone" id="hero-invitation-example">
-      <div className="hero-example-phone-screen">
-        <InvitationExampleFrame key={selected.slug} styleSlug={selected.slug} label={selected.label} viewportHeight={830} hideScrollbar loading="eager" preview />
-      </div>
-      <Image
-        className="hero-phone-frame"
-        src="/iphone.png"
-        alt=""
-        aria-hidden="true"
-        width={541}
-        height={1114}
-        sizes="(max-width: 760px) 280px, 320px"
-        loading="eager"
-      />
-    </div>
+    <HeroInvitationPhone action={<>
+      <button className="hero-example-arrow hero-example-arrow-prev" type="button" aria-label="Diseño anterior" title="Diseño anterior" aria-controls="hero-invitation-example" disabled={availableExamples.length < 2} onClick={() => changeDesign(-1)}><FiChevronLeft aria-hidden="true" /></button>
+      <button className="hero-example-arrow hero-example-arrow-next" type="button" aria-label="Diseño siguiente" title="Diseño siguiente" aria-controls="hero-invitation-example" disabled={availableExamples.length < 2} onClick={() => changeDesign(1)}><FiChevronRight aria-hidden="true" /></button>
+      <a
+        className="hero-example-open"
+        href={`/ejemplo-invitacion/${selected.slug}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Ver diseño completo (se abre en otra pestaña)"
+        aria-label={`Ver diseño completo: ${selected.label} (se abre en otra pestaña)`}
+      ><FiExternalLink aria-hidden="true" /></a></>}>
+      <InvitationExampleFrame key={selected.slug} styleSlug={selected.slug} label={selected.label} viewportHeight={830} hideScrollbar loading="eager" preview />
+    </HeroInvitationPhone>
   </>;
 }

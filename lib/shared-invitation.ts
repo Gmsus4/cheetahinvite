@@ -1,5 +1,7 @@
-import { invitationPaletteChoices, paletteFromAccent } from "./invitation-palettes";
+import { invitationPaletteChoices, paletteFromAccent, paletteFromImageColors } from "./invitation-palettes";
 import type { InvitationButtonAppearance } from "./invitation-buttons";
+
+import { isInvitationImagePalette } from "./invitation-image-palette";
 
 export const sharedInvitationId = "celebration-v1";
 export const sharedInvitationDesign = {
@@ -17,7 +19,8 @@ export const sharedInvitationDesign = {
   ]),
 };
 
-export function invitationPalette(accent: string) {
+export function invitationPalette(accent: string, imagePalette?: unknown) {
+  if (isInvitationImagePalette(imagePalette)) return paletteFromImageColors(imagePalette, accent);
   return sharedInvitationDesign.palettes.find(palette => palette.accent.toLowerCase() === accent.toLowerCase())
     ?? (/^#[0-9a-f]{6}$/i.test(accent) ? paletteFromAccent(accent, "Color personalizado") : sharedInvitationDesign.palettes[0]);
 }

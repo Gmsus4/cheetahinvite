@@ -104,6 +104,48 @@ test('public examples use an explicit snapshot; saving a draft cannot leak unpub
   assert.deepEqual(await service.getShowcaseExamples('hero'), []);
 });
 
+test('example settings from the collection return to the collection after changes and validation errors', async () => {
+  const f = adminFixture();
+  completeEvent(f, { isExample: true });
+  f.state.examples.set('example', { id: 'example', eventId: 'event', slug: 'mi-diseno', label: 'Mi diseño', publishedAt: null, showInHero: true, position: 0 });
+  const form = new FormData();
+  form.set('returnTo', 'collection'); form.set('label', 'Nombre actualizado'); form.set('position', '2');
+  assert.equal(await submit(f.admin.saveExampleSettings('example', form)), '/admin/disenos?saved=1');
+  assert.equal(f.state.examples.get('example').label, 'Nombre actualizado');
+  form.set('position', '-1');
+  assert.match(await submit(f.admin.saveExampleSettings('example', form)), /^\/admin\/disenos\?error=/);
+  form.set('version', '0');
+  assert.equal(await submit(f.admin.publishExample('example', form)), '/admin/disenos?saved=1');
+  assert.ok(f.state.examples.get('example').publishedAt);
+  form.set('version', '99');
+  assert.match(await submit(f.admin.publishExample('example', form)), /^\/admin\/disenos\?error=/);
+  assert.equal(await submit(f.admin.unpublishExample('example', form)), '/admin/disenos?saved=1');
+  assert.equal(f.state.examples.get('example').publishedAt, null);
+  f.state.examples.get('example').event = f.state.events.get('event');
+  assert.equal(await submit(f.admin.duplicateExample('example', form)), '/admin/disenos?saved=1');
+  assert.equal(f.state.examples.size, 2);
+});
+
+test('inline card settings save without navigation and reject empty names and invalid order', async () => {
+  const f = adminFixture();
+  f.state.examples.set('example', { id: 'example', label: 'Original', position: 0, showInHero: false });
+  const form = new FormData(); form.set('label', 'Nombre nuevo'); form.set('position', '12'); form.set('showInHero', 'on');
+  assert.deepEqual(await f.admin.saveExampleCardSettings('example', form), {});
+  assert.equal(f.state.examples.get('example').label, 'Nombre nuevo');
+  assert.equal(f.state.examples.get('example').position, 12);
+  assert.equal(f.state.examples.get('example').showInHero, true);
+  const audits = f.state.audit.size;
+  for (const [name, order] of [[' ', '12'], ['Nombre', '-1'], ['Nombre', '1.5'], ['Nombre', '10000']]) {
+    form.set('label', name); form.set('position', order);
+    assert.ok((await f.admin.saveExampleCardSettings('example', form)).error);
+  }
+  assert.equal(f.state.examples.get('example').label, 'Nombre nuevo');
+  assert.equal(f.state.audit.size, audits);
+  form.set('label', 'Nombre nuevo'); form.set('position', '12'); form.delete('showInHero');
+  await f.admin.saveExampleCardSettings('example', form);
+  assert.equal(f.state.examples.get('example').showInHero, false);
+});
+
 test('a courtesy publishes without a payment, enforces expiry and revocation, and keeps financial records empty', async () => {
   const f = adminFixture(); completeEvent(f);
   const service = f.load('lib/courtesy.ts');
@@ -240,4 +282,28 @@ test('all migrations preserve existing accounts, default to normal access, and c
     await assert.rejects(db.query('UPDATE "User" SET role = $1 WHERE id = $2', ['OWNER', 'existing']), /check constraint/);
     await assert.rejects(db.query('INSERT INTO "PriceRevision" (id, amount, "effectiveAt", "actorId", reason) VALUES ($1, 1, NOW(), $2, $3)', ['bad-price', 'existing', 'Invalid']), /check constraint/);
   } finally { await db.close(); }
+});
+
+test('saved visual design changes reach the published example only after publishing the latest revision', async () => {
+  const f=adminFixture();
+  completeEvent(f,{isExample:true});
+  f.state.examples.set('example',{id:'example',eventId:'event',slug:'mi-diseno',label:'Mi diseño',publishedAt:null,showInHero:true,showInCatalog:true,position:0});
+  const publication=new FormData();publication.set('version','0');
+  await submit(f.admin.publishExample('example',publication));
+  const service=f.load('lib/showcase.ts');
+  const section={id:'story',type:'story',title:'Nuevo diseño',content:'Contenido actualizado',detail:'',link:'',imageUrl:'',enabled:true,textMargin:'wide',photoMargin:'none'};
+  const form=f.saveForm('',[section]);
+  form.set('hostNames','Anfitriones de prueba');form.set('eventDate','2027-05-20');form.set('eventTime','18:00');form.set('venue','Lugar de prueba');form.set('address','Dirección de prueba');
+  const saved=await f.actions.updateEvent('event',form);
+  assert.equal(saved.ok,true);
+  const example=f.state.examples.get('example');
+  assert.notEqual(example.publishedVersion,saved.version);
+  assert.equal((await service.getShowcaseInvitation('mi-diseno')).sections.length,0);
+  assert.match(await submit(f.admin.publishExample('example',publication)),/error=/);
+  publication.set('version',String(saved.version));
+  assert.match(await submit(f.admin.publishExample('example',publication)),/saved=1/);
+  const publicDesign=await service.getShowcaseInvitation('mi-diseno');
+  assert.equal(publicDesign.sections[0].textMargin,'wide');
+  assert.equal(publicDesign.sections[0].photoMargin,'none');
+  assert.equal(f.state.examples.get('example').publishedVersion,saved.version);
 });

@@ -376,3 +376,41 @@ test('closing text and visibility survive saving and reopening', async () => {
   assert.deepEqual(initialGuidedValues(f.state.events.get('event')).sections.find(s=>s.type==='closing'),{...section,layout:'auto'});
  }
 });
+
+test('section margins survive saving and reopening and reject unsupported values', async () => {
+  const f = createFixture();
+  const { initialGuidedValues } = f.load('lib/guided-invitation.ts');
+  for (const margin of [undefined, 'default', 'wide', 'none', '', '24px', null, 0]) {
+    const form = f.saveForm();
+    form.set('contentVersion', String(f.state.events.get('event').contentVersion));
+    form.set('sections', JSON.stringify([{ id:'story', type:'story', title:'Historia', content:'Texto', detail:'', link:'', imageUrl:'', enabled:true, margin }]));
+    const before = structuredClone(f.state.events.get('event'));
+    const result = await f.actions.updateEvent('event', form);
+    if (margin === undefined || ['default', 'wide', 'none'].includes(margin)) {
+      assert.equal(result.ok, true);
+      assert.equal(initialGuidedValues(f.state.events.get('event')).sections.find(s => s.id === 'story').margin, margin);
+    } else {
+      assert.equal(result.code, 'validation');
+      assert.deepEqual(f.state.events.get('event'), before);
+    }
+  }
+});
+
+test('separate mobile photo and content margins persist independently and reject invalid settings', async () => {
+  const f=createFixture();
+  const {initialGuidedValues}=f.load('lib/guided-invitation.ts');
+  for(const textMargin of ['default','wide','none']) for(const photoMargin of ['default','wide','none']) {
+    const form=f.saveForm();form.set('contentVersion',String(f.state.events.get('event').contentVersion));
+    form.set('sections',JSON.stringify([{id:'story',type:'story',title:'Historia',content:'Texto',detail:'',link:'',imageUrl:'',enabled:true,margin:'none',textMargin,photoMargin}]));
+    assert.equal((await f.actions.updateEvent('event',form)).ok,true);
+    const saved=initialGuidedValues(f.state.events.get('event')).sections.find(s=>s.id==='story');
+    assert.equal(saved.textMargin,textMargin);assert.equal(saved.photoMargin,photoMargin);assert.equal(saved.margin,'none');
+  }
+  for(const field of ['textMargin','photoMargin']) for(const invalid of [null,'20px',0]) {
+    const form=f.saveForm();form.set('contentVersion',String(f.state.events.get('event').contentVersion));
+    const before=structuredClone(f.state.events.get('event'));
+    form.set('sections',JSON.stringify([{id:'story',type:'story',title:'Historia',content:'',detail:'',link:'',imageUrl:'',enabled:true,[field]:invalid}]));
+    assert.equal((await f.actions.updateEvent('event',form)).code,'validation');
+    assert.deepEqual(f.state.events.get('event'),before);
+  }
+});

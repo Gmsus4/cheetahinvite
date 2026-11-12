@@ -1,0 +1,19 @@
+.page { min-height: 100vh; padding: 36px 20px 60px; background: var(--app-background); color: var(--ink); }
+.content { width: min(100%, 760px); margin: 0 auto; }
+.back { display: inline-block; margin-bottom: 28px; color: var(--muted); font-size: 14px; }
+.back:hover { color: var(--orange); }
+.content h1 { margin: 0 0 12px; font-size: clamp(28px, 5vw, 40px); line-height: 1.15; }
+.lead { margin: 0 0 28px; color: var(--muted); line-height: 1.6; }
+.card { padding: 24px; margin-top: 20px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
+.card h2 { margin: 0 0 12px; font-size: 20px; }
+.card p { color: var(--muted); line-height: 1.65; }
+.button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 12px 18px; border: 0; border-radius: 12px; background: var(--orange); color: var(--on-inverse); font: 600 14px/1.4 Arial, sans-serif; cursor: pointer; }
+.button:hover:not(:disabled) { background: var(--orange-hover); }
+.button:disabled { opacity: .5; cursor: default; }
+.button:focus-visible, .back:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }
+.card .note { font-size: 13px; }
+.error { padding: 16px; border: 1px solid var(--line); border-left: 3px solid var(--orange); border-radius: 12px; background: var(--surface); line-height: 1.5; }
+.events { display: grid; gap: 12px; margin-top: 24px; }
+.event { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-top: 1px solid var(--line); }
+.event h3 { margin: 0 0 6px; font-size: 16px; overflow-wrap: anywhere; }
+.event span { color: var(--muted); font-size: 12px; }

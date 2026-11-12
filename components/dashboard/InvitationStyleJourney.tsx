@@ -9,6 +9,7 @@ import { invitationStyleSteps, invitationSurfaceOptions } from "@/lib/invitation
 import { sharedInvitationDesign } from "@/lib/shared-invitation";
 import { InvitationCornersPicker } from "./InvitationCornersPicker";
 import { InvitationIconsPicker } from "./InvitationIconsPicker";
+import { InvitationTextColorPicker } from "./InvitationTextColorPicker";
 import { InvitationPalettePicker } from "./InvitationPalettePicker";
 import { InvitationFontSelect } from "./InvitationFontSelect";
 import { InvitationGlassBorderToggle } from "./InvitationGlassBorderToggle";
@@ -41,7 +42,7 @@ export function InvitationStyleJourney({ values, step, onStepChange, onChange }:
       <InvitationBackgroundBlurControl value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => onChange({ backgroundBlurIntensity })} />
       <InvitationBackgroundDimControl value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => onChange({ backgroundDimIntensity })} />
     </section>}
-    {step === 3 && <InvitationPalettePicker compact palettes={sharedInvitationDesign.palettes} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={accent => onChange({ accent })} />}
+    {step === 3 && <><InvitationPalettePicker compact palettes={sharedInvitationDesign.palettes} imagePalette={values.imagePalette} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={(accent, imagePalette) => onChange({ accent, imagePalette: imagePalette ?? null })} /><InvitationTextColorPicker values={values} onChange={onChange} /></>}
     {step === 4 && <section className={styles.fonts} aria-labelledby={`${id}-fonts`}>
       <h2 id={`${id}-fonts`}>Las letras de tu celebración</h2><p>Una letra para los títulos y otra fácil de leer para los detalles.</p>
       <div className={styles.fontGrid}><InvitationFontSelect role="heading" eventType={values.eventType} value={values.typography} onChange={typography => onChange({ typography })} /><InvitationFontSelect role="body" eventType={values.eventType} value={values.bodyTypography} onChange={bodyTypography => onChange({ bodyTypography })} /></div>

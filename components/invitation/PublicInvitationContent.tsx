@@ -1,3 +1,5 @@
+import { isInvitationImagePalette } from "@/lib/invitation-image-palette";
+import { isInvitationTextColorMode } from "@/lib/invitation-text-color";
 import { isInvitationCoverLayout } from "@/lib/invitation-cover-layout";
 import type { Event } from "@/generated/prisma/client";
 import { isInvitationPanelStyle, isInvitationSectionCorners, type InviteSection } from "@/lib/invitation-editor";
@@ -21,6 +23,9 @@ export function PublicInvitationContent({ event }: { event: Omit<Event, "pinHash
       address={event.address ?? ""}
       message={event.message ?? ""}
       imageUrl={event.imageUrl ?? ""} backgroundImageUrl={event.backgroundImageUrl ?? ""}
+      imagePalette={isInvitationImagePalette(event.imagePalette) ? event.imagePalette : null}
+      textColorMode={isInvitationTextColorMode(event.textColorMode) ? event.textColorMode : "auto"}
+      textColor={event.textColor}
       accent={event.accent}
       typography={event.typography}
       bodyTypography={event.bodyTypography} blurIntensity={event.blurIntensity} panelStyle={isInvitationPanelStyle(event.panelStyle) ? event.panelStyle : "auto"}

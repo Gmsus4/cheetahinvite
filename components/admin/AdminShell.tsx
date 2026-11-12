@@ -24,7 +24,7 @@ export function AdminShell({ children, account }: { children: ReactNode; account
     <DashboardHeader name={account.name || "Administrador"} email={account.email || ""} image={account.image} />
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <div className="admin-sidebar-heading"><span className="admin-eyebrow">CHEETAH INVITE</span><strong>Tu negocio,<br /><em>a tu manera.</em></strong><span className="admin-access-badge">Administración</span></div>
+        <div className="admin-sidebar-heading"><span className="admin-eyebrow">CHEETAH INVITE</span><strong>Administración</strong></div>
         <nav aria-label="Administración">{links.map(({ href, label, Icon }) => <Link key={href} href={href} aria-current={(href === "/admin" ? pathname === href : pathname.startsWith(href)) ? "page" : undefined}><Icon aria-hidden="true" />{label}</Link>)}</nav>
         <Link className="admin-return" href="/dashboard">Volver a mi espacio <FiArrowUpRight aria-hidden="true" /></Link>
         <Link className="admin-return" href="/?vista=publica" target="_blank">Ver sitio público <FiArrowUpRight aria-hidden="true" /></Link>

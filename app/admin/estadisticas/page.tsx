@@ -1,3 +1,5 @@
+import { AdminDialog } from "@/components/admin/AdminDialog";
+import styles from "../compact.module.css";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin-access";
 import { analyticsRange } from "@/lib/admin-validation";
@@ -39,13 +41,14 @@ async function StatisticsPageData({ searchParams }: PageProps<"/admin/estadistic
     ["Selecciones de ejemplos", String(selections), "Interacciones en el hero durante el periodo"],
     ["Cortesías otorgadas", String(courtesy), "Se contabilizan fuera de las ventas"],
   ];
-  return <>
-    <AdminHeading title="Conoce lo que está pasando." description="Observa las compras y la actividad de tu escaparate con datos reales. Las visitas empiezan a medirse a partir de esta implementación." />
+  return <div className={`${styles.compact} ${styles.statistics}`}>
+    <AdminHeading title="Estadísticas" description="Compras y actividad del sitio durante el periodo seleccionado." />
     <div className="admin-periods">{[7, 30, 90].map(period => <Link href={`/admin/estadisticas?days=${period}`} key={period} aria-current={days === period ? "page" : undefined}>Últimos {period} días</Link>)}</div>
     <div className="admin-stats">{stats.map(([label, value, caption]) => <article className="admin-stat" key={label}><span className="admin-stat-label">{label}</span><strong>{value}</strong><small>{caption}</small></article>)}</div>
-    <section className="admin-card"><h2>Compras por día</h2><p>Importes cobrados menos los reembolsos confirmados de esas compras. Datos de producción.</p><div className="admin-chart" role="img" aria-label={`Cobros menos reembolsos de los últimos ${days} días: ${paymentMoney((sales._sum.amount || 0) - (sales._sum.refundedAmount || 0), "mxn")}. El detalle por día está disponible debajo.`}>{chartDays.map(day => <div key={day.date.toISOString()} className="admin-chart-day" title={`${adminDate(day.date)}: ${paymentMoney(day.amount, "mxn")}`}><span style={{ height: `${Math.max(1, day.amount / maximum * 100)}%`, opacity: day.amount ? 1 : .15 }} /></div>)}</div><div className="admin-chart-legend"><span>{adminDate(chartDays[0].date)}</span><span>{adminDate(to)}</span></div><details style={{ marginTop: 20 }}><summary className="admin-help" style={{ cursor: "pointer" }}>Ver importes por día</summary><table className="admin-table"><thead><tr><th>Fecha</th><th>Importe</th></tr></thead><tbody>{chartDays.map(day => <tr key={day.date.toISOString()}><td>{adminDate(day.date)}</td><td>{paymentMoney(day.amount, "mxn")}</td></tr>)}</tbody></table></details></section>
+    <div className={styles.analyticsGrid}><section className="admin-card"><h2>Compras por día</h2><p>Importes cobrados menos los reembolsos confirmados de esas compras. Datos de producción.</p><div className="admin-chart" role="img" aria-label={`Cobros menos reembolsos de los últimos ${days} días: ${paymentMoney((sales._sum.amount || 0) - (sales._sum.refundedAmount || 0), "mxn")}. Consulta el detalle con «Ver importes por día».`}>{chartDays.map(day => <div key={day.date.toISOString()} className="admin-chart-day" title={`${adminDate(day.date)}: ${paymentMoney(day.amount, "mxn")}`}><span style={{ height: `${Math.max(1, day.amount / maximum * 100)}%`, opacity: day.amount ? 1 : .15 }} /></div>)}</div><div className="admin-chart-legend"><span>{adminDate(chartDays[0].date)}</span><span>{adminDate(to)}</span></div><div className={styles.dailyDetails}><AdminDialog label="Ver importes por día" title="Importes por día"><table className="admin-table"><thead><tr><th>Fecha</th><th>Importe</th></tr></thead><tbody>{chartDays.map(day => <tr key={day.date.toISOString()}><td>{adminDate(day.date)}</td><td>{paymentMoney(day.amount, "mxn")}</td></tr>)}</tbody></table></AdminDialog></div></section><div>
     <h2 className="admin-section-title">Qué ejemplos despiertan interés</h2>
     {popular.length ? <div className="admin-table-wrap"><table className="admin-table"><caption className="admin-visually-hidden">Ejemplos más seleccionados en el hero</caption><thead><tr><th>Ejemplo</th><th>Selecciones</th></tr></thead><tbody>{popular.map(item => <tr key={item.exampleSlug}><td>{names.find(n => n.slug === item.exampleSlug)?.label || item.exampleSlug}</td><td>{item._count}</td></tr>)}</tbody></table></div> : <AdminEmpty title="Pronto conocerás sus favoritos.">Las selecciones que hagan tus visitantes en el hero aparecerán aquí.</AdminEmpty>}
+    </div></div>
     <p className="admin-help">La medición de visitas es aproximada: respeta las preferencias de privacidad del navegador, no usa cookies y deduplica las interacciones por sesión y día. Los datos de navegación se conservan durante un máximo aproximado de 90 días.</p>
-  </>;
+  </div>;
 }

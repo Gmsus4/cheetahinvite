@@ -1,3 +1,4 @@
+import { invitationTextColor, isGlobalTextColorLocked } from "./invitation-text-color";
 import { isInvitationBlurIntensity, isInvitationSectionCorners } from "./invitation-editor";
 import type { CSSProperties } from "react";
 import type { InviteSection, InvitationPanelStyle } from "./invitation-editor";
@@ -19,10 +20,12 @@ export function atmosphereSections(sections: InviteSection[]) {
   ));
 }
 
-export function atmosphereStyle(accent: string, fonts?: { typography?: string; bodyTypography?: string; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; sectionCorners?: string; glassBorder?: boolean }): CSSProperties {
-  const palette = invitationPalette(accent);
+export function atmosphereStyle(accent: string, fonts?: { imagePalette?: unknown; textColorMode?: string; textColor?: string; typography?: string; bodyTypography?: string; blurIntensity?: number; backgroundBlurIntensity?: number; backgroundDimIntensity?: number; sectionCorners?: string; glassBorder?: boolean }): CSSProperties {
+  const palette = invitationPalette(accent, fonts?.imagePalette);
   const strength = (isInvitationBlurIntensity(fonts?.blurIntensity) ? fonts.blurIntensity : 50) / 50;
   return {
+    "--wa-ink": invitationTextColor(accent, fonts?.textColorMode, fonts?.textColor, fonts?.imagePalette),
+    "--wa-soft": !fonts?.textColorMode || fonts.textColorMode === "auto" ? "#eee7dc" : invitationTextColor(accent, fonts.textColorMode, fonts.textColor, fonts.imagePalette),
     "--wa-section-radius": `${({square:0, soft:8, rounded:18})[isInvitationSectionCorners(fonts?.sectionCorners) ? fonts.sectionCorners : "rounded"]}px`,
     "--wa-background-dim": (isInvitationBlurIntensity(fonts?.backgroundDimIntensity) ? fonts.backgroundDimIntensity : 0) / 100,
     "--wa-background-blur": `${(isInvitationBlurIntensity(fonts?.backgroundBlurIntensity) ? fonts.backgroundBlurIntensity : 0) * 0.24}px`,
@@ -37,6 +40,13 @@ export function atmosphereStyle(accent: string, fonts?: { typography?: string; b
     "--wa-heading": getInvitationFont(fonts?.typography || sharedInvitationDesign.typography).family,
     "--wa-body": getInvitationFont(fonts?.bodyTypography || sharedInvitationDesign.bodyTypography).family,
   } as CSSProperties;
+}
+
+export function atmosphereTextStyle(accent: string, global: { imagePalette?: unknown; textColorMode?: string; textColor?: string }, section?: Pick<InviteSection, "textColorMode" | "textColor">): CSSProperties {
+  const selected = isGlobalTextColorLocked(global.textColorMode) ? global : section;
+  const ink = invitationTextColor(accent, selected?.textColorMode, selected?.textColor, global.imagePalette);
+  const soft = !selected?.textColorMode || selected.textColorMode === "auto" ? "#eee7dc" : ink;
+  return { color: ink, "--wa-ink": ink, "--wa-soft": soft, "--invite-ink": ink, "--invite-action": ink, "--invite-accent": soft, "--invite-muted": soft } as CSSProperties;
 }
 
 export function atmosphereTime(time = "") {

@@ -35,7 +35,7 @@
 .example figcaption span { font-size: 10px; }
 .scene { position: relative; isolation: isolate; overflow: hidden; padding: 26px; border: 1px solid var(--line); border-radius: 14px; }
 .backdrop { position: absolute; inset: calc(var(--wa-background-blur,0px) * -2); filter: blur(var(--wa-background-blur,0px)); background-color: var(--wa-base); background-size: cover; background-position: center; }
-.examplePanel { position: relative; padding: 24px 18px; border-radius: var(--wa-section-radius); background: var(--wa-base); color: #fffaf2; text-align: center; font-family: var(--example-body-font); }
+.examplePanel { position: relative; padding: 24px 18px; border-radius: var(--wa-section-radius); background: var(--wa-base); color: var(--wa-ink,#fffaf2); text-align: center; font-family: var(--example-body-font); }
 .examplePanel[data-surface="blur"] { background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur)) saturate(110%); backdrop-filter: blur(var(--wa-blur)) saturate(110%); }
 .examplePanel[data-surface="blur-color"] { background: color-mix(in srgb,var(--wa-base) 76%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur-color)); backdrop-filter: blur(var(--wa-blur-color)); }
 .examplePanel[data-surface="glass"] { border: var(--wa-glass-border-width,1px) solid #ffffff35; border-top-color: #ffffff70; border-bottom-color: #ffffff45; background: var(--wa-glass-background); box-shadow: var(--wa-glass-shadow); -webkit-backdrop-filter: var(--wa-glass-filter); backdrop-filter: var(--wa-glass-filter); }
