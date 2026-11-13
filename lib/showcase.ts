@@ -29,6 +29,7 @@ export function showcasePreview(content: InvitationProps): InvitationProps {
 export function showcaseContent(event: Event): InvitationProps {
   return {
     coverLayout: isInvitationCoverLayout(event.coverLayout) ? event.coverLayout : "split",
+    sectionColor: event.sectionColor ?? "auto",
     imagePalette: isInvitationImagePalette(event.imagePalette) ? event.imagePalette : null,
     textColorMode: isInvitationTextColorMode(event.textColorMode) ? event.textColorMode : "auto", textColor: isInvitationTextColor(event.textColor) ? event.textColor : "#FFFFFF",
     name: event.name, eventType: event.eventType, hostNames: event.hostNames || "",

@@ -4,17 +4,19 @@ import { useEffect, useRef, useState } from 'react';
 import { FiCheck, FiImage } from 'react-icons/fi';
 import { extractBackgroundPalette, invitationPaletteChoices, paletteFromAccent } from '@/lib/invitation-palettes';
 import type { InvitationPalette } from '@/lib/invitation-palettes';
-import { imagePaletteColors, type InvitationImagePalette } from '@/lib/invitation-image-palette';
+import { imagePaletteColors, imagePaletteTargets, invitationSectionPaletteTarget, type InvitationImagePalette } from '@/lib/invitation-image-palette';
 import styles from './InvitationPalettePicker.module.css';
 
-export function InvitationPalettePicker({ palettes, accent, imagePalette, backgroundImageUrl, onChange, compact = false }: {
-  palettes: InvitationPalette[]; accent: string; imagePalette?: InvitationImagePalette | null; backgroundImageUrl?: string; onChange: (accent: string, imagePalette?: InvitationImagePalette | null) => void; compact?: boolean;
+export function InvitationPalettePicker({ palettes, accent, imagePalette, sectionColor = "auto", backgroundImageUrl, onChange, compact = false }: {
+  palettes: InvitationPalette[]; accent: string; sectionColor?: string; imagePalette?: InvitationImagePalette | null; backgroundImageUrl?: string; onChange: (accent: string, imagePalette?: InvitationImagePalette | null, sectionColor?: string) => void; compact?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [photo, setPhoto] = useState<InvitationImagePalette | null>(imagePalette ?? null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const request = useRef(0);
+  const change = useRef(onChange);
+  useEffect(() => { change.current = onChange; }, [onChange]);
   const background = useRef(backgroundImageUrl);
   const fileInput = useRef<HTMLInputElement>(null);
   useEffect(() => { background.current = backgroundImageUrl; }, [backgroundImageUrl]);
@@ -26,12 +28,12 @@ export function InvitationPalettePicker({ palettes, accent, imagePalette, backgr
   const display = extra && !choices.some(palette => palette.accent.toLowerCase() === extra.accent.toLowerCase()) ? [...choices, extra] : choices;
   const initialCount = Math.min(6, palettes.length);
   const visible = compact && !expanded ? display.filter((palette, index) => index < initialCount || palette.accent.toLowerCase() === accent.toLowerCase()) : display;
-  function select(value: string, colors: InvitationImagePalette | null = null) {
+  function select(value: string, colors: InvitationImagePalette | null = null, blockColor = "auto") {
     if (imagePalette && !colors) setPhoto(imagePalette);
     request.current++;
     setLoading(false);
     setError('');
-    onChange(value, colors);
+    onChange(value, colors, blockColor);
   }
   async function extract(url: string, fromBackground = false) {
     const id = ++request.current;
@@ -42,7 +44,7 @@ export function InvitationPalettePicker({ palettes, accent, imagePalette, backgr
       if (request.current !== id || (fromBackground && background.current !== url)) return;
       if (!palette.colors) throw new Error('No image palette');
       setPhoto(palette.colors);
-      onChange(palette.accent, palette.colors);
+      change.current(palette.accent, palette.colors);
     } catch {
       if (request.current === id && (!fromBackground || background.current === url)) setError('No pudimos obtener los colores de esta imagen. Intenta de nuevo o elige una de las paletas.');
     } finally {
@@ -71,13 +73,14 @@ export function InvitationPalettePicker({ palettes, accent, imagePalette, backgr
         }} />
         {loading && <small role="status">Analizando los tonos de tu imagen…</small>}
         {error && <small role="alert">{error}</small>}
-        {!loading && fromPhoto && <small role="status">Paleta lista. Elige un tono para el fondo; los cinco estarán disponibles para el texto.</small>}
+        {!loading && fromPhoto && <small role="status">Paleta lista. Los cinco tonos están disponibles para los bloques y el texto.</small>}
       </div>
     </section>
     {fromPhoto && <section className={styles.extracted} aria-label="Paleta de cinco colores de la imagen">
       <h2>Los cinco tonos de tu imagen</h2>
-      <p>Selecciona un tono para el fondo. En Color del texto puedes usar el claro, el oscuro o cualquiera de los tres acentos.</p>
-      <div className={styles.tones}>{imagePaletteColors(fromPhoto).map((color, index) => <button key={`${index}-${color}`} type="button" aria-label={`Usar ${color.toUpperCase()} como fondo`} aria-pressed={Boolean(imagePalette) && accent.toLowerCase() === color.toLowerCase()} onClick={() => select(color, fromPhoto)}>
+      <p>Por defecto permite elegir el color de cada bloque. Otro tono se aplica a todos los bloques sin borrar sus colores individuales.</p>
+      <button className={styles.defaultTone} type="button" aria-pressed={sectionColor === "auto"} onClick={() => select(accent, fromPhoto, "auto")}>Por defecto · Personalizar cada bloque</button>
+      <div className={styles.tones}>{imagePaletteColors(fromPhoto).map((color, index) => <button key={`${index}-${color}`} type="button" aria-label={`Usar ${color.toUpperCase()} para todos los bloques`} aria-pressed={Boolean(imagePalette) && invitationSectionPaletteTarget(sectionColor, imagePalette) === imagePaletteTargets[index]} onClick={() => select(accent, fromPhoto, imagePaletteTargets[index])}>
         <i style={{ backgroundColor: color }} aria-hidden="true" /><strong>{index === 0 ? 'Claro' : index === 1 ? 'Oscuro' : `Acento ${index - 1}`}</strong><span>{color.toUpperCase()}</span>
       </button>)}</div>
     </section>}

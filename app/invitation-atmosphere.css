@@ -356,17 +356,18 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
 
   /* Cover media and text sit inside an additional inset. Only the selected
      element expands; its sibling retains its own width and corner choice. */
-  .celebration-invitation .wa-intro { --wa-cover-inset: 16px; }
+  .celebration-invitation .wa-intro { --wa-cover-inset: 16px; --wa-cover-border-inset: 0px; }
+  .celebration-invitation .wa-intro:has(.wa-cover-heading[data-content-surface="glass"]) { --wa-cover-border-inset: var(--wa-glass-border-width,1px); }
   .celebration-invitation .wa-intro[data-cover-layout="stacked"] { --wa-cover-inset: clamp(16px,4vw,40px); }
   .celebration-invitation .wa-intro[data-cover-layout="overlay"] { --wa-cover-inset: clamp(24px,5vw,60px); }
   .celebration-invitation .wa-intro:has([data-margin="none"], [data-photo-margin="none"]),
   .celebration-invitation .wa-cover:has([data-margin="none"], [data-photo-margin="none"]) { overflow: visible; }
-  .celebration-invitation .wa-intro .wa-cover-heading[data-margin="wide"] { width: calc(100% - 40px); }
+  .celebration-invitation .wa-intro .wa-cover-heading[data-margin="wide"] { width: calc(100% + 2 * (var(--wa-cover-inset) + var(--wa-cover-border-inset)) - 40px); margin-inline: calc(20px - var(--wa-cover-inset) - var(--wa-cover-border-inset)); }
   .celebration-invitation .wa-intro .wa-cover-heading[data-margin="none"],
   .celebration-invitation .wa-intro :is(.wa-portrait,.wa-no-photo)[data-photo-margin="none"] {
-    width: calc(100% + 2 * (var(--wa-edge-space) + var(--wa-cover-inset)));
+    width: calc(100% + 2 * (var(--wa-edge-space) + var(--wa-cover-inset) + var(--wa-cover-border-inset)));
     max-width: none;
-    margin-inline: calc(-1 * (var(--wa-edge-space) + var(--wa-cover-inset)));
+    margin-inline: calc(-1 * (var(--wa-edge-space) + var(--wa-cover-inset) + var(--wa-cover-border-inset)));
   }
   .celebration-invitation .wa-intro :is(.wa-portrait,.wa-no-photo)[data-photo-margin="wide"] { width: calc(100% - 40px); margin-inline: 20px; }
   .celebration-invitation .wa-shell .wa-intro :is(.wa-portrait,.wa-no-photo)[data-photo-margin="none"] { border-radius: 0; }
@@ -377,4 +378,44 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
   .celebration-invitation .wa-column { --wa-edge-space: 12px; }
   .celebration-invitation .wa-intro { --wa-cover-inset: 12px; }
   .celebration-invitation .wa-intro[data-cover-layout="overlay"] { --wa-cover-inset: 20px; }
+}
+
+.celebration-invitation .wa-footer { background-color: var(--wa-block-color, transparent); }
+
+/* A mobile cover's content surface must follow its own width, independently of
+   the portrait. Overlay covers keep the photograph behind their text. */
+.celebration-invitation .wa-cover-heading[data-content-surface] {
+  --wa-cover-content-background: var(--wa-base);
+  --wa-cover-content-filter: none;
+  --wa-cover-content-border: 0;
+  --wa-cover-content-shadow: 0 16px 48px #00000018;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .celebration-invitation .wa-cover-heading[data-content-surface="blur"] { --wa-cover-content-background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--wa-base) 64%,transparent); --wa-cover-content-filter: blur(var(--wa-blur,16px)) saturate(110%); }
+  .celebration-invitation .wa-cover-heading[data-content-surface="blur-color"] { --wa-cover-content-background: linear-gradient(145deg,color-mix(in srgb,var(--wa-tint) 24%,transparent),transparent 70%),color-mix(in srgb,var(--wa-base) 76%,transparent); --wa-cover-content-filter: blur(var(--wa-blur-color,24px)); }
+}
+.celebration-invitation .wa-cover-heading[data-content-surface="glass"] { --wa-cover-content-background: var(--wa-glass-fill); --wa-cover-content-filter: var(--wa-glass-filter); --wa-cover-content-border: var(--wa-glass-border-width,1px) solid #ffffff35; --wa-cover-content-shadow: var(--wa-glass-shadow); --wa-cover-content-border-top: #ffffff70; --wa-cover-content-border-bottom: #ffffff45; }
+.celebration-invitation .wa-cover-heading[data-content-surface="none"] { --wa-cover-content-background: transparent; --wa-cover-content-shadow: none; }
+@media(max-width:959px) {
+  .celebration-invitation .wa-shell .wa-intro:not([data-cover-layout="overlay"]):has(.wa-cover-heading:is([data-margin="wide"],[data-margin="none"])),
+  .celebration-invitation .wa-shell .wa-intro:not([data-cover-layout="overlay"]) > .wa-cover:has(.wa-cover-heading:is([data-margin="wide"],[data-margin="none"])) {
+    border-color: transparent; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  .celebration-invitation .wa-shell .wa-intro:not([data-cover-layout="overlay"]) .wa-cover-heading:is([data-margin="wide"],[data-margin="none"]) {
+    padding: var(--wa-cover-editor-top,26px) 36px var(--wa-cover-editor-bottom,28px);
+    border: var(--wa-cover-content-border);
+    border-top-color: var(--wa-cover-content-border-top,transparent);
+    border-bottom-color: var(--wa-cover-content-border-bottom,transparent);
+    border-radius: var(--wa-section-radius,18px);
+    background: var(--wa-cover-content-background);
+    box-shadow: var(--wa-cover-content-shadow);
+    -webkit-backdrop-filter: var(--wa-cover-content-filter);
+    backdrop-filter: var(--wa-cover-content-filter);
+  }
+  .celebration-invitation .wa-shell .wa-intro:not([data-cover-layout="overlay"]) .wa-cover-heading[data-margin="none"] { border-radius: 0; }
+  .celebration-invitation .wa-intro[data-cover-layout="split"] .wa-cover-heading:is([data-margin="wide"],[data-margin="none"]) { margin-bottom: 16px; }
+  .celebration-invitation .wa-intro[data-cover-layout="split-reverse"] .wa-cover-heading:is([data-margin="wide"],[data-margin="none"]) { margin-top: 16px; }
+}
+@media(max-width:600px) {
+  .celebration-invitation .wa-shell .wa-intro:not([data-cover-layout="overlay"]) .wa-cover-heading:is([data-margin="wide"],[data-margin="none"]) { padding-inline: 25px; }
 }

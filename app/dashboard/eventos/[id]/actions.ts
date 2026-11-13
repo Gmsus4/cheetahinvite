@@ -1,5 +1,5 @@
 "use server";
-import { isInvitationImagePalette } from "@/lib/invitation-image-palette";
+import { isInvitationImagePalette, isInvitationSectionColor } from "@/lib/invitation-image-palette";
 import { isInvitationTextColor, isInvitationTextColorMode } from "@/lib/invitation-text-color";
 import { validCompanionLimit } from "@/lib/rsvp";
 
@@ -206,6 +206,8 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     try { imagePalette = JSON.parse(String(formData.get("imagePalette"))); } catch { return failure("validation", "La paleta de la imagen no es válida."); }
     if (imagePalette !== null && !isInvitationImagePalette(imagePalette)) return failure("validation", "La paleta debe incluir un tono claro, uno oscuro y tres acentos válidos.");
   }
+  const sectionColor = formData.get("sectionColor") ?? "auto";
+  if (!isInvitationSectionColor(sectionColor)) return failure("validation", "Elige un color válido para los bloques.");
   const textColorMode = formData.get("textColorMode") ?? "auto";
   const textColor = formData.get("textColor") ?? "#FFFFFF";
   if (!isInvitationTextColorMode(textColorMode) || !isInvitationTextColor(textColor)) return failure("validation", "Elige un color de texto válido (por ejemplo, #FFFFFF).");
@@ -252,6 +254,7 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     ...(formData.has("showSectionIcons") ? { showSectionIcons } : {}),
     ...(formData.has("glassBorder") ? { glassBorder } : {}),
     ...(formData.has("imagePalette") ? { imagePalette: imagePalette === null ? Prisma.DbNull : imagePalette as Prisma.InputJsonValue } : {}),
+    ...(formData.has("sectionColor") ? { sectionColor: String(sectionColor) } : {}),
     ...(formData.has("textColorMode") ? { textColorMode } : {}),
     ...(formData.has("textColor") ? { textColor } : {}),
     ...(formData.has("sectionCorners") ? { sectionCorners } : {}),
@@ -338,6 +341,7 @@ function isValidSection(value: unknown): value is {
   if (section.textMargin !== undefined && !["default", "wide", "none"].includes(section.textMargin as string)) return false;
   if (section.photoMargin !== undefined && !["default", "wide", "none"].includes(section.photoMargin as string)) return false;
   if (section.margin !== undefined && !["default", "wide", "none"].includes(section.margin as string)) return false;
+  if (section.sectionColor !== undefined && !isInvitationSectionColor(section.sectionColor)) return false;
   if (section.textColorMode !== undefined && !isInvitationTextColorMode(section.textColorMode)) return false;
   if (section.textColor !== undefined && !isInvitationTextColor(section.textColor)) return false;
   if (section.textAlign !== undefined && !["auto", "left", "center", "right"].includes(section.textAlign as string)) return false;

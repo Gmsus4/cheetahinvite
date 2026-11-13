@@ -13,7 +13,7 @@
 .workspace :global(.wa-edit-button) { position: absolute; z-index: 5; top: 10px; right: 10px; display: inline-flex; flex: 0 0 44px; align-items: center; justify-content: center; width: 44px; height: 44px; min-width: 44px; min-height: 44px; margin: 0; padding: 0; border: 0; border-radius: 50%; background: #191919; color: #fff; box-shadow: none; font: 500 12px/1.4 var(--font-body), Arial, sans-serif; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .18s, background .18s; }
 .workspace :global(.wa-edit-button):hover { background: #292929; }
 .workspace :global(.wa-edit-button) > span { position: absolute; z-index: 6; top: calc(100% + 8px); right: 0; width: max-content; padding: 7px 10px; border-radius: 8px; background: #191919; color: #fff; font: 500 12px/1.4 var(--font-body), Arial, sans-serif; white-space: nowrap; opacity: 0; visibility: hidden; pointer-events: none; }
-.workspace :global(.wa-edit-surface) > span, .workspace :global(.wa-edit-alignment) > span, .workspace :global(.wa-edit-margin) > span, .workspace :global(.wa-edit-color) > span { top: auto; bottom: calc(100% + 8px); }
+.workspace :global(.wa-edit-surface) > span, .workspace :global(.wa-edit-alignment) > span, .workspace :global(.wa-edit-margin) > span, .workspace :global(.wa-edit-color) > span, .workspace :global(.wa-edit-background-color) > span { top: auto; bottom: calc(100% + 8px); }
 .workspace :global(.wa-edit-button):is(:hover, :focus-visible) > span { opacity: 1; visibility: visible; }
 .workspace :global([data-editable]):hover > :global(.wa-edit-button), .workspace :global([data-editable]):focus-within > :global(.wa-edit-button) { opacity: 1; pointer-events: auto; }
 .workspace :global(.wa-edit-actions) { position: absolute; z-index: 5; top: 10px; right: 10px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: calc(100% - 20px); opacity: 0; pointer-events: none; transition: opacity .18s; }
@@ -24,7 +24,7 @@
 .workspace :global(.wa-panel[data-editable]):has(> :global(.wa-edit-actions)) { padding-top: 64px; }
 .workspace :global(.wa-edit-button):focus-visible { outline: 2px solid #fff; outline-offset: 3px; box-shadow: none; }
 .workspace :global(.wa-edit-button) svg { flex: 0 0 20px; width: 20px; height: 20px; }
-.workspace :global(.wa-cover-heading[data-editable]), .workspace :global(.wa-intro) :global(.wa-cover-heading[data-editable]) { padding: 64px 24px 20px; border-radius: 12px; }
+.workspace :global(.wa-cover-heading[data-editable]), .workspace :global(.wa-intro) :global(.wa-cover-heading[data-editable]) { --wa-cover-editor-top: 64px; --wa-cover-editor-bottom: 20px; padding: 64px 24px 20px; border-radius: 12px; }
 .workspace :global(.wa-cover-heading) > :global(.wa-edit-actions) { top: 12px; right: 12px; max-width: calc(100% - 24px); }
 .notice { position: fixed; z-index: 40; bottom: 24px; left: 50%; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); transform: translateX(-50%); border-radius: 14px; background: var(--accent-soft); color: var(--ink); font-size: 14px; font-weight: 600; box-shadow: 0 8px 28px rgb(var(--shadow-rgb) / .12); }
 .notice:not(:empty) { padding: 14px 20px; border: 1px solid var(--accent-line); }
@@ -103,19 +103,11 @@
 .workspace :global(.editor-leave-dialog) button { min-height: 46px; border-radius: 12px; font-size: 14px; font-weight: 600; }
 .workspace :global(.editor-leave-dialog) button:first-child:hover { border-color: var(--orange-hover); background: var(--orange-hover); }
 .workspace :global(.editor-leave-dialog) button:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
-.toolbar a, .toolbar button, .toolbar .back { position: relative; display: grid; flex-shrink: 0; place-items: center; width: 52px; height: 52px; padding: 0; border: 0; border-radius: 50%; background: var(--wa-base); color: #fff; box-shadow: none; }
-.toolbar a:hover, .toolbar button:hover, .toolbar button[aria-expanded="true"] { background: var(--wa-base); color: #fff; box-shadow: none; }
-@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .toolbar[data-surface="blur"] :is(a, button) { background: linear-gradient(135deg,#fffaf21c,#fffaf206),color-mix(in srgb,var(--wa-base) 64%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur,16px)) saturate(110%); backdrop-filter: blur(var(--wa-blur,16px)) saturate(110%); }
-  .toolbar[data-surface="blur-color"] :is(a, button) { background: linear-gradient(145deg,color-mix(in srgb,var(--wa-tint) 24%,transparent),transparent 70%),color-mix(in srgb,var(--wa-base) 76%,transparent); -webkit-backdrop-filter: blur(var(--wa-blur-color,24px)); backdrop-filter: blur(var(--wa-blur-color,24px)); }
-}
+.toolbar a, .toolbar button, .toolbar .back { position: relative; display: grid; flex-shrink: 0; place-items: center; width: 52px; height: 52px; padding: 0; border: 0; border-radius: 50%; background: #191919; color: #fff; box-shadow: none; }
+.toolbar a:hover, .toolbar button:hover, .toolbar button[aria-expanded="true"] { background: #292929; color: #fff; box-shadow: none; }
 .toolbar svg { width: 23px; height: 23px; color: inherit; }
-.toolbar button:disabled { opacity: .4; color: #9ca3af; cursor: not-allowed; filter: grayscale(1); }
+.toolbar button:disabled { opacity: .65; color: #fff; cursor: not-allowed; }
 .toolbar .toolbarSave:not(:disabled) { outline: 2px solid var(--orange); outline-offset: 3px; }
-.toolbar[data-surface="glass"] :is(a, button) { background: color-mix(in srgb,var(--wa-base) 88%,transparent); box-shadow: 0 4px 14px #00000018; }
-@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .toolbar[data-surface="glass"] :is(a, button) { background: var(--wa-glass-background); -webkit-backdrop-filter: var(--wa-glass-filter); backdrop-filter: var(--wa-glass-filter); }
-}
 
 .sectionMedia { display: none; }
 @media (min-width: 1021px) {
@@ -123,7 +115,7 @@
   .toolbar { top: 50%; right: 20px; left: auto; flex-direction: column; align-items: center; justify-content: flex-start; gap: 24px; width: 52px; min-height: 0; max-height: calc(100svh - 40px); padding: 0; overflow: visible; transform: translateY(-50%); border: 0; border-radius: 0; background: transparent; box-shadow: none; }
   .toolbar :is(a, button):focus-visible { outline-color: #fff; outline-offset: -3px; }
   .toolbar p { display: none; }
-  .back span, .tools span { position: absolute; top: 50%; right: calc(100% + 12px); width: max-content; height: auto; padding: 8px 12px; overflow: visible; clip-path: none; transform: translateY(-50%); border-radius: 10px; background: var(--wa-base); color: #fff; font-size: 12px; line-height: 1.4; white-space: nowrap; box-shadow: 0 4px 16px #0002; opacity: 0; visibility: hidden; pointer-events: none; }
+  .back span, .tools span { position: absolute; top: 50%; right: calc(100% + 12px); width: max-content; height: auto; padding: 8px 12px; overflow: visible; clip-path: none; transform: translateY(-50%); border-radius: 10px; background: #191919; color: #fff; font-size: 12px; line-height: 1.4; white-space: nowrap; box-shadow: 0 4px 16px #0002; opacity: 0; visibility: hidden; pointer-events: none; }
   .toolbar :is(a, button):is(:hover, :focus-visible) > span { opacity: 1; visibility: visible; }
   .tools { flex-direction: column; gap: 12px; }
 }
@@ -137,7 +129,7 @@
   .toolbar :is(a,button):focus-visible { outline-color: #fff; outline-offset: -3px; }
   .toolbar p { display: none; }
   .tools { flex-direction: column; gap: 6px; }
-  .back span, .tools span { position: absolute; z-index: 1; top: 50%; left: calc(100% + 8px); right: auto; transform: translateY(-50%); width: max-content; max-width: calc(100vw - 80px); padding: 8px 12px; border-radius: 10px; background: var(--wa-base); color: #fff; font-size: 12px; line-height: 1.4; white-space: nowrap; opacity: 0; visibility: hidden; pointer-events: none; }
+  .back span, .tools span { position: absolute; z-index: 1; top: 50%; left: calc(100% + 8px); right: auto; transform: translateY(-50%); width: max-content; max-width: calc(100vw - 80px); padding: 8px 12px; border-radius: 10px; background: #191919; color: #fff; font-size: 12px; line-height: 1.4; white-space: nowrap; opacity: 0; visibility: hidden; pointer-events: none; }
   .toolbar :is(a,button):is(:hover,:focus-visible) > span { opacity: 1; visibility: visible; }
 }
 @media (max-width: 460px) {
@@ -205,3 +197,21 @@
 /* Reserve the space used by block actions even when six buttons wrap on narrow blocks. */
 .workspace :global(.wa-panel[data-editable]):has(> :global(.wa-edit-actions) > :global(.wa-edit-margin)) { padding-top: 16px; }
 .workspace :global(.wa-panel) > :global(.wa-edit-actions):has(> :global(.wa-edit-margin)) { position: relative; top: auto; right: auto; width: 100%; max-width: none; margin-bottom: 20px; }
+
+.workspace :global(.wa-edit-more), .workspace :global(.wa-edit-mobile-photo) { display: none; }
+@media (max-width: 600px) {
+  .workspace :global(.wa-edit-actions) > :global(.wa-edit-button):not([data-mobile-primary]) { display: none; }
+  .workspace :global(.wa-edit-more), .workspace :global(.wa-edit-mobile-photo) { display: inline-flex; }
+  .workspace :global([data-editable]) > :global(.wa-edit-actions) { position: relative; top: auto; right: auto; display: flex; flex-wrap: nowrap; width: 100%; max-width: none; margin: 0 0 16px; opacity: 1; pointer-events: auto; }
+  .workspace :global([data-editable]) > :global(.wa-edit-photo-actions) { display: none; }
+  .workspace :global(.wa-cover-heading[data-editable]), .workspace :global(.wa-intro) :global(.wa-cover-heading[data-editable]) { --wa-cover-editor-top: 16px; --wa-cover-editor-bottom: 16px; padding: 16px; }
+  .workspace :global(.wa-panel[data-editable]):has(> :global(.wa-edit-actions)), .workspace :global(.wa-footer[data-editable]) { padding-top: 16px; }
+  .dialog { inset: auto 0 0; width: 100%; max-width: 100%; max-height: calc(100dvh - max(16px,env(safe-area-inset-top))); margin: 0; overflow: hidden; border-radius: 22px 22px 0 0; border-bottom: 0; }
+  .dialog > form { display: flex; flex-direction: column; max-height: calc(100dvh - max(16px,env(safe-area-inset-top)) - 1px); }
+  .dialogHeader { position: static; flex-shrink: 0; padding: 16px; }
+  .dialogHeading { min-width: 0; }
+  .dialogHeader h2 { font-size: 19px; }
+  .dialogBody { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px; }
+  .dialogFooter { position: static; flex-shrink: 0; padding: 12px 16px max(12px,env(safe-area-inset-bottom)); }
+  .dialogFooter button { min-width: 0; white-space: normal; }
+}

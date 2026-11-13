@@ -244,7 +244,8 @@ test('preview section picker lists disabled supported blocks only and is exhaust
 
 test('every occasion offers the same optional block catalog without enabling extra blocks by default',()=>{
  const {guidedSections,guidedContentSectionIds,availableGuidedSections}=setup();
- const catalog=['cover','countdown','location','story','ceremony','program','parents','dress_code','gifts','gallery','rsvp','music','custom','closing'];
+ // The existing editor keeps confirmations just before the closing block.
+ const catalog=['cover','countdown','location','story','ceremony','program','parents','dress_code','gifts','gallery','music','custom','rsvp','closing'];
  for(const eventType of ['wedding','birthday','graduation','baby_shower','anniversary','other']) {
   const sections=guidedSections(eventType);
   assert.deepEqual(sections.map(section=>section.type),catalog);

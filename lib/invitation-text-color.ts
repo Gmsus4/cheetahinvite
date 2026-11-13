@@ -7,7 +7,7 @@ export { isInvitationTextColor, isInvitationTextColorMode, type InvitationTextCo
 export const sectionTextColorOptions = [
   { value: "auto", label: "Por defecto (blanco)" },
   { value: "white", label: "Blanco" }, { value: "black", label: "Negro" },
-  { value: "palette", label: "De la paleta" }, { value: "opposite", label: "Contraste de paleta" },
+  { value: "palette", label: "De la paleta" },
   { value: "custom", label: "Personalizado" },
 ] as const;
 

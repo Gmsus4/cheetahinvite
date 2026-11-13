@@ -12,3 +12,30 @@ export function isInvitationImagePalette(value: unknown): value is InvitationIma
 export function imagePaletteColors(palette: InvitationImagePalette) {
   return [palette.light, palette.dark, ...palette.accents];
 }
+
+export const imagePaletteTargets = ["palette:light", "palette:dark", "palette:accent-1", "palette:accent-2", "palette:accent-3"] as const;
+export type InvitationPaletteTarget = typeof imagePaletteTargets[number];
+
+export function isInvitationPaletteTarget(value: unknown): value is InvitationPaletteTarget {
+  return typeof value === "string" && (imagePaletteTargets as readonly string[]).includes(value);
+}
+
+export function isInvitationSectionColor(value: unknown): value is string {
+  return value === "auto" || isInvitationPaletteTarget(value)
+    || (typeof value === "string" && /^(?:custom:)?#[0-9a-f]{6}$/i.test(value));
+}
+
+/** Recognize older saved swatches while keeping explicit custom colors fixed. */
+export function invitationSectionPaletteTarget(value?: string, palette?: unknown): InvitationPaletteTarget | undefined {
+  if (isInvitationPaletteTarget(value)) return value;
+  if (!value || !/^#[0-9a-f]{6}$/i.test(value) || !isInvitationImagePalette(palette)) return;
+  const index = imagePaletteColors(palette).findIndex(color => color.toLowerCase() === value.toLowerCase());
+  return index < 0 ? undefined : imagePaletteTargets[index];
+}
+
+export function resolveInvitationSectionColor(value?: string, palette?: unknown): string | undefined {
+  if (isInvitationPaletteTarget(value)) {
+    return isInvitationImagePalette(palette) ? imagePaletteColors(palette)[imagePaletteTargets.indexOf(value)] : undefined;
+  }
+  if (value && /^(?:custom:)?#[0-9a-f]{6}$/i.test(value)) return value.replace(/^custom:/i, "");
+}

@@ -1,0 +1,18 @@
+.tools { min-width: 0; font: 14px/1.5 var(--font-body), Arial, sans-serif; }
+.tools > p { margin: 0 0 16px; color: var(--muted); }
+.grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.grid button { display: flex; min-width: 0; align-items: center; gap: 10px; min-height: 64px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.grid button > span { display: grid; flex: 0 0 36px; place-items: center; height: 36px; border-radius: 50%; background: #191919; color: #fff; }
+.grid svg { width: 19px; height: 19px; }
+.grid button:hover { border-color: var(--orange); background: var(--accent-soft); }
+.tools button:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+.tools button:disabled { opacity: .5; cursor: not-allowed; }
+.visibility { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; margin-top: 16px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.visibility > svg { flex: 0 0 20px; width: 20px; height: 20px; }
+.visibility > strong { margin-left: auto; font-size: 12px; color: var(--muted); }
+.heading { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.heading > button { display: grid; flex: 0 0 44px; place-items: center; height: 44px; padding: 0; border: 0; border-radius: 50%; background: #191919; color: #fff; cursor: pointer; }
+.heading svg { width: 20px; height: 20px; }
+.heading h3 { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+.heading h3:focus { outline: 0; }
+@media(max-width:360px) { .grid button { flex-direction: column; align-items: flex-start; } }

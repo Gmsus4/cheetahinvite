@@ -26,6 +26,7 @@ export function PublicInvitationContent({ event }: { event: Omit<Event, "pinHash
       imagePalette={isInvitationImagePalette(event.imagePalette) ? event.imagePalette : null}
       textColorMode={isInvitationTextColorMode(event.textColorMode) ? event.textColorMode : "auto"}
       textColor={event.textColor}
+      sectionColor={event.sectionColor}
       accent={event.accent}
       typography={event.typography}
       bodyTypography={event.bodyTypography} blurIntensity={event.blurIntensity} panelStyle={isInvitationPanelStyle(event.panelStyle) ? event.panelStyle : "auto"}

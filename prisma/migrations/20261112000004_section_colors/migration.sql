@@ -1,0 +1,1 @@
+ALTER TABLE "Event" ADD COLUMN "sectionColor" TEXT NOT NULL DEFAULT 'auto';

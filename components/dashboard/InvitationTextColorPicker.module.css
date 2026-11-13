@@ -9,10 +9,6 @@
 .custom { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 16px; font-size: 12px; }
 .custom input { width: 48px; height: 44px; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); cursor: pointer; }
 .custom output { font-variant-numeric: tabular-nums; }
-.contrast { display: flex; align-items: flex-start; gap: 10px; margin-top: 16px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-size: 12px; line-height: 1.6; }
-.contrast > svg { flex-shrink: 0; margin-top: 3px; }
-.contrast p { margin: 4px 0 0; color: var(--muted); }
-.contrast[data-warning="true"] { border-color: var(--orange); background: var(--accent-soft); }
 .paletteTones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .paletteTones button { display: grid; gap: 5px; padding: 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; font-size: 10px; line-height: 1.5; cursor: pointer; }
 .paletteTones button[aria-pressed="true"] { outline: 2px solid var(--orange); }

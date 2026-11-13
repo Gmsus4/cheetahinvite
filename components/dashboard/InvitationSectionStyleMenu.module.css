@@ -12,11 +12,21 @@
 .colorSwatch { width: 22px; height: 22px; border: 1px solid #aaa; border-radius: 50%; }
 .customColor { display: flex; flex-direction: column; align-items: flex-start; overflow-wrap: anywhere; gap: 12px; max-width: 100%; padding: 10px; border-radius: 10px; background: #191919; color: #fff; font: 12px/1.5 var(--font-body), Arial, sans-serif; pointer-events: auto; }
 .customColor input { width: 44px; height: 44px; padding: 3px; border: 1px solid #777; border-radius: 8px; background: #191919; cursor: pointer; }
-.contrast { overflow-wrap: anywhere; width: min(240px,100%); margin: 0; padding: 10px; border-radius: 10px; background: #191919; color: #fff; font: 12px/1.6 var(--font-body), Arial, sans-serif; }
-.paletteTones { display: flex; flex-wrap: wrap; gap: 8px; width: min(240px,100%); padding: 4px; pointer-events: auto; }
-.paletteTones button { flex: 0 0 44px; width: 44px; height: 44px; border: 1px solid #888; border-radius: 50%; cursor: pointer; }
+.paletteTones { display: flex; flex-wrap: wrap; gap: 6px; width: min(240px,100%); padding: 4px; pointer-events: auto; }
+.paletteTones button { flex: 0 0 40px; width: 40px; height: 40px; border: 1px solid #888; border-radius: 50%; cursor: pointer; }
 .paletteTones button[aria-pressed="true"] { outline: 2px solid var(--orange); outline-offset: 2px; }
 .option > .droplet { position: absolute; right: 7px; bottom: 9px; width: 12px; height: 12px; padding: 1px; background: inherit; }
 .tooltip { position: absolute; top: 50%; left: calc(100% + 8px); width: max-content; max-width: var(--style-tooltip-width, 248px); padding: 7px 10px; transform: translateY(-50%); border-radius: 8px; background: #191919; color: #fff; font: 500 12px/1.4 var(--font-body), Arial, sans-serif; text-align: left; opacity: 0; visibility: hidden; pointer-events: none; }
 .option:is(:hover, :focus-visible) > .tooltip { opacity: 1; visibility: visible; }
 @media (prefers-reduced-motion: reduce) { .option { transition: none; } }
+
+/* Options embedded in the mobile tools sheet. */
+.inline { display: flex; min-width: 0; flex-wrap: wrap; align-items: stretch; gap: 10px; }
+.inline .option { display: flex; flex: 1 1 calc(50% - 10px); align-items: center; justify-content: flex-start; gap: 10px; width: auto; height: auto; min-height: 52px; padding: 12px; border-radius: 12px; }
+.inline .option > svg, .inline .colorSwatch { flex-shrink: 0; }
+.inline .tooltip { position: static; width: auto; max-width: none; min-width: 0; padding: 0; transform: none; background: transparent; color: inherit; font-size: 12px; opacity: 1; visibility: visible; white-space: normal; overflow-wrap: anywhere; }
+.inline .option > .droplet { display: none; }
+.inline .customColor { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; }
+.inline .paletteTones { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 8px; width: 100%; padding: 8px 3px; }
+.inline .paletteTones button { width: 100%; height: auto; min-height: 44px; aspect-ratio: 1; max-height: 64px; border-radius: 12px; }
+.locked { flex: 1 1 100%; margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); font: 13px/1.6 var(--font-body), Arial, sans-serif; }

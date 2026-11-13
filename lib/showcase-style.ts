@@ -38,6 +38,7 @@ export function showcaseStyleData(invitation: InvitationProps, previous?: EventD
   }
   return {
     templateId: sharedInvitationId, texture: "none",
+    sectionColor: invitation.sectionColor ?? "auto",
     imagePalette: invitation.imagePalette ? structuredClone(invitation.imagePalette) : undefined,
     textColorMode: invitation.textColorMode ?? "auto", textColor: invitation.textColor ?? "#FFFFFF",
     accent: invitation.accent, typography: invitation.typography ?? sharedInvitationDesign.typography,

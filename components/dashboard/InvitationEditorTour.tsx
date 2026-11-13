@@ -46,7 +46,7 @@ export function InvitationEditorTour({ ownerId, enabled, published, example, ret
       const { driver } = await import('driver.js');
       if (request !== generation.current || !enabledRef.current) return;
       const scrollY = window.scrollY;
-      const steps = invitationEditorTourSteps({ published, example, returnsToCreation, returnsToDashboard, allIncluded })
+      const steps = invitationEditorTourSteps({ published, example, returnsToCreation, returnsToDashboard, allIncluded, mobile: window.matchMedia("(max-width: 600px)").matches })
         .filter(step => typeof step.element === 'string' && root.querySelector(step.element))
         .map(step => ({ ...step, element: root.querySelector(step.element as string)! }));
       root.dataset.editorTourActive = 'true';

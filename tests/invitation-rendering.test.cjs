@@ -18,7 +18,7 @@ function loadComponents(hooks) {
     } }).outputText;
     function localRequire(name) {
       if (name.endsWith('.css')) return {};
-      if (name === 'react' && hooks) return { ...React, ...hooks };
+      if (name === 'react' && hooks) return { ...React, useCallback: callback => callback, ...hooks };
       if (!name.startsWith('@/') && !name.startsWith('.')) return require(name);
       const base = name.startsWith('@/') ? path.resolve(name.slice(2)) : path.resolve(path.dirname(full), name);
       const resolved = ['.tsx', '.ts', '.js'].map(ext => base + ext).find(fs.existsSync);
@@ -1061,44 +1061,30 @@ test('popover opening waits for native operations and coalesces pointer and focu
   }
 });
 
-test('global text color reaches invitations and the picker warns about low or unverified contrast', () => {
-  const load=loadComponents();
-  const {CelebrationInvitation}=load('components/invitation/CelebrationInvitation.tsx');
-  const {InvitationTextColorPicker}=load('components/dashboard/InvitationTextColorPicker.tsx');
-  const base={name:'Fiesta',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'',accent:'#58664E',sections:[]};
-  for(const [textColorMode,expected] of [['black','#000000'],['white','#FFFFFF'],['palette','#58664E'],['custom','#12AB34']]) {
-    const props={...base,textColorMode,textColor:'#12AB34'};
-    const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,props));
-    assert.ok(html.includes('--wa-ink:'+expected));
-    assert.ok(html.includes('--wa-soft:'+expected));
-    const picker=renderToStaticMarkup(React.createElement(InvitationTextColorPicker,{values:props,onChange(){}}));
-    assert.match(picker,/Color del texto/);
-    if(textColorMode==='black')assert.match(picker,/Contraste bajo/);
-    if(textColorMode==='white')assert.match(picker,/Buen contraste estimado/);
-    if(textColorMode==='custom')assert.match(picker,/type="color"/);
-  }
-  const pending=renderToStaticMarkup(React.createElement(InvitationTextColorPicker,{values:{...base,textColorMode:'white',backgroundImageUrl:'/photo.webp'},onChange(){}}));
-  assert.match(pending,/Analizando contraste de las fotos/);
-  assert.doesNotMatch(pending,/Buen contraste estimado/);
-  const hooks=loadComponents({useEffect(){},useId:()=> 'text-color',useState:value=>[value,()=>{}]});
-  const {InvitationTextColorPicker:Picker}=hooks('components/dashboard/InvitationTextColorPicker.tsx');
-  const changes=[];
-  const tree=Picker({values:base,onChange:patch=>changes.push(patch)});
-  tree.props.children[2].props.children.forEach(button=>button.props.onClick());
-  assert.deepEqual(changes,[{textColorMode:'auto'},{textColorMode:'black'},{textColorMode:'white'},{textColorMode:'palette'},{textColorMode:'opposite'},{textColorMode:'custom'}]);
+test('global text colors reach invitations while the picker offers only default, black, white and the image tones', () => {
+ const load=loadComponents();
+ const {CelebrationInvitation}=load('components/invitation/CelebrationInvitation.tsx');
+ const {InvitationTextColorPicker}=load('components/dashboard/InvitationTextColorPicker.tsx');
+ const base={name:'Fiesta',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'',accent:'#58664E',sections:[]};
+ for(const [textColorMode,expected] of [['black','#000000'],['white','#FFFFFF'],['palette','#58664E'],['custom','#12AB34']]) {
+  const props={...base,textColorMode,textColor:'#12AB34'};
+  const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,props));
+  assert.ok(html.includes('--wa-ink:'+expected));
+  assert.ok(html.includes('--wa-soft:'+expected));
+  const picker=renderToStaticMarkup(React.createElement(InvitationTextColorPicker,{values:props,onChange(){}}));
+  assert.match(picker,/Blanco \(Por defecto\)/);
+  assert.doesNotMatch(picker,/Contraste bajo|contraste estimado|type="color"|Personalizado/);
+ }
+ const changes=[];
+ const tree=InvitationTextColorPicker({values:base,onChange:patch=>changes.push(patch)});
+ tree.props.children[2].props.children[0].forEach(button=>button.props.onClick());
+ assert.deepEqual(changes,[{textColorMode:'auto'},{textColorMode:'black'},{textColorMode:'white'}]);
 });
 
-test('photo contrast warnings never claim success when sampling fails or a sampled region hides the text', () => {
-  const values={accent:'#58664E',textColorMode:'white',textColor:'#FFFFFF',backgroundImageUrl:'/background.webp',imageUrl:''};
-  for(const failed of [false,true]) {
-    const sample={key:JSON.stringify(['/background.webp','']),backgrounds:failed?[]:['#FFFFFF'],overlay:[],failed};
-    const load=loadComponents({useEffect(){},useId:()=> 'contrast',useState:()=>[sample,()=>{}]});
-    const {InvitationTextColorPicker}=load('components/dashboard/InvitationTextColorPicker.tsx');
-    const html=renderToStaticMarkup(React.createElement(InvitationTextColorPicker,{values,onChange(){}}));
-    assert.doesNotMatch(html,/Buen contraste estimado/);
-    if(failed)assert.match(html,/Contraste de la foto sin verificar/);
-    else assert.match(html,/Contraste bajo/);
-  }
+test('text color controls do not show contrast diagnostics for image backgrounds', () => {
+ const {InvitationTextColorPicker}=loadComponents()('components/dashboard/InvitationTextColorPicker.tsx');
+ const html=renderToStaticMarkup(React.createElement(InvitationTextColorPicker,{values:{textColorMode:'white',backgroundImageUrl:'/background.webp'},onChange(){}}));
+ assert.doesNotMatch(html,/Contraste|contraste|4.5:1/);
 });
 
 test('per-section text colors render independently across all blocks and global settings override without erasing them', () => {
@@ -1121,11 +1107,11 @@ test('per-section text colors render independently across all blocks and global 
     const [trigger,panel]=menu.props.children;
     assert.equal(trigger.props.disabled,globalMode!=='auto');
     const options=panel.props.children[0];
-    assert.equal(options.length,6);
+    assert.equal(options.length,5);
     options.forEach(option=>option.props.onClick());
     if(globalMode==='auto') {
-      assert.deepEqual(changes.map(change=>change.textColorMode),['auto','white','black','palette','opposite','custom']);
-      const custom=panel.props.children[1];
+      assert.deepEqual(changes.map(change=>change.textColorMode),['auto','white','black','palette','custom']);
+      const custom=panel.props.children.find(child=>child?.type==='label');
       const input=custom.props.children[1];
       input.props.onChange({target:{value:'#112233'}});
       assert.deepEqual(changes.at(-1),{textColor:'#112233'});
@@ -1141,18 +1127,19 @@ test('the five extracted tones are selectable for both the background and text w
   const load=loadComponents({useEffect(){},useState:value=>[value,()=>{}],useRef:value=>({current:value}),useId:()=> 'palette-tones'});
   const {InvitationPalettePicker}=load('components/dashboard/InvitationPalettePicker.tsx');
   const {InvitationTextColorPicker}=load('components/dashboard/InvitationTextColorPicker.tsx');
+  const {imagePaletteTargets}=load('lib/invitation-image-palette.ts');
   const changes=[];
   const picker=InvitationPalettePicker({palettes:[],accent:palette.light,imagePalette:palette,onChange:(...args)=>changes.push(args)});
-  const colors=picker.props.children[5].props.children[2].props.children;
+  const colors=picker.props.children[5].props.children[3].props.children;
   assert.equal(colors.length,5);
   colors.forEach(button=>button.props.onClick());
-  assert.deepEqual(changes.map(([accent])=>accent),[palette.light,palette.dark,...palette.accents]);
+  assert.deepEqual(changes.map(([, ,sectionColor])=>sectionColor),imagePaletteTargets);
   assert.ok(changes.every(([,data])=>data===palette));
   picker.props.children[2].props.children[0].props.children[0].props.onChange();
   assert.equal(changes.at(-1)[1],null);
   const updates=[];
   const text=InvitationTextColorPicker({values:{accent:palette.light,imagePalette:palette,textColorMode:'palette',imageUrl:''},onChange:patch=>updates.push(patch)});
-  const textTones=text.props.children[4].props.children;
+  const textTones=text.props.children[2].props.children[1];
   assert.equal(textTones.length,5);
   textTones.forEach(button=>button.props.onClick());
   assert.deepEqual(updates.map(patch=>patch.textColor),[palette.light,palette.dark,...palette.accents]);
@@ -1163,4 +1150,127 @@ test('the five extracted tones are selectable for both the background and text w
   const {CelebrationInvitation}=loadComponents()('components/invitation/CelebrationInvitation.tsx');
   const invitation=renderToStaticMarkup(React.createElement(CelebrationInvitation,{name:'Fiesta',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'',sections:[],accent:palette.light,imagePalette:palette,textColorMode:'opposite'}));
   assert.ok(invitation.includes('--wa-base:'+palette.light));assert.ok(invitation.includes('--wa-ink:'+palette.dark));
+});
+
+
+test('each block exposes an independent palette control and global block color locks it',()=>{
+ const palette={light:'#F2E7C4',dark:'#593203',accents:['#F28A2E','#F26E22','#F2B950']};
+ const load=loadComponents({useEffect(){},useLayoutEffect(){},useId:()=> 'block-color',useRef:value=>({current:value}),useState:value=>[value,()=>{}]});
+ const {InvitationSectionStyleMenu}=load('components/dashboard/InvitationSectionStyleMenu.tsx');
+ const {imagePaletteTargets}=load('lib/invitation-image-palette.ts');
+ const section={id:'only-this-block',type:'custom',title:'Mi bloque',sectionColor:palette.dark};
+ for(const sectionColor of ['auto',palette.light]) {
+  const changes=[];
+  const tree=InvitationSectionStyleMenu({section,label:'Color del bloque',values:{accent:palette.accents[0],sectionColor,imagePalette:palette},disabled:false,mode:'background-color',onChange:patch=>changes.push(patch)});
+  const [trigger,panel]=tree.props.children;
+  assert.equal(trigger.props.disabled,sectionColor!=='auto');
+  const options=panel.props.children[0];
+  assert.deepEqual(options.map(option=>option.props['aria-label']),['Por defecto','Mostrar la paleta de colores','Personalizado']);
+  const tones=panel.props.children.find(child=>child?.props?.['aria-label']==='Paleta de colores para Mi bloque').props.children;
+  assert.equal(tones.length,5);
+  tones.forEach(tone=>tone.props.onClick());
+  assert.deepEqual(changes,sectionColor==='auto'?imagePaletteTargets.map(sectionColor=>({sectionColor})):[]);
+  assert.equal(section.sectionColor,palette.dark);
+ }
+ const {CelebrationInvitation}=loadComponents()('components/invitation/CelebrationInvitation.tsx');
+ const sections=['cover','countdown','location','custom','closing'].map(type=>({id:type,type,title:type,content:'Contenido',detail:'',link:'',imageUrl:'',enabled:true,sectionColor:palette.light}));
+ const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,{name:'Fiesta',hostNames:'Alex',date:'',eventDateKey:'2027-01-01',venue:'Jardín',address:'',message:'',imageUrl:'',sections,accent:palette.dark,onEdit(){},renderBackgroundColorControl:section=>React.createElement('button',{'data-block-color':section.id})}));
+ for(const section of sections) assert.ok(html.includes('data-block-color="'+section.id+'"'));
+ assert.match(html,/class="wa-intro" style="[^"]*--wa-base:#F2E7C4/);
+ assert.match(html,/class="wa-section-row" style="[^"]*--wa-base:#F2E7C4/);
+});
+
+
+test('mobile tools open inline options, update only their block and keep the cover visible',()=>{
+ const previousFrame=global.requestAnimationFrame;
+ global.requestAnimationFrame=callback=>{callback();return 1;};
+ try {
+  const nodes=node=>Array.isArray(node)?node.flatMap(nodes):node?.props?[node,...nodes(node.props.children)]:[];
+  const section={id:'only-this-block',type:'custom',title:'Mi bloque',enabled:true};
+  const modes=[];const changes=[];
+  const load=loadComponents({useState:value=>[value,value=>modes.push(value)],useRef:value=>({current:value})});
+  const {InvitationBlockTools}=load('components/dashboard/InvitationBlockTools.tsx');
+  const buttons=nodes(InvitationBlockTools({section,values:{},disabled:false,onChange:patch=>changes.push(patch)})).filter(node=>node.type==='button');
+  assert.equal(buttons.length,7);
+  buttons.filter(node=>node.props.role!=='switch').forEach(button=>button.props.onClick());
+  assert.deepEqual(modes,['style','alignment','background-color','text-color','text-margin','photo-margin']);
+  buttons.find(node=>node.props.role==='switch').props.onClick();
+  assert.deepEqual(changes,[{enabled:false}]);assert.equal(section.enabled,true);
+  const cover=nodes(InvitationBlockTools({section:{...section,type:'cover'},values:{},disabled:false,onChange(){}}));
+  assert.equal(cover.some(node=>node.props.role==='switch'),false);
+  for(const mode of modes) {
+   const active=loadComponents({useState:()=>[mode,()=>{}],useRef:value=>({current:value})});
+   const {InvitationBlockTools:Tools}=active('components/dashboard/InvitationBlockTools.tsx');
+   const tree=nodes(Tools({section,values:{},disabled:false,onChange:patch=>changes.push(patch)}));
+   const inline=tree.find(node=>node.props.inline===true);
+   assert.equal(inline.props.mode,mode);
+   inline.props.onChange({textAlign:'right'});
+   assert.deepEqual(changes.at(-1),{textAlign:'right'});
+   assert.ok(tree.some(node=>node.props['aria-label']==='Volver a las herramientas'));
+  }
+ } finally {if(previousFrame===undefined)delete global.requestAnimationFrame;else global.requestAnimationFrame=previousFrame;}
+});
+
+test('mobile inline color options keep all five palette choices and respect the global lock',()=>{
+ const load=loadComponents({useEffect(){},useLayoutEffect(){},useId:()=> 'inline-tools',useRef:value=>({current:value}),useState:value=>[value,()=>{}]});
+ const {InvitationSectionStyleMenu}=load('components/dashboard/InvitationSectionStyleMenu.tsx');
+ const {imagePaletteTargets}=load('lib/invitation-image-palette.ts');
+ const palette={light:'#F2E7C4',dark:'#593203',accents:['#F28A2E','#F26E22','#F2B950']};
+ const nodes=node=>Array.isArray(node)?node.flatMap(nodes):node?.props?[node,...nodes(node.props.children)]:[];
+ const section={id:'custom',type:'custom',title:'Mi bloque',sectionColor:palette.light};
+ for(const sectionColor of ['auto',palette.dark]) {
+  const changes=[];
+  const tree=InvitationSectionStyleMenu({inline:true,mode:'background-color',section,label:'Color del bloque',values:{sectionColor,imagePalette:palette},disabled:false,onChange:patch=>changes.push(patch)});
+  assert.equal(tree.props.popover,undefined);
+  const all=nodes(tree);
+  const tones=all.find(node=>node.props['aria-label']==='Paleta de colores para Mi bloque').props.children;
+  assert.equal(tones.length,5);tones.forEach(button=>button.props.onClick());
+  assert.equal(all.some(node=>node.props.role==='status'),sectionColor!=='auto');
+  assert.deepEqual(changes,sectionColor==='auto'?imagePaletteTargets.map(sectionColor=>({sectionColor})):[]);
+ }
+});
+
+
+test('block background selection stays in the palette after its target changes color',()=>{
+ const load=loadComponents({useEffect(){},useLayoutEffect(){},useId:()=> 'following-tone',useRef:value=>({current:value}),useState:value=>[value,()=>{}]});
+ const {InvitationSectionStyleMenu}=load('components/dashboard/InvitationSectionStyleMenu.tsx');
+ const {imagePaletteTargets}=load('lib/invitation-image-palette.ts');
+ const first={light:'#F2E7C4',dark:'#593203',accents:['#F2B950','#F28A2E','#F26E22']};
+ const second={light:'#e7f1fa',dark:'#123458',accents:['#8fbfea','#5084c2','#acdcf0']};
+ const nodes=node=>Array.isArray(node)?node.flatMap(nodes):node?.props?[node,...nodes(node.props.children)]:[];
+ for(const [index,target] of imagePaletteTargets.entries()) {
+  const changes=[];
+  let section={id:'custom',type:'custom',title:'Mi bloque',sectionColor:target};
+  for(const imagePalette of [first,second]) {
+   const menu=InvitationSectionStyleMenu({inline:true,mode:'background-color',section,label:'Color',values:{sectionColor:'auto',imagePalette},disabled:false,onChange:patch=>changes.push(patch)});
+   const all=nodes(menu);
+   assert.equal(all.find(node=>node.props['aria-label']==='Mostrar la paleta de colores').props['aria-pressed'],true);
+   assert.equal(all.find(node=>node.props['aria-label']==='Personalizado').props['aria-pressed'],false);
+   const tones=all.find(node=>node.props['aria-label']==='Paleta de colores para Mi bloque').props.children;
+   tones.forEach((button,tone)=>assert.equal(button.props['aria-pressed'],tone===index));
+   tones[index].props.onClick();
+   assert.deepEqual(changes.at(-1),{sectionColor:target});
+  }
+  section={...section,sectionColor:'custom:'+first.light};
+  const custom=nodes(InvitationSectionStyleMenu({inline:true,mode:'background-color',section,label:'Color',values:{sectionColor:'auto',imagePalette:first},disabled:false,onChange:patch=>changes.push(patch)}));
+  assert.equal(custom.find(node=>node.props['aria-label']==='Personalizado').props['aria-pressed'],true);
+  const input=custom.find(node=>node.type==='input');
+  assert.equal(input.props.value,first.light);
+  input.props.onChange({target:{value:second.light}});
+  assert.deepEqual(changes.at(-1),{sectionColor:'custom:'+second.light});
+ }
+});
+
+
+test('cover content exposes its resolved finish alongside independent width settings',()=>{
+ const {CelebrationInvitation}=loadComponents()('components/invitation/CelebrationInvitation.tsx');
+ const base={name:'Fiesta',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'/cover.webp',accent:'#58664E'};
+ for(const coverLayout of ['split','split-reverse','stacked','overlay']) for(const panelStyle of ['auto','blur','blur-color','color','glass','none']) for(const textMargin of ['default','wide','none']) {
+  const cover={id:'cover',type:'cover',title:'Portada',content:'',detail:'',link:'',imageUrl:'',enabled:true,panelStyle:'glass',textMargin,photoMargin:'wide'};
+  const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,{...base,coverLayout,panelStyle,sections:[cover]}));
+  const heading=html.match(/<div class="wa-cover-heading"[^>]*>/)[0];
+  assert.ok(heading.includes('data-margin="'+textMargin+'"'));
+  assert.ok(heading.includes('data-content-surface="'+(panelStyle==='auto'?'glass':panelStyle)+'"'));
+  assert.match(html,/class="wa-portrait" data-photo-margin="wide"/);
+ }
 });

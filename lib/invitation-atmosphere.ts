@@ -1,5 +1,6 @@
 import { invitationTextColor, isGlobalTextColorLocked } from "./invitation-text-color";
 import { isInvitationBlurIntensity, isInvitationSectionCorners } from "./invitation-editor";
+import { resolveInvitationSectionColor } from "./invitation-image-palette";
 import type { CSSProperties } from "react";
 import type { InviteSection, InvitationPanelStyle } from "./invitation-editor";
 import { getInvitationFont } from "./invitation-fonts";
@@ -42,11 +43,14 @@ export function atmosphereStyle(accent: string, fonts?: { imagePalette?: unknown
   } as CSSProperties;
 }
 
-export function atmosphereTextStyle(accent: string, global: { imagePalette?: unknown; textColorMode?: string; textColor?: string }, section?: Pick<InviteSection, "textColorMode" | "textColor">): CSSProperties {
+export function atmosphereTextStyle(accent: string, global: { sectionColor?: string; imagePalette?: unknown; textColorMode?: string; textColor?: string }, section?: Pick<InviteSection, "sectionColor" | "textColorMode" | "textColor">): CSSProperties {
   const selected = isGlobalTextColorLocked(global.textColorMode) ? global : section;
   const ink = invitationTextColor(accent, selected?.textColorMode, selected?.textColor, global.imagePalette);
   const soft = !selected?.textColorMode || selected.textColorMode === "auto" ? "#eee7dc" : ink;
-  return { color: ink, "--wa-ink": ink, "--wa-soft": soft, "--invite-ink": ink, "--invite-action": ink, "--invite-accent": soft, "--invite-muted": soft } as CSSProperties;
+  const blockSelection = global.sectionColor && global.sectionColor !== "auto" ? global.sectionColor : section?.sectionColor;
+  const blockColor = resolveInvitationSectionColor(blockSelection, global.imagePalette);
+  const background: Record<string, string> = blockColor ? { "--wa-base": blockColor, "--wa-tint": blockColor, "--wa-block-color": blockColor } : {};
+  return { ...background, color: ink, "--wa-ink": ink, "--wa-soft": soft, "--invite-ink": ink, "--invite-action": ink, "--invite-accent": soft, "--invite-muted": soft } as CSSProperties;
 }
 
 export function atmosphereTime(time = "") {

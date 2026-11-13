@@ -11,7 +11,7 @@ function fixture({ storageBlocked = false, mobile = false, missingPhoto = false 
   const slots = [], effects = [], cleanups = [], records = new Map(), calls = [];
   let cursor = 0, effectCursor = 0, driverConfig, focused = 0, loadingFailure = false;
   const listeners = new Map();
-  const root = { dataset: {}, querySelector: selector => missingPhoto && selector.includes('cover-photo') ? null : ({ selector }) };
+  const root = { dataset: {}, querySelector: selector => missingPhoto && (selector.includes('cover-photo') || selector.includes('block-photo')) ? null : ({ selector }) };
   const trigger = { closest: () => root, focus: () => focused++ };
   const window = {
     scrollY: 130, innerHeight: 640, scrollTo: position => calls.push(['restore', position]), scrollBy: position => calls.push(['scroll', position]),
@@ -102,7 +102,9 @@ test('welcome appears once per account, manual help replays the tour, and closin
 test('mobile keeps the target above the bottom card and skips missing targets', async t => {
   const f = fixture({ mobile: true, missingPhoto: true }); t.after(() => f.cleanup());
   f.render().help.props.onClick(); await flush();
-  assert.equal(f.config.steps.length, 12);
+  assert.equal(f.config.steps.length, 10);
+  assert.ok(f.config.steps.some(step=>step.element?.selector==='[data-tour="block-more"]'));
+  assert.ok(!f.config.steps.some(step=>/block-style|block-alignment|block-visibility/.test(step.element?.selector)));
   f.config.onHighlighted({ closest: () => null, getBoundingClientRect: () => ({ top: 300, bottom: 380 }) });
   assert.deepEqual(f.calls.at(-1), ['scroll', { top: 46, behavior: 'instant' }]);
   let scrolled = false;

@@ -18,6 +18,7 @@ import { EditorProtectedLink } from "./EditorProtectedLink";
 import { EditorRecoveryDialog } from "./EditorRecoveryDialog";
 import { InvitationFontSelect } from "./InvitationFontSelect";
 import { InvitationTextColorPicker } from "./InvitationTextColorPicker";
+import { invitationPaletteChanges } from "@/lib/invitation-palette-selection";
 import { InvitationPalettePicker } from "./InvitationPalettePicker";
 import { SectionFields, SectionTextAlignmentFields, SectionPhotoFields, SectionSurfaceFields } from "./InvitationSectionFields";
 import { InvitationIconsPicker } from "./InvitationIconsPicker";
@@ -27,6 +28,7 @@ import { InvitationSurfacePicker } from "./InvitationSurfacePicker";
 import { InvitationBackgroundBlurControl } from "./InvitationBackgroundBlurControl";
 import { InvitationBackgroundDimControl } from "./InvitationBackgroundDimControl";
 import { InvitationCoverLayoutPicker } from "./InvitationCoverLayoutPicker";
+import { InvitationBlockTools } from "./InvitationBlockTools";
 import { InvitationSectionStyleMenu } from "./InvitationSectionStyleMenu";
 import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
 import { useEditorProtection } from "./useEditorProtection";
@@ -138,6 +140,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
     </nav>
     <CelebrationInvitation {...values} date={date} eventDateKey={values.eventDate} onEdit={open}
       renderStyleControl={(item, styleLabel) => <InvitationSectionStyleMenu section={item} label={styleLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
+      renderBackgroundColorControl={(item, colorLabel) => <InvitationSectionStyleMenu mode="background-color" section={item} label={colorLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
       renderTextColorControl={(item, colorLabel) => <InvitationSectionStyleMenu mode="text-color" section={item} label={colorLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
       renderMarginControl={(item, marginLabel, photo) => <InvitationSectionStyleMenu mode={photo ? "photo-margin" : "text-margin"} section={item} label={marginLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
       renderAlignmentControl={(item, alignmentLabel) => <InvitationSectionStyleMenu mode="alignment" section={item} label={alignmentLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
@@ -193,7 +196,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
             <InvitationCornersPicker value={values.sectionCorners} onChange={sectionCorners => patch({ sectionCorners })} />
           </AppearanceGroup>
           <AppearanceGroup title="Color y tipografía" description="El color de tu celebración y sus letras" icon={<FiType />} >
-            <InvitationPalettePicker palettes={sharedInvitationDesign.palettes} imagePalette={values.imagePalette} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={(accent, imagePalette) => patch({ accent, imagePalette: imagePalette ?? null })} />
+            <InvitationPalettePicker palettes={sharedInvitationDesign.palettes} imagePalette={values.imagePalette} sectionColor={values.sectionColor} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={(accent, imagePalette, sectionColor) => setValues(current => ({ ...current, ...invitationPaletteChanges(current, accent, imagePalette ?? null, sectionColor) }))} />
             <InvitationTextColorPicker values={values} onChange={patch} />
           <InvitationFontSelect role="heading" eventType={values.eventType} value={values.typography} onChange={typography => patch({ typography })} />
           <InvitationFontSelect role="body" eventType={values.eventType} value={values.bodyTypography} onChange={bodyTypography => patch({ bodyTypography })} />
@@ -214,6 +217,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
         </>}
         {section && target.kind === "section-photo-margin" && <InvitationSectionMarginPicker section={section} scope="photo" onChange={changeSection} />}
         {section && target.kind === "section-margin" && <InvitationSectionMarginPicker section={section} scope="text" onChange={changeSection} />}
+        {section && target.kind === "section-tools" && <InvitationBlockTools section={section} values={values} disabled={busy} onChange={changeSection} />}
         {section && target.kind === "section-alignment" && <SectionTextAlignmentFields section={section} onChange={changeSection} />}
       </fieldset>
       {state.error && <div className={styles.error} role="alert"><p>{state.error}</p>
@@ -231,6 +235,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
 }
 
 function editLabel(target: InvitationEditTarget, section?: InviteSection) {
+  if (target.kind === "section-tools") return `Herramientas de ${section?.title || "la sección"}`;
   if (target.kind === "section") return section ? invitationSectionLabels[section.type] : "Sección";
   if (target.kind === "section-photo") return `${section?.type === "gallery" ? "Fotos" : "Foto"} de ${section?.title || "la sección"}`;
   if (target.kind === "section-surface") return `Estilo de ${section?.title || "la sección"}`;
