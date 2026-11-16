@@ -170,7 +170,7 @@ function AtmosphereSection({ section, eventId, surface, onEdit, renderStyleContr
     <Image src={sectionPhoto} alt={`Foto que acompaña ${section.title}`} width={1200} height={800} sizes="(max-width:600px) calc(100vw - 24px), 560px" unoptimized />
   </figure> : null;
   const url = locationDetails ? invitationLocationUrl(locationDetails.venue, locationDetails.address, section.link) : invitationSectionUrl(section.type, section.link);
-  const media = (photo || images.length > 0) ? <div className="wa-section-media" data-photo-margin={section.photoMargin ?? section.margin} data-mobile-image-focus={section.mobileImageFocus} data-desktop-image-focus={section.desktopImageFocus} data-editable={Boolean(onEdit) || undefined}>
+  const media = (photo || images.length > 0) ? <div className="wa-section-media" data-invitation-field={section.id + "-photo"} data-photo-margin={section.photoMargin ?? section.margin} data-mobile-image-focus={section.mobileImageFocus} data-desktop-image-focus={section.desktopImageFocus} data-editable={Boolean(onEdit) || undefined}>
     <PhotoControls section={section} target={{ kind: "section-photo", sectionId: section.id }} label={`${photoLabel} de ${section.title}`} text={`Editar ${photoLabel}`} onEdit={onEdit} renderMarginControl={renderMarginControl} />
     {photo}
     {images.length > 0 && (section.type === "gallery" ? <InvitationPhotoCarousel images={images} title={section.title} /> : <div className="wa-photo-grid">{images.map((src, index) => <figure key={`${src}-${index}`}><Image src={src} alt={`${section.title} · fotografía ${index + 1}`} width={800} height={1000} sizes="(max-width:600px) 88vw, 500px" unoptimized /></figure>)}</div>)}

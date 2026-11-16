@@ -91,66 +91,32 @@ function setup(step = 5, { creation = true, published = false, exampleId, exampl
   };
 }
 
-test('design step saves before opening /show and adopts its saved design on return without leaving /crear', async t => {
-  const h = setup(); t.after(() => h.stop());
-  let ui = h.render();
-  assert.ok(ui.find(n => n.props['aria-label'] === 'Editar diseño en una nueva pestaña'));
-  assert.equal(ui.find(n => hasClass(n, 'guided-review')), undefined);
-  ui.find(n => n.props['aria-label'] === 'Editar diseño en una nueva pestaña').props.onClick(); await h.flush();
-  assert.equal(h.calls, 1);
-  assert.match(h.tab.location.href, /\/show\?preview=/);
-  assert.equal(h.redirects.some(href => href.includes('/show')), false);
-  assert.equal(h.states[1], 5);
-  h.render();
-  const { invitationPreviewKey, parseInvitationPreview, storeInvitationPreview } = createFixture().load('lib/invitation-preview.ts');
-  const token = new URL(h.tab.location.href, 'http://localhost').searchParams.get('preview');
-  const key = invitationPreviewKey(h.event.ownerId, h.event.id, token);
-  const record = parseInvitationPreview(h.window.localStorage.getItem(key), h.event.ownerId, h.event.id);
-  assert.equal(record.creationFlow, true);
-  storeInvitationPreview(h.window.localStorage, { ...record, saved: true, version: 2, snapshot: JSON.stringify({ ...h.values, name: 'Editada visualmente', accent: '#123456' }) }, token);
-  h.tab.closed = true; h.intervals.at(-1)();
-  ui = h.render();
-  assert.equal(h.states[0].name, 'Editada visualmente');
-  assert.equal(h.states[0].accent, '#123456');
-  assert.equal(h.states[0].privacy, 'PUBLIC');
-  assert.equal(h.controller.getVersion(), 2);
-  assert.equal(h.controller.shouldWarn(), false);
-  assert.equal(h.states[1], 5);
-  assert.equal(ui.find(n => hasClass(n, 'guided-review')), undefined);
-  assert.ok(ui.find(n => n.props['aria-label'] === 'Revisar y publicar'));
-  ui.submit(); ui = h.render();
-  assert.equal(h.states[1], 6);
-  assert.ok(ui.find(n => hasClass(n, 'guided-review')));
-  assert.equal(ui.find(n => n.props.className === 'reviewTools'), undefined);
-  assert.equal(ui.find(n => n.props['aria-label'] === 'Ajustar apariencia'), undefined);
-  assert.ok(ui.find(n => n.props['aria-label'] === 'Guardar y continuar al pago'));
-});
 
-test('blocked popups do not navigate away from creation or start a save', async t => {
-  const h = setup(); t.after(() => h.stop()); h.blockPopup();
-  h.render().find(n => n.props['aria-label'] === 'Editar diseño en una nueva pestaña').props.onClick(); await h.flush();
-  assert.equal(h.calls, 0);
-  assert.equal(h.states[1], 5);
-  assert.ok(h.states.some(value => typeof value === 'string' && value.includes('bloqueó')));
-  assert.deepEqual(h.redirects, []);
-});
 
-test('editing information has four steps and no design card or preview instructions', t => {
+test('editing uses the same seven steps and preserves published-event actions', t => {
   const h=setup(1,{creation:false,published:true});t.after(()=>h.stop());
   h.render().submit();
   let ui=h.render();assert.equal(h.states[1],4);
   assert.equal(ui.nodes.some(n=>n.type?.displayName==='SectionQuickActions'),false);
   h.states[2]='__more';h.render().submit();
+  ui=h.render();assert.equal(h.states[1],2);
+  assert.ok(ui.find(n=>n.type?.displayName==='CreationInvitationPreview'));
+  ui.submit();ui=h.render();assert.equal(h.states[1],7);
+  ui.submit();ui=h.render();assert.equal(h.states[1],5);
+  assert.ok(ui.find(n=>n.type?.displayName==='InvitationStyleJourney' && n.props.compact));
+  assert.equal(ui.find(n=>n.props['aria-label']==='Editar diseño en una nueva pestaña'),undefined);
+  for(let i=0;i<5;i++){ui.submit();ui=h.render();}
   h.states[0]={...h.states[0],name:'Información actualizada'};ui=h.render();
   assert.equal(h.states[1],6);
-  assert.ok(ui.find(n=>n.props['aria-label']?.includes('Paso 4 de 4')));
-  assert.ok(ui.find(n=>hasClass(n, 'guided-review')));
+  assert.ok(ui.find(n=>n.props['aria-label']?.includes('Paso 7 de 7')));
+  assert.ok(ui.find(n=>hasClass(n,'guided-review')));
   assert.ok(ui.find(n=>n.props['aria-label']==='Publicar cambios'));
   assert.equal(ui.find(n=>n.props.className==='reviewTools'),undefined);
   assert.equal(ui.find(n=>n.props['aria-label']==='Editar diseño en una nueva pestaña'),undefined);
   assert.equal(ui.find(n=>n.props['aria-label']==='Ajustar apariencia'),undefined);
   assert.equal(h.calls,0);
 });
+
 
 test('only the creation visual session receives a close-tab return; ordinary previews keep their link', async t => {
   const h = setup(); t.after(() => h.stop());
@@ -254,7 +220,7 @@ test('creation and administrative examples prevent empty next steps and progress
  let ui=h.render();ui.submit();await h.flush();ui=h.render();
  assert.equal(h.states[1],0);
  assert.ok(ui.find(n=>n.props.errors?.['w-hosts']));
- ui.find(n=>n.props['aria-label']?.startsWith(`Paso ${options.creation || options.exampleCreation ? 5 : 4}:`)).props.onClick();assert.equal(h.states[1],0);
+ ui.find(n=>n.props['aria-label']?.startsWith(`Paso 7:`)).props.onClick();assert.equal(h.states[1],0);
  h.states[0]={...h.states[0],name:'Mi celebración',hostNames:'Sofía',eventDate:'',eventTime:'',address:'',venue:''};
  h.render().submit();assert.equal(h.states[1],1);
  h.render().submit();await h.flush();assert.equal(h.states[1],1);
@@ -266,7 +232,7 @@ test('creation and administrative examples prevent empty next steps and progress
  }
 });
 
-test('gallery can be included from optional information blocks while photos are deferred to design', t => {
+test('gallery can be included from optional information blocks while photos are deferred to the photo step', t => {
   const h=setup(4);t.after(()=>h.stop());h.states[2]='__more';
   let ui=h.render();
   const add=ui.find(n=>n.type==='button'&&n.props.children?.[0]?.props?.children==='Galería de fotos');
@@ -281,15 +247,106 @@ test('gallery can be included from optional information blocks while photos are 
   ui.submit();assert.equal(h.states[2],'__more');
 });
 
-test('editing an existing administrative example only includes information and review', t => {
+test('creation traverses seven steps with separate cover, block photos and optional design assistance', t => {
+  const h = setup(4); t.after(() => h.stop());
+  h.render(); h.states[2] = '__more';
+  let ui = h.render();
+  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 3 de 7')));
+  ui.submit(); ui = h.render();
+  assert.equal(h.states[1], 2);
+  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 4 de 7')));
+  const uploads = ui.nodes.filter(n => n.type?.displayName === 'CloudinaryImageUpload');
+  assert.equal(uploads.length, 2);
+  uploads[0].props.onChange(['/cover.webp']);
+  uploads[1].props.onChange(['/background.webp']);
+  ui.find(n => n.type?.displayName === 'InvitationCoverLayoutPicker').props.onChange('overlay');
+  ui = h.render(); ui.submit(); ui = h.render();
+  assert.equal(h.states[1], 7);
+  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 5 de 7')));
+  assert.equal(h.states[0].imageUrl, '/cover.webp');
+  assert.equal(h.states[0].backgroundImageUrl, '/background.webp');
+  assert.equal(h.states[0].coverLayout, 'overlay');
+  const photo = ui.find(n => n.type?.displayName === 'SectionPhotoFields');
+  assert.ok(photo);
+  photo.props.onChange({ imageUrl: '/block.webp' });
+  assert.equal(h.states[0].sections.find(s => s.id === photo.props.section.id).imageUrl, '/block.webp');
+  ui = h.render(); ui.submit(); ui = h.render();
+  assert.equal(h.states[1], 5);
+  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 6 de 7')));
+  const assistance = ui.find(n => n.type?.displayName === 'InvitationStyleJourney');
+  assert.ok(assistance);
+  assistance.props.onChange({ accent: '#123456' });
+  ui = h.render();
+  assert.equal(assistance.props.compact, true);
+  for (let i = 0; i < 5; i++) {
+    assert.equal(h.states[1], 5);
+    assert.equal(ui.find(n => n.type?.displayName === 'InvitationStyleJourney').props.step, i);
+    ui.submit(); ui = h.render();
+  }
+  assert.equal(h.states[1], 6);
+  assert.equal(h.states[0].accent, '#123456');
+  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 7 de 7')));
+  assert.ok(ui.find(n => n.props['aria-label'] === 'Guardar y continuar al pago'));
+  ui.find(n => n.props['aria-label'] === 'Paso anterior').props.onClick();
+  ui = h.render(); assert.equal(h.states[1], 5);
+  for (let i = 4; i >= 0; i--) {
+    assert.equal(ui.find(n => n.type?.displayName === 'InvitationStyleJourney').props.step, i);
+    ui.find(n => n.props['aria-label'] === 'Paso anterior').props.onClick();
+    ui = h.render();
+  }
+  assert.equal(h.states[1], 7);
+});
+
+test('creation and editing follow changed text and photos without restarting scroll for every keystroke', t => {
+  for (const creation of [true, false]) {
+    const h=setup(7,{creation});t.after(()=>h.stop());
+    let ui=h.render();
+    const photo=ui.find(n=>n.type?.displayName==='SectionPhotoFields');
+    photo.props.onChange({imageUrl:'/changed-photo.webp'});ui=h.render();
+    let focus=ui.find(n=>n.type?.displayName==='CreationInvitationPreview').props.focus;
+    assert.equal(focus.target,photo.props.section.id+'-photo');
+    assert.equal(focus.fallback,'section:'+photo.props.section.id);
+    h.states[1]=4;h.states[2]=h.states[0].sections.find(s=>s.type==='story').id;
+    ui=h.render();
+    let fields=ui.find(n=>n.type?.displayName==='SectionFields');
+    fields.props.onChange({content:'Mensaje actualizado'});ui=h.render();
+    focus=ui.find(n=>n.type?.displayName==='CreationInvitationPreview').props.focus;
+    assert.equal(focus.target,fields.props.section.id+'-content');
+    const sequence=focus.sequence;
+    fields=ui.find(n=>n.type?.displayName==='SectionFields');
+    fields.props.onChange({content:'Mensaje actualizado de nuevo'});ui=h.render();
+    assert.equal(ui.find(n=>n.type?.displayName==='CreationInvitationPreview').props.focus.sequence,sequence);
+    fields.props.onChange({enabled:false});ui=h.render();
+    assert.equal(ui.find(n=>n.type?.displayName==='CreationInvitationPreview').props.focus.target,'cover');
+  }
+});
+
+test('publication sends an empty gallery back to block photos without opening the full editor', t => {
+  const h = setup(6); t.after(() => h.stop()); h.render();
+  h.states[0] = { ...h.states[0], sections: h.states[0].sections.map(s => s.type === 'gallery' ? { ...s, enabled: true } : s) };
+  let ui = h.render();
+  const gallery = h.states[0].sections.find(s => s.type === 'gallery');
+  ui.find(n => n.props['data-target-section'] === gallery.id).props.onClick();
+  ui = h.render();
+  assert.equal(h.states[1], 7);
+  assert.ok(ui.find(n => n.type?.displayName === 'SectionPhotoFields' && n.props.section.id === gallery.id));
+  assert.equal(h.calls, 0);
+  assert.equal(h.tab.location.href, undefined);
+});
+
+test('editing an administrative example uses the complete seven-step journey', t => {
   const h = setup(1, { creation: false, exampleId: 'example' }); t.after(() => h.stop());
   let ui = h.render();
-  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 2 de 4')));
+  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 2 de 7')));
   ui.submit();
   assert.equal(h.states[1], 4);
   h.states[2] = '__more'; h.render().submit(); ui = h.render();
+  assert.equal(h.states[1], 2);
+  ui.submit();ui=h.render();assert.equal(h.states[1],7);
+  ui.submit();ui=h.render();assert.equal(h.states[1],5);
+  for(let i=0;i<5;i++){ui.submit();ui=h.render();}
   assert.equal(h.states[1], 6);
-  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 4 de 4')));
+  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 7 de 7')));
   assert.equal(ui.find(n => n.props['aria-label'] === 'Editar diseño en una nueva pestaña'), undefined);
   assert.ok(ui.find(n => hasClass(n, 'guided-review')));
   assert.equal(ui.nodes.some(n => n.type?.displayName === 'InvitationPrivacyFields'), false);
@@ -298,50 +355,27 @@ test('editing an existing administrative example only includes information and r
 test('new administrative examples traverse information before design and never offer customer payment', t => {
   const h = setup(1, { creation: false, exampleId: 'example', exampleCreation: true }); t.after(() => h.stop());
   let ui = h.render();
-  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 2 de 5')));
+  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 2 de 7')));
   ui.submit(); ui = h.render();
   assert.equal(h.states[1], 4);
   assert.equal(ui.nodes.some(n => n.type?.displayName === 'SectionQuickActions'), false);
   assert.equal(ui.find(n => n.props['aria-label'] === 'Editar diseño en una nueva pestaña'), undefined);
   h.states[2] = '__more'; h.render().submit(); ui = h.render();
+  assert.equal(h.states[1],2);
+  ui.submit();ui=h.render();assert.equal(h.states[1],7);
+  ui.submit();ui=h.render();
   assert.equal(h.states[1], 5);
-  assert.ok(ui.find(n => n.props['aria-label'] === 'Editar diseño en una nueva pestaña'));
+  assert.equal(ui.find(n => n.props['aria-label'] === 'Editar diseño en una nueva pestaña'), undefined);
   assert.equal(ui.find(n => hasClass(n, 'guided-review')), undefined);
-  ui.submit(); ui = h.render();
+  for(let i=0;i<5;i++){ui.submit();ui=h.render();}
   assert.equal(h.states[1], 6);
-  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 5 de 5')));
+  assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 7 de 7')));
   assert.ok(ui.find(n => hasClass(n, 'guided-review')));
   assert.equal(ui.nodes.some(n => n.type?.displayName === 'InvitationPrivacyFields'), false);
   assert.equal(ui.find(n => n.props['aria-label'] === 'Guardar y continuar al pago'), undefined);
   assert.ok(ui.find(n => n.props.href === '/admin/disenos/example'));
 });
 
-test('example design handoff saves its draft and synchronizes visual edits back into administration', async t => {
-  const h = setup(5, { creation: false, exampleId: 'example', exampleCreation: true }); t.after(() => h.stop());
-  h.render();
-  h.states[0] = { ...h.states[0], name: 'Ejemplo con información actualizada' };
-  let ui = h.render();
-  ui.find(n => n.props['aria-label'] === 'Editar diseño en una nueva pestaña').props.onClick(); await h.flush();
-  assert.equal(h.calls, 1);
-  const url = new URL(h.tab.location.href, 'http://localhost');
-  assert.equal(url.pathname, '/admin/disenos/example/vista-previa');
-  const { invitationPreviewKey, parseInvitationPreview, storeInvitationPreview } = h.load('lib/invitation-preview.ts');
-  const token = url.searchParams.get('preview');
-  const key = invitationPreviewKey(h.event.ownerId, h.event.id, token);
-  const record = parseInvitationPreview(h.window.localStorage.getItem(key), h.event.ownerId, h.event.id);
-  assert.equal(record.editorFlow, true);
-  assert.equal(record.creationFlow, false);
-  assert.equal(JSON.parse(record.snapshot).privacy, undefined);
-  h.render();
-  storeInvitationPreview(h.window.localStorage, { ...record, saved: true, version: 2, snapshot: JSON.stringify({ ...h.values, accent: '#123456', imageUrl: '/example-cover.jpg' }) }, token);
-  h.tab.closed = true; h.intervals.at(-1)(); ui = h.render();
-  assert.equal(h.states[0].accent, '#123456');
-  assert.equal(h.states[0].imageUrl, '/example-cover.jpg');
-  assert.equal(h.controller.getVersion(), 2);
-  assert.equal(h.states[1], 5);
-  assert.ok(ui.find(n => n.props['aria-label'] === 'Revisar ejemplo'));
-  assert.deepEqual(h.redirects, []);
-});
 
 test('administrative visual sessions close back to the example editor and ordinary previews keep their return', async t => {
   const h = setup(5, { creation: false, exampleId: 'example' }); t.after(() => h.stop());

@@ -346,6 +346,10 @@ test('restoring a copy older than the server requires a conflict decision', asyn
 test('backup parser accepts incomplete fields but rejects foreign, malformed and expired records', () => {
   const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), snapshot: values(''), version: 0, updatedAt: Date.now(), wizard: { step: 0, activeExtra: null } };
   assert.ok(parseEditorDraft(JSON.stringify(record), 'owner', 'event', Date.now()));
+  for (const step of [2, 7, 5, 6]) {
+    const wizard = { step, activeExtra: step === 5 ? 'style:fonts' : null, flow: 'content-v7' };
+    assert.deepEqual(parseEditorDraft(JSON.stringify({ ...record, wizard }), 'owner', 'event', Date.now()).wizard, wizard);
+  }
   for (const change of [{ ownerId: 'other' }, { eventId: 'other' }, { version: -1 }, { snapshot: '{}' }, { updatedAt: Date.now() - EDITOR_DRAFT_LIFETIME - 1000 }]) {
     assert.equal(parseEditorDraft(JSON.stringify({ ...record, ...change }), 'owner', 'event', Date.now()), null);
   }

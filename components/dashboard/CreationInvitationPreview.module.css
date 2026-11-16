@@ -1,0 +1,34 @@
+.preview { position: sticky; top: calc(var(--workspace-progress-top, 80px) + var(--workspace-progress-height, 44px) + 24px); min-width: 0; padding-left: 30px; border-left: 1px solid var(--line); }
+.panel { display: grid; justify-items: center; gap: 18px; }
+.caption { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+.caption > span { width: 6px; height: 6px; border-radius: 50%; background: #22c982; box-shadow: 0 0 0 4px #22c98216; }
+.phone { position: relative; width: min(300px, 100%, calc((100dvh - 230px) * 541 / 1114)); min-width: 220px; aspect-ratio: 541 / 1114; filter: drop-shadow(0 16px 20px #00000020); }
+/* Match the hero mask so composited iframe content stays inside the screen while scrolling. */
+.screen {
+  --phone-screen-radius: 15.54% / 7.3%;
+  --phone-screen-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 830' preserveAspectRatio='none'%3E%3Crect width='390' height='830' rx='61' fill='white'/%3E%3C/svg%3E");
+  position: absolute; z-index: 1; inset: .808% 2.403% .898%;
+  overflow: hidden; border-radius: var(--phone-screen-radius);
+  -webkit-mask-image: var(--phone-screen-mask); mask-image: var(--phone-screen-mask);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  contain: strict; isolation: isolate; background: var(--surface);
+}
+.frame { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.screen :global(.editor-live-preview),
+.screen :global(.editor-preview-viewport) { width: 100%; height: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.screen :global(.editor-preview-devices) { display: none; }
+.screen :global(.editor-preview-focus) { display: none; }
+.screen :global(.editor-preview-marker) { background: var(--orange); color: var(--on-inverse); font-size: 10px; }
+.screen :global(.editor-preview-frame-space) { margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+.screen iframe { display: block; border: 0; }
+.hint { max-width: 240px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; text-align: center; }
+.toggle { display: none; }
+@media (max-width: 1199px) {
+  .preview { position: static; padding: 24px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+  .toggle { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; width: 100%; padding: 12px 18px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; cursor: pointer; }
+  .toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .panel { display: none; padding-top: 24px; }
+  .preview[data-open="true"] .panel { display: grid; }
+  .phone { width: 280px; min-width: 0; max-width: 100%; }
+}

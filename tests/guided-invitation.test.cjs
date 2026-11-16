@@ -281,6 +281,16 @@ test('existing weddings gain missing optional playlist and information blocks wi
 });
 
 
+test('seven-step creation restores photos, optional style details and legacy drafts', () => {
+ const {guidedRecoveryStep,guidedRecoverySection,guidedRecoveryAppearanceStep}=setup();
+ for (const step of [0,1,4,2,7,5,6]) assert.equal(guidedRecoveryStep({step,activeExtra:null,flow:'content-v7'}),step);
+ const wizard={step:5,activeExtra:'style:fonts',flow:'content-v7'};
+ assert.equal(guidedRecoveryAppearanceStep(wizard),4);
+ assert.equal(guidedRecoverySection({step:4,activeExtra:'__add:story',flow:'content-v7'},[{id:'story',type:'story'}]),'story');
+ assert.equal(guidedRecoveryStep({step:5,activeExtra:null,flow:'content-v6'}),5);
+ assert.equal(guidedRecoveryStep({step:6,activeExtra:null,flow:'content-v6'}),6);
+});
+
 test('new style journey restores each substep and keeps block recovery separate',()=>{
  const {guidedRecoveryStep,guidedRecoverySection,guidedRecoveryAppearanceStep}=setup();
  const ids=['corners','icons','surface','colors','fonts'];

@@ -15,7 +15,7 @@ export function requiredSectionFields(section: InviteSection, requirePhotos = fa
   const text = section.content?.trim(), link = section.link?.trim() ?? '';
   switch (section.type) {
     case 'gallery':
-      if (requirePhotos && !section.imageUrl && !section.imageUrls?.length) add('title','Agrega al menos una foto a la galería desde el diseño o desactiva este bloque.');
+      if (requirePhotos && !section.imageUrl && !section.imageUrls?.length) add('title','Agrega al menos una foto a la galería o desactiva este bloque.');
       break;
     case 'program': {
       const activities = parseInvitationProgram(section.content ?? '');

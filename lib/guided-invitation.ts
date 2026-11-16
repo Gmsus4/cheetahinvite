@@ -116,6 +116,7 @@ export function guidedPublicationIssues(values: Pick<EditorValues, 'eventType' |
   return issues;
 }
 export function guidedRecoveryStep(wizard: EditorWizard) {
+  if (wizard.flow === 'content-v7') return [0, 1, 4, 2, 7, 5, 6].includes(wizard.step) ? wizard.step : 2;
   if (wizard.flow === 'content-v6') return [0, 1, 4, 5, 6].includes(wizard.step) ? wizard.step : 5;
   if (wizard.flow === 'content-v5') return Math.min(5, Math.max(0, wizard.step));
   if (wizard.flow === 'content-v4') return wizard.step === 3 ? 4 : wizard.step === 4 ? 3 : Math.min(5, Math.max(0, wizard.step));
@@ -125,7 +126,7 @@ export function guidedRecoveryStep(wizard: EditorWizard) {
 }
 export function guidedRecoverySection(wizard: EditorWizard, sections: InviteSection[]) {
   const cover = sections.find(section => section.type === 'cover')?.id ?? '__cover';
-  if (wizard.flow !== 'content-v4' && wizard.flow !== 'content-v5' && wizard.flow !== 'content-v6') return cover;
+  if (wizard.flow !== 'content-v4' && wizard.flow !== 'content-v5' && wizard.flow !== 'content-v6' && wizard.flow !== 'content-v7') return cover;
   const active = wizard.activeExtra?.replace(/^__add:/, '') ?? '';
   if (active === '__cover' || active === '__welcome') return cover;
   return active === '__more' || sections.some(section => section.id === active) ? active : cover;
@@ -134,7 +135,7 @@ export function guidedRecoveryAppearance(wizard: EditorWizard) {
   return wizard.flow === 'content-v4' ? wizard.activeExtra === 'appearance-custom' : (wizard.flow === 'content-v3' && wizard.step === 1 && wizard.activeExtra === 'appearance') || (wizard.flow === 'content-v2' && wizard.step === 3);
 }
 export function guidedRecoveryAppearanceStep(wizard: EditorWizard) {
-  return wizard.flow === 'content-v5' ? invitationStyleStepIndex(wizard.activeExtra) : guidedRecoveryAppearance(wizard) ? 3 : 0;
+  return wizard.flow === 'content-v5' || wizard.flow === 'content-v7' ? invitationStyleStepIndex(wizard.activeExtra) : guidedRecoveryAppearance(wizard) ? 3 : 0;
 }
 export function eventPublicationIssues(event: { privacy?: string; eventType?: string; hostNames?: string | null; eventDate?: Date | null; eventTime?: string | null; venue?: string | null; address?: string | null; sections?: unknown }) {
   const issues = guidedPublicationIssues({eventType:event.eventType || 'other',hostNames:event.hostNames || '',eventDate:event.eventDate?.toISOString().slice(0,10) || '',eventTime:event.eventTime || '',venue:event.venue || '',address:event.address || '',sections:(Array.isArray(event.sections) ? event.sections : []) as InviteSection[]});

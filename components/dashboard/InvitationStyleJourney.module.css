@@ -47,3 +47,37 @@
 @media(max-width:600px) { .steps strong { font-size: 11px; } .fontGrid { grid-template-columns: minmax(0,1fr); } .scene { padding: 16px; } .journey { gap: 20px; } }
 
 .backgroundDim { position: absolute; inset: 0; background: #000; opacity: var(--wa-background-dim,0); pointer-events: none; }
+.compact { gap: 14px; }
+.compact .steps button { flex-direction: row; gap: 5px; min-height: 42px; padding: 5px 0; border-bottom-color: transparent; }
+.compact .steps button[aria-current="step"] { border-bottom-color: var(--orange); }
+.compact .steps button > span { width: 16px; height: 16px; border-radius: 0; background: transparent; color: inherit; font-size: 10px; }
+.compact .steps strong { font-size: 11px; }
+.compact .position { margin: 0; font-size: 10px; }
+.compact .corners legend { font-size: 14px; }
+.compact .corners p { margin-bottom: 10px; font-size: 11px; }
+.compact .corners button { min-height: 64px; flex-direction: row; gap: 8px; padding: 10px 8px; font-size: 11px; }
+.compact .corners button > span[aria-hidden] { width: 30px; height: 28px; padding: 6px; gap: 3px; }
+.compact .icons label { min-height: 44px; }
+.compact .icons p { margin-bottom: 10px; font-size: 11px; }
+.compact .finish h2, .compact .fonts h2 { margin-bottom: 6px; font-size: 14px; }
+.compact .finish > p, .compact .fonts > p { margin-bottom: 10px; font-size: 11px; }
+.compact .finishes { gap: 6px; }
+.compact .finishes button { min-height: 40px; padding: 7px 10px; font-size: 11px; }
+.compact .finish > label { margin-top: 10px; padding: 10px; }
+.compact .finish > label small { display: none; }
+.compact .intensity { gap: 2px; margin-top: 10px; padding: 10px 12px; }
+.compact .intensity label { font-size: 12px; }
+.compact .intensity output { min-width: 0; padding: 2px 6px; font-size: 12px; }
+.backgroundControls { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+.compact > fieldset > legend { font-size: 14px; }
+.compact > fieldset > p { margin-bottom: 10px; font-size: 11px; }
+.compact > fieldset button { min-height: 40px; padding: 8px; font-size: 11px; }
+.compact :global(.guided-palette-swatches i) { height: 20px; }
+.journey.compact :global(.guided-palettes > div) { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.journey.compact :global(.guided-palettes > div > label) { gap: 8px; padding: 8px 10px; }
+.compact :global(.guided-photo-palette) { margin-top: 12px; padding: 12px; }
+.compact :global(.guided-photo-palette p) { margin-block: 6px; font-size: 11px; }
+.compact .fontGrid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.compact .fonts .fontGrid select { min-height: 42px; margin-top: 6px; padding: 8px; font-size: 13px; }
+.compact .suggestion { min-height: 40px; margin-top: 10px; padding: 8px 10px; font-size: 11px; }
+@media(max-width:400px) { .compact .corners button { flex-direction: column; gap: 6px; } .compact .steps button { gap: 2px; } .compact .steps strong { font-size: 10px; } }
