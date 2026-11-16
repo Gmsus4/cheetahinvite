@@ -473,6 +473,19 @@ test('local backups retain global section corners and accept older drafts withou
 });
 
 
+test('itinerary time formats survive saving and recovery while older drafts remain valid',()=>{
+ for(const programTimeFormat of [undefined,'24h','12h','invalid',null]) {
+  const section={id:'program',type:'program',title:'Itinerario',content:'18:30 — Cena',detail:'',link:'',imageUrl:'',enabled:true,programTimeFormat};
+  const snapshot=JSON.stringify({...JSON.parse(values('Fiesta')),sections:[section]});
+  const record={schema:1,ownerId:'owner',eventId:'event',creationKey:randomUUID(),version:0,updatedAt:Date.now(),wizard:{step:4,activeExtra:'program'},snapshot};
+  const parsed=parseEditorDraft(JSON.stringify(record),'owner','event',Date.now());
+  if(programTimeFormat===undefined||['24h','12h'].includes(programTimeFormat)) {
+   assert.equal(JSON.parse(parsed.snapshot).sections[0].programTimeFormat,programTimeFormat);
+   assert.equal(JSON.parse(editorFormData(snapshot,0).get('sections'))[0].programTimeFormat,programTimeFormat);
+  } else assert.equal(parsed,null);
+ }
+});
+
 test('local backups retain icon preferences and allow legacy sections without the flag',()=>{
  for(const showIcon of [undefined,true,false,'false',0,null]) {
   const snapshot=JSON.parse(values('Fiesta'));snapshot.sections=[{id:'story',type:'story',title:'Historia',content:'',detail:'',link:'',imageUrl:'',enabled:true,showIcon}];

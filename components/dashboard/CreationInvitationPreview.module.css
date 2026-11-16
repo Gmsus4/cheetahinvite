@@ -32,3 +32,11 @@
   .preview[data-open="true"] .panel { display: grid; }
   .phone { width: 280px; min-width: 0; max-width: 100%; }
 }
+@media (max-width: 600px) {
+  .preview { display: none; }
+  .preview[data-mobile-open="true"] { display: block; order: -1; min-height: 0; padding: 0; border: 0; overflow: hidden; }
+  .toggle, .caption, .hint, .frame { display: none; }
+  .preview[data-mobile-open="true"] .panel { display: block; height: 100%; padding: 0; }
+  .phone { width: 100%; height: 100%; max-width: none; aspect-ratio: auto; filter: none; }
+  .screen { inset: 0; border: 1px solid var(--line); border-radius: 12px; -webkit-mask-image: none; mask-image: none; }
+}

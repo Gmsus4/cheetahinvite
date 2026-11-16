@@ -39,7 +39,7 @@ export function isMobileImageFocus(value: unknown): value is MobileImageFocus {
 export function isSectionTextAlign(value: unknown): value is SectionTextAlign {
   return typeof value === "string" && ["auto", "left", "center", "right"].includes(value);
 }
-export type InviteSection = { id: string; type: SectionType; title: string; titleCustomized?: boolean; showIcon?: boolean; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; mobileImageFocus?: MobileImageFocus; desktopImageFocus?: MobileImageFocus; sectionColor?: string; panelStyle?: InvitationPanelStyle; textColorMode?: InvitationTextColorMode; textColor?: string; textAlign?: SectionTextAlign; margin?: SectionMargin; textMargin?: SectionMargin; photoMargin?: SectionMargin; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; maxCompanions?: number; whatsappPhone?: string; whatsappMessage?: string; enabled: boolean };
+export type InviteSection = { id: string; type: SectionType; title: string; titleCustomized?: boolean; showIcon?: boolean; showCalendarButton?: boolean; programTimeFormat?: "24h" | "12h"; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; mobileImageFocus?: MobileImageFocus; desktopImageFocus?: MobileImageFocus; sectionColor?: string; panelStyle?: InvitationPanelStyle; textColorMode?: InvitationTextColorMode; textColor?: string; textAlign?: SectionTextAlign; margin?: SectionMargin; textMargin?: SectionMargin; photoMargin?: SectionMargin; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; maxCompanions?: number; whatsappPhone?: string; whatsappMessage?: string; enabled: boolean };
 export type EditorValues = {
   privacy?: InvitationPrivacy; pin?: string; pinPending?: boolean;
   name: string; eventType: string; eventDate: string; eventTime: string; hostNames: string; venue: string; address: string;
@@ -121,6 +121,8 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
     if (values.sections.some(section => !section || !types.includes(section.type) || typeof section.enabled !== "boolean"
       || (section.titleCustomized !== undefined && typeof section.titleCustomized !== 'boolean')
       || (section.showIcon !== undefined && typeof section.showIcon !== 'boolean')
+      || (section.showCalendarButton !== undefined && (section.type !== 'countdown' || typeof section.showCalendarButton !== 'boolean'))
+      || (section.programTimeFormat !== undefined && (section.type !== 'program' || !['24h', '12h'].includes(section.programTimeFormat)))
       || (section.maxCompanions !== undefined && (section.type !== "rsvp" || !validCompanionLimit(section.maxCompanions)))
       || (section.rsvpMode !== undefined && (section.type !== "rsvp" || !["external", "integrated"].includes(section.rsvpMode)))
       || (section.whatsappPhone !== undefined && (section.type !== "rsvp" || typeof section.whatsappPhone !== "string" || section.whatsappPhone.length > 40))

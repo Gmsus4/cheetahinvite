@@ -8,10 +8,10 @@ import type { EditorValues } from "@/lib/invitation-editor";
 import { InvitationLivePreview, type InvitationPreviewFocus } from "./InvitationLivePreview";
 import styles from "./CreationInvitationPreview.module.css";
 
-export function CreationInvitationPreview({ values, date, focus }: { values: EditorValues; date: string; focus?: InvitationPreviewFocus }) {
+export function CreationInvitationPreview({ values, date, focus, mobileOpen = false }: { values: EditorValues; date: string; focus?: InvitationPreviewFocus; mobileOpen?: boolean }) {
   const [open, setOpen] = useState(false);
 
-  return <aside className={styles.preview} aria-label="Vista previa de tu invitación" data-open={open}>
+  return <aside className={styles.preview} aria-label="Vista previa de tu invitación" data-open={open} data-mobile-open={mobileOpen}>
     <button className={styles.toggle} type="button" aria-expanded={open} aria-controls="creation-phone-preview" onClick={() => setOpen(current => !current)}>
       {open ? <FiX aria-hidden="true" /> : <FiEye aria-hidden="true" />}{open ? "Ocultar vista previa" : "Ver mi invitación"}
     </button>

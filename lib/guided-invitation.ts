@@ -43,7 +43,7 @@ export function guidedContentSectionIds(eventType: string, sections: InviteSecti
 }
 
 export function guidedInformationSectionIds(eventType: string, sections: InviteSection[], activeSection = '') {
-  const informationIds = new Set(sections.filter(section => !['cover', 'countdown', 'location'].includes(section.type)).map(section => section.id));
+  const informationIds = new Set(sections.filter(section => !['cover', 'location'].includes(section.type)).map(section => section.id));
   return guidedContentSectionIds(eventType, sections, activeSection).filter(id => id === '__more' || informationIds.has(id));
 }
 
@@ -109,7 +109,7 @@ export function guidedPublicationIssues(values: Pick<EditorValues, 'eventType' |
     if (!values.address.trim() && !values.sections.find(section => section.type === 'location')?.link.trim()) issues.push({ step: 1, message: 'Agrega la dirección o un enlace de Google Maps para que tus invitados puedan llegar.' });
   }
   for (const section of values.sections.filter(section => section.enabled)) {
-    if (section.type === 'reception' || section.type === 'countdown' || section.type === 'cover' || section.type === 'location' || (section.type === 'rsvp' && section.rsvpMode === 'integrated')) continue;
+    if (section.type === 'reception' || section.type === 'cover' || section.type === 'location' || (section.type === 'rsvp' && section.rsvpMode === 'integrated')) continue;
     const complete = requiredSectionFields(section, true).length === 0;
     if (!complete) issues.push({ step: 4, message: `Completa «${section.title}» o desactívala.`, sectionId: section.id });
   }

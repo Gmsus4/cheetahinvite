@@ -19,6 +19,8 @@ export function showcaseStyleData(invitation: InvitationProps, previous?: EventD
     return {
       ...section, id: existing.id, title: existing.title, titleCustomized: existing.titleCustomized,
       content: existing.content, detail: existing.detail, link: existing.link,
+      ...(section.type === "countdown" ? { showCalendarButton: existing.showCalendarButton === true } : {}),
+      ...(section.type === "program" ? { programTimeFormat: existing.programTimeFormat } : {}),
       imageUrl: existing.imageUrl || section.imageUrl,
       imageUrls: existing.imageUrls?.length ? [...existing.imageUrls] : existing.imageUrl ? [] : section.imageUrls,
       ...(section.type === "rsvp" ? {

@@ -3,15 +3,17 @@
 import Image from "next/image";
 import type { CSSProperties, ReactNode } from "react";
 import { isInvitationCoverLayout } from "@/lib/invitation-cover-layout";
-import { parseInvitationProgram } from "@/lib/invitation-program";
+import { formatInvitationProgramTime, parseInvitationProgram } from "@/lib/invitation-program";
 import { normalizeEventLocations } from "@/lib/invitation-locations";
 import { FiMaximize, FiEyeOff, FiAlignCenter, FiArrowUpRight, FiClock, FiEdit3, FiGift, FiHeart, FiMapPin, FiMusic, FiUsers, FiLayers, FiImage, FiMoreHorizontal } from "react-icons/fi";
 import type { InviteSection } from "@/lib/invitation-editor";
 import { getInvitationEventContent, invitationPresentation } from "@/lib/invitation-event-content";
 import { atmospherePanelStyle, atmosphereSections, atmosphereStyle, atmosphereTextStyle, atmosphereTime } from "@/lib/invitation-atmosphere";
 import { invitationLinkLabel, invitationLocationUrl, invitationSectionUrl } from "@/lib/invitation-links";
+import { invitationMusicPlayer } from "@/lib/invitation-music";
 import type { InvitationEditTarget, InvitationProps } from "@/lib/invitation-editor";
 import { CountdownTimer } from "./CountdownTimer";
+import { AddToCalendar } from "./AddToCalendar";
 import { rsvpCompanionLimit } from "@/lib/rsvp";
 import { RsvpForm } from "./RsvpForm";
 import { InvitationPhotoCarousel } from "./InvitationPhotoCarousel";
@@ -135,6 +137,7 @@ export function CelebrationInvitation(inputProps: InvitationProps & { preview?: 
           <VisibilityControl section={countdownSection} onEdit={props.onEdit} />
         </div>}
         <span className="wa-kicker" data-invitation-field={countdownSection ? `${countdownSection.id}-title` : undefined}>{countdownSection?.title || "Cada vez más cerca"}</span><CountdownTimer date={props.eventDateKey!} time={props.eventTime || "00:00"} />
+        {countdownSection?.showCalendarButton === true && <AddToCalendar date={props.eventDateKey!} time={props.eventTime} name={props.name} venue={props.venue} address={props.address} sections={props.sections} />}
       </section>}
       </div>
       {hasLocation && <AtmosphereSection showIcons={props.showSectionIcons !== false} section={locationSection ?? { id: "primary-location", type: "location", title: "Lugar del evento", content: "", detail: "", link: "", imageUrl: "", enabled: true }} surface={atmospherePanelStyle(locationSection, 1 + Number(hasCountdown), panelStyle)} onEdit={props.onEdit} renderStyleControl={props.renderStyleControl} renderAlignmentControl={props.renderAlignmentControl} renderMarginControl={props.renderMarginControl} renderBackgroundColorControl={props.renderBackgroundColorControl} renderTextColorControl={props.renderTextColorControl} textStyle={atmosphereTextStyle(props.accent, props, locationSection)} locationDetails={{ venue: props.venue, address: props.address, showPlaceholders: props.showPlaceholders, date: date + (time ? ` · ${time}` : "") }} />}
@@ -170,6 +173,7 @@ function AtmosphereSection({ section, eventId, surface, onEdit, renderStyleContr
     <Image src={sectionPhoto} alt={`Foto que acompaña ${section.title}`} width={1200} height={800} sizes="(max-width:600px) calc(100vw - 24px), 560px" unoptimized />
   </figure> : null;
   const url = locationDetails ? invitationLocationUrl(locationDetails.venue, locationDetails.address, section.link) : invitationSectionUrl(section.type, section.link);
+  const musicPlayer = section.type === "music" ? invitationMusicPlayer(section.link) : null;
   const media = (photo || images.length > 0) ? <div className="wa-section-media" data-invitation-field={section.id + "-photo"} data-photo-margin={section.photoMargin ?? section.margin} data-mobile-image-focus={section.mobileImageFocus} data-desktop-image-focus={section.desktopImageFocus} data-editable={Boolean(onEdit) || undefined}>
     <PhotoControls section={section} target={{ kind: "section-photo", sectionId: section.id }} label={`${photoLabel} de ${section.title}`} text={`Editar ${photoLabel}`} onEdit={onEdit} renderMarginControl={renderMarginControl} />
     {photo}
@@ -191,9 +195,12 @@ function AtmosphereSection({ section, eventId, surface, onEdit, renderStyleContr
     {showIcons && section.type !== "gallery" && section.showIcon !== false && <Icon className="wa-section-icon" aria-hidden="true" />}<h2 id={locationDetails ? "invitation-location-title" : undefined} data-invitation-field={`${section.id}-title`}>{locationDetails ? locationSectionTitle(section) : section.title}</h2>
     {locationDetails && <><h3 data-invitation-field="w-venue">{locationDetails.venue || "Nos vemos aquí"}</h3><p>{locationDetails.date}</p>{(locationDetails.address || locationDetails.showPlaceholders) && <p data-invitation-field="w-address">{locationDetails.address || "Dirección por definir"}</p>}</>}
     {section.detail && <p className="wa-detail" data-invitation-field={`${section.id}-time`}>{section.detail}</p>}
-    {!locationDetails && (section.type === "program" ? <ol className="wa-timeline" data-invitation-field={`${section.id}-content`}>{parseInvitationProgram(section.content).filter(item => item.time || item.activity.trim()).map(({ time, activity }, index) => {
-      return <li key={index}>{time && <span className="wa-timeline-time">{time}</span>}<span>{activity}</span></li>;
+    {!locationDetails && (section.type === "program" ? <ol className="wa-timeline" data-time-format={section.programTimeFormat ?? "24h"} data-invitation-field={`${section.id}-content`}>{parseInvitationProgram(section.content).filter(item => item.time || item.activity.trim()).map(({ time, activity }, index) => {
+      return <li key={index}>{time && <span className="wa-timeline-time">{formatInvitationProgramTime(time, section.programTimeFormat)}</span>}<span>{activity}</span></li>;
     })}</ol> : section.content && <p data-invitation-field={`${section.id}-content`}>{section.content}</p>)}
+    {musicPlayer && <div className="wa-music-player" data-provider={musicPlayer.provider} data-invitation-field={`${section.id}-link`}>
+      <iframe src={musicPlayer.src} title={`Reproductor de ${musicPlayer.provider}: ${section.title}`} width="100%" height={musicPlayer.height} loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
+    </div>}
     {onEdit && !locationDetails && !media && !section.content && !section.detail && !url && !(section.type === "rsvp" && section.rsvpMode === "integrated") && <p>{section.type === "gallery" ? "Agrega fotos a este apartado." : "Agrega contenido o una foto a este apartado."}</p>}
     {section.type === "rsvp" && section.rsvpMode === "integrated" ? <RsvpForm eventId={eventId} maxCompanions={rsvpCompanionLimit(section.maxCompanions)} /> : url && <a className="wa-button" href={url} target="_blank" rel="noopener noreferrer" data-invitation-field={`${locationDetails ? "w-map " : ""}${section.id}-link ${section.id}-map ${section.id}-mode`}>{invitationLinkLabel(section.type)}<FiArrowUpRight aria-hidden="true" /></a>}
   </section>{photoPosition === "after" && media}</div>;

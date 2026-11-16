@@ -1,4 +1,12 @@
 export type ProgramActivity = { time: string; activity: string };
+export type ProgramTimeFormat = "24h" | "12h";
+
+export function formatInvitationProgramTime(time: string, format: ProgramTimeFormat = "24h") {
+  if (format !== "12h" || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return time;
+  const [hour, minute] = time.split(":");
+  const value = Number(hour);
+  return `${value % 12 || 12}:${minute} ${value < 12 ? "a. m." : "p. m."}`;
+}
 
 // Keep blank rows while editing and accept itineraries saved in the original text format.
 export function parseInvitationProgram(content: string): ProgramActivity[] {

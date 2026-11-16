@@ -546,3 +546,28 @@
   .workspace :global(.guided-photo-field)  { padding:16px; border-radius:16px}
   .workspace :global(.guided-occasion),.workspace :global(.guided-review-design)  { padding:14px}
 }
+
+.mobilePreviewToggle { display: none; }
+@media (max-width:600px) {
+  .workspace[data-intro-layout="true"] .journeyNavigation { --mobile-preview-toggle-width: 56px; grid-template-columns: minmax(0,1fr) var(--mobile-preview-toggle-width) minmax(0,1fr); grid-template-rows: 56px; gap: 8px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .journeyNavigation::before { content: ""; position: absolute; top: 0; left: 0; width: calc((100% - var(--mobile-preview-toggle-width) - 16px)/2); height: 56px; box-sizing: border-box; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); pointer-events: none; z-index: -1; }
+  .workspace[data-intro-layout="true"] .journeyNavigation > :global(.guided-back) { grid-column: 1; justify-self: center; margin: 0; transform: translateX(-22px); border: 0; border-radius: 12px; background: transparent; }
+  .workspace[data-intro-layout="true"] .journeyNavigation .mobileSaveButton { grid-column: 1; justify-self: center; margin: 0; transform: translateX(22px); border: 0; border-radius: 12px; background: transparent; }
+  .workspace .mobilePreviewToggle { grid-column: 2; grid-row: 1; display: grid; place-items: center; width: 100%; height: 56px; padding: 0; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); cursor: pointer; }
+  .workspace[data-intro-layout="true"] .journeyNavigation > :global(.button[type="submit"]) { grid-column: 3; box-sizing: border-box; width: 100%; min-width: 0; height: 56px; padding: 0; gap: 4px; border: 8px solid var(--surface); border-radius: 999px; outline: 1px solid var(--line); outline-offset: -1px; box-shadow: none; font-size: 11px; }
+  .workspace[data-intro-layout="true"] .journeyNavigation > :global(.guided-footer-actions) { display: contents; }
+  .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions > .button) { grid-column: 1; grid-row: 1; justify-self: center; width: 40px; min-width: 40px; margin: 0; padding: 0; border-radius: 12px; }
+  .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions > .button:not(.guided-publish)) { transform: translateX(22px); border: 0; background: transparent; color: var(--ink); box-shadow: none; }
+  .workspace[data-intro-layout="true"] .journeyNavigation > :global(.guided-back:hover:not(:disabled)),
+  .workspace[data-intro-layout="true"] .journeyNavigation .mobileSaveButton:hover:not(:disabled),
+  .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions > .button:not(.guided-publish):hover:not(:disabled)) { background: var(--surface-muted); }
+  .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions > .guided-publish) { grid-column: 3; box-sizing: border-box; width: 100%; min-width: 0; height: 56px; margin: 0; padding: 0; gap: 4px; border: 8px solid var(--surface); border-radius: 999px; outline: 1px solid var(--line); outline-offset: -1px; box-shadow: none; font-size: 11px; }
+  .workspace[data-intro-layout="true"] .journeyNavigation :global(.guided-footer-actions > .button .guided-bottom-label) { display: none; }
+  .mobilePreviewToggle svg { width: 22px; height: 22px; }
+  .mobilePreviewToggle:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .workspace[data-intro-layout="true"] :global(.guided-layout) { padding-bottom: calc(92px + env(safe-area-inset-bottom,0px)); }
+  .workspace[data-mobile-preview-open="true"] .stepProgress { display: none; }
+  .workspace[data-intro-layout="true"][data-mobile-preview-open="true"] :global(.guided-layout) { position: fixed; top: var(--workspace-progress-top); bottom: calc(80px + env(safe-area-inset-bottom,0px)); left: 0; right: 0; display: flex; flex-direction: column; align-items: stretch; gap: 12px; width: 100%; max-width: none; margin: 0; padding: 12px 16px 0; overflow: hidden; }
+  .workspace[data-mobile-preview-open="true"] :global(.guided-layout) > aside { flex: 0 0 46%; }
+  .workspace[data-intro-layout="true"][data-mobile-preview-open="true"] :global(.guided-workspace) { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-gutter: stable; padding-bottom: 16px; }
+}

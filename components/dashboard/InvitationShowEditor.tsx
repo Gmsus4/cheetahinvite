@@ -20,7 +20,7 @@ import { InvitationFontSelect } from "./InvitationFontSelect";
 import { InvitationTextColorPicker } from "./InvitationTextColorPicker";
 import { invitationPaletteChanges } from "@/lib/invitation-palette-selection";
 import { InvitationPalettePicker } from "./InvitationPalettePicker";
-import { SectionFields, SectionTextAlignmentFields, SectionPhotoFields, SectionSurfaceFields } from "./InvitationSectionFields";
+import { CountdownCalendarFields, SectionFields, SectionTextAlignmentFields, SectionPhotoFields, SectionSurfaceFields } from "./InvitationSectionFields";
 import { InvitationIconsPicker } from "./InvitationIconsPicker";
 import { InvitationSectionMarginPicker } from "./InvitationSectionMarginPicker";
 import { InvitationCornersPicker } from "./InvitationCornersPicker";
@@ -166,6 +166,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
         </>}
         {(target.kind === "date" || target.kind === "location") && <DateFields values={values} patch={patch} expiresAt={event.expiresAt} isExample={event.isExample} />}
         {target.kind === "date" && countdownSection && <>
+          <CountdownCalendarFields section={countdownSection} onChange={changes => patch({ sections: values.sections.map(item => item.id === countdownSection.id ? { ...item, ...changes } : item) })} />
           <Field label="Mostrar cuenta regresiva" id="show-countdown-enabled"><input id="show-countdown-enabled" type="checkbox" checked={countdownSection.enabled} onChange={e => patch({ sections: values.sections.map(item => item.id === countdownSection.id ? { ...item, enabled: e.target.checked } : item) })} /></Field>
           <Field label="Título de la sección" id="show-countdown-title"><input id="show-countdown-title" maxLength={100} value={countdownSection.title} onChange={e => patch({ sections: values.sections.map(item => item.id === countdownSection.id ? { ...item, title: e.target.value } : item) })} /></Field>
         </>}

@@ -1,3 +1,5 @@
+import { invitationMusicPlayer } from "./invitation-music";
+
 export function invitationExternalUrl(value: string): string | null {
   try {
     const url = new URL(value);
@@ -12,6 +14,7 @@ export function invitationLinkLabel(type: string): string {
     case "location": return "Cómo llegar";
     case "rsvp": return "Confirmar asistencia";
     case "gifts": return "Consultar mesa de regalos";
+    case "dress_code": return "Ver inspiración en Pinterest";
     case "gallery": return "Ver galería";
     case "music": return "Escuchar playlist";
     case "ceremony": case "reception": return "Abrir mapa";
@@ -41,6 +44,10 @@ export function invitationGoogleMapsUrl(value: string): string | null {
 
 export function invitationSectionUrl(type: string, value: string): string | null {
   const input = value.trim();
+  if (type === "music") {
+    const player = invitationMusicPlayer(input);
+    if (player) return player.href;
+  }
   const external = invitationExternalUrl(input);
   if (external || !input || (type !== "location" && type !== "ceremony" && type !== "reception")) return external;
   // Accept pasted Maps links without a scheme, too.

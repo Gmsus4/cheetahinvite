@@ -81,12 +81,16 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
 .celebration-invitation .wa-section-icon { display: block; width: 44px; height: 44px; margin: 0 auto 22px; stroke-width: 1; }
 .celebration-invitation .wa-button { display: inline-flex; min-height: 44px; max-width: 100%; align-items: center; justify-content: center; gap: 15px; margin: 24px auto 0; padding: 10px 24px; border: 1px solid #fffaf245; border-radius: 999px; background: #fffaf21a; color: var(--wa-ink); font: 500 12px/1.6 var(--wa-body); text-decoration: none; transition: background .2s; }
 .celebration-invitation .wa-button:hover { background: #fffaf230; }
+.celebration-invitation .wa-music-player { width: 100%; min-width: 0; max-width: 660px; margin: 24px auto 0; overflow: hidden; border-radius: 12px; }
+.celebration-invitation .wa-music-player iframe { display: block; width: 100%; border: 0; }
+.celebration-invitation .wa-music-player[data-provider="YouTube"] iframe { height: auto; aspect-ratio: 16 / 9; min-height: 200px; }
 .celebration-invitation .wa-button svg { flex: 0 0 15px; width: 15px; height: 15px; }
 .celebration-invitation .wa-panel > .wa-detail { margin: -6px 0 20px; font-size: 16px; letter-spacing: .02em; }
 .celebration-invitation .wa-timeline { padding: 0; margin: 0; list-style: none; text-align: left; }
 .celebration-invitation .wa-timeline li { display: flex; gap: 24px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid #fffaf21c; }
 .celebration-invitation .wa-timeline li:last-child { border: 0; padding-bottom: 0; }
 .celebration-invitation .wa-timeline-time { flex: 0 0 68px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.celebration-invitation .wa-timeline[data-time-format="12h"] .wa-timeline-time { flex-basis: 96px; white-space: nowrap; }
 .celebration-invitation .wa-timeline li > span:last-child { min-width: 0; overflow-wrap: anywhere; color: var(--wa-soft); font-size: 14px; }
 .celebration-invitation .wa-photo-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 24px -20px -20px; }
 .celebration-invitation .wa-photo-grid figure { display: block; overflow: hidden; border-radius: 10px; }

@@ -31,6 +31,42 @@ function loadComponents(hooks) {
   return load;
 }
 
+test('countdown calendar button is opt-in and follows countdown visibility and event date', () => {
+  const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
+  const section = { id: 'countdown', type: 'countdown', title: 'Falta poco', content: '', detail: '', link: '', imageUrl: '', enabled: true };
+  const values = { name: 'Celebración', hostNames: 'Alex', eventDateKey: '2027-01-01', eventTime: '18:00', date: '', venue: 'Jardín', address: 'Calle 1', message: '', imageUrl: '', accent: '#58664E' };
+  const render = (changes = {}, props = {}) => renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...values, ...props, sections: [{ ...section, ...changes }] }));
+  assert.doesNotMatch(render(), /Agregar al calendario/);
+  const visible = render({ showCalendarButton: true });
+  assert.match(visible, /Agregar al calendario/);
+  assert.match(visible, /calendar.google.com/);
+  const href = visible.match(/href="(https:\/\/calendar.google.com[^\"]+)"/)[1].replace(/&amp;/g, '&');
+  const params = new URL(href).searchParams;
+  assert.equal(params.get('text'), values.name);
+  assert.equal(params.get('dates'), '20270102T000000Z/20270102T000000Z');
+  assert.equal(params.get('location'), 'Jardín, Calle 1');
+  const itinerary = { ...section, id: 'program', type: 'program', content: '16:30 — Llegada\n19:00 — Cena' };
+  const withItinerary = renderToStaticMarkup(React.createElement(CelebrationInvitation, { ...values, sections: [{ ...section, showCalendarButton: true }, itinerary] }));
+  const itineraryHref = withItinerary.match(/href="(https:\/\/calendar.google.com[^\"]+)"/)[1].replace(/&amp;/g, '&');
+  assert.equal(new URL(itineraryHref).searchParams.get('dates'), '20270101T223000Z/20270102T010000Z');
+  assert.doesNotMatch(render({ showCalendarButton: true }, { eventDateKey: '2027-02-30' }), /Agregar al calendario/);
+  assert.doesNotMatch(render({ showCalendarButton: false }), /Agregar al calendario/);
+  assert.doesNotMatch(render({ showCalendarButton: true, enabled: false }), /Agregar al calendario/);
+  assert.doesNotMatch(render({ showCalendarButton: true }, { eventDateKey: '' }), /Agregar al calendario/);
+});
+
+test('calendar settings retain the toggle without asking for an organizer link', () => {
+  const { CountdownCalendarFields } = loadComponents()('components/dashboard/InvitationSectionFields.tsx');
+  const section = { id: 'countdown', type: 'countdown', link: 'https://example.com/event' };
+  const render = enabled => renderToStaticMarkup(React.createElement(CountdownCalendarFields, { section: { ...section, showCalendarButton: enabled }, onChange() {} }));
+  assert.match(render(false), /class="guided-toggle guided-include-toggle"/);
+  assert.match(render(false), /role="switch"/);
+  assert.match(render(false), /class="guided-switch"/);
+  assert.doesNotMatch(render(false), /type="url"/);
+  assert.doesNotMatch(render(true), /type="url"|Enlace del calendario/);
+  assert.match(render(true), /Google Calendar/);
+});
+
 test('editor location placeholders are available before typing and stay out of public and hero invitations', () => {
   const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
   const values = { name: 'Mi invitación', hostNames: 'Alex', date: '', venue: '', address: '', message: '', imageUrl: '', sections: [], accent: '#58664E' };
@@ -436,6 +472,41 @@ test('disabled photos and empty sections are omitted, optional music and custom 
   assert.match(html, /Guardar confirmación/);
 });
 
+test('playlist fields accept embed code and invitations render trusted players with an external fallback', () => {
+  const load = loadComponents();
+  const { SectionFields } = load('components/dashboard/InvitationSectionFields.tsx');
+  const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');
+  const section = { id: 'music', type: 'music', title: 'Nuestra playlist', content: '', detail: '', imageUrl: '', enabled: true, link: '<iframe src="https://open.spotify.com/embed/playlist/abc123" onload="evil()"></iframe>' };
+  const fields = renderToStaticMarkup(React.createElement(SectionFields, { section, onChange() {}, uploadProps: { eventId: '', onBusyChange() {} } }));
+  assert.match(fields, /<textarea id="music-link"/);
+  assert.match(fields, /Reproductor de Spotify listo/);
+  const render = extra => renderToStaticMarkup(React.createElement(CelebrationInvitation, {
+    name: 'Celebración', hostNames: 'Alex', date: '', venue: '', address: '', message: '', imageUrl: '', accent: '#58664e', sections: [{ ...section, ...extra }],
+  }));
+  const html = render({});
+  assert.match(html, /<iframe src="https:\/\/open.spotify.com\/embed\/playlist\/abc123"/);
+  assert.match(html, /title="Reproductor de Spotify: Nuestra playlist"/);
+  assert.match(html, /href="https:\/\/open.spotify.com\/playlist\/abc123"/);
+  assert.doesNotMatch(html, /evil\(\)|onload|srcdoc/);
+  const fallback = render({ link: 'https://example.com/playlist' });
+  assert.doesNotMatch(fallback, /<iframe/);
+  assert.match(fallback, /href="https:\/\/example.com\/playlist"/);
+  assert.doesNotMatch(render({ link: '<iframe src="https://evil.test/player"></iframe>' }), /<iframe|evil.test/);
+  assert.doesNotMatch(render({ enabled: false }), /<iframe|Nuestra playlist/);
+  for (const [link, host] of [
+    ['https://music.youtube.com/playlist?list=PL_123', 'www.youtube-nocookie.com'],
+    ['https://music.apple.com/mx/playlist/favorites/pl.123', 'embed.music.apple.com'],
+    ['https://soundcloud.com/artist/sets/favorites', 'w.soundcloud.com'],
+  ]) assert.ok(render({ link }).includes(`<iframe src="https://${host}/`));
+  const changes = [];
+  const editor = SectionFields({ section, onChange: patch => changes.push(patch), uploadProps: { eventId: '', onBusyChange() {} } });
+  const content = editor.props.children[0];
+  const fieldsTree = content.type(content.props);
+  const field = fieldsTree.props.children.find(child => child?.props?.id === 'music-link');
+  field.props.children.props.onChange({ target: { value: section.link } });
+  assert.deepEqual(changes, [{ link: 'https://open.spotify.com/embed/playlist/abc123' }]);
+});
+
 test('shared invitation rendering applies independent heading and body font choices',()=>{
  const load=loadComponents();const {CelebrationInvitation}=load('components/invitation/CelebrationInvitation.tsx');
  const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,{
@@ -682,6 +753,28 @@ test('program editing preserves legacy activities, optional times, midnight orde
   assert.equal(parseInvitationProgram('5:30 p. m. — Brindis')[0].time,'17:30');
   assert.equal(parseInvitationProgram('12:00 a.m. — Despedida')[0].time,'00:00');
   for(const activity of ['99:00 — Una nota','24:00 — Una nota','12:99 — Una nota','Un texto - con guion']) assert.deepEqual(parseInvitationProgram(activity),[{time:'',activity}]);
+});
+
+test('program time display supports 12 and 24 hours without altering stored activities',()=>{
+ const load=loadComponents();
+ const {CelebrationInvitation}=load('components/invitation/CelebrationInvitation.tsx');
+ const {formatInvitationProgramTime}=load('lib/invitation-program.ts');
+ for(const [time,expected] of [['00:00','12:00 a. m.'],['12:00','12:00 p. m.'],['18:30','6:30 p. m.'],['09:05','9:05 a. m.']]) {
+  assert.equal(formatInvitationProgramTime(time,'12h'),expected);
+  assert.equal(formatInvitationProgramTime(time,'24h'),time);
+ }
+ const base={name:'Fiesta',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'',accent:'#58664E'};
+ const section={id:'program',type:'program',title:'Itinerario',content:'18:30 — Llegada',detail:'',link:'',imageUrl:'',enabled:true};
+ for(const format of [undefined,'24h','12h']) {
+  const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,{...base,sections:[{...section,programTimeFormat:format}]}));
+  assert.ok(html.includes(format==='12h'?'6:30 p. m.':'18:30'));
+ }
+ const {SectionFields}=load('components/dashboard/InvitationSectionFields.tsx');
+ const fields=renderToStaticMarkup(React.createElement(SectionFields,{section:{...section,programTimeFormat:'12h'},onChange(){},uploadProps:{eventId:'',onBusyChange(){}}}));
+ assert.match(fields,/Formato de hora/);
+ assert.match(fields,/id="program-time-format" type="checkbox" role="switch"[^>]*checked=""/);
+ assert.match(fields,/>24 h<\/span>/);
+ assert.match(fields,/>12 h<\/span>/);
 });
 
 test('program preview keeps descriptions intact and omits empty editing rows',()=>{

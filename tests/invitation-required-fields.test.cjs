@@ -2,6 +2,15 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');
 const {createFixture}=require('./helpers/cloudinary-fixture.cjs');
 function setup(){const f=createFixture();const {initialGuidedValues}=f.load('lib/guided-invitation.ts');return{...f.load('lib/invitation-required-fields.ts'),values:initialGuidedValues({id:'',eventType:'birthday',sections:[]})};}
+
+test('calendar button uses invitation data without requiring an organizer link',()=>{
+ const {values,requiredSectionFields:validate}=setup();
+ const section={...values.sections.find(s=>s.type==='countdown'),showCalendarButton:true};
+ assert.deepEqual(validate({...section,link:''}),[]);
+ assert.deepEqual(validate({...section,link:'https://calendar.google.com/calendar/event?eid=example'}),[]);
+ assert.deepEqual(validate({...section,showCalendarButton:false}),[]);
+ assert.deepEqual(validate({...section,enabled:false}),[]);
+});
 test('creation requires names, date, time and venue with either an address or a location link',()=>{
  const {values,creationRequiredFields:validate}=setup();
  assert.deepEqual(validate({...values,name:' '}).map(e=>e.field),['w-hosts','w-name','w-date','w-time','w-venue','w-address']);
@@ -30,6 +39,8 @@ test('program requires named activities and playlist requires a valid web link',
  assert.ok(validate(music).some(e=>e.field.endsWith('-link')));
  assert.ok(validate({...music,link:'javascript:alert(1)'}).length);
  assert.deepEqual(validate({...music,link:'https://example.com/playlist'}),[]);
+ assert.deepEqual(validate({...music,link:'<iframe src="https://open.spotify.com/embed/playlist/abc123"></iframe>'}),[]);
+ assert.ok(validate({...music,link:'<iframe src="https://example.com/player"></iframe>'}).length);
 });
 test('ceremony requires its place, schedule and address while gifts and extra info accept a message or link',()=>{
  const {values,requiredSectionFields:validate}=setup();

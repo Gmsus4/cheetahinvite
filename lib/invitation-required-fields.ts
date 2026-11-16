@@ -1,5 +1,6 @@
 import type { EditorValues, InviteSection } from './invitation-editor';
 import { parseInvitationProgram } from './invitation-program';
+import { invitationMusicPlayer } from './invitation-music';
 import { usesPrimaryLocation } from './invitation-sections';
 import { parseInvitationWhatsAppLink, splitWhatsAppPhone } from './invitation-whatsapp';
 
@@ -38,7 +39,11 @@ export function requiredSectionFields(section: InviteSection, requirePhotos = fa
       if (!link) add('map','Agrega la dirección o el enlace de la ceremonia.');
       break;
     case 'music':
-      if (!webLink(link)) add('link','Agrega un enlace válido a la playlist.');
+      if (!webLink(link) && !invitationMusicPlayer(link)) add('link','Agrega un enlace válido o un iframe de Spotify, YouTube, Apple Music o SoundCloud.');
+      break;
+    case 'dress_code':
+      if (!text) add('content','Completa el texto de este bloque o desactívalo para continuar.');
+      if (link && !webLink(link)) add('link','Escribe un enlace válido que comience con https:// o http://.');
       break;
     case 'gifts': case 'custom':
       if (!text && !link) add('content', section.type === 'gifts' ? 'Escribe un mensaje sobre los regalos o agrega un enlace.' : 'Escribe la información adicional o agrega un enlace.');

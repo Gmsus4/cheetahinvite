@@ -10,6 +10,7 @@ import { RSVP_LIMITS, rsvpCompanionLimit } from "@/lib/rsvp";
 import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
 import { InvitationSectionMarginPicker } from "./InvitationSectionMarginPicker";
 import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
+import { invitationMusicPlayer, normalizeInvitationMusicInput } from "@/lib/invitation-music";
 
 type SectionFieldsProps = { fieldErrors?: Record<string, string>; deferGalleryPhotos?: boolean; globalPanelStyle?: InvitationPanelStyle; globalShowIcons?: boolean; section: InviteSection; onChange(changes: Partial<InviteSection>): void; uploadProps: { eventId: string; ensureEvent?: () => Promise<string>; onBusyChange(active: boolean): void }; allowSectionPhoto?: boolean; showStyleControls?: boolean; mediaClassName?: string; locationFields?: ReactNode };
 
@@ -18,6 +19,15 @@ function Field({ label, id, help, wide, children, errors = {} }: { errors?: Reco
   const control = isValidElement<{ 'aria-invalid'?: boolean; 'aria-describedby'?: string }>(children) && typeof children.type === 'string' && ['input', 'select', 'textarea'].includes(children.type)
     ? cloneElement(children, { 'aria-invalid': error ? true : children.props['aria-invalid'], 'aria-describedby': [children.props['aria-describedby'], error ? `${id}-error` : null].filter(Boolean).join(' ') || undefined }) : children;
   return <div className={`guided-field${wide ? " guided-wide" : ""}`} data-preview-field={id} data-preview-label={label}><label htmlFor={id}>{label}</label>{control}{errors[id] && <small id={`${id}-error`} role="alert" style={{ color: "var(--danger)" }}>{errors[id]}</small>}{help && <small>{help}</small>}</div>;
+}
+
+export function CountdownCalendarFields({ section, onChange }: Pick<SectionFieldsProps, "section" | "onChange">) {
+  return <>
+    <label className="guided-toggle guided-include-toggle" htmlFor={`${section.id}-calendar`}>
+      <span><strong>Mostrar botón Agregar al calendario</strong><small>Tus invitados podrán guardar el evento en Google Calendar con el nombre, la fecha y el lugar de la invitación. El inicio y el término se toman de la primera y la última hora del itinerario. Si no tiene horario, se usa la hora de «Fecha y lugar».</small></span>
+      <input id={`${section.id}-calendar`} type="checkbox" role="switch" checked={section.showCalendarButton === true} onChange={event => onChange({ showCalendarButton: event.target.checked })} /><span className="guided-switch" aria-hidden="true" />
+    </label>
+  </>;
 }
 
 export function SectionTextAlignmentFields({ section, onChange }: Pick<SectionFieldsProps, "section" | "onChange">) {
@@ -42,6 +52,7 @@ export function SectionFields(props: SectionFieldsProps) {
 
 function SectionContentFields({ section, onChange, uploadProps, allowSectionPhoto = false, showStyleControls = true, globalShowIcons = true, globalPanelStyle = "auto", mediaClassName, locationFields, deferGalleryPhotos = false, fieldErrors = {} }: SectionFieldsProps) {
   const prefix = section.id;
+  const musicPlayer = section.type === "music" ? invitationMusicPlayer(section.link) : null;
   const companionLimit = rsvpCompanionLimit(section.maxCompanions);
   const updateCompanionLimit = (value: number) => onChange({ maxCompanions: Number.isFinite(value) ? Math.min(RSVP_LIMITS.companions, Math.max(0, Math.trunc(value))) : 0 });
   const mediaClass = `guided-section-media${mediaClassName ? ` ${mediaClassName}` : ""}`;
@@ -54,6 +65,7 @@ function SectionContentFields({ section, onChange, uploadProps, allowSectionPhot
   if (section.type === "countdown") return <>
     <Field errors={fieldErrors} label="Título de la sección" id={`${prefix}-title`}><input id={`${prefix}-title`} value={section.title} maxLength={100} onChange={e => onChange({ title: e.target.value })} /></Field>
     <small>La cuenta regresiva usa la fecha y la hora de «Fecha y lugar» y aparece dentro de la portada en escritorio, o debajo de ella en móvil, cuando hay una fecha definida.</small>
+    <CountdownCalendarFields section={section} onChange={onChange} />
     {surfaceControl}
   </>;
   if (section.type === "location") return <>
@@ -80,9 +92,23 @@ function SectionContentFields({ section, onChange, uploadProps, allowSectionPhot
         <button type="button" aria-label="Agregar un acompañante" disabled={companionLimit === RSVP_LIMITS.companions} onClick={() => updateCompanionLimit(companionLimit + 1)}><FiPlus aria-hidden="true" /></button>
       </div>
     </Field>}
+    {section.type === "program" && <div className="guided-time-format-row">
+      <span>Formato de hora</span>
+      <label className="guided-toggle guided-time-format" htmlFor={`${prefix}-time-format`}>
+        <span>24 h</span>
+        <input id={`${prefix}-time-format`} type="checkbox" role="switch" aria-label="Mostrar horas en formato de 12 horas con a. m. y p. m." checked={section.programTimeFormat === "12h"} onChange={event => onChange({ programTimeFormat: event.target.checked ? "12h" : "24h" })} />
+        <span className="guided-switch" aria-hidden="true" />
+        <span>12 h</span>
+      </label>
+    </div>}
     {section.type === "program" ? <InvitationProgramFields fieldErrors={fieldErrors} id={prefix} content={section.content} onChange={content => onChange({ content })} /> : <Field errors={fieldErrors} label={({ story: "Cuenta la historia de tu celebración", ceremony: "Nombre del lugar de la ceremonia", reception: "Nombre del lugar de la recepción", parents: "Nombres de las personas que quieres mencionar", dress_code: "¿Cómo deben vestir tus invitados?", gifts: "Mensaje sobre los regalos", rsvp: "Texto de la sección (opcional)", music: "Mensaje para la playlist", custom: "Información adicional" } as Record<string, string>)[section.type]} id={`${prefix}-content`}><textarea id={`${prefix}-content`} rows={section.type === "story" ? 10 : ["ceremony", "reception"].includes(section.type) ? 3 : 6} data-short-content={["ceremony", "reception"].includes(section.type)} value={section.content} maxLength={2000} placeholder={({ story: "Todo empezó cuando…", ceremony: "Ej. Parroquia San José", reception: "Ej. Jardín Las Rosas", dress_code: "Ej. Casual, con calzado cómodo.", gifts: "Tu compañía es nuestro mejor regalo…" } as Record<string, string>)[section.type]} onChange={e => onChange({ content: e.target.value })} /></Field>}
     {(section.type === "ceremony" || section.type === "reception") && <><Field errors={fieldErrors} label="Horario" id={`${prefix}-time`}><input id={`${prefix}-time`} value={section.detail} maxLength={240} placeholder="Ej. 5:00 p. m." onChange={e => onChange({ detail: e.target.value })} /></Field><Field errors={fieldErrors} label="Dirección o enlace de Google Maps" id={`${prefix}-map`}><input id={`${prefix}-map`} value={section.link} maxLength={500} placeholder="Calle, número y ciudad, o enlace de Maps" onChange={e => onChange({ link: e.target.value })} /></Field></>}
-    {(section.type === "gifts" || section.type === "music" || section.type === "custom") && <Field errors={fieldErrors} label={section.type === "gifts" ? "Enlace a la mesa de regalos (opcional)" : section.type === "music" ? "Enlace a la playlist" : "Enlace adicional (opcional)"} id={`${prefix}-link`}><input id={`${prefix}-link`} type="url" maxLength={500} value={section.link} placeholder="https://…" onChange={e => onChange({ link: e.target.value })} /></Field>}
+    {section.type === "music" && <Field errors={fieldErrors} label="Enlace o código iframe de la playlist" id={`${prefix}-link`} help="Pega el enlace o el código de Compartir → Insertar de Spotify, YouTube, Apple Music o SoundCloud. Otros enlaces se mostrarán como un botón.">
+      <textarea id={`${prefix}-link`} rows={3} maxLength={4000} value={section.link} placeholder={'https://open.spotify.com/playlist/… o <iframe src="…"></iframe>'} onChange={e => onChange({ link: normalizeInvitationMusicInput(e.target.value) })} aria-describedby={`${prefix}-player-help`} />
+    </Field>}
+    {section.type === "music" && <small id={`${prefix}-player-help`} role="status">{musicPlayer ? `Reproductor de ${musicPlayer.provider} listo. Aparecerá dentro de tu invitación.` : section.link.trim().startsWith('<') ? 'No reconocemos este iframe. Usa el código de Spotify, YouTube, Apple Music o SoundCloud.' : 'La reproducción comienza cuando tu invitado presiona play. Algunos servicios pueden requerir iniciar sesión.'}</small>}
+    {section.type === "dress_code" && <Field errors={fieldErrors} label="Enlace de Pinterest (opcional)" id={`${prefix}-link`} help="Comparte un tablero o un pin con ideas de vestimenta para tus invitados."><input id={`${prefix}-link`} type="url" maxLength={500} value={section.link} placeholder="https://www.pinterest.com/…" onChange={e => onChange({ link: e.target.value })} /></Field>}
+    {(section.type === "gifts" || section.type === "custom") && <Field errors={fieldErrors} label={section.type === "gifts" ? "Enlace a la mesa de regalos (opcional)" : "Enlace adicional (opcional)"} id={`${prefix}-link`}><input id={`${prefix}-link`} type="url" maxLength={500} value={section.link} placeholder="https://…" onChange={e => onChange({ link: e.target.value })} /></Field>}
     {section.type === "rsvp" && section.rsvpMode !== "integrated" && <InvitationWhatsAppFields fieldErrors={fieldErrors} key={section.id} section={section} onChange={onChange} />}
     {allowSectionPhoto && <section className={mediaClass} aria-label="Fotografía y acabado de esta sección">{surfaceControl}<SectionPhotoFields section={section} onChange={onChange} uploadProps={uploadProps} /></section>}
   </>;

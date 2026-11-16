@@ -4,7 +4,7 @@ import { invitationSectionLabels } from "@/lib/invitation-sections";
 
 import { cloneElement, isValidElement, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { FiArrowLeft, FiArrowRight, FiChevronDown, FiCheck, FiEye, FiLock, FiSave, FiPlus } from "react-icons/fi";
+import { FiArrowLeft, FiArrowRight, FiChevronDown, FiChevronUp, FiCheck, FiEye, FiLock, FiSave, FiPlus } from "react-icons/fi";
 import { prepareEvent } from "@/app/crear/actions";
 import { publishEvent, updateEvent } from "@/app/dashboard/eventos/[id]/actions";
 
@@ -70,6 +70,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const [visualSession, setVisualSession] = useState<{ tab: Window; eventId: string; token: string; snapshot: string } | null>(null);
   const [validationAttempted, setValidationAttempted] = useState(false);
   const [previewSelection, setPreviewSelection] = useState<{ context: string; focus: PreviewTarget } | null>(null);
+  const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
   const requiredIssues = requiredInformation ? creationRequiredFields(values) : [];
   const fieldErrors = Object.fromEntries((validationAttempted ? requiredIssues : []).map(issue => [issue.field, issue.message]));
   const flowSteps = [0, 1, 4, 2, 7, 5, 6];
@@ -155,6 +156,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     heading.current?.focus({ preventScroll: true });
     if (scrollToTop.current) {
       scrollToTop.current = false;
+      form.current?.closest('.guided-workspace')?.scrollTo({ top: 0 });
       window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
     }
   }, [step, activeSection, appearanceStep]);
@@ -183,7 +185,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   const details = guidedDetails(values.eventType);
   const editableSections = [...values.sections.filter(section => section.type === "countdown"), ...values.sections.filter(section => section.type === "location"), ...details.flatMap(detail => values.sections.filter(section => section.type === detail.type))];
   const contentIds = guidedContentSectionIds(values.eventType, values.sections, activeSection);
-  const informationSections = editableSections.filter(section => !['cover', 'countdown', 'location'].includes(section.type));
+  const informationSections = editableSections.filter(section => !['cover', 'location'].includes(section.type));
   const availableSections = (guidedFlow ? informationSections : editableSections).filter(section => !section.enabled);
   const includedSections = guidedFlow ? informationSections.filter(section => section.enabled) : [...values.sections.filter(section => section.type === "cover"), ...editableSections.filter(section => section.enabled)];
   const journeyContentIds = guidedFlow ? guidedInformationSectionIds(values.eventType, values.sections, activeSection) : contentIds;
@@ -386,6 +388,9 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
 
   const journeyNavigation = <div className={`guided-bottom-bar ${styles.journeyNavigation}`}>
             <button className="guided-back" type="button" aria-label="Paso anterior" disabled={step === 0 || busy || uploads > 0} onClick={previousJourney}><FiArrowLeft /><span className="guided-bottom-label">Anterior</span></button>
+            <button className={styles.mobilePreviewToggle} type="button" aria-label={mobilePreviewOpen ? "Ocultar vista previa" : "Mostrar vista previa"} title={mobilePreviewOpen ? "Ocultar vista previa" : "Mostrar vista previa"} aria-expanded={mobilePreviewOpen} aria-controls="creation-phone-preview" onClick={() => setMobilePreviewOpen(current => !current)}>
+              {mobilePreviewOpen ? <FiChevronUp aria-hidden="true" /> : <FiChevronDown aria-hidden="true" />}
+            </button>
             {step !== finalStep ? <button className="button" type="submit" form="guided-invitation-form" aria-label={(step === 3 || (step === 5)) ? appearanceStep < invitationStyleSteps.length - 1 ? `Continuar a ${invitationStyleSteps[appearanceStep + 1].label}` : step === 5 ? "Continuar a revisión" : "Continuar a Personaliza los bloques" : "Continuar al siguiente paso"} disabled={busy || uploads > 0}><span className="guided-bottom-label">{continueLabel}</span><FiArrowRight /></button> : <div className="guided-footer-actions">
               <button className={`button${!exampleId && !event.paidAt && !published ? " guided-save-compact" : ""}`} type="button" aria-label={saveLabel} title={saveLabel} data-save-state={changesSaved ? "saved" : undefined} disabled={busy || uploads > 0 || changesSaved || (!creation && !dirty)} onClick={() => void save()}>{changesSaved ? <FiCheck aria-hidden="true" /> : <FiSave aria-hidden="true" />}<span className="guided-bottom-label" role="status">{saveLabel}</span></button>
               {!exampleId && !event.paidAt && !published && <button className="button guided-publish" type="button" aria-label={event.complimentaryAt ? "Publicar con mi cortesía" : "Guardar y continuar al pago"} title={issues.length ? "Completa los datos indicados antes de publicar" : undefined} disabled={busy || uploads > 0 || issues.length > 0} onClick={() => void save(true)}><span className="guided-bottom-label">{saving ? "Guardando…" : event.complimentaryAt ? "Publicar cortesía" : "Continuar al pago"}</span><span className="guided-mobile-payment-label">{event.complimentaryAt ? "Publicar" : "Pagar"}</span><FiArrowRight aria-hidden="true" /></button>}
@@ -403,7 +408,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
             </div>}
           </div>;
 
-  return <main className={`guided-editor ${styles.workspace}`} data-intro-layout="true" data-live-preview="true" data-final-step={step === finalStep} data-example-editor={exampleId ? "true" : undefined} data-short-step={step === 0 || step === 1 || step === 2 || step === 3}>
+  return <main className={`guided-editor ${styles.workspace}`} data-intro-layout="true" data-live-preview="true" data-mobile-preview-open={mobilePreviewOpen} data-final-step={step === finalStep} data-example-editor={exampleId ? "true" : undefined} data-short-step={step === 0 || step === 1 || step === 2 || step === 3}>
     {protection.recovery && <EditorRecoveryDialog onRecover={recover} onDiscard={() => persistence.discardRecovery()} />}
     {navigation.destination && <EditorLeaveDialog onStay={navigation.stay} onLeave={navigation.leave} onSaveAndLeave={() => void saveAndExit(navigation.destination!)} saving={saving} saveDisabled={busy || uploads > 0} uploading={uploads > 0} error={protection.error} saveLabel={saveAndExitLabel} publishesChanges={published} />}
     <DashboardHeader name={account?.name || "Usuario"} email={account?.email || ""} image={account?.image} guard={confirmNavigation} />
@@ -525,7 +530,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
         </form>
         </div>
       </div>
-      <CreationInvitationPreview values={values} date={date} focus={previewFocus} />
+      <CreationInvitationPreview values={values} date={date} focus={previewFocus} mobileOpen={mobilePreviewOpen} />
     </div>
     {step >= 4 && !guidedFlow && <button className="guided-mobile-preview" type="button" disabled={busy || uploads > 0} onClick={() => void openPrivatePreview()} aria-label={preparingPreview ? "Abriendo vista previa…" : "Abrir vista previa privada"} title="Abrir vista previa privada"><FiEye aria-hidden="true" /></button>}
   </main>;

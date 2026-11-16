@@ -5,14 +5,22 @@ const {randomUUID}=require('node:crypto');
 const {createFixture}=require('./helpers/cloudinary-fixture.cjs');
 function setup(){const f=createFixture();return {f,...f.load('lib/guided-invitation.ts')};}
 
-test('creation information journey excludes visual blocks and retains added information and recovery', () => {
+test('blocks journey includes countdown settings and retains added information and recovery', () => {
  const {guidedSections,guidedInformationSectionIds,guidedRecoveryStep,guidedRecoverySection}=setup();
  for(const type of ['wedding','birthday','graduation','baby_shower','anniversary','other']) {
   const sections=guidedSections(type);
   const ids=guidedInformationSectionIds(type,sections);
   assert.equal(ids.at(-1),'__more');
   assert.ok(ids.includes(sections.find(s=>s.type==='story').id));
-  for(const visual of ['cover','countdown','location']) assert.ok(!ids.includes(sections.find(s=>s.type===visual).id));
+  for(const visual of ['cover','location']) assert.ok(!ids.includes(sections.find(s=>s.type===visual).id));
+  const countdown=sections.find(s=>s.type==='countdown');
+  assert.equal(ids[0],countdown.id);
+  countdown.showCalendarButton=true;
+  assert.equal(guidedRecoverySection({step:4,activeExtra:countdown.id,flow:'content-v7'},sections),countdown.id);
+  countdown.enabled=false;
+  assert.ok(guidedInformationSectionIds(type,sections).includes(countdown.id));
+  assert.ok(guidedInformationSectionIds(type,sections,countdown.id).includes(countdown.id));
+  countdown.enabled=true;
   const gallery=sections.find(s=>s.type==='gallery');
   assert.ok(!ids.includes(gallery.id));gallery.enabled=true;
   assert.ok(guidedInformationSectionIds(type,sections).includes(gallery.id));

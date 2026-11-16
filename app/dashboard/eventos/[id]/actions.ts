@@ -331,6 +331,8 @@ function isValidSection(value: unknown): value is {
   if (!strings.every((key) => typeof section[key] === "string")) return false;
   if (typeof section.enabled !== "boolean" || !types.includes(section.type as string)) return false;
   if (section.showIcon !== undefined && typeof section.showIcon !== "boolean") return false;
+  if (section.showCalendarButton !== undefined && (section.type !== "countdown" || typeof section.showCalendarButton !== "boolean")) return false;
+  if (section.programTimeFormat !== undefined && (section.type !== "program" || !["24h", "12h"].includes(section.programTimeFormat as string))) return false;
   if (section.titleCustomized !== undefined && typeof section.titleCustomized !== "boolean") return false;
   if (section.maxCompanions !== undefined && (section.type !== "rsvp" || !validCompanionLimit(section.maxCompanions))) return false;
   if (section.rsvpMode !== undefined && (section.type !== "rsvp" || !["external", "integrated"].includes(section.rsvpMode as string))) return false;
