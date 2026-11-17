@@ -1,21 +1,19 @@
 import { FiArrowUpRight, FiCalendar, FiCheck } from "react-icons/fi";
-import { Suspense } from "react";
+import { cacheLife } from "next/cache";
 import { getCurrentPrice } from "@/lib/site-pricing";
 
 const features = [
-  "Invitación personalizable",
-  "Enlace público para compartir",
-  "Fotos, colores y tipografías",
+  "Fotos, textos, colores y tipografías",
+  "Secciones que eliges para tu evento",
+  "Enlace público o protegido con PIN",
   "Confirmación de asistencia opcional",
   "Lista de respuestas y descarga para Excel",
   "Edición durante la vigencia",
 ];
 
-export function Pricing() {
-  return <Suspense fallback={<section className="pricing-section" aria-busy="true" style={{ minHeight: 350 }} />}><PricingContent /></Suspense>;
-}
-
-async function PricingContent() {
+export async function Pricing() {
+  "use cache";
+  cacheLife("minutes");
   const price = await getCurrentPrice();
   return (
     <section className="pricing-section" id="precios" aria-labelledby="home-pricing-title">
@@ -27,8 +25,8 @@ async function PricingContent() {
           <em>un gran comienzo.</em>
         </h2>
         <p>
-          Publica tu invitación con todo listo para compartir. Sin
-          mensualidades, sin complicaciones.
+          Un pago por la publicación de tu evento, con personalización y
+          confirmaciones incluidas. Sin mensualidades ni renovación automática.
         </p>
       </div>
 
@@ -38,7 +36,7 @@ async function PricingContent() {
             <span className="price-label">INVITACIÓN DIGITAL</span>
             <div className="price">{price.label} <span>MXN</span></div>
             <p>IVA incluido · Un pago por evento</p>
-            <span className="price-duration"><FiCalendar aria-hidden="true" /> {price.months} meses activa</span>
+            <span className="price-duration"><FiCalendar aria-hidden="true" /> {price.months} meses desde el pago</span>
           </div>
           <div className="price-action">
             <a className="button" href="/crear">

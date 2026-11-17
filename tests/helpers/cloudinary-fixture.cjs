@@ -105,7 +105,7 @@ function createFixture() {
       if (name === 'server-only') return {};
       if (name === 'next/server') return { NextResponse: Response, connection: async () => {}, after: job => jobs.push(job) };
       if (name === 'next/headers') return { cookies: async () => ({ get: key => fixture.cookies.has(key) ? { value: fixture.cookies.get(key) } : undefined, set: (key, value) => fixture.cookies.set(key, value) }) };
-      if (name === 'next/cache') return { revalidatePath() {} };
+      if (name === 'next/cache') return { revalidatePath() {}, io: async () => {} };
       if (name === 'next/navigation') return { redirect: url => { throw Object.assign(Error('redirect'), { url }); }, notFound: () => { throw Object.assign(Error('not-found'), { status: 404 }); } };
       if (name === '@/auth') return { auth: async () => fixture.owner ? { user: { id: fixture.owner, role: state.users.get(fixture.owner)?.role } } : null };
       if (name === '@/prisma') return { prisma };

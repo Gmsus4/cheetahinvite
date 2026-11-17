@@ -4,19 +4,19 @@ const steps = [
   {
     number: "01",
     title: "Crea tu evento",
-    description: "Agrega el nombre, la fecha, el lugar y los demás datos de tu celebración.",
+    description: "Crea tu cuenta y agrega los protagonistas, la fecha y el lugar. Elige qué detalles incluir.",
     symbol: FiCalendar,
   },
   {
     number: "02",
     title: "Dale tu estilo",
-    description: "Incorpora tus fotos y elige los colores y las tipografías.",
+    description: "Agrega tus fotos, ajusta colores y tipografías y revisa cómo se verá antes de pagar.",
     symbol: FiEdit3,
   },
   {
     number: "03",
     title: "Comparte tu invitación",
-    description: "Publica tu invitación y envía el enlace a tus invitados.",
+    description: "Elige acceso público o con PIN, paga para publicar y envía el enlace por WhatsApp o correo.",
     symbol: FiSend,
   },
 ];
@@ -33,8 +33,8 @@ export function HowItWorks() {
         </h2>
         <div className="how-summary">
           <p>
-            Todo lo que necesitas para invitar, organizar y celebrar, en un solo
-            lugar.
+            De los primeros detalles al enlace que recibirán tus invitados.
+            Tú decides cuándo está lista para publicar.
           </p>
           <a className="how-details-link" href="#precios">
             Ver qué incluye <FiArrowUpRight aria-hidden="true" />

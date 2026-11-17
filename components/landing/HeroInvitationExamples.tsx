@@ -44,8 +44,8 @@ export function HeroInvitationExamples({ examples, priceLabel }: { examples: Eve
       </div>
       {variants.length > 1 && <label className="hero-example-variants">Elige un diseño<select aria-label="Diseño de invitación de ejemplo" value={selected.slug} onChange={event => { setSelectedSlug(event.target.value); trackLandingEvent("example_select", event.target.value); }}>{variants.map(example => <option key={example.slug} value={example.slug}>{example.label}</option>)}</select></label>}
       <div className="hero-example-meta">
-        <span className="hero-example-demo-label">Demo</span>
-        <span className="hero-example-hint">Desde {priceLabel}</span>
+        <span className="hero-example-demo-label">Ejemplo</span>
+        <span className="hero-example-hint">{priceLabel} MXN por evento</span>
         <span className="hero-example-hint" role="status"><FiCheck aria-hidden="true" /> {selected.label} · datos de ejemplo</span>
       </div>
     </div>

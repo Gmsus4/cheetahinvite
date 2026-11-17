@@ -71,7 +71,7 @@ function createPaymentFixture(options = {}) {
       if (name === 'server-only') return {};
       if (name === 'next/server') return { connection: async () => {} };
       if (name === 'next/headers') return { cookies: async () => ({ get: () => undefined }) };
-      if (name === 'next/cache') return { revalidatePath: value => f.invalidations.push(value) };
+      if (name === 'next/cache') return { revalidatePath: value => f.invalidations.push(value), io: async () => {} };
       if (name === 'next/navigation') return { redirect: url => { throw Object.assign(Error('redirect'), { url }); } };
       if (name === '@/auth') return { auth: async () => f.ownerId ? { user: { id: f.ownerId } } : null };
       if (name === '@/prisma') return { prisma: f.prisma };

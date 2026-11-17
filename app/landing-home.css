@@ -362,6 +362,48 @@
   .landing-home .catalog-open-icon { flex-basis: 15px; width: 15px; height: 15px; }
 }
 
+/* Visible, staggered entrances use transforms only so content never disappears. */
+@media (prefers-reduced-motion: no-preference) {
+  .landing-home .hero-copy > :is(.eyebrow, h1, .hero-lead, .hero-actions) {
+    animation: home-hero-enter 750ms cubic-bezier(.22,.68,0,1) both;
+  }
+  .landing-home .hero-copy > h1 { animation-delay: 70ms; }
+  .landing-home .hero-copy > .hero-lead { animation-delay: 140ms; }
+  .landing-home .hero-copy > .hero-actions { animation-delay: 210ms; }
+  .landing-home .hero-copy:focus-within > * { animation: none; }
+  .landing-home .art-spark { animation: home-spark-enter 1000ms 180ms ease-out both; }
+  .landing-home .button { transition: transform 180ms ease, background-color 180ms ease; }
+  .landing-home :is(.button, .text-link, .how-details-link) svg { transition: transform 180ms ease; }
+  .landing-home :is(.text-link, .how-details-link) { transition: color 180ms ease; }
+  .landing-home :is(.steps article, .benefit-card) { transition: transform 220ms cubic-bezier(.22,1,.36,1), border-color 220ms ease; }
+  .landing-home .home-menu-toggle { transition: background-color 180ms ease; }
+  .landing-home :is(.step-paper, .benefit-art > svg, .palette-art > span) { transition: scale 350ms ease, translate 350ms ease; }
+  .landing-home .button:active { transform: translateY(0) scale(.98); }
+}
+@media (max-width: 760px) and (prefers-reduced-motion: no-preference) {
+  .landing-home .main-nav[data-open="true"] { animation: home-menu-enter 180ms ease-out; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .landing-home :is(.steps article, .benefit-card):hover { transform: translateY(-6px); border-color: var(--orange); }
+  .landing-home .steps article:hover .step-paper, .landing-home .benefit-card:hover .benefit-art > svg { scale: 1.08; }
+  .landing-home .benefit-card:hover .palette-art > span { translate: 0 -6px; }
+  .landing-home .palette-art > span:nth-of-type(2) { transition-delay: 50ms; }
+  .landing-home .palette-art > span:nth-of-type(3) { transition-delay: 100ms; }
+  .landing-home :is(.button, .text-link, .how-details-link):hover svg { transform: translate(3px, -3px); }
+}
+@keyframes home-hero-enter {
+  from { transform: translateY(20px); }
+  to { transform: translateY(0); }
+}
+@keyframes home-spark-enter {
+  from { transform: rotate(-45deg) scale(.65); }
+  to { transform: rotate(0) scale(1); }
+}
+@keyframes home-menu-enter {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* Keep the floating labels on the pixel grid for crisp text. */
 .landing-home .hero-product-stage .floating-note { transform: none; color: var(--ink); font-size: 12px; line-height: 1.5; }
 .landing-home .hero-product-stage .floating-note b { font-size: 12px; }

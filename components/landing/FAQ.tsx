@@ -19,25 +19,33 @@ const questions = [
   },
   {
     question: "¿Qué puedo personalizar?",
-    answer: "Puedes cambiar los textos, las fotos, los colores y las tipografías. También puedes elegir las secciones que necesites, como ubicación, programa y confirmación de asistencia.",
+    answer: "Puedes cambiar los textos, las fotos, los colores y las tipografías, y elegir qué secciones mostrar: historia, programa, galería, regalos, confirmación de asistencia y más. Los ejemplos te ayudan a conocer el resultado; tú agregas los datos de tu celebración.",
+  },
+  {
+    question: "¿Puedo proteger mi invitación con un PIN?",
+    answer: "Sí. Antes de publicar eliges entre acceso público o protegido con un PIN de seis dígitos. Si eliges PIN, compártelo junto con el enlace: tus invitados lo necesitarán para abrir la invitación. También puedes cambiar esta opción desde los ajustes de tu evento.",
   },
   {
     question: "¿Cómo la comparto con mis invitados?",
-    answer: "Después de publicar, copia el enlace desde tu panel y envíalo por WhatsApp, correo o tus redes sociales. Tus invitados pueden abrirlo en su navegador, sin crear una cuenta ni instalar una aplicación.",
+    answer: "Después de publicar, copia el enlace desde tu panel y envíalo por WhatsApp, correo o tus redes sociales. Tus invitados lo abren en su navegador, sin crear una cuenta ni instalar una aplicación. Si la protegiste con PIN, recuerda enviarles también ese código.",
   },
   {
     question: "¿Puedo editarla después de publicarla?",
-    answer: "Sí. Puedes actualizar los datos, los textos y las fotos desde tu panel durante la vigencia de la invitación. Guarda tus cambios para que tus invitados los vean al abrir de nuevo el enlace.",
+    answer: "Sí. Durante la vigencia puedes actualizar los datos, los textos y las fotos desde tu panel, sin pagar otra publicación. Publica los cambios para que se vean en el mismo enlace que ya compartiste.",
   },
   {
     question: "¿Cómo funciona la confirmación de asistencia?",
-    answer: "Activa la confirmación integrada para que tus invitados indiquen su nombre, si asistirán y hasta cinco acompañantes adicionales. Las respuestas son privadas para ti: puedes consultarlas en tu panel y descargar la lista para abrirla en Excel. Si prefieres, puedes usar un enlace externo de confirmación, como WhatsApp.",
+    answer: "Activa la confirmación integrada para recibir el nombre, la respuesta de asistencia y el número de acompañantes. Tú defines el máximo de acompañantes permitido por respuesta. Consulta las respuestas y los totales en tu panel, o descarga la lista para abrirla en Excel; no se muestran a otros invitados. También puedes usar un enlace externo de confirmación, como WhatsApp.",
+  },
+  {
+    question: "¿Qué pasa cuando termina la vigencia?",
+    answer: "El enlace deja de estar disponible para tus invitados y la edición se desactiva. La invitación se conserva archivada durante un mes natural; si no se renueva, se elimina al terminar ese plazo. Descarga tus confirmaciones antes del vencimiento si quieres conservarlas.",
   },
 ];
 
 const questionGroups = [
-  { title: "Antes de publicar", questions: questions.slice(0, 3) },
-  { title: "Después de publicar", questions: questions.slice(3) },
+  { title: "Antes de publicar", questions: questions.slice(0, 4) },
+  { title: "Después de publicar", questions: questions.slice(4) },
 ];
 
 export function FAQ() {
