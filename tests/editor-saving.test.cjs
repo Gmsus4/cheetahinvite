@@ -4,6 +4,30 @@ const assert = require('node:assert/strict');
 const { randomUUID } = require('node:crypto');
 const { createFixture } = require('./helpers/cloudinary-fixture.cjs');
 
+test('creation and editing reject past dates without changing stored events or account slots', async () => {
+  const f = createFixture();
+  const { prepareEvent } = f.load('app/crear/actions.ts');
+  const initial = structuredClone(f.state.events.get('event'));
+  const count = f.state.users.get('owner').invitationCount;
+  for (const date of ['2000-01-01', '2027-02-29']) {
+    const form = f.saveForm(); form.set('creationKey', randomUUID()); form.set('eventDate', date);
+    assert.equal((await prepareEvent(form)).code, 'validation');
+    assert.equal((await f.actions.updateEvent('event', form)).code, 'validation');
+  }
+  assert.deepEqual(f.state.events.get('event'), initial);
+  assert.equal(f.state.events.size, 1);
+  assert.equal(f.state.users.get('owner').invitationCount, count);
+});
+
+test('creation and editing accept today even when its event time has already passed', async () => {
+  const f = createFixture();
+  const { invitationToday } = f.load('lib/invitation-date.ts');
+  const form = f.saveForm(); form.set('eventDate', invitationToday()); form.set('eventTime', '00:00');
+  assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+  form.set('creationKey', randomUUID());
+  assert.equal((await f.load('app/crear/actions.ts').prepareEvent(form)).ok, true);
+});
+
 test('concurrent saves have one winner, retain the other copy and allow a deliberate retry', async () => {
   const f = createFixture();
   const first = f.saveForm(), second = f.saveForm(); first.set('name', 'Primera'); second.set('name', 'Segunda');

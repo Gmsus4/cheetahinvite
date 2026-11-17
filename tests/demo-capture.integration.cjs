@@ -20,6 +20,8 @@ async function main() {
     const image = Buffer.from(capture.webp, 'base64');
     const info = await require('sharp')(image).metadata();
     assert.equal(info.width, 390); assert.equal(info.height, 830); assert.equal(info.format, 'webp');
+    const stats = await require('sharp')(image).stats();
+    assert.ok(stats.channels.some(channel => channel.stdev > 5), 'The capture must contain visible invitation content, not a blank screen');
     assert.equal(capture.contentKey, f.load('lib/demo-preview.ts').demoPreviewKey(invitation));
     const output = path.join(os.tmpdir(), 'cheetahinvite-automatic-demo-capture.webp');
     await fs.writeFile(output, image);

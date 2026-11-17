@@ -1,9 +1,25 @@
 import "server-only";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import type { Page } from "puppeteer-core";
 import type { InvitationProps } from "./invitation-editor";
 import { createDemoPreview, demoPreviewKey } from "./demo-preview";
 import { demoCaptureToken } from "./demo-capture-token";
+
+export async function waitForDemoCapture(page: Page, key: string) {
+  // Streamed Suspense content can exist inside a hidden container before React
+  // reveals it. Its images have no bounds yet, so image checks alone pass early.
+  await page.waitForSelector(`main[data-preview-key="${key}"]`, { visible: true });
+  await page.waitForFunction(() => document.fonts.status === "loaded" && Array.from(document.images)
+    .filter(image => { const bounds = image.getBoundingClientRect(); return bounds.top < 830 && bounds.bottom > 0 && bounds.width > 0; })
+    .every(image => image.complete && image.naturalWidth > 0));
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await Promise.all(Array.from(document.images)
+      .filter(image => { const bounds = image.getBoundingClientRect(); return bounds.top < 830 && bounds.bottom > 0 && bounds.width > 0; })
+      .map(image => image.decode()));
+  });
+}
 
 async function browserOptions() {
   if (process.env.CHROMIUM_EXECUTABLE_PATH) return { executablePath: process.env.CHROMIUM_EXECUTABLE_PATH, args: ["--hide-scrollbars"] };
@@ -40,10 +56,7 @@ export async function captureDemoPreview(id: string, version: number, invitation
     });
     const response = await page.goto(url.toString(), { waitUntil: "domcontentloaded", timeout: 40_000 });
     if (!response?.ok()) throw new Error("Demo capture page was unavailable");
-    await page.waitForSelector(`main[data-preview-key="${demoPreviewKey(invitation)}"]`);
-    await page.waitForFunction(() => document.fonts.status === "loaded" && Array.from(document.images)
-      .filter(image => { const bounds = image.getBoundingClientRect(); return bounds.top < 830 && bounds.bottom > 0; })
-      .every(image => image.complete && image.naturalWidth > 0));
+    await waitForDemoCapture(page, demoPreviewKey(invitation));
     const image = await page.screenshot({ type: "webp", quality: 80, fullPage: false });
     return createDemoPreview(invitation, image);
   } finally {

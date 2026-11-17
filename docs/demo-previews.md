@@ -10,6 +10,8 @@ Si la captura falla o alguien modifica el borrador mientras se genera, se muestr
 
 La ruta de renderizado requiere una firma HMAC de corta duración vinculada al ID y a la versión del borrador; las visitas públicas no pueden consultar borradores. El navegador espera las fuentes y las imágenes visibles antes de tomar una captura de 390 × 830 en WebP.
 
+También espera a que el contenido transmitido por Suspense sea visible: su presencia en el HTML no basta para capturarlo. `node tests/demo-capture-ready.integration.cjs` verifica esta espera y la carga de imágenes en un navegador real, sin base de datos.
+
 La captura se almacena dentro del JSON de publicación en PostgreSQL. La ruta de imágenes solo sirve capturas de ejemplos publicados y usa una URL distinta por contenido de imagen, con caché inmutable. No se escriben archivos en producción, no se necesita migración y las capturas no se envían como base64 al cliente ni al hero. `/demo` se invalida al publicar.
 
 ## Servidor

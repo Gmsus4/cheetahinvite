@@ -1,4 +1,5 @@
 "use client";
+import { InvitationDateInput } from "./InvitationDateInput";
 
 import { invitationSectionLabels } from "@/lib/invitation-sections";
 
@@ -284,7 +285,7 @@ function FieldGroup({ title, children }: { title: string; children: ReactNode })
 function DateFields({ values, patch, expiresAt, isExample }: { values: EditorValues; patch(changes: Partial<EditorValues>): void; expiresAt?: Date | null; isExample?: boolean }) {
   return <div className={styles.dateFields}>
     {!isExample && <InvitationDateNotice date={values.eventDate} time={values.eventTime} expiresAt={expiresAt} />}
-    <Field label="Fecha" id="show-date"><input id="show-date" type="date" value={values.eventDate} onChange={e => patch({ eventDate: e.target.value, ...(!e.target.value ? { eventTime: "" } : {}) })} /></Field>
+    <Field label="Fecha" id="show-date"><InvitationDateInput id="show-date" value={values.eventDate} onValueChange={date => patch({ eventDate: date, ...(!date ? { eventTime: "" } : {}) })} /></Field>
     <Field label="Hora" id="show-time"><input id="show-time" type="time" disabled={!values.eventDate} value={values.eventTime} onChange={e => patch({ eventTime: e.target.value })} /></Field>
   </div>;
 }

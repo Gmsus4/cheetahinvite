@@ -1,5 +1,15 @@
 import { addCalendarMonths } from "./invitation-lifecycle";
 
+export function invitationToday(now = new Date()) {
+  return new Date(now.getTime() - 6 * 3600000).toISOString().slice(0, 10);
+}
+
+export function invitationDateIssue(date: string, now = new Date()): string | null {
+  if (!date) return null;
+  if (!Number.isFinite(invitationTimestamp(date))) return "Revisa la fecha del evento.";
+  return date < invitationToday(now) ? "Elige una fecha de hoy en adelante. No se permiten días que ya pasaron." : null;
+}
+
 // Event wall time uses UTC−6, independently of the viewer's time zone.
 export function invitationTimestamp(date: string, time = "00:00") {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return NaN;

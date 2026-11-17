@@ -10,7 +10,6 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { EventEditor } from "@/components/dashboard/InvitationEditor";
 import { prisma } from "@/prisma";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
-import { CreationDraftResume } from "@/components/dashboard/CreationDraftResume";
 import { getCurrentPrice } from "@/lib/site-pricing";
 import { authPageHref } from "@/lib/auth-destination";
 
@@ -57,5 +56,5 @@ async function CreateEventData({
     paidAt: null, expiresAt: null, status: "DRAFT", slug: null, venue: null, address: null, message: null,
     imageUrl: null, imageUploads: 0, accent: "#E9560A", typography: "default", bodyTypography: "inter", sections: [],
   }} saved={false} published={false} error={hasError ? "datos" : ""} />;
-  return <main className="create-event-page"><DashboardHeader name={account.name} email={account.email} image={account.image} /><section className="create-event-card create-event-limit-card"><span className="create-event-icon"><FiGift /></span><h1>Ya usaste tus {ACCOUNT_LIMITS.invitations} invitaciones disponibles</h1><p>Puedes editar tus invitaciones desde el panel.</p><CreationDraftResume ownerId={session.user.id} /><Link className="button" href="/dashboard">Volver a mi panel</Link></section></main>;
+  return <main className="create-event-page"><DashboardHeader name={account.name} email={account.email} image={account.image} /><section className="create-event-card create-event-limit-card"><span className="create-event-icon"><FiGift /></span><h1>Ya usaste tus {ACCOUNT_LIMITS.invitations} invitaciones disponibles</h1><p>Puedes editar tus invitaciones desde el panel.</p><Link className="button" href="/dashboard">Volver a mi panel</Link></section></main>;
 }

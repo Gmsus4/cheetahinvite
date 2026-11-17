@@ -1,12 +1,7 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { FiArrowLeft } from "react-icons/fi";
+import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-access";
 import { prisma } from "@/prisma";
-import { AdminPageBoundary, AdminHeading, AdminNotice } from "@/components/admin/AdminUI";
-import { ExampleSettings } from "@/components/admin/ExampleSettings";
-import { ExampleRefreshOnReturn } from "@/components/admin/ExampleRefreshOnReturn";
-import styles from "../../compact.module.css";
+import { AdminPageBoundary } from "@/components/admin/AdminUI";
 
 export const maxDuration = 120;
 
@@ -17,13 +12,10 @@ export default function ExamplePage(props: PageProps<"/admin/disenos/[id]">) {
 async function ExamplePageData({ params, searchParams }: PageProps<"/admin/disenos/[id]">) {
   await requireAdmin();
   const { id } = await params;
-  const [query, example] = await Promise.all([searchParams, prisma.showcaseExample.findUnique({ where: { id }, include: { event: { select: { contentVersion: true } } } })]);
+  const [query, example] = await Promise.all([searchParams, prisma.showcaseExample.findUnique({ where: { id }, select: { id: true } })]);
   if (!example) notFound();
-  return <div className={styles.compact}>
-    <ExampleRefreshOnReturn />
-    <Link href="/admin/disenos" className="admin-inline admin-help"><FiArrowLeft />Todos los ejemplos</Link>
-    <div style={{ marginTop: 24 }}><AdminHeading title={example.label} description="Administra la presentación y publicación de tu ejemplo." /></div>
-    <AdminNotice success={query.saved} error={query.error} />
-    <ExampleSettings example={example} />
-  </div>;
+  const notice = new URLSearchParams();
+  if (typeof query.saved === "string") notice.set("saved", query.saved);
+  if (typeof query.error === "string") notice.set("error", query.error);
+  return redirect(`/admin/disenos${notice.size ? `?${notice}` : ""}`);
 }

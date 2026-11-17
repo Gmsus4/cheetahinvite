@@ -1,4 +1,5 @@
 "use client";
+import { InvitationDateInput } from "./InvitationDateInput";
 
 import { invitationSectionLabels } from "@/lib/invitation-sections";
 
@@ -322,7 +323,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
     } catch { persistence.reportError("No pudimos completar la operación. Tu borrador sigue protegido; intenta de nuevo."); }
     finally { setSaving(false); }
   }
-  async function saveAndExit(destination = exampleId ? `/admin/disenos/${exampleId}` : "/dashboard") {
+  async function saveAndExit(destination = exampleId ? "/admin/disenos" : "/dashboard") {
     if (busy || uploads > 0 || exitInFlight.current) return;
     exitInFlight.current = true;
     setSaving(true); setNotice("");
@@ -401,8 +402,8 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
             </div>
             {step !== finalStep && <button className={styles.mobileSaveButton} type="button" aria-label={saveLabel} title={saveLabel} disabled={busy || uploads > 0 || changesSaved || (!creation && !dirty)} onClick={() => void save()}><FiSave aria-hidden="true" /></button>}
             {exampleId && <div className={styles.exampleReturn}>
-              <EditorProtectedLink className={styles.exampleReturnLink} guard={confirmNavigation} href={`/admin/disenos/${exampleId}`}>
-                <FiArrowLeft aria-hidden="true" />Volver a gestionar este ejemplo
+              <EditorProtectedLink className={styles.exampleReturnLink} guard={confirmNavigation} href="/admin/disenos">
+                <FiArrowLeft aria-hidden="true" />Volver a diseños y ejemplos
               </EditorProtectedLink>
               <p className={styles.exampleReturnNote}>Publica los cambios desde Administración.</p>
             </div>}
@@ -431,7 +432,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
             </div>}
             {!exampleId && (step === 1 || step === finalStep) && <InvitationDateNotice date={values.eventDate} time={values.eventTime} expiresAt={event.expiresAt} />}
             {step === 1 && <div className="guided-data-grid">
-              <Field label="Fecha" id="w-date"><input id="w-date" type="date" value={values.eventDate} onChange={e => patch({ eventDate: e.target.value, ...(!e.target.value ? { eventTime: '' } : {}) })} /></Field>
+              <Field label="Fecha" id="w-date"><InvitationDateInput id="w-date" value={values.eventDate} onValueChange={date => patch({ eventDate: date, ...(!date ? { eventTime: '' } : {}) })} /></Field>
               <Field label="Hora" id="w-time" help={!values.eventDate ? 'Primero elige una fecha.' : undefined}><input id="w-time" type="time" disabled={!values.eventDate} value={values.eventTime} onChange={e => patch({ eventTime: e.target.value })} /></Field>
               <Field label="Lugar del evento" id="w-venue" wide help="Donde será la fiesta o reunión principal. La iglesia o el acto formal se configuran en Ceremonia."><input id="w-venue" value={values.venue} maxLength={160} placeholder="Nombre del salón, jardín o lugar" onChange={e => patch({ venue: e.target.value })} /></Field>
               <Field label="Dirección" id="w-address" wide help="Texto que aparecerá en la invitación: calle, número y ciudad."><input id="w-address" value={values.address} maxLength={240} placeholder="Calle, número, colonia y ciudad" onChange={e => patch({ address: e.target.value })} /></Field>

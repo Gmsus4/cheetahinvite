@@ -103,7 +103,7 @@ export function DashboardContent({ ownerId, userName, userEmail, userImage, even
               Nueva invitación <FiArrowUpRight aria-hidden="true" />
             </Link>}
           </div>
-          <div className="dashboard-draft-recovery"><CreationDraftResume ownerId={ownerId} /></div>
+          {availableSlots > 0 && <div className="dashboard-draft-recovery"><CreationDraftResume ownerId={ownerId} existingEventIds={events.map(event => event.id)} /></div>}
           {unreadCourtesyEvents.length > 0 && <section className="dashboard-courtesy-notices" aria-label="Cortesías recibidas">
             {unreadCourtesyEvents.map((event) => <CourtesyNotice key={event.courtesyNoticeId} grantId={event.courtesyNoticeId!} eventId={event.id} name={event.name} expiresAt={event.expiresAt!} published={isInvitationPublished(event, new Date(now))} />)}
           </section>}

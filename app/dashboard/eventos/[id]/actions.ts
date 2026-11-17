@@ -1,4 +1,5 @@
 "use server";
+import { invitationDateIssue } from "@/lib/invitation-date";
 import { isInvitationImagePalette, isInvitationSectionColor } from "@/lib/invitation-image-palette";
 import { isInvitationTextColor, isInvitationTextColorMode } from "@/lib/invitation-text-color";
 import { validCompanionLimit } from "@/lib/rsvp";
@@ -227,6 +228,8 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     return failure("validation", "Revisa las secciones de la invitación.");
   }
   const eventTypes = ["wedding", "birthday", "graduation", "baby_shower", "anniversary", "other"];
+  const dateIssue = invitationDateIssue(dateValue);
+  if (dateIssue) return failure("validation", dateIssue);
   const eventDate = dateValue ? new Date(`${dateValue}T12:00:00.000Z`) : null;
   if (
     !buttonAppearance || !["left", "center", "right"].includes(heroHorizontal) || !["top", "center", "bottom"].includes(heroVertical) ||

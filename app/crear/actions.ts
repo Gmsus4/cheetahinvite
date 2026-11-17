@@ -5,6 +5,7 @@ import { prisma } from "@/prisma";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { validCreationKey, type EditorSaveResult } from "@/lib/invitation-editor";
 import { sharedInvitationDesign } from "@/lib/shared-invitation";
+import { invitationDateIssue } from "@/lib/invitation-date";
 
 const eventTypes = new Set([
   "wedding",
@@ -29,6 +30,8 @@ export async function prepareEvent(formData: FormData): Promise<EditorSaveResult
     return { ok: false, code: "validation", message: "Revisa el nombre y el tipo de evento antes de continuar." };
   }
 
+  const dateIssue = invitationDateIssue(dateValue);
+  if (dateIssue) return { ok: false, code: "validation", message: dateIssue };
   const eventDate = dateValue ? new Date(`${dateValue}T12:00:00.000Z`) : null;
   if (eventDate && Number.isNaN(eventDate.getTime())) return { ok: false, code: "validation", message: "Revisa la fecha del evento." };
 
