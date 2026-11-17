@@ -1,0 +1,28 @@
+.overlay { position: absolute; z-index: 8; inset: 0; pointer-events: none; }
+.trigger { position: absolute; z-index: 2; top: 12px; left: 12px; display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 8px 12px; border: 1px solid #ffffff80; border-radius: 999px; background: #191919e6; color: #fff; font: 600 12px/1.4 var(--font-body), Arial, sans-serif; cursor: pointer; pointer-events: auto; }
+.trigger svg, .positions svg { width: 20px; height: 20px; }
+.trigger:disabled { opacity: .5; cursor: not-allowed; }
+.overlay[data-open="true"] { pointer-events: auto; background: #0002; }
+.positions { position: absolute; top: max(64px, calc(50% - 72px)); left: 50%; width: 156px; height: 148px; transform: translateX(-50%); display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); grid-template-rows: repeat(3,minmax(0,1fr)); align-items: center; justify-items: center; gap: 4px; padding: 2px; }
+.positions button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid #ffffffb3; border-radius: 50%; background: #191919d9; color: #fff; cursor: pointer; pointer-events: auto; box-shadow: 0 2px 8px #0004; }
+.positions button:nth-child(3n + 1) { justify-self: start; }
+.positions button:nth-child(3n) { justify-self: end; }
+.positions button:nth-child(-n + 3) { align-self: start; }
+.positions button:nth-child(n + 7) { align-self: end; }
+.positions button[aria-pressed="true"] { background: var(--orange); border-color: #fff; box-shadow: 0 0 0 2px var(--orange); }
+.positions button:hover { background: #333; }
+.overlay button:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+.positions[data-device="desktop"] { display: none; }
+.settings { position: relative; z-index: 3; width: 44px; height: 44px; color: #fff; pointer-events: auto; font: 12px/1.5 var(--font-body), Arial, sans-serif; }
+.settingsPanel fieldset { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 12px; border: 1px solid #ffffff80; border-radius: 12px; background: #191919; }
+.settingsPanel label { display: grid; gap: 6px; color: #fff; font-size: 12px; }
+.settingsPanel select { width: 100%; min-width: 0; min-height: 44px; padding: 8px; border: 1px solid #777; border-radius: 8px; background: #262626; color: #fff; font: inherit; font-size: 16px; }
+.settingsPanel p { margin: 0; color: #ddd; font-size: 11px; line-height: 1.5; }
+@media(min-width:960px) { .positions[data-device="mobile"] { display: none; } .positions[data-device="desktop"] { display: grid; } }
+
+/* Match the editor's icon class so this nested trigger overrides its default
+   pointer-events: none, just as the direct toolbar buttons do. */
+.settings > button:global(.wa-edit-button) { position: relative; inset: auto; opacity: 1; pointer-events: auto; }
+.settingsPanel { position: fixed; inset: auto; width: min(280px, calc(100vw - 24px)); margin: 0; padding: 0; overflow: auto; overscroll-behavior: contain; border: 1px solid #777; border-radius: 12px; background: #191919; color: #fff; font: 12px/1.5 var(--font-body), Arial, sans-serif; box-shadow: 0 12px 40px #0005; }
+.settingsPanel::backdrop { background: transparent; }
+.settingsPanel fieldset { border: 0; border-radius: 0; }

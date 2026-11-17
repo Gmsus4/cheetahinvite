@@ -8,10 +8,11 @@ import { HeroInvitationPhone } from "./HeroInvitationPhone";
 import { Suspense } from "react";
 import { getShowcaseExamples } from "@/lib/showcase";
 import { LandingAnalytics } from "./LandingAnalytics";
+import { getCurrentPrice } from "@/lib/site-pricing";
 
 async function HeroExamples() {
-  const examples = await getShowcaseExamples("hero");
-  return <HeroInvitationExamples examples={examples.map(({ slug, label, typeLabel, invitation, available }) => ({ slug, label, typeLabel, eventType: invitation.eventType, available }))} />;
+  const [examples, price] = await Promise.all([getShowcaseExamples("hero"), getCurrentPrice()]);
+  return <HeroInvitationExamples priceLabel={price.label} examples={examples.map(({ slug, label, typeLabel, invitation, available }) => ({ slug, label, typeLabel, eventType: invitation.eventType, available }))} />;
 }
 
 export function Hero() {

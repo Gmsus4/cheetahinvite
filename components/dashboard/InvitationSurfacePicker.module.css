@@ -80,3 +80,14 @@
 .embedded .intensity { padding: 22px 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
 .embedded .option:hover { transform: none; box-shadow: none; }
 .embedded .option[aria-pressed="true"] { box-shadow: none; }
+.embedded .options { gap: 10px; }
+.embedded .preview { height: 124px; }
+.embedded .samples { gap: 6px; margin-block: 10px; }
+.embedded .sample { gap: 4px; padding: 6px; }
+.embedded .names { font-size: 18px; }
+.embedded .option { padding-bottom: 10px; border-radius: 12px; }
+.embedded .caption { padding-top: 8px; }
+.embedded .intro { margin-bottom: 12px; line-height: 1.5; }
+.embedded .intensity { margin-top: 16px; padding-top: 16px; }
+.embedded .sliderRow { margin-top: 12px; }
+@media(min-width:541px) { .embedded .options { grid-template-columns: repeat(3,minmax(0,1fr)); } }

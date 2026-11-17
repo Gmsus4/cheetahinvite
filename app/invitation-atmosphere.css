@@ -423,3 +423,30 @@ html:has(.celebration-invitation), body:has(.celebration-invitation) { overscrol
 @media(max-width:600px) {
   .celebration-invitation .wa-shell .wa-intro:not([data-cover-layout="overlay"]) .wa-cover-heading:is([data-margin="wide"],[data-margin="none"]) { padding-inline: 25px; }
 }
+
+/* Per-photo format and fit, shared by owner previews and public invitations. */
+.celebration-invitation .wa-shell .wa-intro .wa-portrait[data-photo-shape="square"],
+.celebration-invitation .wa-shell .wa-section-media[data-photo-shape="square"] :is(.wa-section-photo,.wa-photo-grid figure,.wa-carousel-viewport) { position: relative; width: 100%; min-height: 0; height: auto; max-height: none; aspect-ratio: 1 / 1; align-self: start; }
+.celebration-invitation .wa-shell .wa-intro .wa-portrait[data-photo-shape="square"] img,
+.celebration-invitation .wa-shell .wa-section-media[data-photo-shape="square"] :is(.wa-section-photo,.wa-photo-grid figure,.wa-carousel-viewport) img { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; aspect-ratio: auto; }
+.celebration-invitation .wa-shell .wa-intro .wa-portrait[data-photo-shape="landscape"],
+.celebration-invitation .wa-shell .wa-section-media[data-photo-shape="landscape"] :is(.wa-section-photo,.wa-photo-grid figure,.wa-carousel-viewport) { position: relative; width: 100%; min-height: 0; height: auto; max-height: none; aspect-ratio: 3 / 2; align-self: start; }
+.celebration-invitation .wa-shell .wa-intro .wa-portrait[data-photo-shape="landscape"] img,
+.celebration-invitation .wa-shell .wa-section-media[data-photo-shape="landscape"] :is(.wa-section-photo,.wa-photo-grid figure,.wa-carousel-viewport) img { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; aspect-ratio: auto; }
+.celebration-invitation .wa-shell .wa-intro .wa-portrait[data-photo-shape="original"],
+.celebration-invitation .wa-shell .wa-section-media[data-photo-shape="original"] :is(.wa-section-photo,.wa-photo-grid figure,.wa-carousel-viewport) { position: relative; width: 100%; min-height: 0; height: auto; max-height: none; aspect-ratio: auto; align-self: start; }
+.celebration-invitation .wa-shell .wa-intro .wa-portrait[data-photo-shape="original"] img,
+.celebration-invitation .wa-shell .wa-section-media[data-photo-shape="original"] :is(.wa-section-photo,.wa-photo-grid figure,.wa-carousel-viewport) img { position: static; inset: 0; width: 100%; height: auto; max-height: none; aspect-ratio: auto; }
+.celebration-invitation .wa-shell .wa-section-media[data-photo-shape="original"] .wa-carousel-track { align-items: start; }
+.celebration-invitation .wa-shell .wa-intro .wa-portrait[data-photo-fit="cover"] img,
+.celebration-invitation .wa-shell .wa-section-media[data-photo-fit="cover"] img { object-fit: cover; }
+.celebration-invitation .wa-shell .wa-intro .wa-portrait[data-photo-fit="contain"] img,
+.celebration-invitation .wa-shell .wa-section-media[data-photo-fit="contain"] img { object-fit: contain; }
+.celebration-invitation .wa-shell .wa-intro .wa-portrait[data-photo-fit="fill"] img,
+.celebration-invitation .wa-shell .wa-section-media[data-photo-fit="fill"] img { object-fit: fill; }
+.celebration-invitation .wa-shell .wa-intro .wa-portrait[data-photo-fit="none"] img,
+.celebration-invitation .wa-shell .wa-section-media[data-photo-fit="none"] img { object-fit: none; }
+.celebration-invitation .wa-shell .wa-intro .wa-portrait[data-photo-fit="scale-down"] img,
+.celebration-invitation .wa-shell .wa-section-media[data-photo-fit="scale-down"] img { object-fit: scale-down; }
+.celebration-invitation .wa-shell .wa-intro[data-cover-layout="overlay"]:has(.wa-portrait[data-photo-shape]:not([data-photo-shape="auto"])) { min-height: 0; padding: 0; }
+.celebration-invitation .wa-shell .wa-intro[data-cover-layout="overlay"] .wa-portrait[data-photo-shape]:not([data-photo-shape="auto"]) { position: relative; inset: auto; grid-column: 1; grid-row: 1 / span 2; }

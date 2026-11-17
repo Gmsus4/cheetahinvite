@@ -9,7 +9,7 @@ import { canEditInvitation } from "@/lib/invitation-lifecycle";
 import { publishCourtesy } from "@/lib/courtesy";
 import { Prisma } from "@/generated/prisma/client";
 
-import { isMobileImageFocus, isInvitationPanelStyle, isInvitationBlurIntensity, isInvitationSectionCorners } from "@/lib/invitation-editor";
+import { isPhotoShape, isPhotoFit, isMobileImageFocus, isInvitationPanelStyle, isInvitationBlurIntensity, isInvitationSectionCorners } from "@/lib/invitation-editor";
 import { isInvitationCoverLayout } from "@/lib/invitation-cover-layout";
 import type { EditorSaveResult } from "@/lib/invitation-editor";
 import { invitationSectionUrl, invitationExternalUrl } from "@/lib/invitation-links";
@@ -341,6 +341,8 @@ function isValidSection(value: unknown): value is {
   if (section.whatsappMessage !== undefined && (section.type !== "rsvp" || typeof section.whatsappMessage !== "string" || section.whatsappMessage.length > 200)) return false;
   if (section.layout !== undefined && !["auto", "split", "centered", "card"].includes(section.layout as string)) return false;
   if (section.textMargin !== undefined && !["default", "wide", "none"].includes(section.textMargin as string)) return false;
+  if (section.photoShape !== undefined && !isPhotoShape(section.photoShape)) return false;
+  if (section.photoFit !== undefined && !isPhotoFit(section.photoFit)) return false;
   if (section.photoMargin !== undefined && !["default", "wide", "none"].includes(section.photoMargin as string)) return false;
   if (section.margin !== undefined && !["default", "wide", "none"].includes(section.margin as string)) return false;
   if (section.sectionColor !== undefined && !isInvitationSectionColor(section.sectionColor)) return false;

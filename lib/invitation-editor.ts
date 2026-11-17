@@ -39,7 +39,11 @@ export function isMobileImageFocus(value: unknown): value is MobileImageFocus {
 export function isSectionTextAlign(value: unknown): value is SectionTextAlign {
   return typeof value === "string" && ["auto", "left", "center", "right"].includes(value);
 }
-export type InviteSection = { id: string; type: SectionType; title: string; titleCustomized?: boolean; showIcon?: boolean; showCalendarButton?: boolean; programTimeFormat?: "24h" | "12h"; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; mobileImageFocus?: MobileImageFocus; desktopImageFocus?: MobileImageFocus; sectionColor?: string; panelStyle?: InvitationPanelStyle; textColorMode?: InvitationTextColorMode; textColor?: string; textAlign?: SectionTextAlign; margin?: SectionMargin; textMargin?: SectionMargin; photoMargin?: SectionMargin; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; maxCompanions?: number; whatsappPhone?: string; whatsappMessage?: string; enabled: boolean };
+export type PhotoShape = "auto" | "square" | "landscape" | "original";
+export type PhotoFit = "cover" | "contain" | "fill" | "none" | "scale-down";
+export function isPhotoShape(value: unknown): value is PhotoShape { return typeof value === "string" && ["auto", "square", "landscape", "original"].includes(value); }
+export function isPhotoFit(value: unknown): value is PhotoFit { return typeof value === "string" && ["cover", "contain", "fill", "none", "scale-down"].includes(value); }
+export type InviteSection = { id: string; type: SectionType; title: string; titleCustomized?: boolean; showIcon?: boolean; showCalendarButton?: boolean; programTimeFormat?: "24h" | "12h"; content: string; detail: string; link: string; imageUrl: string; imageUrls?: string[]; imagePosition?: "before" | "after"; mobileImageFocus?: MobileImageFocus; desktopImageFocus?: MobileImageFocus; sectionColor?: string; panelStyle?: InvitationPanelStyle; textColorMode?: InvitationTextColorMode; textColor?: string; textAlign?: SectionTextAlign; margin?: SectionMargin; textMargin?: SectionMargin; photoMargin?: SectionMargin; photoShape?: PhotoShape; photoFit?: PhotoFit; layout?: "auto" | "split" | "centered" | "card"; rsvpMode?: "external" | "integrated"; maxCompanions?: number; whatsappPhone?: string; whatsappMessage?: string; enabled: boolean };
 export type EditorValues = {
   privacy?: InvitationPrivacy; pin?: string; pinPending?: boolean;
   name: string; eventType: string; eventDate: string; eventTime: string; hostNames: string; venue: string; address: string;
@@ -134,6 +138,8 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
       || (section.panelStyle !== undefined && !isInvitationPanelStyle(section.panelStyle))
       || (section.margin !== undefined && !isSectionMargin(section.margin))
       || (section.textMargin !== undefined && !isSectionMargin(section.textMargin))
+      || (section.photoShape !== undefined && !isPhotoShape(section.photoShape))
+      || (section.photoFit !== undefined && !isPhotoFit(section.photoFit))
       || (section.photoMargin !== undefined && !isSectionMargin(section.photoMargin))
       || (section.textColorMode !== undefined && !isInvitationTextColorMode(section.textColorMode))
       || (section.textColor !== undefined && !isInvitationTextColor(section.textColor))

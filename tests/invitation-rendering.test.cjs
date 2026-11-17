@@ -917,7 +917,6 @@ test('mobile framing reaches the cover, attached photos and carousel without cha
  const load = loadComponents();
  const { CelebrationInvitation } = load('components/invitation/CelebrationInvitation.tsx');
  const { SectionPhotoFields } = load('components/dashboard/InvitationSectionFields.tsx');
- const { InvitationMobileImageFocus } = load('components/dashboard/InvitationMobileImageFocus.tsx');
  const blank = { title:'Foto', content:'Texto', detail:'', link:'', enabled:true, imageUrl:'https://example.com/photo.jpg', mobileImageFocus:'bottom', desktopImageFocus:'top' };
  const sections = [{...blank,id:'cover',type:'cover',mobileImageFocus:'top',desktopImageFocus:'bottom'}, {...blank,id:'story',type:'story',imagePosition:'before'}, {...blank,id:'gallery',type:'gallery',imageUrls:['https://example.com/photo.jpg']}];
  const props = { name:'Fiesta',eventType:'wedding',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'https://example.com/cover.jpg',accent:'#58664E',sections };
@@ -929,23 +928,12 @@ test('mobile framing reaches the cover, attached photos and carousel without cha
   assert.equal((html.match(/data-mobile-image-focus="bottom" data-desktop-image-focus="top"/g) || []).length, 2);
   assert.match(html, /wa-carousel-slide/);
  }
- const changes = [];
- const control = InvitationMobileImageFocus({value:'center',onChange:value=>changes.push(value)});
- const choices = control.props.children[1].props.children;
- assert.equal(choices[4].props['aria-pressed'], true);
- choices.forEach(choice => choice.props.onClick());
- assert.deepEqual(changes, ['top-left', 'top', 'top-right', 'left', 'center', 'right', 'bottom-left', 'bottom', 'bottom-right']);
  for (const section of sections.slice(1)) {
   const html = renderToStaticMarkup(React.createElement(SectionPhotoFields, { section, onChange(){}, uploadProps:{eventId:'event',onBusyChange(){}} }));
-  assert.match(html, /Encuadre de la foto en móvil/);
-  assert.match(html, /Encuadre de la foto en escritorio/);
+  assert.match(html, /aria-label="Dispositivo del encuadre"/);
+  assert.match(html, /Vista previa del encuadre en móvil/);
+  assert.match(html, /Escritorio/);
  }
- const { InvitationImageFocusFields } = load('components/dashboard/InvitationMobileImageFocus.tsx');
- const updates = [];
- const fields = InvitationImageFocusFields({ section:sections[0], onChange:patch=>updates.push(patch) }).props.children;
- fields[0].props.onChange('top-left');
- fields[1].props.onChange('bottom-right');
- assert.deepEqual(updates, [{mobileImageFocus:'top-left'}, {desktopImageFocus:'bottom-right'}]);
 });
 
 
@@ -1087,26 +1075,26 @@ test('open quick menus stay aligned with their trigger after changing margins', 
   const previousWindow=global.window;
   global.window={innerWidth:390,innerHeight:844};
   try {
-    for(const mode of ['text-margin','photo-margin']) {
+    for(const mode of ['text-margin','photo-margin','text-color','background-color']) {
       const layouts=[];
       const load=loadComponents({useRef:()=>({current:null}),useEffect(){},useLayoutEffect:effect=>layouts.push(effect),useState:()=>[true,()=>{}],useId:()=> 'moving-menu'});
       const {InvitationSectionStyleMenu}=load('components/dashboard/InvitationSectionStyleMenu.tsx');
       const section={id:'story',type:'story',title:'Historia',content:'Texto',detail:'',link:'',imageUrl:'',enabled:true};
-      const tree=InvitationSectionStyleMenu({section,mode,label:'Bordes',values:{},disabled:false,onChange(){}});
+      const tree=InvitationSectionStyleMenu({section,mode,label:'Bordes',values:{accent:'#ff8a3d'},disabled:false,onChange(){}});
       const [trigger,panel]=tree.props.children;
-      let bounds={left:180,bottom:54};
+      let bounds={left:180,right:224,bottom:54};
       trigger.props.ref.current={getBoundingClientRect:()=>bounds};
       const style={setProperty(){}};
       panel.props.ref.current={style};
       assert.ok(layouts.length>0);
       layouts.forEach(effect=>effect());
-      assert.equal(style.left,'180px');
+      assert.equal(Number.parseFloat(style.left)+Number.parseFloat(style.width),bounds.right);
       assert.equal(style.top,'62px');
-      bounds={left:210,bottom:106};
+      bounds={left:210,right:254,bottom:106};
       layouts.forEach(effect=>effect());
-      assert.equal(style.left,'210px');
+      assert.equal(Number.parseFloat(style.left)+Number.parseFloat(style.width),bounds.right);
       assert.equal(style.top,'114px');
-      assert.equal(style.width,'168px');
+      assert.equal(style.width,'242px');
     }
   } finally {
     if(previousWindow===undefined)delete global.window;
@@ -1274,6 +1262,37 @@ test('each block exposes an independent palette control and global block color l
 });
 
 
+test('floating palette opens its five tones in place of the color options and allows returning',()=>{
+ const palette={light:'#F2E7C4',dark:'#593203',accents:['#F28A2E','#F26E22','#F2B950']};
+ for(const mode of ['text-color','background-color']) {
+  let stateIndex=0;
+  const states=[];
+  const load=loadComponents({useEffect(){},useLayoutEffect(){},useId:()=> 'palette-view',useRef:value=>({current:value}),useState:initial=>{
+   const index=stateIndex++;
+   if(!(index in states))states[index]=initial;
+   return [states[index],value=>{states[index]=value;}];
+  }});
+  const {InvitationSectionStyleMenu}=load('components/dashboard/InvitationSectionStyleMenu.tsx');
+  let section={id:'story',type:'story',title:'Historia'};
+  const render=()=>{
+   stateIndex=0;
+   return InvitationSectionStyleMenu({section,mode,label:'Color',values:{accent:palette.light,imagePalette:palette},disabled:false,onChange:patch=>{section={...section,...patch};}}).props.children[1];
+  };
+  let panel=render();
+  panel.props.children[0].find(option=>/paleta/.test(option.props['aria-label'])).props.onClick();
+  panel=render();
+  assert.ok(panel.props.children[0].every(option=>option.props.hidden));
+  const tones=panel.props.children.find(child=>child?.props?.role==='group');
+  assert.equal(tones.props.hidden,false);
+  assert.equal(tones.props.children.length,5);
+  const back=panel.props.children.find(child=>child?.props?.['aria-label']==='Volver a las opciones de color');
+  back.props.onClick();
+  panel=render();
+  assert.ok(panel.props.children[0].every(option=>!option.props.hidden));
+  assert.equal(panel.props.children.find(child=>child?.props?.role==='group').props.hidden,true);
+ }
+});
+
 test('mobile tools open inline options, update only their block and keep the cover visible',()=>{
  const previousFrame=global.requestAnimationFrame;
  global.requestAnimationFrame=callback=>{callback();return 1;};
@@ -1366,4 +1385,24 @@ test('cover content exposes its resolved finish alongside independent width sett
   assert.ok(heading.includes('data-content-surface="'+(panelStyle==='auto'?'glass':panelStyle)+'"'));
   assert.match(html,/class="wa-portrait" data-photo-margin="wide"/);
  }
+});
+
+test('photo focus controls render directly on owner photos and never on public invitations', () => {
+ const { CelebrationInvitation } = loadComponents()('components/invitation/CelebrationInvitation.tsx');
+ const blank = { title:'Foto',content:'Texto',detail:'',link:'',enabled:true,imageUrl:'/photo.jpg' };
+ const sections = [{...blank,id:'cover',type:'cover'}, {...blank,id:'story',type:'story'}, {...blank,id:'gallery',type:'gallery',imageUrls:['/gallery.jpg']}];
+ const props = {name:'Fiesta',eventType:'wedding',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'/cover.jpg',accent:'#58664E',sections,renderPhotoFocusControl: section => React.createElement('div',{'data-focus-overlay':section.id})};
+ const owner = renderToStaticMarkup(React.createElement(CelebrationInvitation,{...props,onEdit(){}}));
+ for (const id of ['cover','story','gallery']) assert.ok(owner.includes(`data-focus-overlay="${id}"`));
+ assert.doesNotMatch(owner, /<dialog/);
+ assert.doesNotMatch(renderToStaticMarkup(React.createElement(CelebrationInvitation,props)), /data-focus-overlay/);
+});
+
+test('public photo rendering carries shape and fit for cover, attached photos and galleries', () => {
+ const { CelebrationInvitation }=loadComponents()('components/invitation/CelebrationInvitation.tsx');
+ const base={title:'Foto',content:'Texto',detail:'',link:'',imageUrl:'/photo.jpg',enabled:true,photoShape:'square',photoFit:'contain'};
+ const props={name:'Fiesta',eventType:'wedding',hostNames:'Alex',date:'',venue:'',address:'',message:'',imageUrl:'/cover.jpg',accent:'#58664E',sections:[{...base,id:'cover',type:'cover'},{...base,id:'story',type:'story'},{...base,id:'gallery',type:'gallery'}]};
+ const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,props));
+ assert.equal((html.match(/data-photo-shape="square" data-photo-fit="contain"/g)||[]).length,3);
+ assert.doesNotMatch(html,/Formato y ajuste/);
 });

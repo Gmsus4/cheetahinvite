@@ -12,7 +12,7 @@ import { InvitationSectionMarginPicker } from "./InvitationSectionMarginPicker";
 import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
 import { invitationMusicPlayer, normalizeInvitationMusicInput } from "@/lib/invitation-music";
 
-type SectionFieldsProps = { fieldErrors?: Record<string, string>; deferGalleryPhotos?: boolean; globalPanelStyle?: InvitationPanelStyle; globalShowIcons?: boolean; section: InviteSection; onChange(changes: Partial<InviteSection>): void; uploadProps: { eventId: string; ensureEvent?: () => Promise<string>; onBusyChange(active: boolean): void }; allowSectionPhoto?: boolean; showStyleControls?: boolean; mediaClassName?: string; locationFields?: ReactNode };
+type SectionFieldsProps = { compact?: boolean; fieldErrors?: Record<string, string>; deferGalleryPhotos?: boolean; globalPanelStyle?: InvitationPanelStyle; globalShowIcons?: boolean; section: InviteSection; onChange(changes: Partial<InviteSection>): void; uploadProps: { eventId: string; ensureEvent?: () => Promise<string>; onBusyChange(active: boolean): void }; allowSectionPhoto?: boolean; showStyleControls?: boolean; mediaClassName?: string; locationFields?: ReactNode };
 
 function Field({ label, id, help, wide, children, errors = {} }: { errors?: Record<string, string>; label: string; id: string; help?: string; wide?: boolean; children: ReactNode }) {
   const error = errors[id];
@@ -50,8 +50,9 @@ export function SectionFields(props: SectionFieldsProps) {
   </>;
 }
 
-function SectionContentFields({ section, onChange, uploadProps, allowSectionPhoto = false, showStyleControls = true, globalShowIcons = true, globalPanelStyle = "auto", mediaClassName, locationFields, deferGalleryPhotos = false, fieldErrors = {} }: SectionFieldsProps) {
+function SectionContentFields({ section, onChange, uploadProps, allowSectionPhoto = false, showStyleControls = true, globalShowIcons = true, globalPanelStyle = "auto", mediaClassName, locationFields, deferGalleryPhotos = false, fieldErrors = {}, compact = false }: SectionFieldsProps) {
   const prefix = section.id;
+  const contentRows = compact ? section.type === "story" ? 5 : 3 : section.type === "story" ? 10 : ["ceremony", "reception"].includes(section.type) ? 3 : 6;
   const musicPlayer = section.type === "music" ? invitationMusicPlayer(section.link) : null;
   const companionLimit = rsvpCompanionLimit(section.maxCompanions);
   const updateCompanionLimit = (value: number) => onChange({ maxCompanions: Number.isFinite(value) ? Math.min(RSVP_LIMITS.companions, Math.max(0, Math.trunc(value))) : 0 });
@@ -101,7 +102,7 @@ function SectionContentFields({ section, onChange, uploadProps, allowSectionPhot
         <span>12 h</span>
       </label>
     </div>}
-    {section.type === "program" ? <InvitationProgramFields fieldErrors={fieldErrors} id={prefix} content={section.content} onChange={content => onChange({ content })} /> : <Field errors={fieldErrors} label={({ story: "Cuenta la historia de tu celebración", ceremony: "Nombre del lugar de la ceremonia", reception: "Nombre del lugar de la recepción", parents: "Nombres de las personas que quieres mencionar", dress_code: "¿Cómo deben vestir tus invitados?", gifts: "Mensaje sobre los regalos", rsvp: "Texto de la sección (opcional)", music: "Mensaje para la playlist", custom: "Información adicional" } as Record<string, string>)[section.type]} id={`${prefix}-content`}><textarea id={`${prefix}-content`} rows={section.type === "story" ? 10 : ["ceremony", "reception"].includes(section.type) ? 3 : 6} data-short-content={["ceremony", "reception"].includes(section.type)} value={section.content} maxLength={2000} placeholder={({ story: "Todo empezó cuando…", ceremony: "Ej. Parroquia San José", reception: "Ej. Jardín Las Rosas", dress_code: "Ej. Casual, con calzado cómodo.", gifts: "Tu compañía es nuestro mejor regalo…" } as Record<string, string>)[section.type]} onChange={e => onChange({ content: e.target.value })} /></Field>}
+    {section.type === "program" ? <InvitationProgramFields fieldErrors={fieldErrors} id={prefix} content={section.content} onChange={content => onChange({ content })} /> : <Field errors={fieldErrors} label={({ story: "Cuenta la historia de tu celebración", ceremony: "Nombre del lugar de la ceremonia", reception: "Nombre del lugar de la recepción", parents: "Nombres de las personas que quieres mencionar", dress_code: "¿Cómo deben vestir tus invitados?", gifts: "Mensaje sobre los regalos", rsvp: "Texto de la sección (opcional)", music: "Mensaje para la playlist", custom: "Información adicional" } as Record<string, string>)[section.type]} id={`${prefix}-content`}><textarea id={`${prefix}-content`} rows={contentRows} data-short-content={["ceremony", "reception"].includes(section.type)} value={section.content} maxLength={2000} placeholder={({ story: "Todo empezó cuando…", ceremony: "Ej. Parroquia San José", reception: "Ej. Jardín Las Rosas", dress_code: "Ej. Casual, con calzado cómodo.", gifts: "Tu compañía es nuestro mejor regalo…" } as Record<string, string>)[section.type]} onChange={e => onChange({ content: e.target.value })} /></Field>}
     {(section.type === "ceremony" || section.type === "reception") && <><Field errors={fieldErrors} label="Horario" id={`${prefix}-time`}><input id={`${prefix}-time`} value={section.detail} maxLength={240} placeholder="Ej. 5:00 p. m." onChange={e => onChange({ detail: e.target.value })} /></Field><Field errors={fieldErrors} label="Dirección o enlace de Google Maps" id={`${prefix}-map`}><input id={`${prefix}-map`} value={section.link} maxLength={500} placeholder="Calle, número y ciudad, o enlace de Maps" onChange={e => onChange({ link: e.target.value })} /></Field></>}
     {section.type === "music" && <Field errors={fieldErrors} label="Enlace o código iframe de la playlist" id={`${prefix}-link`} help="Pega el enlace o el código de Compartir → Insertar de Spotify, YouTube, Apple Music o SoundCloud. Otros enlaces se mostrarán como un botón.">
       <textarea id={`${prefix}-link`} rows={3} maxLength={4000} value={section.link} placeholder={'https://open.spotify.com/playlist/… o <iframe src="…"></iframe>'} onChange={e => onChange({ link: normalizeInvitationMusicInput(e.target.value) })} aria-describedby={`${prefix}-player-help`} />
@@ -136,7 +137,7 @@ export function SectionSurfaceFields({ section, onChange, globalPanelStyle = "au
   </>;
 }
 
-export function SectionPhotoFields({ section, onChange, uploadProps, compact = false }: Pick<SectionFieldsProps, "section" | "onChange" | "uploadProps"> & { compact?: boolean }) {
+export function SectionPhotoFields({ section, onChange, uploadProps, compact = false, showFraming = true }: Pick<SectionFieldsProps, "section" | "onChange" | "uploadProps"> & { compact?: boolean; showFraming?: boolean }) {
   const gallery = section.type === "gallery";
   const images = gallery && section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : [];
   const upload = <CloudinaryImageUpload {...uploadProps} multiple={gallery} images={images} onChange={imageUrls => {
@@ -145,7 +146,7 @@ export function SectionPhotoFields({ section, onChange, uploadProps, compact = f
     const additional = section.imageUrls?.filter(url => url !== section.imageUrl && url !== imageUrl) ?? [];
     onChange({ imageUrl, ...(section.imageUrls?.length ? { imageUrls: [imageUrl, ...additional].filter(Boolean) } : {}), imagePosition: section.imagePosition ?? "after" });
   }} />;
-  const framing = images.length > 0 && <InvitationImageFocusFields section={section} onChange={onChange} />;
+  const framing = showFraming && images.length > 0 && <InvitationImageFocusFields section={section} imageUrl={images[0]} onChange={onChange} />;
   const position = !gallery && section.imageUrl && <Field label="¿Dónde quieres mostrar la foto en móvil?" id={section.id + '-photo-position'}><select id={section.id + '-photo-position'} value={section.imagePosition ?? "after"} onChange={event => onChange({ imagePosition: event.target.value as "before" | "after" })}><option value="before">Antes de esta sección</option><option value="after">Después de esta sección</option></select></Field>;
   if (compact) return <div className="guided-compact-section-photo" data-gallery={gallery || undefined} data-preview-field={section.id + '-photo'} data-preview-label={'Foto de ' + section.title}>
     {upload}

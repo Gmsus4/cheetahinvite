@@ -31,3 +31,12 @@
 .sample[data-layout="overlay"] .sampleText i:nth-child(2) { width: 20%; }
 .picker > .help { margin-bottom: 0; color: var(--accent); }
 @media(max-width:400px) { .options { gap: 8px; } .options button { padding: 9px; } .sample { height: 110px; padding-inline: 10px; gap: 7px; } }
+.compact { margin: 0; }
+.compact > legend { font-size: 13px; }
+.compact > p { margin: 6px 0 12px; line-height: 1.5; }
+.compact .options { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
+.compact .options button { gap: 8px; padding: 8px; border-radius: 10px; }
+.compact .sample { height: 92px; gap: 6px; padding: 10px; }
+.compact .sample[data-layout="stacked"] { padding: 8px 12px; }
+.compact .options small { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media(max-width:540px) { .compact .options { grid-template-columns: repeat(2,minmax(0,1fr)); } }

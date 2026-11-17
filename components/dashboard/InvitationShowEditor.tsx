@@ -30,7 +30,7 @@ import { InvitationBackgroundDimControl } from "./InvitationBackgroundDimControl
 import { InvitationCoverLayoutPicker } from "./InvitationCoverLayoutPicker";
 import { InvitationBlockTools } from "./InvitationBlockTools";
 import { InvitationSectionStyleMenu } from "./InvitationSectionStyleMenu";
-import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
+import { InvitationPhotoFocusOverlay } from "./InvitationPhotoFocusOverlay";
 import { useEditorProtection } from "./useEditorProtection";
 import styles from "./InvitationShowEditor.module.css";
 import { InvitationDateNotice } from "./InvitationDateNotice";
@@ -139,6 +139,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
       </div>
     </nav>
     <CelebrationInvitation {...values} date={date} eventDateKey={values.eventDate} onEdit={open}
+      renderPhotoFocusControl={(item, mode) => <InvitationPhotoFocusOverlay mode={mode} section={item} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
       renderStyleControl={(item, styleLabel) => <InvitationSectionStyleMenu section={item} label={styleLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
       renderBackgroundColorControl={(item, colorLabel) => <InvitationSectionStyleMenu mode="background-color" section={item} label={colorLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
       renderTextColorControl={(item, colorLabel) => <InvitationSectionStyleMenu mode="text-color" section={item} label={colorLabel} values={values} disabled={editingDisabled} onChange={changes => changePreviewSection(item.id, changes)} />}
@@ -150,47 +151,59 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
       {state.conflictVersion !== undefined && <button type="button" disabled={editingDisabled} onClick={() => save(true)}>{published ? "Publicar mi versión" : "Guardar mi versión"}</button>}
       {state.code === "auth" && <EditorProtectedLink guard={confirmNavigation} href={`/login?callbackUrl=${encodeURIComponent(`/dashboard/eventos/${event.id}/show`)}`}>Iniciar sesión</EditorProtectedLink>}
     </div>}
-    {target && <EditDialog key={target.kind} selectionOnly={target.kind === "add-section"} title={label} busy={busy} uploading={uploads > 0} saveLabel={saveLabel} savingLabel={savingLabel} published={published} onCancel={cancel} onSave={() => save()}>
+    {target && <EditDialog key={target.kind} wide={target.kind === "appearance" || target.kind === "add-section" || (target.kind === "section" && section?.type === "program")} selectionOnly={target.kind === "add-section"} title={label} busy={busy} uploading={uploads > 0} saveLabel={saveLabel} savingLabel={savingLabel} published={published} onCancel={cancel} onSave={() => save()}>
       <fieldset className={styles.fields} disabled={busy}>
         {target.kind === "add-section" && <>
-          <p className={styles.sectionIntro}>Elige una sección para agregarla y completar su información.</p>
           <div className={styles.sectionOptions}>{availableSections.map(item => <button key={item.id} type="button" aria-label={`Agregar ${invitationSectionLabels[item.type]}`} onClick={() => addSection(item.id)}><span><strong>{invitationSectionLabels[item.type]}</strong><small>{item.type === "countdown" ? "Los días, horas y minutos que faltan para tu evento." : item.type === "location" ? "El lugar, la dirección y el mapa del evento." : guidedDetails(values.eventType).find(detail => detail.type === item.type)?.help}</small></span><FiPlus aria-hidden="true" /></button>)}</div>
           {!availableSections.length && <p>Ya incluiste todas las secciones disponibles.</p>}
         </>}
         {target.kind === "cover" && <>
-          <InvitationCoverLayoutPicker value={values.coverLayout} imageUrl={values.imageUrl} onChange={coverLayout => patch({ coverLayout })} />
+          <FieldGroup title="Información principal">
+          <div className={styles.fieldRow}>
           <Field label="Tipo de evento" id="show-event-type"><select id="show-event-type" value={values.eventType} onChange={e => patch(changeGuidedEventType(values, e.target.value))}>{invitationEventTypes.map(type => <option key={type} value={type}>{getInvitationEventContent(type).label}</option>)}</select></Field>
           <Field label="Nombre de la invitación" id="show-name"><input id="show-name" required minLength={2} maxLength={100} value={values.name} onChange={e => patch({ name: e.target.value })} /></Field>
+          </div>
           <Field label="Protagonistas o anfitriones" id="show-hosts"><input id="show-hosts" maxLength={120} value={values.hostNames} onChange={e => patch({ hostNames: e.target.value })} /></Field>
-          <DateFields values={values} patch={patch} expiresAt={event.expiresAt} isExample={event.isExample} />
+          </FieldGroup>
+          <FieldGroup title="Fecha y hora"><DateFields values={values} patch={patch} expiresAt={event.expiresAt} isExample={event.isExample} /></FieldGroup>
+          <InvitationCoverLayoutPicker compact value={values.coverLayout} imageUrl={values.imageUrl} onChange={coverLayout => patch({ coverLayout })} />
         </>}
-        {(target.kind === "date" || target.kind === "location") && <DateFields values={values} patch={patch} expiresAt={event.expiresAt} isExample={event.isExample} />}
+        {(target.kind === "date" || target.kind === "location") && <FieldGroup title="Fecha y hora"><DateFields values={values} patch={patch} expiresAt={event.expiresAt} isExample={event.isExample} /></FieldGroup>}
         {target.kind === "date" && countdownSection && <>
-          <CountdownCalendarFields section={countdownSection} onChange={changes => patch({ sections: values.sections.map(item => item.id === countdownSection.id ? { ...item, ...changes } : item) })} />
-          <Field label="Mostrar cuenta regresiva" id="show-countdown-enabled"><input id="show-countdown-enabled" type="checkbox" checked={countdownSection.enabled} onChange={e => patch({ sections: values.sections.map(item => item.id === countdownSection.id ? { ...item, enabled: e.target.checked } : item) })} /></Field>
+          <FieldGroup title="Cuenta regresiva">
+          <label className="guided-toggle guided-include-toggle" htmlFor="show-countdown-enabled"><span><strong>Mostrar cuenta regresiva</strong></span><input id="show-countdown-enabled" type="checkbox" role="switch" checked={countdownSection.enabled} onChange={e => patch({ sections: values.sections.map(item => item.id === countdownSection.id ? { ...item, enabled: e.target.checked } : item) })} /><span className="guided-switch" aria-hidden="true" /></label>
           <Field label="Título de la sección" id="show-countdown-title"><input id="show-countdown-title" maxLength={100} value={countdownSection.title} onChange={e => patch({ sections: values.sections.map(item => item.id === countdownSection.id ? { ...item, title: e.target.value } : item) })} /></Field>
+          <CountdownCalendarFields section={countdownSection} onChange={changes => patch({ sections: values.sections.map(item => item.id === countdownSection.id ? { ...item, ...changes } : item) })} />
+          </FieldGroup>
         </>}
         {target.kind === "location" && <>
+          <FieldGroup title="Lugar del evento">
+          <div className={styles.fieldRow}>
           {locationSection && <>
             <Field label="Título de la sección" id="show-location-title"><input id="show-location-title" maxLength={100} value={locationSection.title} onChange={e => patch({ sections: values.sections.map(item => item.id === locationSection.id ? { ...item, title: e.target.value, titleCustomized: true } : item) })} /></Field>
           </>}
           <Field label="Lugar de la celebración" id="show-venue"><input id="show-venue" maxLength={160} value={values.venue} onChange={e => patch({ venue: e.target.value })} /></Field>
+          </div>
           <Field label="Dirección" id="show-address"><input id="show-address" maxLength={240} value={values.address} onChange={e => patch({ address: e.target.value })} /></Field>
-          {locationSection && <Field label="Enlace de Google Maps (opcional)" id="show-map"><input id="show-map" type="url" maxLength={500} placeholder="https://maps.app.goo.gl/…" value={locationSection.link} onChange={e => patch({ sections: values.sections.map(item => item.id === locationSection.id ? { ...item, link: e.target.value } : item) })} /><small>Si lo dejas vacío, «Cómo llegar» buscará la dirección escrita.</small></Field>}
+          {locationSection && <Field label="Google Maps (opcional)" id="show-map"><input id="show-map" type="url" maxLength={500} placeholder="https://maps.app.goo.gl/…" aria-describedby="show-map-help" value={locationSection.link} onChange={e => patch({ sections: values.sections.map(item => item.id === locationSection.id ? { ...item, link: e.target.value } : item) })} /><small id="show-map-help">Si lo dejas vacío, «Cómo llegar» usará la dirección escrita.</small></Field>}
+          </FieldGroup>
           {locationSection && <div className={styles.sectionMedia}><SectionPhotoFields section={locationSection} uploadProps={uploadProps} onChange={changes => patch({ sections: values.sections.map(item => item.id === locationSection.id ? { ...item, ...changes } : item) })} /></div>}
         </>}
         {(target.kind === "cover-photo" || target.kind === "background") && <CloudinaryImageUpload {...uploadProps} multiple={false} images={target.kind === "cover-photo" ? values.imageUrl ? [values.imageUrl] : [] : values.backgroundImageUrl ? [values.backgroundImageUrl] : []} onChange={images => patch(target.kind === "cover-photo" ? { imageUrl: images[0] ?? "" } : { backgroundImageUrl: images[0] ?? "" })} />}
-        {target.kind === "cover-photo" && values.imageUrl && coverSection && <InvitationImageFocusFields section={coverSection} onChange={changes => changePreviewSection(coverSection.id, changes)} />}
         {target.kind === "background" && <>
-          <InvitationBackgroundBlurControl value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
-          <InvitationBackgroundDimControl value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => patch({ backgroundDimIntensity })} />
+          <FieldGroup title="Ajustes del fondo"><div className={styles.fieldRow}>
+          <InvitationBackgroundBlurControl compact value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
+          <InvitationBackgroundDimControl compact value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => patch({ backgroundDimIntensity })} />
+          </div></FieldGroup>
         </>}
         {target.kind === "appearance" && <div className={styles.appearanceGroups}>
-          <p className={styles.sectionIntro}>Dale tu estilo a la invitación. Abre un apartado para personalizarlo.</p>
+          <p className={styles.sectionIntro}>Abre un apartado para personalizarlo.</p>
           <AppearanceGroup title="Fondo" description="Tu fotografía, desenfoque y oscuridad" icon={<FiImage />} defaultOpen>
             <CloudinaryImageUpload {...uploadProps} multiple={false} images={values.backgroundImageUrl ? [values.backgroundImageUrl] : []} onChange={images => patch({ backgroundImageUrl: images[0] ?? "" })} />
-            <InvitationBackgroundBlurControl value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
-            <InvitationBackgroundDimControl value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => patch({ backgroundDimIntensity })} />
+            <div className={styles.fieldRow}>
+            <InvitationBackgroundBlurControl compact value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
+            <InvitationBackgroundDimControl compact value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => patch({ backgroundDimIntensity })} />
+            </div>
           </AppearanceGroup>
           <AppearanceGroup title="Tarjeta" description="Acabado, efecto cristal y esquinas" icon={<FiLayers />} >
             <InvitationSurfacePicker embedded values={values} onChange={panelStyle => patch({ panelStyle })} onBlurChange={blurIntensity => patch({ blurIntensity })} onGlassBorderChange={glassBorder => patch({ glassBorder })} />
@@ -199,17 +212,19 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
           <AppearanceGroup title="Color y tipografía" description="El color de tu celebración y sus letras" icon={<FiType />} >
             <InvitationPalettePicker palettes={sharedInvitationDesign.palettes} imagePalette={values.imagePalette} sectionColor={values.sectionColor} accent={values.accent} backgroundImageUrl={values.backgroundImageUrl} onChange={(accent, imagePalette, sectionColor) => setValues(current => ({ ...current, ...invitationPaletteChanges(current, accent, imagePalette ?? null, sectionColor) }))} />
             <InvitationTextColorPicker values={values} onChange={patch} />
-          <InvitationFontSelect role="heading" eventType={values.eventType} value={values.typography} onChange={typography => patch({ typography })} />
-          <InvitationFontSelect role="body" eventType={values.eventType} value={values.bodyTypography} onChange={bodyTypography => patch({ bodyTypography })} />
+            <div className={styles.fieldRow}>
+              <InvitationFontSelect role="heading" eventType={values.eventType} value={values.typography} onChange={typography => patch({ typography })} />
+              <InvitationFontSelect role="body" eventType={values.eventType} value={values.bodyTypography} onChange={bodyTypography => patch({ bodyTypography })} />
+            </div>
           </AppearanceGroup>
           <AppearanceGroup title="Detalles" description="Iconos que acompañan tus secciones" icon={<FiStar />} >
             <InvitationIconsPicker embedded value={values.showSectionIcons} onChange={showSectionIcons => patch({ showSectionIcons })} />
           </AppearanceGroup>
         </div>}
-        {section && target.kind === "section" && <SectionFields section={section} onChange={changeSection} uploadProps={uploadProps} allowSectionPhoto globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle} mediaClassName={styles.sectionMedia} showStyleControls={false} />}
-        {section && target.kind === "section-photo" && <SectionPhotoFields section={section} onChange={changeSection} uploadProps={uploadProps} />}
+        {section && target.kind === "section" && <SectionFields compact section={section} onChange={changeSection} uploadProps={uploadProps} allowSectionPhoto globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle} mediaClassName={styles.sectionMedia} showStyleControls={false} />}
+        {section && target.kind === "section-photo" && <SectionPhotoFields showFraming={false} section={section} onChange={changeSection} uploadProps={uploadProps} />}
         {section && target.kind === "section-surface" && <>
-          {section.type === "cover" && <InvitationCoverLayoutPicker value={values.coverLayout} imageUrl={values.imageUrl} onChange={coverLayout => patch({ coverLayout })} />}
+          {section.type === "cover" && <InvitationCoverLayoutPicker compact value={values.coverLayout} imageUrl={values.imageUrl} onChange={coverLayout => patch({ coverLayout })} />}
           <SectionSurfaceFields section={section} onChange={changeSection} globalShowIcons={values.showSectionIcons} globalPanelStyle={values.panelStyle} />
         </>}
         {section && section.type !== "cover" && target.kind === "section-visibility" && <>
@@ -248,7 +263,7 @@ function editLabel(target: InvitationEditTarget, section?: InviteSection) {
 }
 
 function AppearanceGroup({ title, description, icon, defaultOpen = false, children }: { title: string; description: string; icon: ReactNode; defaultOpen?: boolean; children: ReactNode }) {
-  return <details className={styles.appearanceGroup} open={defaultOpen}>
+  return <details className={styles.appearanceGroup} name="show-appearance" open={defaultOpen}>
     <summary className={styles.appearanceSummary}>
       <span className={styles.appearanceIcon} aria-hidden="true">{icon}</span>
       <span className={styles.appearanceLabel}><strong>{title}</strong><span>{description}</span></span>
@@ -262,6 +277,10 @@ function Field({ label, id, children }: { label: string; id: string; children: R
   return <div className="guided-field"><label htmlFor={id}>{label}</label>{children}</div>;
 }
 
+function FieldGroup({ title, children }: { title: string; children: ReactNode }) {
+  return <fieldset className={styles.fieldGroup}><legend>{title}</legend><div>{children}</div></fieldset>;
+}
+
 function DateFields({ values, patch, expiresAt, isExample }: { values: EditorValues; patch(changes: Partial<EditorValues>): void; expiresAt?: Date | null; isExample?: boolean }) {
   return <div className={styles.dateFields}>
     {!isExample && <InvitationDateNotice date={values.eventDate} time={values.eventTime} expiresAt={expiresAt} />}
@@ -270,7 +289,7 @@ function DateFields({ values, patch, expiresAt, isExample }: { values: EditorVal
   </div>;
 }
 
-function EditDialog({ title, busy, uploading, onCancel, onSave, children, selectionOnly = false, saveLabel, savingLabel, published }: { title: string; busy: boolean; uploading: boolean; onCancel(): void; onSave(): void; children: ReactNode; selectionOnly?: boolean; saveLabel: string; savingLabel: string; published: boolean }) {
+function EditDialog({ title, busy, uploading, onCancel, onSave, children, selectionOnly = false, wide = false, saveLabel, savingLabel, published }: { title: string; busy: boolean; uploading: boolean; onCancel(): void; onSave(): void; children: ReactNode; selectionOnly?: boolean; wide?: boolean; saveLabel: string; savingLabel: string; published: boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const dialog = ref.current;
@@ -279,11 +298,11 @@ function EditDialog({ title, busy, uploading, onCancel, onSave, children, select
     document.body.style.overflow = "hidden";
     return () => { dialog?.close(); document.body.style.overflow = previousOverflow; };
   }, []);
-  return <dialog ref={ref} className={styles.dialog} aria-labelledby="show-edit-title" aria-describedby="show-edit-description" onCancel={event => { event.preventDefault(); onCancel(); }}>
+  return <dialog ref={ref} className={`${styles.dialog}${wide ? ` ${styles.dialogWide}` : ""}`} aria-labelledby="show-edit-title" aria-describedby="show-edit-description" onCancel={event => { event.preventDefault(); onCancel(); }}>
     <form onSubmit={event => { event.preventDefault(); if (!busy && !selectionOnly) onSave(); }}>
-      <header className={styles.dialogHeader}><div className={styles.dialogHeading}><span className={styles.dialogIcon} aria-hidden="true">{selectionOnly ? <FiPlus /> : <FiEdit3 />}</span><div><span className={styles.eyebrow}>EDITAR INVITACIÓN</span><h2 id="show-edit-title">{title}</h2><p id="show-edit-description">{published ? "Tus cambios solo serán visibles para los invitados al pulsar «Publicar cambios»." : "Personaliza este apartado y guarda cuando termines de revisar."}</p></div></div><button type="button" aria-label="Cerrar edición" disabled={busy} onClick={onCancel}><FiX aria-hidden="true" /></button></header>
+      <header className={styles.dialogHeader}><div className={styles.dialogHeading}><span className={styles.eyebrow}>{selectionOnly ? "SECCIONES" : "EDITAR INVITACIÓN"}</span><h2 id="show-edit-title">{title}</h2><p id="show-edit-description">{selectionOnly ? "Elige qué quieres incluir en tu invitación." : published ? "Los invitados verán los cambios al pulsar «Publicar cambios»." : "Personaliza este apartado y guarda al terminar."}</p></div><button type="button" aria-label="Cerrar edición" disabled={busy} onClick={onCancel}><FiX aria-hidden="true" /></button></header>
       <div className={styles.dialogBody}>{children}</div>
-      <footer className={styles.dialogFooter}><button type="button" disabled={busy} onClick={onCancel}>{selectionOnly ? "Cerrar" : "Cancelar"}</button>{!selectionOnly && <button type="submit" className={styles.save} disabled={busy}><FiSave aria-hidden="true" />{uploading ? "Subiendo fotografías…" : busy ? savingLabel : saveLabel}</button>}</footer>
+      <footer className={styles.dialogFooter}><button type="button" disabled={busy} onClick={onCancel}><span>{selectionOnly ? "Cerrar" : "Cancelar"}</span></button>{!selectionOnly && <button type="submit" className={styles.save} disabled={busy}><FiSave aria-hidden="true" /><span>{uploading ? "Subiendo fotografías…" : busy ? savingLabel : saveLabel}</span></button>}</footer>
     </form>
   </dialog>;
 }

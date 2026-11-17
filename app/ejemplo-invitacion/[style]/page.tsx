@@ -7,6 +7,7 @@ import { ExampleStyleAction } from "@/components/landing/ExampleStyleAction";
 import { landingEventExamples } from "@/lib/landing-invitation-example";
 import { getShowcaseInvitation, getShowcaseExamples } from "@/lib/showcase";
 import { getInvitationEventContent, invitationEventTypes } from "@/lib/invitation-event-content";
+import { getCurrentPrice } from "@/lib/site-pricing";
 
 export const metadata: Metadata = { title: "Invitación de ejemplo | Cheetah Invite", robots: { index: false, follow: false } };
 
@@ -21,7 +22,10 @@ export default function InvitationExamplePage({ params }: { params: Promise<{ st
 async function InvitationExampleData({ params }: { params: Promise<{ style: string }> }) {
   const { style } = await params;
   const invitation = await getShowcaseInvitation(style);
-  if (invitation) return <main className="public-invitation-page"><CelebrationInvitation {...invitation} /><ExampleStyleAction styleSlug={style} /></main>;
+  if (invitation) {
+    const price = await getCurrentPrice();
+    return <main className="public-invitation-page"><CelebrationInvitation {...invitation} /><ExampleStyleAction styleSlug={style} priceLabel={price.label} /></main>;
+  }
   const examples = [...await getShowcaseExamples("catalog"), ...await getShowcaseExamples("hero")];
   const occasion = invitationEventTypes.find(type => getInvitationEventContent(type).slug === style);
   const match = occasion && examples.find(item => item.invitation.eventType === occasion);

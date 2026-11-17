@@ -9,7 +9,7 @@ import { trackLandingEvent } from "@/lib/client-analytics";
 type Example = { slug: string; label: string };
 type EventExample = Example & { available: boolean; typeLabel: string; eventType: string };
 
-export function HeroInvitationExamples({ examples }: { examples: EventExample[] }) {
+export function HeroInvitationExamples({ examples, priceLabel }: { examples: EventExample[]; priceLabel: string }) {
   const [selectedSlug, setSelectedSlug] = useState(examples[0]?.slug || "");
   const selected = examples.find(({ slug }) => slug === selectedSlug) ?? examples[0];
   if (!selected) return <div className="hero-example-caption"><span className="eyebrow">TU HISTORIA, TU ESTILO</span><p>Crea una invitación tan especial como tu celebración.</p></div>;
@@ -44,6 +44,8 @@ export function HeroInvitationExamples({ examples }: { examples: EventExample[] 
       </div>
       {variants.length > 1 && <label className="hero-example-variants">Elige un diseño<select aria-label="Diseño de invitación de ejemplo" value={selected.slug} onChange={event => { setSelectedSlug(event.target.value); trackLandingEvent("example_select", event.target.value); }}>{variants.map(example => <option key={example.slug} value={example.slug}>{example.label}</option>)}</select></label>}
       <div className="hero-example-meta">
+        <span className="hero-example-demo-label">Demo</span>
+        <span className="hero-example-hint">Desde {priceLabel}</span>
         <span className="hero-example-hint" role="status"><FiCheck aria-hidden="true" /> {selected.label} · datos de ejemplo</span>
       </div>
     </div>
