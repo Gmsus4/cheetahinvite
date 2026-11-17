@@ -6,6 +6,7 @@ import { landingEventExamples } from "@/lib/landing-invitation-example";
 import { getShowcaseInvitation, showcasePreview } from "@/lib/showcase";
 import { BrandLoader } from "@/components/BrandLoader";
 import "./hero-preview.css";
+import { demoPreviewKey } from "@/lib/demo-preview";
 
 export const metadata: Metadata = { title: "Demostración | Cheetah Invite", robots: { index: false, follow: false } };
 
@@ -21,5 +22,5 @@ async function HeroPreview({ params }: { params: Promise<{ style: string }> }) {
   const { style } = await params;
   const invitation = await getShowcaseInvitation(style);
   if (!invitation) notFound();
-  return <main className="public-invitation-page"><CelebrationInvitation {...showcasePreview(invitation)} preview /></main>;
+  return <main className="public-invitation-page" data-preview-key={demoPreviewKey(invitation)}><CelebrationInvitation {...showcasePreview(invitation)} preview /></main>;
 }

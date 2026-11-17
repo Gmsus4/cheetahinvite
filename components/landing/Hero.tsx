@@ -1,6 +1,5 @@
 import {
   FiArrowUpRight,
-  FiChevronDown,
   FiStar,
 } from "react-icons/fi";
 import { HeroInvitationExamples } from "./HeroInvitationExamples";
@@ -36,8 +35,8 @@ export function Hero() {
           <a className="button" href="/crear">
             Crea tu invitación <span><FiArrowUpRight aria-hidden="true" /></span>
           </a>
-          <a className="text-link" href="#como-funciona">
-            Cómo funciona <span><FiChevronDown aria-hidden="true" /></span>
+          <a className="text-link" href="/demo">
+            Ver diseños <span><FiArrowUpRight aria-hidden="true" /></span>
           </a>
         </div>
       </div>

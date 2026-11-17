@@ -8,6 +8,8 @@ import { ExampleSettings } from "@/components/admin/ExampleSettings";
 import { ExampleRefreshOnReturn } from "@/components/admin/ExampleRefreshOnReturn";
 import styles from "../../compact.module.css";
 
+export const maxDuration = 120;
+
 export default function ExamplePage(props: PageProps<"/admin/disenos/[id]">) {
   return <AdminPageBoundary><ExamplePageData {...props} /></AdminPageBoundary>;
 }

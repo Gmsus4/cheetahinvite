@@ -1,6 +1,8 @@
 /* Keep the published surfaces intact; only disable motion in the small demo. */
 html { scrollbar-width: none; scroll-behavior: auto; }
 html::-webkit-scrollbar { display: none; }
+/* Embedded previews and exported captures do not need the development overlay. */
+nextjs-portal { display: none; }
 .celebration-invitation[data-preview] *,
 .celebration-invitation[data-preview] *::before,
 .celebration-invitation[data-preview] *::after {

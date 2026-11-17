@@ -45,7 +45,11 @@ function createFixture() {
         return structuredClone(take ? found.slice(0, take) : found);
       },
       async findFirst({ where, orderBy } = {}) { return (await api.findMany({ where, orderBy, take: 1 }))[0] ?? null; },
-      async findUnique({ where }) { return api.findFirst({ where }); },
+      async findUnique({ where, include }) {
+        const row = await api.findFirst({ where });
+        if (row && include?.event && row.eventId) row.event = structuredClone(state.events.get(row.eventId));
+        return row;
+      },
       async create({ data }) {
         if (state[name].has(data[primaryKey])) throw Object.assign(Error('Duplicate key'), { code: 'P2002' });
         const row = { id: require('node:crypto').randomUUID(), ...defaults, createdAt: new Date(), updatedAt: new Date(), ...data };
@@ -105,6 +109,11 @@ function createFixture() {
       if (name === 'next/navigation') return { redirect: url => { throw Object.assign(Error('redirect'), { url }); }, notFound: () => { throw Object.assign(Error('not-found'), { status: 404 }); } };
       if (name === '@/auth') return { auth: async () => fixture.owner ? { user: { id: fixture.owner, role: state.users.get(fixture.owner)?.role } } : null };
       if (name === '@/prisma') return { prisma };
+      if (name === '@/lib/demo-capture') return { captureDemoPreview: async (id, version, invitation) => {
+        (fixture.demoCaptures ??= []).push({ id, version, invitation });
+        if (fixture.demoCapture) return fixture.demoCapture(id, version, invitation);
+        return load('lib/demo-preview.ts').createDemoPreview(invitation, Buffer.from('fixture-webp'));
+      } };
       if (name === '@/generated/prisma/client') return { Prisma: { DbNull: null, sql: (strings, ...values) => ({ strings, values }) } };
       if (name.startsWith('@/')) return load(path.resolve(name.slice(2)) + '.ts');
       if (name.startsWith('.')) return load(path.resolve(path.dirname(absolute), name) + '.ts');

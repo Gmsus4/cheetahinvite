@@ -30,7 +30,7 @@ export function ExampleSettings({ example, collection = false }: { example: Exam
       {example.publishedAt && example.publishedVersion !== example.event.contentVersion && <p className={styles.pending}>Hay cambios guardados pendientes de publicar.</p>}
       <p className={styles.link}>Enlace: /ejemplo-invitacion/{example.slug}</p>
       <div className={styles.actions}>
-        <form action={publishExample.bind(null, example.id)}>{destination}<input type="hidden" name="version" value={example.event.contentVersion} /><AdminSubmit confirmMessage="¿Publicar el contenido guardado de este ejemplo?">{example.publishedAt ? "Publicar cambios" : "Publicar ejemplo"}</AdminSubmit></form>
+        <form action={publishExample.bind(null, example.id)}>{destination}<input type="hidden" name="version" value={example.event.contentVersion} /><AdminSubmit pendingLabel="Generando imagen y publicando…" confirmMessage="¿Publicar el contenido guardado de este ejemplo? Su imagen de demostración se actualizará automáticamente.">{example.publishedAt ? "Publicar cambios" : "Publicar ejemplo"}</AdminSubmit></form>
         {example.publishedAt && <form action={unpublishExample.bind(null, example.id)}>{destination}<AdminSubmit secondary confirmMessage="¿Retirar este ejemplo del sitio? El borrador se conservará.">Retirar del sitio</AdminSubmit></form>}
       </div>
     </section>

@@ -10,6 +10,7 @@ import { getInvitationEventContent } from "./invitation-event-content";
 import { landingEventExamples } from "./landing-invitation-example";
 import { exampleWithImages } from "./invitation-example-images";
 import { heroPreviewImages } from "./hero-preview-images";
+import { withoutDemoPreview } from "./demo-preview";
 
 export function showcasePreview(content: InvitationProps): InvitationProps {
   const image = (url: string) => {
@@ -58,7 +59,7 @@ export async function getShowcaseExamples(placement: "hero" | "catalog") {
 export async function getShowcaseInvitation(slug: string) {
   await connection();
   const example = await prisma.showcaseExample.findUnique({ where: { slug } });
-  if (example?.publishedAt && example.publishedContent) return example.publishedContent as unknown as InvitationProps;
+  if (example?.publishedAt && example.publishedContent) return withoutDemoPreview(example.publishedContent as unknown as InvitationProps);
   const settings = await prisma.siteSettings.findUnique({ where: { id: "site" } });
   if (settings?.useCustomExamples) return null;
   const legacy = landingEventExamples.find(example => example.slug === slug);

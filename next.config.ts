@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   allowedDevOrigins: ["127.0.0.1"],
+  serverExternalPackages: ["puppeteer-core", "@sparticuz/chromium"],
+  outputFileTracingIncludes: { "/admin/**/*": ["./node_modules/@sparticuz/chromium/bin/**/*"] },
   experimental: {
     agentFeedback: true,
   },

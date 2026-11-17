@@ -14,6 +14,8 @@ import { showcaseContent } from "@/lib/showcase";
 import { CourtesyError, grantCourtesy, revokeCourtesy } from "@/lib/courtesy";
 import { withImageLock, queueEventImages, scheduleCloudinaryCleanup, syncCloudinaryImages } from "@/lib/cloudinary-storage";
 import { landingEventExamples } from "@/lib/landing-invitation-example";
+import { captureDemoPreview } from "@/lib/demo-capture";
+import { demoPreviewKey } from "@/lib/demo-preview";
 
 function invalidateAdmin() {
   revalidatePath("/admin", "layout");
@@ -24,6 +26,7 @@ function invalidateAdmin() {
   revalidatePath("/invitacion/[slug]", "page");
   revalidatePath("/invitacion/[slug]/[customSlug]", "page");
   revalidatePath("/");
+  revalidatePath("/demo");
 }
 function done(path: string, error?: string): never { redirect(`${path}${path.includes("?") ? "&" : "?"}${error ? `error=${encodeURIComponent(error)}` : "saved=1"}`); }
 
@@ -134,6 +137,16 @@ export async function saveExampleCardSettings(id: string, form: FormData): Promi
 export async function publishExample(id: string, form: FormData) {
   const actor = await requireAdmin();
   const destination = form?.get("returnTo") === "collection" ? "/admin/disenos" : `/admin/disenos/${id}`;
+  const candidate = await prisma.showcaseExample.findUnique({ where: { id }, include: { event: true } });
+  if (!candidate) done(destination, "No encontramos este ejemplo.");
+  const draft = candidate.event;
+  if (!draft || draft.ownerId !== actor.id || !draft.isExample || draft.contentVersion !== Number(form.get("version"))) done(destination, "El borrador cambió. Revisa la vista previa y vuelve a publicar.");
+  const draftIssues = eventPublicationIssues(draft);
+  if (draftIssues.length) done(destination, draftIssues[0].message);
+  let preview: Awaited<ReturnType<typeof captureDemoPreview>>;
+  try { preview = await captureDemoPreview(id, draft.contentVersion, showcaseContent(draft)); }
+  catch { done(destination, "No pudimos generar la imagen de la demo. La versión publicada se conserva. Intenta publicar de nuevo."); }
+  await requireAdmin();
   let error = "";
   await withImageLock(actor.id, async tx => {
     const example = await tx.showcaseExample.findUnique({ where: { id } });
@@ -143,7 +156,8 @@ export async function publishExample(id: string, form: FormData) {
     if (!event || event.ownerId !== actor.id || !event.isExample || event.contentVersion !== Number(form.get("version"))) { error = "El borrador cambió. Revisa la vista previa y vuelve a publicar."; return; }
     const issues = eventPublicationIssues(event);
     if (issues.length) { error = issues[0].message; return; }
-    await tx.showcaseExample.update({ where: { id }, data: { publishedAt: new Date(), publishedVersion: event.contentVersion, publishedContent: showcaseContent(event) as unknown as Prisma.InputJsonValue } });
+    if (preview.contentKey !== demoPreviewKey(showcaseContent(event))) { error = "El borrador cambió. Revisa la vista previa y vuelve a publicar."; return; }
+    await tx.showcaseExample.update({ where: { id }, data: { publishedAt: new Date(), publishedVersion: event.contentVersion, publishedContent: { ...showcaseContent(event), demoPreview: preview } as unknown as Prisma.InputJsonValue } });
     await syncCloudinaryImages(tx, actor.id, event.id, event, event);
     await tx.adminAudit.create({ data: { actorId: actor.id, action: "example.publish", targetId: id, detail: { version: event.contentVersion } } });
   });

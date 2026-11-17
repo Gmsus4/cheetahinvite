@@ -11,7 +11,7 @@ const navigation = [
   { id: "preguntas-frecuentes", label: "Preguntas" },
 ];
 
-export function Navbar() {
+export function Navbar({ homePage = true }: { homePage?: boolean }) {
   const header = useRef<HTMLElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -76,7 +76,7 @@ export function Navbar() {
     <header ref={header} className={`site-header home-navbar${scrolled ? " is-scrolled" : ""}`}>
       <a className="home-skip-link" href="#inicio">Ir al contenido</a>
       <div className="home-navbar-shell">
-        <a className="brand" href="#inicio" aria-label="Cheetah Invite, inicio" onClick={() => setMenuOpen(false)}>
+        <a className="brand" href={homePage ? "#inicio" : "/"} aria-label="Cheetah Invite, inicio" onClick={() => setMenuOpen(false)}>
           <BrandEmblem size={40} priority />
           <span className="brand-name">
             Cheetah<span>Invite</span>
@@ -98,8 +98,8 @@ export function Navbar() {
         <nav id="home-primary-navigation" className="main-nav" aria-label="Navegación principal" data-open={menuOpen || undefined}>
           {navigation.map(({ id, label }) => <a
             key={id}
-            href={`#${id}`}
-            aria-current={activeSection === id ? "location" : undefined}
+            href={`${homePage ? "" : "/"}#${id}`}
+            aria-current={homePage && activeSection === id ? "location" : undefined}
             onClick={() => setMenuOpen(false)}
           >{label}</a>)}
           <div className="header-actions">
