@@ -1,5 +1,9 @@
 # Almacenamiento y limpieza de imágenes
 
+> Documento histórico de Vercel/Cloudinary. En la rama de migración usar
+> [Cloudflare Workers y R2](cloudflare-migration.md). No ejecutar estas instrucciones
+> ni activar el antiguo planificador contra producción desde este worktree.
+
 ## Configuración
 
 1. Aplicar `npx prisma migrate deploy` y generar el cliente con `npx prisma generate`.

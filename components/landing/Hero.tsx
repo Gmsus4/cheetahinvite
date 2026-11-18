@@ -3,17 +3,11 @@ import {
   FiStar,
 } from "react-icons/fi";
 import { HeroInvitationExamples } from "./HeroInvitationExamples";
-import { cacheLife } from "next/cache";
 import { getShowcaseExamples } from "@/lib/showcase";
 import { LandingAnalytics } from "./LandingAnalytics";
 import { getCurrentPrice } from "@/lib/site-pricing";
 
 export async function Hero() {
-  "use cache";
-  // Include the real categories and price in the prerendered shell. A phone-only
-  // Suspense fallback removes the caption on reload and shifts the next section.
-  // Admin changes already invalidate the homepage via revalidatePath("/").
-  cacheLife("minutes");
   const [examples, price] = await Promise.all([getShowcaseExamples("hero"), getCurrentPrice()]);
   return (
     <section className="hero" id="inicio">

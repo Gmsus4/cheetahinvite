@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Prisma } from "@/generated/prisma/client";
 import { authPageHref } from "@/lib/auth-destination";
-import { withImageLock } from "@/lib/cloudinary-storage";
+import { withImageLock } from "@/lib/image-storage";
 import { validCreationKey } from "@/lib/invitation-editor";
 import { canEditInvitation } from "@/lib/invitation-lifecycle";
 import { ACCOUNT_LIMITS } from "@/lib/limits";

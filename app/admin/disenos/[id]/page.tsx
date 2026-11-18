@@ -3,7 +3,6 @@ import { requireAdmin } from "@/lib/admin-access";
 import { prisma } from "@/prisma";
 import { AdminPageBoundary } from "@/components/admin/AdminUI";
 
-export const maxDuration = 120;
 
 export default function ExamplePage(props: PageProps<"/admin/disenos/[id]">) {
   return <AdminPageBoundary><ExamplePageData {...props} /></AdminPageBoundary>;

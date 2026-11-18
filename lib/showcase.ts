@@ -3,7 +3,6 @@ import { isInvitationTextColorMode, isInvitationTextColor } from "./invitation-t
 import "server-only";
 import { isInvitationCoverLayout } from "./invitation-cover-layout";
 import { connection } from "next/server";
-import { io } from "next/cache";
 import { prisma } from "@/prisma";
 import type { Event } from "@/generated/prisma/client";
 import { isInvitationPanelStyle, isInvitationSectionCorners, type InvitationProps, type InviteSection } from "./invitation-editor";
@@ -47,7 +46,7 @@ export function showcaseContent(event: Event): InvitationProps {
 }
 
 export async function getShowcaseExamples(placement: "hero" | "catalog") {
-  await io();
+  await connection();
   const settings = await prisma.siteSettings.findUnique({ where: { id: "site" } });
   if (!settings?.useCustomExamples) return landingEventExamples;
   const examples = await prisma.showcaseExample.findMany({ where: { publishedAt: { not: null }, ...(placement === "hero" ? { showInHero: true } : { showInCatalog: true }) }, orderBy: [{ position: "asc" }, { createdAt: "asc" }], take: 100 });

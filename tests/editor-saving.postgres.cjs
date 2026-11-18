@@ -19,7 +19,7 @@ function form(name, version = 0) {
     assert.equal(results.filter(result => result.ok).length, 1);
     assert.equal(results.find(result => !result.ok).code, 'conflict');
     assert.equal((await prisma.event.findUnique({ where: { id: eventId } })).contentVersion, 1);
-    await prisma.event.update({ where: { id: eventId }, data: { paidAt: new Date(), status: 'PUBLISHED' } });
+    await prisma.event.update({ where: { id: eventId }, data: { paidAt: new Date(), expiresAt: new Date(Date.now() + 86400000), privacy: 'PUBLIC', status: 'PUBLISHED' } });
     assert.equal((await updateEvent(eventId, form('Auto should fail', 1), 'auto')).code, 'published');
     assert.equal((await updateEvent(eventId, form('Explicit fixture', 1))).version, 2);
     assert.equal((await publishEvent(eventId, 1)).code, 'conflict');

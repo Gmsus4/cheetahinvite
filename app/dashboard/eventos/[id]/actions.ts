@@ -31,7 +31,7 @@ import { isInvitationTemplate } from "@/lib/invitation-templates";
 import { isInvitationTexture } from "@/lib/invitation-textures";
 import { sharedInvitationId, sharedInvitationDesign, invitationPalette } from "@/lib/shared-invitation";
 import { heroPreviewImages } from "@/lib/hero-preview-images";
-import { ImageStorageError, queueEventImages, scheduleCloudinaryCleanup, syncCloudinaryImages, withImageLock } from "@/lib/cloudinary-storage";
+import { ImageStorageError, queueEventImages, scheduleImageCleanup, syncImages, withImageLock } from "@/lib/image-storage";
 
 export async function deleteEvent(eventId: string) {
   const session = await auth();
@@ -54,7 +54,7 @@ export async function deleteEvent(eventId: string) {
     return { error: "No se pudo eliminar la invitación. Inténtalo de nuevo." };
   }
 
-  scheduleCloudinaryCleanup(session.user.id);
+  scheduleImageCleanup(session.user.id);
   revalidatePath("/dashboard", "layout");
   revalidatePath("/crear");
   revalidatePath("/dashboard/compras");
@@ -309,10 +309,10 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
         throw new EditorWriteError({ ...failure("conflict", "La invitación cambió mientras guardabas. Tu copia local sigue disponible."), version: latest?.contentVersion });
       }
       if (privacyChanged) await tx.invitationAccessSession.deleteMany({ where: { eventId } });
-      await syncCloudinaryImages(tx, session.user.id, eventId, previous, { imageUrl, backgroundImageUrl: hasBackgroundImage ? backgroundImageUrl : previous.backgroundImageUrl, sections: curated.sections ?? sections, isExample: previous.isExample });
+      await syncImages(tx, session.user.id, eventId, previous, { imageUrl, backgroundImageUrl: hasBackgroundImage ? backgroundImageUrl : previous.backgroundImageUrl, sections: curated.sections ?? sections, isExample: previous.isExample });
       return { ok: true as const, eventId, version: version + 1, ...(hasPrivacy ? { privacyVersion: previous.privacyVersion + (privacyChanged ? 1 : 0) } : {}) };
     });
-    scheduleCloudinaryCleanup(session.user.id);
+    scheduleImageCleanup(session.user.id);
     return result;
   } catch (error) {
     if (error instanceof EditorWriteError) return error.result;

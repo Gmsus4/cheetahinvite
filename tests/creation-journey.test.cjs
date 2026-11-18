@@ -255,7 +255,7 @@ test('creation traverses seven steps with separate cover, block photos and optio
   ui.submit(); ui = h.render();
   assert.equal(h.states[1], 2);
   assert.ok(ui.find(n => n.props['aria-label']?.includes('Paso 4 de 7')));
-  const uploads = ui.nodes.filter(n => n.type?.displayName === 'CloudinaryImageUpload');
+  const uploads = ui.nodes.filter(n => n.type?.displayName === 'InvitationImageUpload');
   assert.equal(uploads.length, 2);
   uploads[0].props.onChange(['/cover.webp']);
   uploads[1].props.onChange(['/background.webp']);

@@ -12,7 +12,7 @@ import { invitationEventTypes } from "@/lib/invitation-event-content";
 import { eventPublicationIssues } from "@/lib/guided-invitation";
 import { showcaseContent } from "@/lib/showcase";
 import { CourtesyError, grantCourtesy, revokeCourtesy } from "@/lib/courtesy";
-import { withImageLock, queueEventImages, scheduleCloudinaryCleanup, syncCloudinaryImages } from "@/lib/cloudinary-storage";
+import { withImageLock, queueEventImages, scheduleImageCleanup, syncImages } from "@/lib/image-storage";
 import { landingEventExamples } from "@/lib/landing-invitation-example";
 import { captureDemoPreview } from "@/lib/demo-capture";
 import { demoPreviewKey } from "@/lib/demo-preview";
@@ -158,11 +158,11 @@ export async function publishExample(id: string, form: FormData) {
     if (issues.length) { error = issues[0].message; return; }
     if (preview.contentKey !== demoPreviewKey(showcaseContent(event))) { error = "El borrador cambió. Revisa la vista previa y vuelve a publicar."; return; }
     await tx.showcaseExample.update({ where: { id }, data: { publishedAt: new Date(), publishedVersion: event.contentVersion, publishedContent: { ...showcaseContent(event), demoPreview: preview } as unknown as Prisma.InputJsonValue } });
-    await syncCloudinaryImages(tx, actor.id, event.id, event, event);
+    await syncImages(tx, actor.id, event.id, event, event);
     await tx.adminAudit.create({ data: { actorId: actor.id, action: "example.publish", targetId: id, detail: { version: event.contentVersion } } });
   });
   if (error) done(destination, error);
-  scheduleCloudinaryCleanup(actor.id);
+  scheduleImageCleanup(actor.id);
   invalidateAdmin();
   done(destination);
 }
@@ -200,7 +200,7 @@ export async function deleteExample(id: string) {
     await tx.event.delete({ where: { id: example.eventId } });
     await tx.adminAudit.create({ data: { actorId: actor.id, action: "example.delete", targetId: id, detail: {} } });
   });
-  scheduleCloudinaryCleanup(example.event.ownerId);
+  scheduleImageCleanup(example.event.ownerId);
   invalidateAdmin();
   done("/admin/disenos");
 }

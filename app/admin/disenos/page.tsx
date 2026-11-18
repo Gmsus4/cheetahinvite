@@ -10,7 +10,6 @@ import { AdminPageBoundary, AdminHeading, AdminEmpty, AdminNotice, eventLabels }
 import { AdminSubmit } from "@/components/admin/AdminSubmit";
 import { createExample, toggleCustomExamples } from "../actions";
 
-export const maxDuration = 120;
 
 export default function DesignsPage(props: PageProps<"/admin/disenos">) {
   return <AdminPageBoundary><DesignsPageData {...props} /></AdminPageBoundary>;

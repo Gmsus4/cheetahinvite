@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cheetahinvite-staging",
+  "account_id": "b7b3f244a50b4ce56b50f66c66dcf801",
+  "main": "worker.ts",
+  "compatibility_date": "2026-11-17",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "cheetahinvite-staging" }],
+  "r2_buckets": [
+    { "binding": "INVITATION_IMAGES", "bucket_name": "cheetahinvite-images-staging", "remote": false },
+    { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "cheetahinvite-cache-staging", "remote": false }
+  ],
+  "images": { "binding": "IMAGES" },
+  "browser": { "binding": "BROWSER", "remote": false },
+  "durable_objects": { "bindings": [
+    { "name": "NEXT_CACHE_DO_QUEUE", "class_name": "DOQueueHandler" },
+    { "name": "NEXT_TAG_CACHE_DO_SHARDED", "class_name": "DOShardedTagCache" }
+  ] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler", "DOShardedTagCache"] }],
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "vars": { "APP_ENV": "staging", "APP_URL": "https://cheetahinvite-staging.fergomez-js.workers.dev", "AUTH_URL": "https://cheetahinvite-staging.fergomez-js.workers.dev", "AUTH_TRUST_HOST": "true", "PAYPAL_ENVIRONMENT": "sandbox", "MERCADOPAGO_ENVIRONMENT": "sandbox" }
+}

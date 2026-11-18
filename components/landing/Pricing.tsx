@@ -1,5 +1,4 @@
 import { FiArrowUpRight, FiCalendar, FiCheck } from "react-icons/fi";
-import { cacheLife } from "next/cache";
 import { getCurrentPrice } from "@/lib/site-pricing";
 
 const features = [
@@ -12,8 +11,6 @@ const features = [
 ];
 
 export async function Pricing() {
-  "use cache";
-  cacheLife("minutes");
   const price = await getCurrentPrice();
   return (
     <section className="pricing-section" id="precios" aria-labelledby="home-pricing-title">

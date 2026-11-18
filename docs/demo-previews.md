@@ -17,9 +17,9 @@ La captura se almacena dentro del JSON de publicación en PostgreSQL. La ruta de
 ## Servidor
 
 - `APP_URL` debe apuntar al sitio accesible desde el servidor. `AUTH_SECRET` firma los enlaces temporales.
-- Linux usa `@sparticuz/chromium`. El empaquetado de Next incluye sus binarios para las rutas de admin. El hosting debe permitir procesos Chromium y suficiente tiempo/memoria para capturar; reservar al menos 60 segundos para la publicación.
-- En Windows se detectan Chrome, Brave o Edge; en macOS se detecta Chrome. `CHROMIUM_EXECUTABLE_PATH` permite indicar otro binario instalado.
-- El navegador solo carga recursos del propio sitio y de Cloudinary. No se transmite el token de renderizado como referente a otros dominios.
+- Workers usa `@cloudflare/puppeteer` con el binding `BROWSER` de Browser Run; no ejecuta un binario Chromium local. Ver [el entorno aislado](cloudflare-migration.md).
+- Browser Run remoto necesita un APP_URL de pruebas accesible desde Cloudflare. Las pruebas independientes de navegador pueden usar `CHROMIUM_EXECUTABLE_PATH` local.
+- El navegador solo carga recursos del propio sitio (incluidas las fotos R2) y referencias históricas de Cloudinary. No se transmite el token de renderizado como referente a otros dominios.
 
 La comprobación opcional `node tests/demo-capture.integration.cjs` usa la app en ejecución y su base de datos configurada para capturar un borrador existente. Valida el WebP y lo guarda en el directorio temporal del sistema; no publica ni modifica registros.
 

@@ -26,7 +26,7 @@ import { invitationPriceLabel, isInvitationPublished, hasPublicationGrant } from
 import { invitationPath } from "@/lib/invitation-url";
 import { authPageHref } from "@/lib/auth-destination";
 import { invitationPrivacyIssue, isInvitationPrivacy } from "@/lib/invitation-privacy";
-import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
+import { InvitationImageUpload } from "./InvitationImageUpload";
 import { SectionFields, SectionPhotoFields } from "./InvitationSectionFields";
 import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
 import { SectionQuickActions } from "./SectionQuickActions";
@@ -442,8 +442,8 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
             {step === 2 && <>
               <div className={styles.coverMedia}>
                 <div className={`guided-photo-grid ${styles.coverUploads}`}>
-                  <section className="guided-photo-field" data-preview-field="cover-photo" data-preview-label="Foto de portada" aria-labelledby="cover-upload-title" aria-describedby="guided-photo-formats"><h2 id="cover-upload-title">Portada <span>Opcional</span></h2><CloudinaryImageUpload {...uploadProps} images={values.imageUrl ? [values.imageUrl] : []} multiple={false} onChange={images => patch({ imageUrl: images[0] ?? '' })} /></section>
-                  <section className="guided-photo-field" data-preview-field="cover" data-preview-label="Foto de fondo" aria-labelledby="background-upload-title" aria-describedby="guided-photo-formats"><h2 id="background-upload-title">Fondo <span>Opcional</span></h2><CloudinaryImageUpload {...uploadProps} images={values.backgroundImageUrl ? [values.backgroundImageUrl] : []} multiple={false} onChange={images => patch({ backgroundImageUrl: images[0] ?? '' })} /></section>
+                  <section className="guided-photo-field" data-preview-field="cover-photo" data-preview-label="Foto de portada" aria-labelledby="cover-upload-title" aria-describedby="guided-photo-formats"><h2 id="cover-upload-title">Portada <span>Opcional</span></h2><InvitationImageUpload {...uploadProps} images={values.imageUrl ? [values.imageUrl] : []} multiple={false} onChange={images => patch({ imageUrl: images[0] ?? '' })} /></section>
+                  <section className="guided-photo-field" data-preview-field="cover" data-preview-label="Foto de fondo" aria-labelledby="background-upload-title" aria-describedby="guided-photo-formats"><h2 id="background-upload-title">Fondo <span>Opcional</span></h2><InvitationImageUpload {...uploadProps} images={values.backgroundImageUrl ? [values.backgroundImageUrl] : []} multiple={false} onChange={images => patch({ backgroundImageUrl: images[0] ?? '' })} /></section>
                 </div>
                 <section className={styles.backgroundAdjustments} aria-labelledby="background-adjustments-title">
                   <h2 id="background-adjustments-title">Ajustes del fondo</h2>
@@ -476,7 +476,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
                     <p>Ya contiene los datos de los pasos anteriores: nombres, nombre de la invitación, fecha, hora, y foto de portada. La cuenta regresiva se personaliza en el siguiente bloque.</p>
                     <p><strong>{values.name}</strong><br />{values.hostNames}<br />{date}{values.eventTime && ` · ${values.eventTime}`}</p>
                     <div className={styles.blockLinks}><button type="button" onClick={() => goTo(0)}>Editar nombres</button><button type="button" onClick={() => goTo(1)}>Editar fecha y hora</button></div>
-                    <SectionQuickActions section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} globalPanelStyle={values.panelStyle} globalShowIcons={values.showSectionIcons} uploadProps={uploadProps} disabled={busy || uploads > 0} photoFields={<><h3>Foto de portada</h3><CloudinaryImageUpload {...uploadProps} images={values.imageUrl ? [values.imageUrl] : []} multiple={false} onChange={images => patch({ imageUrl: images[0] ?? '' })} />{values.imageUrl && <InvitationImageFocusFields section={currentSection} imageUrl={values.imageUrl} coverLayout={values.coverLayout} onChange={changes => changeSection(currentSection.id, changes)} />}</>} />
+                    <SectionQuickActions section={currentSection} onChange={changes => changeSection(currentSection.id, changes)} globalPanelStyle={values.panelStyle} globalShowIcons={values.showSectionIcons} uploadProps={uploadProps} disabled={busy || uploads > 0} photoFields={<><h3>Foto de portada</h3><InvitationImageUpload {...uploadProps} images={values.imageUrl ? [values.imageUrl] : []} multiple={false} onChange={images => patch({ imageUrl: images[0] ?? '' })} />{values.imageUrl && <InvitationImageFocusFields section={currentSection} imageUrl={values.imageUrl} coverLayout={values.coverLayout} onChange={changes => changeSection(currentSection.id, changes)} />}</>} />
                   </> : currentSection && <>
                     <div className={styles.blockHeader}><h2>{currentSection.title}</h2>
                     <label className="guided-toggle" htmlFor={`include-${currentSection.id}`}>

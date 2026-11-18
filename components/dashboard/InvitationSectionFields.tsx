@@ -7,7 +7,7 @@ import { invitationSurfaceOptions } from "@/lib/invitation-style-journey";
 import { InvitationWhatsAppFields } from "./InvitationWhatsAppFields";
 import { InvitationProgramFields } from "./InvitationProgramFields";
 import { RSVP_LIMITS, rsvpCompanionLimit } from "@/lib/rsvp";
-import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
+import { InvitationImageUpload } from "./InvitationImageUpload";
 import { InvitationSectionMarginPicker } from "./InvitationSectionMarginPicker";
 import { InvitationImageFocusFields } from "./InvitationMobileImageFocus";
 import { invitationMusicPlayer, normalizeInvitationMusicInput } from "@/lib/invitation-music";
@@ -140,7 +140,7 @@ export function SectionSurfaceFields({ section, onChange, globalPanelStyle = "au
 export function SectionPhotoFields({ section, onChange, uploadProps, compact = false, showFraming = true }: Pick<SectionFieldsProps, "section" | "onChange" | "uploadProps"> & { compact?: boolean; showFraming?: boolean }) {
   const gallery = section.type === "gallery";
   const images = gallery && section.imageUrls?.length ? section.imageUrls : section.imageUrl ? [section.imageUrl] : [];
-  const upload = <CloudinaryImageUpload {...uploadProps} multiple={gallery} images={images} onChange={imageUrls => {
+  const upload = <InvitationImageUpload {...uploadProps} multiple={gallery} images={images} onChange={imageUrls => {
     if (gallery) { onChange({ imageUrls, imageUrl: imageUrls[0] ?? "" }); return; }
     const imageUrl = imageUrls[0] ?? "";
     const additional = section.imageUrls?.filter(url => url !== section.imageUrl && url !== imageUrl) ?? [];

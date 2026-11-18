@@ -8,7 +8,7 @@ export function paymentCheckoutOrigin() {
   if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) throw new Error("Invalid payment APP_URL");
   const loopback = url.hostname === "localhost" || url.hostname.endsWith(".localhost")
     || url.hostname === "[::1]" || /^(127\.|0\.0\.0\.0$)/.test(url.hostname);
-  if (process.env.VERCEL === "1" && (url.protocol !== "https:" || loopback)) throw new Error("Vercel payment APP_URL must use a public HTTPS origin");
+  if ((process.env.APP_ENV === "staging" || process.env.APP_ENV === "production") && (url.protocol !== "https:" || loopback)) throw new Error("Hosted payment APP_URL must use a public HTTPS origin");
   return url.origin;
 }
 export function isPaymentProvider(value: unknown): value is PaymentProvider {

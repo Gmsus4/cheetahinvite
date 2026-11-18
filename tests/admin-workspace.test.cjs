@@ -242,14 +242,14 @@ test('published example photos remain retained while the draft changes, then are
     const next = { imageUrl: '', sections: [], isExample: true };
     Object.assign(f.state.events.get('event'), next);
     f.state.examples.set('example', { id: 'example', eventId: 'event', publishedAt: new Date(), publishedContent: previous });
-    await f.storage.syncCloudinaryImages(f.prisma, 'owner', 'event', previous, next);
+    await f.storage.syncImages(f.prisma, 'owner', 'event', previous, next);
     assert.equal(f.state.assets.get(asset.publicId).state, 'READY');
-    await f.storage.runCloudinaryCleanup('owner', 5);
+    await f.storage.runImageCleanup('owner', 5);
     assert.ok(f.state.assets.has(asset.publicId));
     f.state.examples.get('example').publishedContent = next;
-    await f.storage.syncCloudinaryImages(f.prisma, 'owner', 'event', next, next);
+    await f.storage.syncImages(f.prisma, 'owner', 'event', next, next);
     assert.equal(f.state.assets.get(asset.publicId).state, 'DELETE_PENDING');
-    await f.storage.runCloudinaryCleanup('owner', 5);
+    await f.storage.runImageCleanup('owner', 5);
     assert.equal(f.state.assets.has(asset.publicId), false);
   } finally { for (const [key, value] of Object.entries(oldConfig)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; } }
 });

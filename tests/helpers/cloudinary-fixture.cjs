@@ -26,6 +26,7 @@ function matches(row, where = {}) {
 }
 
 function createFixture() {
+  process.env.APP_URL = 'http://localhost';
   const state = { users: new Map([['owner', { id: 'owner', role: 'USER', invitationCount: 1 }]]), events: new Map([['event', { id: 'event', ownerId: 'owner', isExample: false, complimentaryAt: null, contentVersion: 0, status: 'DRAFT', privacy: 'PUBLIC', privacyVersion: 0, pinHash: null, paidAt: null, name: 'Celebración', imageUrl: '', sections: [] }]]), accessSessions: new Map(), pinBudgets: new Map(), links: new Map(), assets: new Map(), budgets: new Map(), prices: new Map(), examples: new Map(), settings: new Map(), courtesy: new Map(), audit: new Map(), payments: new Map(), analytics: new Map(), analyticsBudgets: new Map() };
   const jobs = [], requests = [];
   let tail = Promise.resolve();
@@ -103,6 +104,7 @@ function createFixture() {
     const source = ts.transpileModule(fs.readFileSync(absolute, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true } }).outputText;
     const requireMock = name => {
       if (name === 'server-only') return {};
+      if (name === '@/lib/cloudflare') return { cloudflareEnv: async () => fixture.env };
       if (name === 'next/server') return { NextResponse: Response, connection: async () => {}, after: job => jobs.push(job) };
       if (name === 'next/headers') return { cookies: async () => ({ get: key => fixture.cookies.has(key) ? { value: fixture.cookies.get(key) } : undefined, set: (key, value) => fixture.cookies.set(key, value) }) };
       if (name === 'next/cache') return { revalidatePath() {}, io: async () => {} };
@@ -120,42 +122,46 @@ function createFixture() {
       return require(name);
     };
     new Function('require', 'module', 'exports', 'fetch', source)(requireMock, mod, mod.exports, async (url, options = {}) => {
-      if (url === '/api/cloudinary/upload') {
+      if (url.startsWith('/api/images/upload')) {
         fixture.clientCalls.push({ url, ...options });
         const response = await fixture.route[options.method](new Request('http://localhost' + url, { ...options, headers: { ...options.headers, origin: 'http://localhost' } }));
-        if (options.method === 'PUT' && fixture.loseConfirmationResponse) { fixture.loseConfirmationResponse = false; throw new TypeError('Connection lost after confirmation'); }
+        if (options.method === 'PUT' && fixture.loseConfirmationResponse) { fixture.loseConfirmationResponse = false; throw new TypeError('Connection lost after upload'); }
         return response;
       }
-      requests.push({ url, form: options.body, ...options });
-      if (fixture.failure) throw Error(fixture.failure);
-      if (url.includes('/upload_presets/')) return Response.json(fixture.preset);
-      if (url.endsWith('/destroy')) return Response.json({ result: 'ok' });
-      if (url.includes('/resources/image/upload/')) {
-        const id = decodeURIComponent(url.split('/resources/image/upload/')[1]);
-        return fixture.responseOverride ? fixture.responseOverride(id) : fixture.providerAssets.has(id) ? Response.json(fixture.providerAssets.get(id)) : Response.json({ error: 'Not found' }, { status: 404 });
-      }
-      assert.equal(url, 'https://api.cloudinary.com/v1_1/test/image/upload');
-      const id = options.body.get('public_id');
-      assert.equal(options.body.get('overwrite'), 'false');
-      const uploaded = fixture.providerAssets.get(id) ?? { public_id: id, secure_url: fixture.url(id), version: 123, signature: fixture.signature(id), bytes: options.body.get('file').size, format: 'png', resource_type: 'image', type: 'upload' };
-      fixture.providerAssets.set(id, uploaded);
-      return Response.json(uploaded);
+      throw new Error('Unexpected external request: ' + url);
     });
     return mod.exports;
   };
-  fixture.url = id => `https://res.cloudinary.com/test/image/upload/v123/${id}.png`;
+  fixture.url = id => `http://localhost/api/media/${id}`;
   fixture.uploadRequest = (extras = {}, file = new File(['image'], 'photo.png', { type: 'image/png' })) => {
     return fixture.jsonRequest({ eventId: 'event', size: file.size, contentType: file.type, ...extras });
   };
-  fixture.jsonRequest = (body, method = 'POST') => new Request('http://localhost/api/cloudinary/upload', { method,
+  fixture.jsonRequest = (body, method = 'POST') => new Request('http://localhost/api/images/upload', { method,
     headers: { 'content-type': 'application/json', origin: 'http://localhost' }, body: JSON.stringify(body) });
-  fixture.signature = (id, version = 123) => require('node:crypto').createHash('sha1').update(`public_id=${id}&version=${version}${process.env.CLOUDINARY_API_SECRET}`).digest('hex');
-  fixture.confirmRequest = (id, extras = {}) => fixture.jsonRequest({ eventId: 'event', publicId: id, version: 123, signature: fixture.signature(id), ...extras }, 'PUT');
+  fixture.confirmRequest = (id, extras = {}) => new Request('http://localhost/api/images/upload?' + new URLSearchParams({ eventId: 'event', publicId: id, ...extras }), { method: 'PUT', headers: { origin: 'http://localhost', 'content-type': 'image/png' }, body: 'photo' });
   fixture.issue = async () => { const response = await fixture.route.POST(fixture.uploadRequest()); assert.equal(response.status, 200); return response.json(); };
-  fixture.putProviderAsset = (id, extras = {}) => fixture.providerAssets.set(id, { public_id: id, secure_url: fixture.url(id), version: 123, bytes: 100, format: 'png', resource_type: 'image', type: 'upload', ...extras });
+  fixture.env = {
+    INVITATION_IMAGES: {
+      async put(key, bytes, options) {
+        requests.push({ method: 'PUT', key, bytes, options });
+        if (fixture.failure) throw Error(fixture.failure);
+        if (fixture.providerAssets.has(key)) return null;
+        const object = { customMetadata: options.customMetadata, size: bytes.length, httpEtag: '"fixture"', bytes };
+        fixture.providerAssets.set(key, object); return object;
+      },
+      async head(key) { return fixture.providerAssets.get(key) || null; },
+      async get(key) { const object = fixture.providerAssets.get(key); return object ? { ...object, body: new Blob([object.bytes]).stream() } : null; },
+      async delete(key) { requests.push({ method: 'DELETE', key }); if (fixture.failure) throw Error(fixture.failure); fixture.providerAssets.delete(key); },
+    },
+    IMAGES: {
+      async info() { if (fixture.invalidImage) return { format: 'image/svg+xml' }; return { width: 100, height: 100, format: 'image/png', ...fixture.imageInfo }; },
+      input() { return { transform() { return this; }, async output() { if (fixture.decodeError) throw Error('Invalid image'); return { response: () => new Response(fixture.outputBytes || new Uint8Array(100)) }; } }; },
+    },
+  };
+
   fixture.addAsset = (overrides = {}) => {
     const id = overrides.publicId ?? `cheetahinvite/${overrides.ownerId ?? 'owner'}/${overrides.eventId ?? 'event'}/${require('node:crypto').randomUUID()}`;
-    const asset = { publicId: id, ownerId: 'owner', eventId: 'event', url: fixture.url(id), bytes: 1024, state: 'READY', expiresAt: null, nextAttemptAt: null, attempts: 0, createdAt: new Date(), updatedAt: new Date(), ...overrides };
+    const asset = { publicId: id, provider: 'R2', ownerId: 'owner', eventId: 'event', url: fixture.url(id), bytes: 1024, state: 'READY', expiresAt: null, nextAttemptAt: null, attempts: 0, createdAt: new Date(), updatedAt: new Date(), ...overrides };
     state.assets.set(id, asset); return asset;
   };
   fixture.saveForm = (imageUrl = '', sections = []) => {
@@ -164,9 +170,9 @@ function createFixture() {
     return form;
   };
   fixture.prisma = prisma;
-  fixture.storage = fixture.load('lib/cloudinary-storage.ts');
-  fixture.route = fixture.load('app/api/cloudinary/upload/route.ts');
-  fixture.client = fixture.load('lib/cloudinary-upload.ts');
+  fixture.storage = fixture.load('lib/image-storage.ts');
+  fixture.route = fixture.load('app/api/images/upload/route.ts');
+  fixture.client = fixture.load('lib/image-upload.ts');
   fixture.actions = fixture.load('app/dashboard/eventos/[id]/actions.ts');
   return fixture;
 }

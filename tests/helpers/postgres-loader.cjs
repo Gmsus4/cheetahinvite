@@ -9,6 +9,7 @@ module.exports = function loadPostgres(ownerId) {
   ).outputText, file);
   const original = Module._load;
   Module._load = function(name, parent, isMain) {
+    if (name.endsWith('.wasm?module')) return new WebAssembly.Module(fs.readFileSync(path.resolve(path.dirname(parent.filename), name.slice(0, -7))));
     if (name === 'server-only') return {};
     if (name === 'next/server') return { after() {} };
     if (name === 'next/cache') return { revalidatePath() {} };

@@ -22,6 +22,7 @@ test('public assets have no missing references or unused bundled files after ret
   const { landingEventExamples } = createFixture().load('lib/landing-invitation-example.ts');
   const manualFolders = new Set(landingEventExamples.map(example => example.imageFolder));
   for (const file of filesIn(path.join(root, 'public'))) {
+    if (path.basename(file) === '_headers') continue; // Workers static asset policy.
     const reference = '/' + path.relative(path.join(root, 'public'), file).split(path.sep).join('/');
     const folder = reference.slice(0, reference.lastIndexOf('/'));
     const manual = manualFolders.has(folder) && /\/(?:fondo|principal|historia|lugar|programa|familias|galeria-(?:[1-9]|1[0-2]))\.(?:webp|jpe?g|png|avif)$/.test(reference);

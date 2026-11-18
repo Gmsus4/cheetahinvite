@@ -497,16 +497,16 @@ test('retired PayPal return URLs cannot capture a later approval', async () => {
   });
 });
 
-test('Vercel refuses localhost payment return URLs before creating an order', async () => {
+test('hosted Workers refuse localhost payment return URLs before creating an order', async () => {
   const f = external('paypal'); f.payments.clear();
-  const previous = process.env.VERCEL; process.env.VERCEL = '1';
+  const previous = process.env.APP_ENV; process.env.APP_ENV = 'staging';
   try {
     await withFetch(async () => { throw Error('No provider request expected'); }, async () => {
       const { prepareExternalCheckout } = f.load('lib/external-payment-checkout.ts');
       await assert.rejects(prepareExternalCheckout('event-fixture', f.ownerId, 'paypal'), /public HTTPS origin/);
       assert.equal(f.payments.size, 0);
     });
-  } finally { if (previous === undefined) delete process.env.VERCEL; else process.env.VERCEL = previous; }
+  } finally { if (previous === undefined) delete process.env.APP_ENV; else process.env.APP_ENV = previous; }
 });
 
 test('Mercado Pago expires an unpaid preference before replacing its return origin', async () => {

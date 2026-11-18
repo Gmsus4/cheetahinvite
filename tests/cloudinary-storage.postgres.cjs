@@ -17,17 +17,18 @@ require.extensions['.ts'] = (mod, file) => mod._compile(ts.transpileModule(
 let destroys = 0;
 const load = Module._load;
 Module._load = function(name, parent, isMain) {
+  if (name.endsWith('.wasm?module')) return new WebAssembly.Module(fs.readFileSync(path.resolve(path.dirname(parent.filename), name.slice(0, -7))));
   if (name === 'server-only') return {};
   if (name === 'next/server') return { after() {} };
   if (name.startsWith('@/')) {
     const result = load.call(this, path.resolve(__dirname, '..', name.slice(2)), parent, isMain);
-    if (name === '@/lib/cloudinary') return { ...result, destroyCloudinaryImage: async () => { destroys++; }, destroyCloudinaryUploadVariants: async () => {} };
+    if (name === '@/lib/r2') return { ...result, deleteImage: async () => { destroys++; } };
     return result;
   }
   return load.call(this, name, parent, isMain);
 };
 const { prisma } = require('../prisma.ts');
-const storage = require('../lib/cloudinary-storage.ts');
+const storage = require('../lib/image-storage.ts');
 const ownerId = `__storage_test_${randomUUID()}`;
 const eventId = `__storage_test_${randomUUID()}`;
 
@@ -37,10 +38,10 @@ const eventId = `__storage_test_${randomUUID()}`;
     await prisma.event.create({ data: { id: eventId, ownerId, name: 'Storage integration fixture', eventType: 'wedding' } });
     // Use the storage boundary rather than a clock window: the test is valid even
     // when requests straddle an hour/day boundary on the real database.
-    const existing = Array.from({ length: 19 }, () => ({ publicId: `cheetahinvite/${ownerId}/${eventId}/${randomUUID()}`, ownerId, eventId, bytes: 5 * 1024 * 1024, state: 'READY' }));
+    const existing = Array.from({ length: 19 }, () => ({ publicId: `cheetahinvite/${ownerId}/${eventId}/${randomUUID()}`, ownerId, eventId, provider: 'R2', bytes: 5 * 1024 * 1024, state: 'READY' }));
     await prisma.cloudinaryAsset.createMany({ data: existing });
     const simultaneous = await Promise.allSettled([
-      storage.reserveCloudinaryImage(ownerId, eventId), storage.reserveCloudinaryImage(ownerId, eventId),
+      storage.reserveImage(ownerId, eventId), storage.reserveImage(ownerId, eventId),
     ]);
     assert.equal(simultaneous.filter(result => result.status === 'fulfilled').length, 1);
     assert.equal(simultaneous.find(result => result.status === 'rejected').reason.status, 409);
@@ -48,23 +49,23 @@ const eventId = `__storage_test_${randomUUID()}`;
     assert.equal((await prisma.imageUploadBudget.findMany({ where: { ownerId } })).every(row => row.count === 1), true);
     await prisma.cloudinaryAsset.deleteMany({ where: { ownerId, publicId: { in: existing.map(row => row.publicId) } } });
     const asset = simultaneous.find(result => result.status === 'fulfilled').value;
-    const url = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/v123/${asset.publicId}.png`;
-    await storage.finishCloudinaryImage(ownerId, eventId, asset.publicId, url, 100);
+    const url = new URL(`/api/media/${asset.publicId}`, process.env.APP_URL).href;
+    await storage.finishImage(ownerId, eventId, asset.publicId, url, 100);
     await storage.withImageLock(ownerId, async tx => {
       const previous = await tx.event.findUnique({ where: { id: eventId } });
-      await storage.syncCloudinaryImages(tx, ownerId, eventId, previous, { imageUrl: url });
+      await storage.syncImages(tx, ownerId, eventId, previous, { imageUrl: url });
       await tx.event.update({ where: { id: eventId }, data: { imageUrl: url } });
     });
     assert.equal((await prisma.cloudinaryAsset.findUnique({ where: { publicId: asset.publicId } })).expiresAt, null);
     await prisma.cloudinaryAsset.update({ where: { publicId: asset.publicId }, data: { expiresAt: new Date(0) } });
-    assert.equal((await storage.runCloudinaryCleanup(ownerId)).retained, 1);
+    assert.equal((await storage.runImageCleanup(ownerId)).retained, 1);
     assert.equal(destroys, 0);
     await storage.withImageLock(ownerId, async tx => {
       const previous = await tx.event.findUnique({ where: { id: eventId } });
-      await storage.syncCloudinaryImages(tx, ownerId, eventId, previous, { imageUrl: '' });
+      await storage.syncImages(tx, ownerId, eventId, previous, { imageUrl: '' });
       await tx.event.update({ where: { id: eventId }, data: { imageUrl: null } });
     });
-    const results = await Promise.all([storage.runCloudinaryCleanup(ownerId), storage.runCloudinaryCleanup(ownerId)]);
+    const results = await Promise.all([storage.runImageCleanup(ownerId), storage.runImageCleanup(ownerId)]);
     assert.equal(results.reduce((sum, result) => sum + result.deleted, 0), 1);
     assert.equal(destroys, 1);
     assert.equal(await prisma.cloudinaryAsset.count({ where: { ownerId } }), 0);

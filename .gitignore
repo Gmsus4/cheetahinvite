@@ -41,6 +41,11 @@ yarn-error.log*
 # Cloudflare local state and secrets
 .wrangler/
 .dev.vars*
+!.dev.vars.example
+.open-next/
+worker-configuration.d.ts
+.cloudflare-test/
+.cloudflare-*.log
 
 # typescript
 *.tsbuildinfo

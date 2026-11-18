@@ -1,8 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
-import { runCloudinaryCleanup } from "@/lib/cloudinary-storage";
+import { runImageCleanup } from "@/lib/image-storage";
 import { runInvitationLifecycle } from "@/lib/invitation-lifecycle-storage";
-
-export const maxDuration = 60;
 
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
@@ -12,10 +10,10 @@ export async function GET(request: Request) {
   if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return Response.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const invitations = await runInvitationLifecycle();
-    const images = await runCloudinaryCleanup();
-    return Response.json({ ...images, invitations }, { status: invitations.failed ? 500 : 200, headers: { "Cache-Control": "no-store" } });
+    const images = await runImageCleanup();
+    return Response.json({ ...images, invitations }, { status: invitations.failed || images.failed ? 500 : 200, headers: { "Cache-Control": "no-store" } });
   } catch {
-    console.error("Scheduled Cloudinary cleanup could not complete");
+    console.error("Scheduled R2 cleanup could not complete");
     return Response.json({ error: "Cleanup failed; retry required" }, { status: 500 });
   }
 }

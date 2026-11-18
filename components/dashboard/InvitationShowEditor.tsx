@@ -13,7 +13,7 @@ import { getInvitationEventContent, invitationEventTypes } from "@/lib/invitatio
 import { editorFormData, type EditorValues, type EventData, type InvitationEditTarget, type InviteSection } from "@/lib/invitation-editor";
 import { isInvitationPublished } from "@/lib/invitation-payment";
 import { sharedInvitationDesign } from "@/lib/shared-invitation";
-import { CloudinaryImageUpload } from "./CloudinaryImageUpload";
+import { InvitationImageUpload } from "./InvitationImageUpload";
 import { EditorLeaveDialog } from "./EditorLeaveDialog";
 import { EditorProtectedLink } from "./EditorProtectedLink";
 import { EditorRecoveryDialog } from "./EditorRecoveryDialog";
@@ -190,7 +190,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
           </FieldGroup>
           {locationSection && <div className={styles.sectionMedia}><SectionPhotoFields section={locationSection} uploadProps={uploadProps} onChange={changes => patch({ sections: values.sections.map(item => item.id === locationSection.id ? { ...item, ...changes } : item) })} /></div>}
         </>}
-        {(target.kind === "cover-photo" || target.kind === "background") && <CloudinaryImageUpload {...uploadProps} multiple={false} images={target.kind === "cover-photo" ? values.imageUrl ? [values.imageUrl] : [] : values.backgroundImageUrl ? [values.backgroundImageUrl] : []} onChange={images => patch(target.kind === "cover-photo" ? { imageUrl: images[0] ?? "" } : { backgroundImageUrl: images[0] ?? "" })} />}
+        {(target.kind === "cover-photo" || target.kind === "background") && <InvitationImageUpload {...uploadProps} multiple={false} images={target.kind === "cover-photo" ? values.imageUrl ? [values.imageUrl] : [] : values.backgroundImageUrl ? [values.backgroundImageUrl] : []} onChange={images => patch(target.kind === "cover-photo" ? { imageUrl: images[0] ?? "" } : { backgroundImageUrl: images[0] ?? "" })} />}
         {target.kind === "background" && <>
           <FieldGroup title="Ajustes del fondo"><div className={styles.fieldRow}>
           <InvitationBackgroundBlurControl compact value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
@@ -200,7 +200,7 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
         {target.kind === "appearance" && <div className={styles.appearanceGroups}>
           <p className={styles.sectionIntro}>Abre un apartado para personalizarlo.</p>
           <AppearanceGroup title="Fondo" description="Tu fotografía, desenfoque y oscuridad" icon={<FiImage />} defaultOpen>
-            <CloudinaryImageUpload {...uploadProps} multiple={false} images={values.backgroundImageUrl ? [values.backgroundImageUrl] : []} onChange={images => patch({ backgroundImageUrl: images[0] ?? "" })} />
+            <InvitationImageUpload {...uploadProps} multiple={false} images={values.backgroundImageUrl ? [values.backgroundImageUrl] : []} onChange={images => patch({ backgroundImageUrl: images[0] ?? "" })} />
             <div className={styles.fieldRow}>
             <InvitationBackgroundBlurControl compact value={values.backgroundBlurIntensity} onChange={backgroundBlurIntensity => patch({ backgroundBlurIntensity })} />
             <InvitationBackgroundDimControl compact value={values.backgroundDimIntensity} onChange={backgroundDimIntensity => patch({ backgroundDimIntensity })} />

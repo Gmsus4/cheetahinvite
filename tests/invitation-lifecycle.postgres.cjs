@@ -17,7 +17,7 @@ process.env.CLOUDINARY_CLOUD_NAME = 'lifecycle-fixture';
     const expiresAt = new Date(now.getTime() - 40 * DAY);
     const due = await prisma.event.create({ data: { ownerId, name: 'Due fixture', eventType: 'other', status: 'PUBLISHED', paidAt: addCalendarMonths(expiresAt, -12), expiresAt } });
     const publicId = `cheetahinvite/${ownerId}/${due.id}/${randomUUID()}`;
-    await prisma.event.update({ where: { id: due.id }, data: { imageUrl: `https://res.cloudinary.com/lifecycle-fixture/image/upload/v123/${publicId}.png` } });
+    await prisma.event.update({ where: { id: due.id }, data: { imageUrl: new URL(`/api/media/${publicId}`, process.env.APP_URL).href } });
     const token = randomUUID();
     await prisma.rsvpResponse.create({ data: { eventId: due.id, tokenHash: token, name: 'Fixture', attending: true } });
     await prisma.invitationLink.create({ data: { path: `/event/${ownerId}`, eventId: due.id } });

@@ -12,7 +12,7 @@ function form(enabled, version) { const data = new FormData(); for (const [key, 
 (async () => {
   try {
     await prisma.user.create({ data: { id: ownerId, name: 'RSVP integration fixture', invitationCount: 1 } });
-    eventId = (await prisma.event.create({ data: { ownerId, name: 'RSVP fixture', eventType: 'wedding', status: 'PUBLISHED', paidAt: new Date(), expiresAt: new Date(Date.now() + 86400000), slug: `rsvp-${randomUUID()}`, sections: [section] } })).id;
+    eventId = (await prisma.event.create({ data: { ownerId, name: 'RSVP fixture', eventType: 'wedding', privacy: 'PUBLIC', status: 'PUBLISHED', paidAt: new Date(), expiresAt: new Date(Date.now() + 86400000), slug: `rsvp-${randomUUID()}`, sections: [section] } })).id;
     const f = createRsvpFixture({ prisma, Prisma, ownerId, eventId });
     const responses = await Promise.all([f.submit(), f.submit()]); assert.equal(responses.every(r => r.status === 200), true);
     assert.equal(await prisma.rsvpResponse.count({ where: { eventId } }), 1);

@@ -47,7 +47,7 @@ test('archived content rejects forged saves, privacy changes and image uploads',
   assert.equal((await f.actions.updateEvent('event', f.saveForm())).ok, false);
   const privacy = f.load('app/dashboard/eventos/[id]/ajustes/actions.ts');
   assert.equal((await privacy.saveInvitationPrivacy('event', 'PUBLIC', '', 0)).ok, false);
-  await assert.rejects(f.storage.reserveCloudinaryImage('owner', 'event'), /edición está desactivada/);
+  await assert.rejects(f.storage.reserveImage('owner', 'event'), /edición está desactivada/);
   assert.deepEqual(f.state.events.get('event'), before);
 });
 

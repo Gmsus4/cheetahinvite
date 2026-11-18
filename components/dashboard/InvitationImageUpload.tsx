@@ -2,9 +2,9 @@
 import Image from "next/image";
 import { useState } from "react";
 import { FiImage, FiTrash2 } from "react-icons/fi";
-import { uploadInvitationImage } from "@/lib/cloudinary-upload";
+import { uploadInvitationImage } from "@/lib/image-upload";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
-export function CloudinaryImageUpload({ eventId, images, multiple, onChange, ensureEvent, onBusyChange }: {
+export function InvitationImageUpload({ eventId, images, multiple, onChange, ensureEvent, onBusyChange }: {
   ensureEvent?: () => Promise<string>;
   onBusyChange?: (busy: boolean) => void;
   eventId: string;

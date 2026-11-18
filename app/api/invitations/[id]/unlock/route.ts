@@ -24,7 +24,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     let pin: unknown;
     try { pin = JSON.parse(Buffer.concat(chunks).toString("utf8")).pin; } catch { return json({ error: "Escribe un PIN de seis dígitos." }, 400); }
     if (typeof pin !== "string" || !validInvitationPin(pin)) return json({ error: "Escribe un PIN de seis dígitos." }, 400);
-    const address = request.headers.get(process.env.VERCEL ? "x-vercel-forwarded-for" : "x-forwarded-for")?.split(",")[0].trim().slice(0, 100) || "unknown";
+    const address = request.headers.get("cf-connecting-ip")?.trim().slice(0, 100) || "unknown";
     const result = await unlockPrivateInvitation(id, pin, address);
     if (result.status !== 200) return json({ error: result.error }, result.status);
     (await cookies()).set(accessCookieName(id), result.token, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: ACCESS_SECONDS, path: "/" });

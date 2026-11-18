@@ -3,7 +3,7 @@ import { prisma } from "@/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { invitationLifecycle } from "@/lib/invitation-lifecycle";
 import { reconcilePurchase } from "@/lib/payment-reconciliation";
-import { queueEventImages, withImageLock } from "@/lib/cloudinary-storage";
+import { queueEventImages, withImageLock } from "@/lib/image-storage";
 
 // Run from the existing authenticated, scheduled cleanup, even without visits.
 export async function runInvitationLifecycle(now = new Date(), limit = 10, ownerId?: string) {

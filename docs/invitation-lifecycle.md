@@ -34,11 +34,11 @@ o ejecutar la limpieza concilia la sesión guardada antes de retirar el contenid
 1. Aplicar la migración `20261109000001_invitation_lifecycle` mediante
    `npx prisma migrate deploy` y ejecutar `npx prisma generate`.
 2. Configurar `CRON_SECRET` en el servidor.
-3. Activar el scheduler existente de `workers/cloudinary-cleanup/` o un servicio
-   equivalente: cada cinco minutos debe invocar `GET /api/internal/cloudinary/cleanup`
-   con `Authorization: Bearer <CRON_SECRET>`. Ver `cloudinary-storage.md`.
+3. En Workers, el handler `scheduled` de `worker.ts` invoca cada cinco minutos
+   `GET /api/internal/images/cleanup` mediante el service binding propio, con
+   `Authorization: Bearer <CRON_SECRET>`. Ver `cloudflare-migration.md`.
 
-La ruta ejecuta `runInvitationLifecycle` y después la cola de Cloudinary. Archiva
+La ruta ejecuta `runInvitationLifecycle` y después la cola de R2. Archiva
 las publicaciones vencidas y examina hasta diez candidatos para eliminar por
 ejecución. Cada eliminación vuelve a leer y bloquear el evento y la cuenta:
 una renovación concurrente no debe perder el contenido ni descontar dos veces

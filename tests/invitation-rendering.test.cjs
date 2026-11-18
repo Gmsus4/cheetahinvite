@@ -264,7 +264,7 @@ test('shared section photo fields add, replace and remove photos with the same c
   const render = current => SectionPhotoFields({ section: current, uploadProps, onChange: next => { changes = next; } });
   function findUpload(node) {
     if (!node || typeof node !== 'object') return undefined;
-    if (node.type?.name === 'CloudinaryImageUpload') return node;
+    if (node.type?.name === 'InvitationImageUpload') return node;
     for (const child of React.Children.toArray(node.props?.children)) {
       const result = findUpload(child);
       if (result) return result;

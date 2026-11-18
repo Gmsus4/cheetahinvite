@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client"
+  runtime  = "workerd"
   output   = "../generated/prisma"
 }
 
@@ -261,6 +262,8 @@ enum CloudinaryAssetState {
 // No cascading foreign keys: cleanup records must survive event/account deletion.
 model CloudinaryAsset {
   publicId      String @id
+  // Keep the historical table name. Old rows are never deleted by the R2 worker.
+  provider      String @default("CLOUDINARY")
   ownerId       String
   eventId       String
   url           String? @db.Text
