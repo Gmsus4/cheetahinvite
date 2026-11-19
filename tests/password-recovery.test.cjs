@@ -41,7 +41,8 @@ const prisma = {
 const load = Module._load;
 Module._load = function(name, parent, isMain) {
   if (name === 'server-only') return {};
-  if (name === 'next-auth') return config => { authConfig = config; return {}; };
+  if (name === 'next-auth') return Object.assign(config => { authConfig = config; return {}; }, { CredentialsSignin: class extends Error {} });
+  if (name === '@/lib/auth-attempts') return { authRequestAddress: () => 'fixture', consumeAuthAttempt: async () => ({ allowed: true }) };
   if (name === '@auth/prisma-adapter') return { PrismaAdapter: () => ({}) };
   if (name === 'next-auth/providers/credentials') return config => config;
   if (name === 'next-auth/providers/google') return {};

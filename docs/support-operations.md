@@ -66,6 +66,16 @@ su estado; también existe «Actualizar estado del pago» en Mis compras. No se
 emiten reembolsos desde la aplicación ni se automatizan movimientos de dinero.
 
 - Reembolso total confirmado: se retira el enlace público.
+- Mientras conserve su contenido, una invitación reembolsada ofrece «Reutilizar
+  como nuevo borrador» en Pago y soporte. Reemplaza la original en el mismo espacio,
+  incluso con tres espacios ocupados, y conserva textos, fecha, lugares, fotos y
+  diseño. Requiere confirmación explícita: se eliminan respuestas, enlaces y sesiones
+  anteriores; el historial de compra/reembolso permanece independiente. El nuevo
+  borrador requiere elegir privacidad y otro pago para publicar, con seis meses
+  iniciales de conservación. No está disponible para disputas ni contenido ya fuera
+  del plazo de conservación. Los intentos de pago pendientes de verificar bloquean
+  la operación. El reemplazo es transaccional e idempotente; las imágenes se
+  transfieren sin duplicarlas y las cargas descartadas siguen en la cola de limpieza.
 - Reembolso parcial confirmado: se mantiene la publicación durante su vigencia.
 - Reembolso pendiente, cancelado o fallido: no retira el enlace. Si Stripe revierte
   un reembolso previamente confirmado, se recalcula el acceso con el estado actual.

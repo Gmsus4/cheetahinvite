@@ -14,6 +14,10 @@
 .compact :global(.admin-table td) { overflow-wrap: anywhere; }
 .compact :global(.admin-table td:first-child) { min-width: 150px; }
 .compact :global(.admin-table .admin-button) { min-height: 44px; }
+.clientTable { min-width: 640px; }
+.compact :global(.admin-table) .clientActionCell { width: 1%; text-align: right; white-space: nowrap; }
+.compact :global(.admin-table) .clientAction { min-height: 34px; gap: 6px; padding: 6px 10px; border-radius: 8px; font-size: 12px; white-space: nowrap; }
+.compact :global(.admin-table) .clientAction svg { width: 13px; height: 13px; }
 .compact :global(.admin-badge) { padding: 4px 8px; border-radius: 8px; }
 .compact :global(.admin-search) { align-items: stretch; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .compact :global(.admin-search > label) { flex-basis: 220px; }
@@ -39,6 +43,9 @@
 .compact :global(.admin-periods a) { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 14px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; }
 .compact :global(.admin-periods a[aria-current]) { border-bottom-color: var(--orange); color: var(--orange); }
 .compact :global(.admin-search) > .searchState { flex: 0 1 180px; }
+.compact :global(.admin-search).clientSearch { align-items: end; }
+.clientSearch > label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; }
+.compact :global(.admin-search) > .clientDate { flex: 0 1 170px; }
 .pricing :global(.admin-grid) { grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr); gap: 36px; }
 .pricing :global(.admin-grid > .admin-card:first-child) { padding: 20px; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(135deg,var(--accent-soft),var(--surface) 80%); }
 .pricing :global(.admin-price-amount) { margin: 8px 0; }
@@ -139,6 +146,7 @@
   .compact :global(.admin-form :is(input:not([type=checkbox]),select,textarea)),.compact :global(.admin-search :is(input,select)) { font-size: 16px; }
   .compact :global(.admin-search > label) { flex-basis: 100%; }
   .compact :global(.admin-search) > .searchState { flex: 1 1 150px; }
+  .compact :global(.admin-search) > .clientDate { flex: 1 1 140px; }
   .compact :global(.admin-stats) { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .compact :global(.admin-stat) { padding: 12px; }
   .compact :global(.admin-stat + .admin-stat) { border-left: 0; }

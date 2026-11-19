@@ -85,6 +85,11 @@ staging ausente en el cliente de otra cuenta); recuperación por correo requiere
 crear/configurar Resend; pagos sandbox completos y webhooks de proveedores no
 se dan por verificados solo por tener sus credenciales cargadas.
 
+El [registro de evidencia sandbox](payment-sandbox-evidence.md) permite documentar
+las pruebas existentes y las nuevas por proveedor y caso, con referencias,
+notificaciones/HTTP, estados y fechas antes/después y capturas depuradas. La
+preparación del registro no da esos recorridos por verificados.
+
 R2 ya tiene facturación por uso activada. El uso gratuito incluido no es un corte
 monetario: mantener pruebas pequeñas y vigilar el consumo. Procedimientos y
 estado de recursos: [configuración de Cloudflare](cloudflare-setup.md).

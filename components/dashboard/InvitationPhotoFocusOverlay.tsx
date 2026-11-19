@@ -47,7 +47,7 @@ export function InvitationPhotoFocusOverlay({ section, disabled, onChange, mode 
     return () => controls.forEach((control, index) => { control.inert = previous[index]; });
   }, [open, disabled, mode]);
   if (mode === "settings") return <div className={styles.settings} data-photo-settings>
-      <button ref={settingsButton} type="button" className="wa-edit-button" data-mobile-primary disabled={disabled} popoverTarget={settingsId} aria-controls={settingsId} aria-expanded={open} aria-label={`Formato y ajuste de ${section.title || "la foto"}`}><FiSliders aria-hidden="true" /><span>Formato y ajuste</span></button>
+      <button ref={settingsButton} type="button" className="wa-edit-button" data-tour="photo-format" data-mobile-primary disabled={disabled} popoverTarget={settingsId} aria-controls={settingsId} aria-expanded={open} aria-label={`Formato y ajuste de ${section.title || "la foto"}`}><FiSliders aria-hidden="true" /><span>Formato y ajuste</span></button>
       <div ref={settingsPanel} id={settingsId} popover="auto" role="group" aria-label="Formato y ajuste de la foto" className={styles.settingsPanel} onBeforeToggle={event => { if (event.newState === "open") positionSettings(); }} onToggle={event => setOpen(event.newState === "open")}>
       <fieldset disabled={disabled}>
         <label><span>Formato de la foto</span><select aria-label="Formato de la foto" value={section.photoShape ?? "auto"} onChange={event => { if (isPhotoShape(event.target.value)) onChange({ photoShape: event.target.value }); }}>
@@ -61,7 +61,7 @@ export function InvitationPhotoFocusOverlay({ section, disabled, onChange, mode 
       </div>
     </div>;
   return <div ref={root} className={styles.overlay} data-photo-focus data-open={open && !disabled}>
-    <button className={styles.trigger} type="button" disabled={disabled} aria-expanded={open && !disabled} aria-label={open ? "Cerrar encuadre" : `Ajustar encuadre de ${section.title || "la foto"}`} onClick={() => setOpen(current => !current)}>{open ? <FiX aria-hidden="true" /> : <FiMove aria-hidden="true" />}<span>{open ? "Cerrar encuadre" : "Encuadre"}</span></button>
+    <button className={styles.trigger} data-tour="photo-focus" type="button" disabled={disabled} aria-expanded={open && !disabled} aria-label={open ? "Cerrar encuadre" : `Ajustar encuadre de ${section.title || "la foto"}`} onClick={() => setOpen(current => !current)}>{open ? <FiX aria-hidden="true" /> : <FiMove aria-hidden="true" />}<span>{open ? "Cerrar encuadre" : "Encuadre"}</span></button>
     {open && !disabled && (["mobile", "desktop"] as const).map(device => {
       const field = device === "mobile" ? "mobileImageFocus" : "desktopImageFocus";
       return <div className={styles.positions} key={device} data-device={device} role="group" aria-label={`Encuadre de ${section.title || "la foto"} en ${device === "mobile" ? "móvil" : "escritorio"}`}>

@@ -47,3 +47,19 @@ export function canEditInvitation(event: TermEvent, now = new Date()) {
   if (!event.paidAt && !event.complimentaryAt) return true;
   return Boolean(event.expiresAt && event.expiresAt > now);
 }
+
+export function draftDeletionDate(event: Pick<TermEvent, "paidAt" | "complimentaryAt" | "isExample" | "status"> & { draftLastSavedAt?: Date | null }) {
+  if (event.isExample || event.paidAt || event.complimentaryAt || !["DRAFT", "PENDING_PAYMENT"].includes(event.status) || !event.draftLastSavedAt) return null;
+  return addCalendarMonths(event.draftLastSavedAt, 6);
+}
+
+// Compare only persisted values being saved. Object key order is not a change.
+export function savedContentChanged(previous: object, changes: object): boolean {
+  const normalize = (value: unknown): unknown => {
+    if (value instanceof Date) return value.toISOString();
+    if (Array.isArray(value)) return value.map(normalize);
+    if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([key, item]) => [key, normalize(item)]));
+    return value ?? null;
+  };
+  return Object.entries(changes).some(([key, value]) => JSON.stringify(normalize((previous as Record<string, unknown>)[key])) !== JSON.stringify(normalize(value)));
+}

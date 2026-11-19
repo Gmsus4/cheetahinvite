@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { FiImage, FiTrash2 } from "react-icons/fi";
-import { uploadInvitationImage } from "@/lib/image-upload";
+import { uploadInvitationImage, validateInvitationImage } from "@/lib/image-upload";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 export function InvitationImageUpload({ eventId, images, multiple, onChange, ensureEvent, onBusyChange }: {
   ensureEvent?: () => Promise<string>;
@@ -24,24 +24,35 @@ export function InvitationImageUpload({ eventId, images, multiple, onChange, ens
       return;
     }
     const selected = files.slice(0, remaining);
-    if (files.length > remaining) setError(`Solo puedes agregar ${remaining} foto${remaining === 1 ? "" : "s"} más.`);
+    const errors = files.length > remaining ? [`Solo puedes agregar ${remaining} foto${remaining === 1 ? "" : "s"} más.`] : [];
+    const validFiles = selected.filter(file => {
+      try { validateInvitationImage(file); return true; }
+      catch (error) { errors.push(`${file.name}: ${error instanceof Error ? error.message : "Selecciona una imagen válida."}`); return false; }
+    });
+    if (!validFiles.length) {
+      setError(errors.join(" "));
+      return;
+    }
     const nextImages = multiple ? [...images] : [];
     setUploading(true);
     onBusyChange?.(true);
 
     try {
-      for (const file of selected) {
-        if (!file.type.startsWith("image/") || !["image/jpeg", "image/png", "image/webp", "image/avif"].includes(file.type)) {
-          throw new Error("Usa imágenes JPG, PNG, WebP o AVIF.");
+      const uploadEventId = ensureEvent ? await ensureEvent() : eventId;
+      for (const file of validFiles) {
+        try {
+          const secureUrl = await uploadInvitationImage(file, uploadEventId);
+          nextImages.push(secureUrl);
+          onChange([...nextImages]);
+        } catch (uploadError) {
+          const reason = uploadError instanceof Error ? uploadError.message : "No pudimos subir la imagen.";
+          errors.push(`${file.name}: ${reason}`);
         }
-        if (file.size > ACCOUNT_LIMITS.imageSizeBytes) throw new Error(`Cada imagen debe pesar ${ACCOUNT_LIMITS.imageSizeBytes / (1024 * 1024)} MB o menos.`);
-        const secureUrl = await uploadInvitationImage(file, ensureEvent ? await ensureEvent() : eventId);
-        nextImages.push(secureUrl);
-        onChange(nextImages.slice(0, ACCOUNT_LIMITS.imagesPerGallery));
       }
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "No pudimos subir la imagen.");
+      errors.push(uploadError instanceof Error ? uploadError.message : "No pudimos preparar la carga de imágenes.");
     } finally {
+      setError(errors.join(" "));
       setUploading(false);
       onBusyChange?.(false);
     }

@@ -22,7 +22,7 @@ export async function saveInvitationPrivacy(eventId: string, privacy: string, pi
       const pinHash = privacy === "PRIVATE" ? newHash || event.pinHash : null;
       if (privacy === "PRIVATE" && !pinHash) return { ok: false, error: "Elige un PIN de seis dígitos para proteger la invitación." } as const;
       if (privacy === event.privacy && !newHash) return { ok: true, privacy, version, hasPin: Boolean(pinHash) } as const;
-      await tx.event.update({ where: { id: eventId }, data: { privacy, pinHash, privacyVersion: { increment: 1 } } });
+      await tx.event.update({ where: { id: eventId }, data: { privacy, pinHash, draftLastSavedAt: new Date(), privacyVersion: { increment: 1 } } });
       await tx.invitationAccessSession.deleteMany({ where: { eventId } });
       return { ok: true, privacy, version: version + 1, hasPin: Boolean(pinHash) } as const;
     });

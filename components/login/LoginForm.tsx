@@ -26,7 +26,11 @@ export function LoginForm({ redirectTo = "/dashboard" }: { redirectTo?: string }
       });
 
       if (result?.error) {
-        setMessage("No encontramos una cuenta con esos datos. Revisa tu correo y contraseña.");
+        setMessage(result.code === "too_many_attempts"
+          ? "Demasiados intentos de acceso. Espera 15 minutos e inténtalo de nuevo."
+          : result.code === "temporarily_unavailable"
+            ? "El acceso no está disponible por el momento. Inténtalo de nuevo más tarde."
+            : "No encontramos una cuenta con esos datos. Revisa tu correo y contraseña.");
         return;
       }
 

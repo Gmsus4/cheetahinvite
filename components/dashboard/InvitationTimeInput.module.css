@@ -1,0 +1,8 @@
+.heading { display: flex; align-items: center; justify-content: space-between; min-height: 36px; gap: 12px; }
+.heading span { color: var(--orange); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.label { padding: 6px 0 10px; color: var(--muted); font-size: 12px; text-align: center; }
+.options { display: flex; flex-direction: column; gap: 3px; height: 216px; padding: 4px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.options button { flex-shrink: 0; width: 100%; font-variant-numeric: tabular-nums; }
+.picker .options button[aria-pressed="true"], .picker button.confirm { background: var(--orange); color: #fff; }
+.picker .options button[aria-pressed="true"]:hover, .picker button.confirm:hover { background: var(--orange); color: #fff; filter: brightness(.95); }

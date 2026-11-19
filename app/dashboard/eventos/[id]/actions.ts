@@ -6,11 +6,11 @@ import { validCompanionLimit } from "@/lib/rsvp";
 
 import { eventPublicationIssues } from "@/lib/guided-invitation";
 import { hasPublicationGrant } from "@/lib/invitation-payment";
-import { canEditInvitation } from "@/lib/invitation-lifecycle";
+import { canEditInvitation, savedContentChanged } from "@/lib/invitation-lifecycle";
 import { publishCourtesy } from "@/lib/courtesy";
 import { Prisma } from "@/generated/prisma/client";
 
-import { isPhotoShape, isPhotoFit, isMobileImageFocus, isInvitationPanelStyle, isInvitationBlurIntensity, isInvitationSectionCorners } from "@/lib/invitation-editor";
+import { isPhotoShape, isPhotoFit, isMobileImageFocus, isInvitationPanelStyle, isInvitationBlurIntensity, isInvitationSectionCorners, isDiscardedImageUrls } from "@/lib/invitation-editor";
 import { isInvitationCoverLayout } from "@/lib/invitation-cover-layout";
 import type { EditorSaveResult } from "@/lib/invitation-editor";
 import { invitationSectionUrl, invitationExternalUrl } from "@/lib/invitation-links";
@@ -184,6 +184,10 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
   const imageUrl = String(formData.get("imageUrl") ?? "").trim();
   const hasBackgroundImage = formData.has("backgroundImageUrl");
   const backgroundImageUrl = String(formData.get("backgroundImageUrl") ?? "").trim();
+  let discardedImageUrls: unknown;
+  try { discardedImageUrls = JSON.parse(String(formData.get("discardedImageUrls") ?? "[]")); }
+  catch { return failure("validation", "Revisa las fotos descartadas antes de guardar."); }
+  if (!isDiscardedImageUrls(discardedImageUrls)) return failure("validation", "Revisa las fotos descartadas antes de guardar.");
   const accent = String(formData.get("accent") ?? "#E9560A");
   const typography = String(formData.get("typography") ?? "default");
   const bodyTypography = String(formData.get("bodyTypography") ?? "inter");
@@ -277,7 +281,7 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
     const registryReady = !hasCustomSlug || await invitationLinkRegistryReady(prisma);
     const result = await withImageLock(session.user.id, async tx => {
       await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${eventId} FOR UPDATE`);
-      const previous = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { imageUrl: true, backgroundImageUrl: true, sections: true, contentVersion: true, status: true, paidAt: true, complimentaryAt: true, expiresAt: true, isExample: true, customSlug: true, privacy: true, privacyVersion: true, pinHash: true } });
+      const previous = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id } });
       if (!previous) throw new EditorWriteError(failure("not-found", "No encontramos esta invitación. Tu copia local sigue disponible."));
       if (previous.isExample && (await tx.user.findUnique({ where: { id: session.user.id }, select: { role: true } }))?.role !== "ADMIN") throw new EditorWriteError(failure("auth", "Esta cuenta no tiene permisos para editar ejemplos del sitio."));
       if (previous.contentVersion !== version || (hasPrivacy && previous.privacyVersion !== privacyVersion)) throw new EditorWriteError({ ...failure("conflict", "El contenido o la privacidad cambiaron desde otra pestaña o dispositivo. Revisa la versión guardada antes de reemplazarlos."), version: previous.contentVersion, ...(hasPrivacy ? { privacyVersion: previous.privacyVersion } : {}) });
@@ -299,9 +303,11 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
       if (registryReady && hasCustomSlug && customSlug && !await reserveInvitationPath(tx, `/event/${customSlug}`, eventId)) {
         throw new EditorWriteError(failure("validation", "Este enlace ya está ocupado. Elige otro nombre."));
       }
+      const content = { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, ...(hasBackgroundImage ? { backgroundImageUrl: backgroundImageUrl || null } : {}), ...curated, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}), ...(privacyChanged ? { privacy: privacy as string, pinHash } : {}) };
+      const meaningfulChange = savedContentChanged(previous, { ...content, ...(formData.has("imagePalette") ? { imagePalette } : {}) });
       const changed = await tx.event.updateMany({
         where: { id: eventId, ownerId: session.user.id, contentVersion: version, ...(automatic ? { paidAt: null, complimentaryAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] } } : {}) },
-        data: { name, eventType, eventDate, eventTime: eventTime || null, hostNames, venue, address, message, imageUrl: imageUrl || null, ...(hasBackgroundImage ? { backgroundImageUrl: backgroundImageUrl || null } : {}), ...curated, contentVersion: { increment: 1 }, ...(hasCustomSlug ? { customSlug: customSlug || null } : {}), ...(privacyChanged ? { privacy: privacy as string, pinHash, privacyVersion: { increment: 1 } } : {}) },
+        data: { ...content, contentVersion: { increment: 1 }, ...(privacyChanged ? { privacyVersion: { increment: 1 } } : {}), ...(meaningfulChange ? { draftLastSavedAt: new Date() } : {}) },
       });
       if (!changed.count) {
         const latest = await tx.event.findFirst({ where: { id: eventId, ownerId: session.user.id }, select: { contentVersion: true, paidAt: true, status: true } });
@@ -309,7 +315,7 @@ async function persistEvent(eventId: string, formData: FormData, automatic: bool
         throw new EditorWriteError({ ...failure("conflict", "La invitación cambió mientras guardabas. Tu copia local sigue disponible."), version: latest?.contentVersion });
       }
       if (privacyChanged) await tx.invitationAccessSession.deleteMany({ where: { eventId } });
-      await syncImages(tx, session.user.id, eventId, previous, { imageUrl, backgroundImageUrl: hasBackgroundImage ? backgroundImageUrl : previous.backgroundImageUrl, sections: curated.sections ?? sections, isExample: previous.isExample });
+      await syncImages(tx, session.user.id, eventId, previous, { imageUrl, backgroundImageUrl: hasBackgroundImage ? backgroundImageUrl : previous.backgroundImageUrl, sections: curated.sections ?? sections, isExample: previous.isExample }, discardedImageUrls);
       return { ok: true as const, eventId, version: version + 1, ...(hasPrivacy ? { privacyVersion: previous.privacyVersion + (privacyChanged ? 1 : 0) } : {}) };
     });
     scheduleImageCleanup(session.user.id);

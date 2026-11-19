@@ -24,6 +24,7 @@ import { publicationResponses } from "@/lib/publication-next-steps";
 import "@/app/ayuda/soporte.css";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { InvitationActionLink } from "@/components/dashboard/InvitationActionLink";
+import { ReuseRefundedInvitation } from "@/components/dashboard/ReuseRefundedInvitation";
 import styles from "./payment.module.css";
 
 export const metadata: Metadata = { title: "Pago y soporte | Cheetah Invite" };
@@ -61,6 +62,7 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
   const now = Date.now();
   const termEvent = { id: event.id, status: event.status, paidAt: event.paidAt, complimentaryAt: event.complimentaryAt, expiresAt: event.expiresAt, isExample: event.isExample, stripePaymentIntentId: event.stripePaymentIntentId };
   const term = invitationLifecycle(event, new Date(now));
+  const showTerm = Boolean(term) && event.status !== "REFUNDED";
   const renewalWindowOpen = renewal && term!.deletesAt.getTime() - now >= 31 * 60 * 1000;
   if (event.complimentaryAt && !event.paidAt) return <main className={styles.page}>
     <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} />
@@ -71,7 +73,7 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
         <p>Publicación sin cobro.{!published && " Completa los datos y elige la privacidad desde el editor."}</p>
         {publication}
         <div className={styles.courtesyActions}><Link className={styles.primary} href={`/dashboard/eventos/${id}`}>Ir al editor<FiArrowRight aria-hidden="true" /></Link></div>
-        {term && <div className={styles.termSummary}><InvitationTerm event={termEvent} now={now} compact /></div>}
+        {showTerm && <div className={styles.termSummary}><InvitationTerm event={termEvent} now={now} compact /></div>}
       </section>
     </div>
   </main>;
@@ -87,7 +89,7 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
       <div className={styles.layout}>
         <div className={styles.mainColumn}>
           <section className={`${styles.card} ${styles.paymentCard}`} aria-labelledby="payment-heading" data-published={published || undefined}>
-            <div className={styles.cardHeading}><h2 id="payment-heading">{renewal ? "Renovar invitación" : published ? "Comparte tu invitación" : event.paidAt ? "Estado de la invitación" : "Publicar invitación"}</h2><span className={`${styles.status} ${published ? styles.confirmed : ""}`}>{published ? "Publicada" : waiting ? "Verificando pago" : renewal ? "Por renovar" : event.paidAt ? "Pago registrado" : "Pendiente de pago"}</span></div>
+            <div className={styles.cardHeading}><h2 id="payment-heading">{renewal ? "Renovar invitación" : published ? "Comparte tu invitación" : event.paidAt ? "Estado de la invitación" : "Publicar invitación"}</h2><span className={`${styles.status} ${published ? styles.confirmed : ""}`}>{event.status === "REFUNDED" ? "Reembolsada" : published ? "Publicada" : waiting ? "Verificando pago" : renewal ? "Por renovar" : event.paidAt ? "Pago registrado" : "Pendiente de pago"}</span></div>
             {(!event.paidAt || renewal) && <InvitationDateNotice date={event.eventDate?.toISOString().slice(0, 10) ?? ""} time={event.eventTime ?? ""} now={now} />}
             {renewal ? <>
               <p>Conservamos tu invitación durante un mes después de vencer. Compra otro año para recuperar su contenido, sus fotos y el mismo enlace.</p>
@@ -118,7 +120,8 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
                 </ul>
               </details>
             </>}
-            {term && <div className={styles.termSummary}><InvitationTerm event={termEvent} now={now} compact /></div>}
+            {event.status === "REFUNDED" && term?.phase !== "deletion_due" && <ReuseRefundedInvitation eventId={id} eventName={event.name} className={styles.primary} />}
+            {showTerm && <div className={styles.termSummary}><InvitationTerm event={termEvent} now={now} compact /></div>}
             <details className={styles.purchaseDetails}><summary>Referencia de la invitación <FiChevronDown aria-hidden="true" /></summary><div className={styles.reference}><strong>{event.id}</strong></div></details>
           </section>
           {payment && <details className={styles.receiptDetails}><summary><h2>Detalle de tu compra</h2><FiChevronDown aria-hidden="true" /></summary><PaymentReceipt payment={payment} /></details>}

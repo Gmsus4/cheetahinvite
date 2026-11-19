@@ -125,6 +125,66 @@ test('saving replacement photos queues only previously saved unused images and p
   assert.equal(f.state.assets.has(replacement.publicId), true);
 });
 
+test('saving discards superseded temporary covers while retaining the background and other tabs uploads', async () => {
+  const f = createFixture();
+  const upload = () => f.client.uploadInvitationImage(new File(['photo'], 'photo.png', { type: 'image/png' }), 'event');
+  const original = await upload();
+  const background = await upload();
+  const replacement = await upload();
+  const otherTab = await upload();
+  const form = f.saveForm(replacement);
+  form.set('backgroundImageUrl', background);
+  form.set('discardedImageUrls', JSON.stringify([original, replacement, background]));
+  assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+  await Promise.all(f.jobs.map(job => job()));
+  const remaining = [...f.state.assets.values()].map(asset => asset.url).sort();
+  assert.deepEqual(remaining, [background, replacement, otherTab].sort());
+  assert.equal(f.providerAssets.size, 3);
+  assert.equal(f.requests.filter(request => request.method === 'DELETE').length, 1);
+});
+
+test('discarded temporary images preserve section and published example references', async () => {
+  const f = createFixture();
+  const sectionImage = f.addAsset({ expiresAt: new Date(Date.now() + HOUR) });
+  const published = f.addAsset({ expiresAt: new Date(Date.now() + HOUR) });
+  f.state.users.get('owner').role = 'ADMIN';
+  f.state.events.get('event').isExample = true;
+  f.state.examples.set('example', { id: 'example', eventId: 'event', publishedAt: new Date(), publishedContent: { backgroundImageUrl: published.url } });
+  const section = { id: 'story', type: 'story', title: 'Historia', content: '', detail: '', link: '', imageUrl: sectionImage.url, enabled: false };
+  const form = f.saveForm('', [section]);
+  form.set('discardedImageUrls', JSON.stringify([sectionImage.url, published.url]));
+  assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+  assert.equal((await f.storage.runImageCleanup()).deleted, 0);
+  for (const asset of f.state.assets.values()) assert.equal(asset.state, 'READY');
+});
+
+test('discard hints cannot delete another account or event and invalid hints cannot change the invitation', async () => {
+  const f = createFixture();
+  const anotherOwner = f.addAsset({ ownerId: 'another', expiresAt: new Date(Date.now() + HOUR) });
+  const anotherEvent = f.addAsset({ eventId: 'another', expiresAt: new Date(Date.now() + HOUR) });
+  const form = f.saveForm();
+  form.set('discardedImageUrls', JSON.stringify([anotherOwner.url, anotherEvent.url, 'https://example.com/photo.jpg']));
+  assert.equal((await f.actions.updateEvent('event', form)).ok, true);
+  assert.equal((await f.storage.runImageCleanup()).deleted, 0);
+  const version = f.state.events.get('event').contentVersion;
+  for (const value of ['null', '{}', '[1]', 'invalid', JSON.stringify(Array(257).fill('photo'))]) {
+    const invalid = f.saveForm();
+    invalid.set('discardedImageUrls', value);
+    assert.equal((await f.actions.updateEvent('event', invalid)).code, 'validation');
+    assert.equal(f.state.events.get('event').contentVersion, version);
+  }
+});
+
+test('a conflicting save does not queue discarded temporary images', async () => {
+  const f = createFixture();
+  const discarded = f.addAsset({ expiresAt: new Date(Date.now() + HOUR) });
+  const form = f.saveForm();
+  form.set('discardedImageUrls', JSON.stringify([discarded.url]));
+  f.state.events.get('event').contentVersion++;
+  assert.equal((await f.actions.updateEvent('event', form)).code, 'conflict');
+  assert.equal(f.state.assets.get(discarded.publicId).state, 'READY');
+});
+
 test('a cover reused in a disabled section is retained until its last reference is removed', async () => {
   const f = createFixture();
   const image = f.addAsset();

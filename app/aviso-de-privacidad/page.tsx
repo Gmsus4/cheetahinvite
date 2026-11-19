@@ -1,24 +1,151 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/app/legal/LegalPage";
+import { LEGAL_OPERATOR, LEGAL_UPDATED_AT } from "@/lib/legal";
+import { RSVP_LIMITS } from "@/lib/rsvp";
 
-export const metadata: Metadata = { title: "Aviso de privacidad | Cheetah Invite", description: "Conoce cómo Cheetah Invite trata y protege tus datos personales." };
+export const metadata: Metadata = {
+  title: "Aviso de privacidad | Cheetah Invite",
+  description: "Datos personales, invitaciones con PIN, asistencia, pagos, proveedores y derechos ARCO en Cheetah Invite.",
+};
 
 export default function PrivacyPage() {
-  return <LegalPage eyebrow="PRIVACIDAD Y DATOS PERSONALES" title="Aviso de privacidad integral" intro="Este aviso explica cómo se recaban, usan, almacenan y protegen los datos personales al visitar Cheetah Invite, crear una cuenta, contratar servicios o contactar a soporte." updated="8 de noviembre de 2026" sections={[
-    // { title: "Responsable y domicilio", body: <p>El responsable del tratamiento de tus datos es <strong>Fernando Gómez Montes</strong>, operador de Cheetah Invite,
-    { title: "Responsable y domicilio", body: <p>El responsable del tratamiento de tus datos es <strong>Fernando Gómez Montes</strong>, operador de Cheetah Invite <br />
-    {/* con domicilio en <strong>[POR DEFINIR: domicilio físico completo en México]</strong>.  */}
-    
-    Para asuntos de privacidad y solicitudes de derechos ARCO, contacta a <a href="mailto:cheetahinvite@gmail.com">cheetahinvite@gmail.com</a> con el asunto “Privacidad / Derechos ARCO”. Responsable de privacidad: <strong>Fernando Gómez Montes</strong>.</p> },
-    { title: "Datos personales que podemos tratar", body: <><p>Según las funciones que uses, podemos tratar:</p><ul><li><strong>Cuenta:</strong> nombre, correo, hash de la contraseña y, si eliges Google, identificadores y datos de perfil que ese proveedor comparte para autenticarte.</li><li><strong>Compra y soporte:</strong> referencias y estado del pago, fechas de pago y vigencia, y los mensajes y datos de contacto que envíes al equipo. Stripe gestiona los datos completos de pago.</li><li><strong>Recuperación de acceso:</strong> correo de la cuenta, códigos y comunicaciones de verificación gestionados por soporte y, en la opción automática, un hash del enlace temporal, su vencimiento y contadores de solicitudes. Nunca necesitamos que envíes tu contraseña actual por correo.</li><li><strong>Uso técnico:</strong> cookies de autenticación y protección de acceso. La infraestructura de alojamiento y los proveedores pueden procesar dirección IP, navegador y registros técnicos al recibir las conexiones.</li><li><strong>Contenido del evento:</strong> nombres, fecha, hora, ubicación, fotografías, textos, enlaces y otros datos que agregues voluntariamente. Si el organizador activa la confirmación integrada, se recoge el nombre del invitado, si asistirá y de cero a cinco acompañantes extra. Las respuestas son visibles para el organizador y cada invitado solo puede recuperar su propia respuesta con una clave privada conservada en su navegador.</li></ul><p>No solicitamos datos personales sensibles para el uso ordinario. Evita incluirlos en las invitaciones o en los mensajes de soporte.</p></> },
-    { title: "Finalidades del tratamiento", body: <><p>Usamos los datos necesarios para crear y administrar cuentas, iniciar sesión, recuperar el acceso, guardar y editar invitaciones, publicar sus enlaces, gestionar pagos y vigencias, atender soporte y aclaraciones, proteger el servicio y cumplir obligaciones legales.</p><p>El servicio actual no incluye campañas promocionales ni un programa de suscripción a noticias. Si incorporamos finalidades adicionales que requieran tu consentimiento, las informaremos antes de utilizarlas y habilitaremos los mecanismos correspondientes.</p></> },
-    { title: "Datos de invitados y contenido público", body: <><p>Una invitación publicada es accesible para cualquier persona que tenga el enlace y puede ser reenviada. No se comprueba la identidad de quienes la visitan. Al compartirla, la portada, el título y la descripción pueden ser consultados y guardados por aplicaciones de mensajería o redes sociales para mostrar su vista previa.</p><p>Quien publica debe contar con las autorizaciones necesarias para usar fotografías, nombres y datos de otras personas, incluidos menores. Si añade enlaces de confirmación a WhatsApp u otro servicio, los datos que los invitados proporcionen allí se gestionan fuera de Cheetah Invite, conforme a las condiciones de ese servicio y a la información que facilite el organizador.</p></> },
-    { title: "Transferencias y proveedores", body: <><p>El servicio integra Google para el acceso opcional y la atención mediante Gmail, Cloudinary para alojar imágenes, Neon para la base de datos, Stripe para pagos y Resend para los correos automáticos de recuperación cuando está habilitado. Cada proveedor recibe los datos necesarios para la función que utilizas. Abrir un borrador de correo desde el sitio no lo envía: debes revisarlo y enviarlo desde tu aplicación.</p><p><strong>[POR DEFINIR: proveedor de alojamiento de producción; confirmar entidades contratantes, países o regiones de tratamiento, acuerdos aplicables y clasificación de remisiones y transferencias antes de operar]</strong>.</p><p>También podremos comunicar datos a autoridades ante obligaciones o requerimientos legales válidos. No vendemos tus datos personales. Cuando una transferencia requiera consentimiento, se informarán sus destinatarios y finalidades y se recabará el consentimiento correspondiente.</p></> },
-    { title: "Opciones para limitar uso o divulgación", body: <p>Puedes solicitar dejar de recibir comunicaciones promocionales a través del mecanismo incluido en el mensaje o escribiendo a <a href="mailto:cheetahinvite@gmail.com">cheetahinvite@gmail.com</a>. También puedes limitar la exposición de tu evento retirando su publicación, editando el contenido público o cerrando el enlace desde tu cuenta, si esas funciones están disponibles. Para cookies y controles del navegador, consulta la configuración de tu navegador y el apartado de cookies de este aviso.</p> },
-    { title: "Derechos ARCO y revocación del consentimiento", body: <><p>Puedes ejercer los derechos de <strong>Acceso</strong>, <strong>Rectificación</strong>, <strong>Cancelación</strong> u <strong>Oposición</strong> (ARCO), así como revocar el consentimiento cuando proceda. Envía una solicitud a <a href="mailto:cheetahinvite@gmail.com">cheetahinvite@gmail.com</a> con el asunto “Privacidad / Derechos ARCO” e incluye:</p><ul><li>Tu nombre y un medio para comunicarte la respuesta.</li><li>El derecho que deseas ejercer y una descripción clara de los datos involucrados.</li><li>Elementos que permitan localizar los datos y, para rectificación, la corrección solicitada y su sustento.</li><li>Documento o mecanismo razonable para acreditar tu identidad y, en su caso, la representación legal.</li></ul><p>Responderemos dentro de los plazos previstos por la legislación aplicable. Si la solicitud es procedente, se hará efectiva dentro del plazo legal correspondiente. La cancelación puede estar sujeta a periodos de bloqueo y a excepciones legales; revocar el consentimiento no afecta tratamientos anteriores legítimos ni impide conservar información que debamos mantener por ley o para defender reclamaciones. La identidad se verificará de forma proporcional y no se solicitarán datos innecesarios.</p></> },
-    { title: "Cookies y tecnologías similares", body: <p>La aplicación utiliza cookies técnicas para mantener la sesión y proteger los procesos de autenticación. La confirmación integrada guarda una clave aleatoria en el almacenamiento local del navegador para recuperar y actualizar tu propia respuesta. Si borras ese almacenamiento o cambias de navegador puedes perder esa posibilidad. El sitio mide de forma aproximada las visitas a la página de inicio y las selecciones de ejemplos de invitaciones. Para evitar contar varias veces la misma interacción, guarda un identificador aleatorio en el almacenamiento de sesión del navegador; el servidor conserva únicamente una huella criptográfica que cambia por día, sin guardar el identificador original, el correo ni la dirección IP en estos registros de medición. Estos datos no se vinculan con la cuenta, no se usan para publicidad y se eliminan de forma periódica cuando superan los 90 días. Respetamos las señales Do Not Track y Global Privacy Control del navegador. Puedes impedir esta medición activando esas preferencias o bloqueando el almacenamiento de sesión. Los servicios externos, como el acceso con Google o el pago de Stripe, pueden utilizar sus propias tecnologías cuando visitas sus pantallas. Puedes administrar las cookies desde tu navegador; bloquear las necesarias puede impedir el acceso a tu cuenta. <strong>[POR DEFINIR: inventario final de cookies, nombres y duraciones en el dominio y alojamiento de producción, y controles que correspondan si se añaden herramientas no necesarias]</strong>.</p> },
-    { title: "Conservación y seguridad", body: <><p>El contenido de una invitación vencida se conserva archivado durante un mes natural posterior al vencimiento, sin mantener activo su enlace público ni permitir su edición. Puedes renovar una invitación comprada durante ese mes para recuperar el acceso por otro año. Al terminar ese periodo sin renovación, la aplicación elimina automáticamente la invitación y sus respuestas de asistencia y encola la eliminación de sus imágenes alojadas. Si solicitas el cierre de tu cuenta, el contenido se conserva durante un máximo de tres meses para tramitar la baja, salvo una solicitud procedente de cancelación que deba atenderse antes o una obligación legal de conservación.</p><p>Los registros de compras, aclaraciones, soporte y obligaciones legales pueden requerir una conservación distinta a la del contenido del evento. <strong>[POR DEFINIR: plazos de registros de compra y soporte, bloqueo legal, registros técnicos y ciclo de eliminación de respaldos, incluyendo los proveedores]</strong>. La recuperación mediante renovación solo está disponible durante el mes de archivo y mientras el estado de la compra permita el acceso. La eliminación de la aplicación no retira capturas, mensajes o copias conservadas por destinatarios y otros servicios.</p><p>Las contraseñas se guardan mediante hash y el restablecimiento invalida las sesiones anteriores. Aplicamos controles de acceso y verificamos la identidad antes de realizar cambios sensibles mediante soporte. Ningún medio de transmisión o almacenamiento garantiza seguridad absoluta.</p></> },
-    { title: "Cambios al aviso", body: <p>Podemos modificar este aviso para reflejar cambios legales o de operación. La versión actualizada estará disponible en esta página con su fecha. Si los cambios son relevantes, los comunicaremos por correo registrado o mediante un aviso visible en el sitio. Cuando la ley requiera consentimiento para una nueva finalidad o transferencia, lo solicitaremos antes del tratamiento correspondiente.</p> },
-    { title: "Autoridad de protección de datos", body: <p>Si consideras que tu derecho a la protección de datos personales fue vulnerado, puedes acudir a la Secretaría Anticorrupción y Buen Gobierno, autoridad federal competente conforme al marco legal vigente, sin perjuicio de otros medios previstos por la ley. Consulta sus canales oficiales vigentes en <a href="https://www.gob.mx/buengobierno" target="_blank" rel="noreferrer">gob.mx/buengobierno</a>.</p> },
-  ]} />;
+  return <LegalPage
+    eyebrow="PRIVACIDAD Y DATOS PERSONALES"
+    title="Aviso de privacidad integral"
+    intro="Este aviso explica el tratamiento de datos al visitar Cheetah Invite, crear una cuenta, editar o consultar invitaciones, confirmar asistencia, contratar servicios o contactar a soporte. También aplica a invitados y personas cuyos datos aparezcan en un evento."
+    updated={LEGAL_UPDATED_AT}
+    sections={[
+      {
+        title: "Responsable, domicilio y contacto",
+        body: <>
+          <p>El responsable del tratamiento es <strong>{LEGAL_OPERATOR.name}</strong>, operador de Cheetah Invite. Domicilio: <strong>{LEGAL_OPERATOR.address}</strong>.</p>
+          <p>Para privacidad y derechos ARCO, escribe a <a href={LEGAL_OPERATOR.emailHref}>{LEGAL_OPERATOR.email}</a> con el asunto “Privacidad / Derechos ARCO”. Responsable de privacidad: <strong>{LEGAL_OPERATOR.name}</strong>. Teléfono de contacto: <a href={LEGAL_OPERATOR.phoneHref}>{LEGAL_OPERATOR.phone}</a>.</p>
+        </>,
+      },
+      {
+        title: "Datos personales que tratamos",
+        body: <>
+          <p>Los datos dependen de las funciones que utilices:</p>
+          <ul>
+            <li><strong>Cuenta y acceso:</strong> nombre, correo, hash de contraseña y, si eliges Google, identificador, fotografía, datos de perfil y credenciales técnicas de la cuenta vinculada que ese proveedor entregue para autenticarte.</li>
+            <li><strong>Invitaciones:</strong> nombres de organizadores y festejados, tipo de evento, fecha, hora, lugares, direcciones, fotografías, textos y enlaces. Los enlaces o textos pueden incluir teléfono de WhatsApp o referencias de regalos que decidas publicar.</li>
+            <li><strong>Asistencia integrada:</strong> nombre y apellido, respuesta Sí o No, cantidad de acompañantes adicionales según el límite del organizador —de cero a {RSVP_LIMITS.companions}—, fechas de respuesta y actualización y la huella de una clave privada del navegador. No pedimos teléfono, correo ni nombres de acompañantes en este formulario.</li>
+            <li><strong>Compras:</strong> identificadores de cuenta y evento, nombre del evento, proveedor, referencias, importe, moneda, fechas, vigencia, estado del pago, reembolsos y disputas. Stripe, PayPal o Mercado Pago procesan los datos completos del medio de pago; no almacenamos el número completo de tarjeta ni su código de seguridad.</li>
+            <li><strong>Recuperación, soporte y reportes de uso indebido:</strong> correo, mensajes, enlace de la invitación reportada y evidencias necesarias que proporciones para revisar una incidencia o verificar una solicitud; en la recuperación automática, huella del token temporal, vencimiento y contadores. No necesitamos tu contraseña actual por correo.</li>
+            <li><strong>Seguridad y operación:</strong> sesiones, huellas de PIN y de tokens de acceso, contadores contra abuso, referencias técnicas de imágenes y registros administrativos de acciones sobre cuentas, compras o cortesías.</li>
+            <li><strong>Navegación:</strong> cookies y almacenamiento descritos más adelante. La infraestructura puede recibir IP, navegador y registros de conexión. Al comprobar un PIN, la aplicación utiliza la IP para generar una huella por evento y limitar intentos; el contador no conserva la IP en texto claro.</li>
+          </ul>
+          <p>No solicitamos datos sensibles para el uso ordinario. El contenido que publiques puede revelar información íntima, por ejemplo creencias religiosas según el evento. Evita incluirla, así como documentos de identidad o datos innecesarios de otras personas.</p>
+        </>,
+      },
+      {
+        title: "Finalidades necesarias y medición opcional",
+        body: <>
+          <p>Tratamos los datos necesarios para administrar cuentas, autenticar y recuperar el acceso, guardar y editar invitaciones, alojar imágenes, publicar enlaces y comprobar PIN, recibir y consultar asistencia, gestionar pagos, vigencias y renovaciones, atender soporte y reportes de uso no autorizado de datos, contenido o funciones del servicio, prevenir abuso, resolver aclaraciones y cumplir obligaciones legales.</p>
+          <p>Como finalidad adicional, medimos aproximadamente visitas al inicio y selecciones de ejemplos para conocer el uso de la plataforma. Esta medición no es necesaria para crear o consultar invitaciones. Puedes impedirla mediante Do Not Track, Global Privacy Control o bloqueando el almacenamiento de sesión, como se explica en el apartado de tecnologías.</p>
+          <p>No utilizamos estos datos para publicidad personalizada ni ofrecemos actualmente campañas promocionales o suscripción a noticias. Si incorporamos otras finalidades que requieran consentimiento, las informaremos y solicitaremos antes del tratamiento correspondiente.</p>
+        </>,
+      },
+      {
+        title: "Invitaciones públicas y protegidas con PIN",
+        body: <>
+          <p>El organizador elige entre acceso público y protección con PIN de seis dígitos. En modo público, cualquier persona con el enlace puede abrirlo y reenviarlo; aplicaciones de mensajería o redes sociales pueden consultar y guardar portada, título y descripción para sus vistas previas.</p>
+          <p>En modo protegido, la página requiere el PIN y muestra metadatos genéricos de Cheetah Invite antes de desbloquearla. Tras introducirlo correctamente, una cookie permite el acceso durante hasta doce horas. Cambiar el PIN o la privacidad invalida los accesos previos. El PIN no verifica la identidad: cualquiera que lo reciba junto con el enlace puede entrar.</p>
+          <p>La protección de la página no convierte las imágenes en archivos de acceso individual: quien conozca una dirección directa puede consultarla, incluidas referencias antiguas de Cloudinary. Cambiar a PIN o eliminar el evento no retira copias, descargas ni vistas previas guardadas por otros servicios.</p>
+          <p>Quien publique debe tener autorización para utilizar fotografías y datos de terceros, incluidos menores. Si apareces en una invitación y quieres ejercer tus derechos, puedes contactar al responsable sin necesidad de registrarte.</p>
+        </>,
+      },
+      {
+        title: "Datos de terceros y gestión de asistencia",
+        body: <>
+          <p>La persona titular de la cuenta que crea y administra la invitación (el Organizador) es responsable de los datos de otras personas que incorpora y de contar con los derechos, consentimientos y autorizaciones necesarios para compartirlos y utilizarlos en las funciones del evento. Debe informar a las personas involucradas sobre ese uso y facilitarles este aviso. Cheetah Invite trata la información conforme a las finalidades aquí descritas; esta obligación del Organizador no elimina las que correspondan a la plataforma.</p>
+          <p>Las respuestas integradas se facilitan al organizador para gestionar su evento. La lista no es pública: la cuenta propietaria puede verla, exportarla en CSV y eliminar respuestas. El personal autorizado puede tratarla cuando sea necesario para operación, seguridad, atención de derechos o soporte.</p>
+          <p>Cada invitado recupera o actualiza su propia respuesta mediante una clave aleatoria guardada en su navegador; el servidor conserva su huella. No se utiliza el nombre como identificador verificado. Si borras el almacenamiento o cambias de dispositivo, puedes perder el acceso a tu respuesta y generar registros duplicados.</p>
+          <p>Desactivar el formulario conserva las respuestas ya recibidas. Eliminar una respuesta la retira de la aplicación y de futuras exportaciones; eliminar la invitación elimina sus respuestas. Los CSV descargados permanecen bajo control de quien los descargó. El organizador debe protegerlos y utilizar los datos para las finalidades informadas a sus invitados.</p>
+        </>,
+      },
+      {
+        title: "Proveedores, comunicaciones y transferencias",
+        body: <>
+          <p>Según la función utilizada, intervienen los siguientes proveedores:</p>
+          <ul>
+            <li><strong>Cloudflare:</strong> alojamiento de esta plataforma, entrega y transformación de nuevas imágenes en R2 e Images y generación de capturas de invitaciones.</li>
+            <li><strong>Proveedor de la base PostgreSQL:</strong> almacenamiento de cuentas, eventos, respuestas, referencias de pago y registros operativos. La entidad y región concretas dependen del servicio contratado.</li>
+            <li><strong>Cloudinary:</strong> entrega de imágenes antiguas que todavía lo referencian. Las nuevas cargas de esta versión se realizan en Cloudflare.</li>
+            <li><strong>Google:</strong> inicio de sesión opcional; Gmail para recibir y atender mensajes enviados al correo de soporte.</li>
+            <li><strong>Stripe, PayPal y Mercado Pago:</strong> procesamiento y verificación del pago seleccionado, incluidos reembolsos y disputas. Solo se ofrecen los métodos habilitados.</li>
+            <li><strong>Resend:</strong> envío del enlace automático de recuperación cuando esa opción está configurada.</li>
+          </ul>
+          <p>Los servicios de infraestructura reciben los datos necesarios para sus funciones y pueden tratarlos fuera de México según la contratación. Los proveedores que actúan por cuenta propia, como el de pago o autenticación elegido, aplican también sus avisos. La distinción entre encargos y transferencias depende del servicio y de los acuerdos aplicables.</p>
+          <p>No vendemos tus datos. Podemos comunicarlos a autoridades ante requerimientos legales válidos. Cuando una transferencia requiera consentimiento, informaremos destinatario y finalidad y lo solicitaremos antes de realizarla.</p>
+          <p>Los botones de soporte y recuperación manual abren un borrador en tu aplicación de correo: debes enviarlo para que el equipo lo reciba.</p>
+        </>,
+      },
+      {
+        title: "Enlaces y reproductores de terceros",
+        body: <>
+          <p>Las invitaciones pueden incluir WhatsApp, mapas, mesas de regalos, enlaces externos o reproductores de Spotify, YouTube, Apple Music y SoundCloud elegidos por el organizador. Los reproductores incrustados pueden conectarse a esos proveedores al cargarse en la página, incluso antes de iniciar la reproducción, y transmitir datos técnicos o utilizar sus propias cookies.</p>
+          <p>Al seguir un enlace externo, los datos que proporciones se tratan fuera de Cheetah Invite conforme al aviso del destinatario. Las respuestas de WhatsApp no se guardan como confirmaciones integradas de la plataforma. Consulta las condiciones del servicio externo y la información que facilite el organizador.</p>
+        </>,
+      },
+      {
+        title: "Opciones para limitar uso o divulgación",
+        body: <>
+          <p>Puedes editar o eliminar tu invitación, elegir protección con PIN, cambiarlo y limitar a quién compartes enlace y código. Los invitados pueden pedir al organizador que elimine su respuesta o contactar al responsable para ejercer sus derechos. Estos controles no retiran copias que terceros ya tengan.</p>
+          <p>Si consideras que tus datos, tu imagen u otro contenido se han utilizado sin autorización o para una finalidad que no corresponde al evento, puedes reportarlo a <a href={`${LEGAL_OPERATOR.emailHref}?subject=${encodeURIComponent("Reporte de uso indebido de una invitación")}`}>{LEGAL_OPERATOR.email}</a>, aunque no tengas cuenta. Facilita el enlace y una descripción con la información mínima necesaria para revisar el caso. El reporte no sustituye ni condiciona el ejercicio de tus derechos ARCO.</p>
+          <p>Para limitar usos adicionales o solicitar información sobre tus datos, escribe a <a href={LEGAL_OPERATOR.emailHref}>{LEGAL_OPERATOR.email}</a>. Puedes impedir la medición con las preferencias de privacidad del navegador descritas más adelante. Rechazar esa medición no impide utilizar el servicio.</p>
+        </>,
+      },
+      {
+        title: "Derechos ARCO y revocación del consentimiento",
+        body: <>
+          <p>Puedes solicitar <strong>Acceso</strong>, <strong>Rectificación</strong>, <strong>Cancelación</strong> u <strong>Oposición</strong> (ARCO), así como revocar tu consentimiento cuando proceda, a <a href={LEGAL_OPERATOR.emailHref}>{LEGAL_OPERATOR.email}</a>, con el asunto “Privacidad / Derechos ARCO”. Incluye:</p>
+          <ul>
+            <li>Nombre y medio para recibir la respuesta.</li>
+            <li>El derecho que solicitas y los datos involucrados; para acceso, puedes solicitar los datos que tratamos sobre ti.</li>
+            <li>Información para localizar el registro, por ejemplo correo de cuenta o enlace del evento; para rectificación, la corrección y su sustento.</li>
+            <li>Acreditación de identidad y, si corresponde, de la representación. Acordaremos un medio proporcional, evitando documentos o datos innecesarios.</li>
+          </ul>
+          <p>Comunicaremos la determinación en un máximo de veinte días hábiles desde la recepción y, si procede, la haremos efectiva en los quince días hábiles siguientes a la respuesta. Los plazos pueden ampliarse una sola vez por un periodo igual cuando exista justificación. El acceso podrá entregarse por correo o documento electrónico, previa acreditación de identidad.</p>
+          <p>El ejercicio es gratuito, salvo costos de reproducción o envío legalmente permitidos. La cancelación puede requerir bloqueo o conservación por obligaciones legales y reclamaciones. Revocar el consentimiento no afecta tratamientos anteriores legítimos; si impide una función necesaria del servicio, te informaremos sus efectos. Comunicaremos cualquier negativa y su motivo.</p>
+        </>,
+      },
+      {
+        title: "Cookies y almacenamiento en el navegador",
+        body: <>
+          <ul>
+            <li><strong>Autenticación:</strong> cookies de sesión y seguridad de Auth.js para mantener el acceso, proteger solicitudes y completar el inicio con Google. Los controles temporales de OAuth utilizados pueden durar hasta quince minutos; la sesión se renueva conforme al uso y puede cerrarse desde la cuenta.</li>
+            <li><strong>Acceso con PIN:</strong> una cookie técnica por invitación protegida, con duración máxima de doce horas, que contiene un token de acceso y no el PIN.</li>
+            <li><strong>Confirmación integrada:</strong> una clave aleatoria por evento en almacenamiento local, sin caducidad automática del navegador, para recuperar y actualizar tu respuesta.</li>
+            <li><strong>Editor y preferencias:</strong> almacenamiento local para recuperar borradores, trasladar cambios a la vista privada y recordar tema visual y ayudas del editor. Las copias de borrador se consideran recuperables durante siete días desde su actualización; las de traslado a la vista privada, durante treinta minutos. Su limpieza ocurre al volver a utilizar las funciones o al borrar los datos del sitio; no equivale a un borrado inmediato del dispositivo al vencer.</li>
+            <li><strong>Medición opcional:</strong> un identificador aleatorio en almacenamiento de sesión permite evitar conteos repetidos. El servidor guarda claves derivadas criptográficamente por día para visitas al inicio y selección de ejemplos; no guarda el identificador original, correo ni IP en esos registros ni los vincula con la cuenta para medir visitas.</li>
+          </ul>
+          <p>Respetamos Do Not Track y Global Privacy Control para no registrar esta medición. También puedes impedirla bloqueando el almacenamiento de sesión. Los registros de medición mayores de noventa días se eliminan en limpiezas periódicas asociadas a nuevas visitas, por lo que su eliminación no es instantánea al alcanzar ese plazo.</p>
+          <p>Puedes administrar cookies y almacenamiento desde tu navegador. Bloquear los necesarios puede impedir el acceso, desbloquear invitaciones o recuperar borradores y respuestas. Borrar el navegador no elimina los datos ya guardados en el servidor. Google, los medios de pago y los reproductores externos pueden emplear tecnologías propias al utilizar sus servicios.</p>
+        </>,
+      },
+      {
+        title: "Conservación y eliminación",
+        body: <>
+          <p>Los borradores sin pago confirmado ni cortesía se eliminan automáticamente tras seis meses naturales desde su creación o el último guardado de cambios reales de contenido, diseño o privacidad. Abrirlos o iniciar sesión no reinicia el plazo. El panel muestra la fecha prevista; los recordatorios por correo todavía no están disponibles. Antes de eliminarlos se verifican los pagos pendientes; si la verificación falla, se conservan para reintentar. El resto del contenido de una cuenta se conserva conforme a los plazos aplicables o hasta su eliminación o una solicitud procedente.</p>
+          <p>Al vencer una publicación se desactivan el enlace, las respuestas nuevas y la edición. El contenido permanece archivado un mes natural, con renovación manual para compras elegibles. Al concluir sin renovar, el proceso automático elimina el evento y sus respuestas, enlaces y sesiones de acceso. Las imágenes de Cloudflare se encolan para borrado con reintentos; las cargas temporales no utilizadas tienen un plazo de veinticuatro horas antes de quedar disponibles para limpieza.</p>
+          <p>El borrado de imágenes depende del procesamiento y de referencias todavía utilizadas por otras invitaciones. La limpieza actual no elimina automáticamente archivos históricos de Cloudinary; su retiro debe gestionarse por separado. La eliminación no alcanza capturas, mensajes, CSV ni otras copias conservadas por destinatarios.</p>
+          <p>El historial de compras se conserva independientemente de la invitación o de la cuenta para aclaraciones, reembolsos, disputas y obligaciones legales. Los mensajes de soporte, registros administrativos, técnicos y respaldos pueden tener conservación distinta. No se les aplica automáticamente el mes de archivo del evento ni existe en esta versión una purga automática general de esas categorías. Puedes solicitar información o su cancelación cuando proceda por los canales indicados.</p>
+          <p>El cierre de cuenta se solicita a soporte y se tramita con verificación de identidad y los plazos legales correspondientes. No prometemos un borrado instantáneo de sistemas o respaldos ni un plazo adicional que retrase el ejercicio de tus derechos.</p>
+        </>,
+      },
+      {
+        title: "Medidas de seguridad",
+        body: <p>Las contraseñas y PIN se guardan mediante hash, y los tokens de recuperación o acceso mediante huellas criptográficas. Aplicamos controles de sesión, propiedad de eventos y límites contra abuso. El restablecimiento de contraseña invalida las sesiones anteriores. El acceso del personal debe limitarse a sus funciones de operación, seguridad, atención de derechos y soporte. Ningún sistema garantiza seguridad absoluta; si ocurre una vulneración que afecte significativamente tus derechos, te informaremos en los términos legales aplicables.</p>,
+      },
+      {
+        title: "Cambios al aviso",
+        body: <p>La versión vigente estará disponible en esta página con su fecha. Los cambios relevantes se comunicarán por el correo registrado o mediante un aviso visible en el sitio. Cuando una nueva finalidad o transferencia requiera consentimiento, lo solicitaremos antes del tratamiento correspondiente.</p>,
+      },
+      {
+        title: "Autoridad y legislación de protección de datos",
+        body: <p>Este aviso se refiere a la <a href="https://www.diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf" target="_blank" rel="noreferrer">Ley Federal de Protección de Datos Personales en Posesión de los Particulares</a>. Si consideras vulnerados tus derechos, puedes acudir a la Secretaría Anticorrupción y Buen Gobierno mediante sus <a href="https://www.gob.mx/buengobierno" target="_blank" rel="noreferrer">canales oficiales</a>, sin perjuicio de otros medios legales.</p>,
+      },
+    ]}
+  />;
 }

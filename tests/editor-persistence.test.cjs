@@ -38,6 +38,74 @@ function setup(t, options = {}) {
 }
 const edit = (controller, name, uploading = false) => controller.update(values(name), uploading, { step: 0, activeExtra: null }, false);
 
+test('discarded cover uploads survive local recovery and are submitted only with a successful save', async t => {
+  const attempts = [];
+  let fail = true;
+  const save = async (snapshot, version, automatic, privacyVersion, discardedImageUrls) => {
+    attempts.push(discardedImageUrls);
+    return fail ? { ok: false, code: 'unavailable', message: 'Retry' } : { ok: true, eventId: 'event', version: version + 1 };
+  };
+  const { controller: c, storage } = setup(t, { manualOnly: true, save });
+  const photo = imageUrl => JSON.stringify({ ...JSON.parse(values('Fiesta')), imageUrl, backgroundImageUrl: 'https://example.com/background' });
+  c.update(photo('https://example.com/old-cover'), false, { step: 2, activeExtra: null }, true);
+  c.update(photo('https://example.com/new-cover'), false, { step: 2, activeExtra: null }, true);
+  assert.deepEqual(JSON.parse([...storage.data.values()][0]).discardedImageUrls, ['https://example.com/old-cover']);
+  c.stop();
+  const { controller: recovered } = setup(t, { storage, manualOnly: true, save });
+  assert.ok(recovered.recover());
+  assert.equal((await recovered.saveNow()).ok, false);
+  fail = false;
+  assert.equal((await recovered.saveNow()).ok, true);
+  assert.deepEqual(attempts, [['https://example.com/old-cover'], ['https://example.com/old-cover']]);
+  recovered.update(photo('https://example.com/latest-cover'), false, { step: 2, activeExtra: null }, true);
+  await recovered.saveNow();
+  assert.deepEqual(attempts[2], ['https://example.com/new-cover']);
+});
+
+test('a photo removed while another save is pending is still discarded by the next save', async t => {
+  let resolve;
+  const calls = [];
+  const { controller: c } = setup(t, { manualOnly: true, save: async (snapshot, version, automatic, privacyVersion, discardedImageUrls) => {
+    calls.push(discardedImageUrls);
+    if (calls.length === 1) return new Promise(done => { resolve = done; });
+    return { ok: true, eventId: 'event', version: version + 1 };
+  } });
+  const photo = imageUrl => JSON.stringify({ ...JSON.parse(values('Fiesta')), imageUrl });
+  const update = url => c.update(photo(url), false, { step: 2, activeExtra: null }, true);
+  update('https://example.com/cover');
+  update('https://example.com/other');
+  update('https://example.com/cover');
+  const flight = c.saveNow(); await flush();
+  update('https://example.com/latest');
+  resolve({ ok: true, eventId: 'event', version: 1 });
+  await flight;
+  assert.deepEqual(calls[1], ['https://example.com/cover']);
+});
+
+test('discard tracking includes removed gallery photos but preserves images reused in disabled sections', async t => {
+  let discarded;
+  const { controller: c } = setup(t, { manualOnly: true, save: async (snapshot, version, automatic, privacyVersion, urls) => {
+    discarded = urls;
+    return { ok: true, eventId: 'event', version: version + 1 };
+  } });
+  const section = { id: 'gallery', type: 'gallery', title: 'Fotos', content: '', detail: '', link: '', enabled: false };
+  const first = { ...JSON.parse(values('Fiesta')), imageUrl: 'https://example.com/shared', sections: [{ ...section, imageUrl: 'https://example.com/gallery', imageUrls: ['https://example.com/gallery', 'https://example.com/shared'] }] };
+  const next = { ...first, imageUrl: '', sections: [{ ...section, imageUrl: 'https://example.com/shared', imageUrls: ['https://example.com/shared'] }] };
+  c.update(JSON.stringify(first), false, { step: 2, activeExtra: null }, true);
+  c.update(JSON.stringify(next), false, { step: 2, activeExtra: null }, true);
+  await c.saveNow();
+  assert.deepEqual(discarded, ['https://example.com/gallery']);
+});
+
+test('local recovery rejects malformed discard lists and accepts older backups without one', () => {
+  const now = Date.now();
+  const record = { schema: 1, ownerId: 'owner', eventId: 'event', creationKey: randomUUID(), version: 0, updatedAt: now, wizard: { step: 2, activeExtra: null }, snapshot: values('Fiesta') };
+  assert.ok(parseEditorDraft(JSON.stringify(record), 'owner', 'event', now));
+  for (const discardedImageUrls of [null, {}, [1], ['x'.repeat(1001)], Array(257).fill('url')]) {
+    assert.equal(parseEditorDraft(JSON.stringify({ ...record, discardedImageUrls }), 'owner', 'event', now), null);
+  }
+});
+
 test('creation adopts newer saves from its visual editor and publishes against that revision', async t => {
   const { controller: c, calls } = setup(t, { creation: true, manualOnly: true });
   assert.equal(c.acceptExternalSave(values('Diseño guardado'), 2, 0), true);

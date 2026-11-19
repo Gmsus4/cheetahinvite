@@ -1,5 +1,6 @@
 "use client";
 import { InvitationDateInput } from "./InvitationDateInput";
+import { InvitationTimeInput } from "./InvitationTimeInput";
 
 import { invitationSectionLabels } from "@/lib/invitation-sections";
 
@@ -100,8 +101,9 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
   }
   const { controller: persistence, state: protection, confirmNavigation, navigation } = useEditorProtection({
     ownerId: event.ownerId, eventId: event.id, snapshot, version: event.contentVersion, privacyVersion: event.privacyVersion ?? 0, creation, manualOnly,
-    save: async (submitted, version, automatic, privacyVersion) => {
+    save: async (submitted, version, automatic, privacyVersion, discardedImageUrls) => {
       const formData = editorFormData(submitted, version);
+      formData.set("discardedImageUrls", JSON.stringify(discardedImageUrls));
       const submittedValues = JSON.parse(submitted) as EditorValues;
       const acknowledged = JSON.parse(persistence.getSnapshot().acknowledged) as EditorValues;
       if (exampleId) { formData.delete("privacy"); formData.delete("pin"); formData.delete("pinPending"); }
@@ -433,7 +435,7 @@ export function GuidedInvitationEditor({ event, creation = false, error, account
             {!exampleId && (step === 1 || step === finalStep) && <InvitationDateNotice date={values.eventDate} time={values.eventTime} expiresAt={event.expiresAt} />}
             {step === 1 && <div className="guided-data-grid">
               <Field label="Fecha" id="w-date"><InvitationDateInput id="w-date" value={values.eventDate} onValueChange={date => patch({ eventDate: date, ...(!date ? { eventTime: '' } : {}) })} /></Field>
-              <Field label="Hora" id="w-time" help={!values.eventDate ? 'Primero elige una fecha.' : undefined}><input id="w-time" type="time" disabled={!values.eventDate} value={values.eventTime} onChange={e => patch({ eventTime: e.target.value })} /></Field>
+              <Field label="Hora" id="w-time" help={!values.eventDate ? 'Primero elige una fecha.' : undefined}><InvitationTimeInput id="w-time" disabled={!values.eventDate} value={values.eventTime} onValueChange={time => patch({ eventTime: time })} /></Field>
               <Field label="Lugar del evento" id="w-venue" wide help="Donde será la fiesta o reunión principal. La iglesia o el acto formal se configuran en Ceremonia."><input id="w-venue" value={values.venue} maxLength={160} placeholder="Nombre del salón, jardín o lugar" onChange={e => patch({ venue: e.target.value })} /></Field>
               <Field label="Dirección" id="w-address" wide help="Texto que aparecerá en la invitación: calle, número y ciudad."><input id="w-address" value={values.address} maxLength={240} placeholder="Calle, número, colonia y ciudad" onChange={e => patch({ address: e.target.value })} /></Field>
               {primaryLocation && <Field label="Enlace de Google Maps (opcional)" id="w-map" wide help="Pega el enlace de la ubicación exacta. Si lo dejas vacío, buscaremos la dirección escrita."><input id="w-map" type="url" value={primaryLocation.link} maxLength={500} placeholder="https://maps.app.goo.gl/…" onChange={e => changeSection(primaryLocation.id, { link: e.target.value })} /></Field>}

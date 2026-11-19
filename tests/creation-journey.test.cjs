@@ -207,7 +207,8 @@ test('creation skips visual steps and visual block controls while traversing inf
   h.render().submit();
   const ui = h.render();
   assert.equal(h.states[1], 4);
-  assert.ok(ui.find(n => n.props['data-preview-label'] === '¡Vamos a celebrar!'));
+  const countdown = h.states[0].sections.find(section => section.type === 'countdown');
+  assert.ok(ui.find(n => n.props['data-preview-section'] === countdown.id && n.props['data-preview-label'] === countdown.title));
   assert.equal(ui.nodes.some(n => n.type?.displayName === 'SectionQuickActions'), false);
   const inputs = ui.nodes.filter(n => typeof n.type === 'string' && n.type === 'input');
   assert.equal(inputs.some(n => n.props.type === 'file'), false);
@@ -373,7 +374,7 @@ test('new administrative examples traverse information before design and never o
   assert.ok(ui.find(n => hasClass(n, 'guided-review')));
   assert.equal(ui.nodes.some(n => n.type?.displayName === 'InvitationPrivacyFields'), false);
   assert.equal(ui.find(n => n.props['aria-label'] === 'Guardar y continuar al pago'), undefined);
-  assert.ok(ui.find(n => n.props.href === '/admin/disenos/example'));
+  assert.ok(ui.find(n => n.props.href === '/admin/disenos'));
 });
 
 

@@ -13,11 +13,13 @@ test('editable cards have separate information and design links; locked invitati
   if(name.startsWith('@/lib/'))return f.load(name.slice(2)+'.ts');
   return new Proxy({}, {get:()=>()=>null});
  },mod,mod.exports);
- const base={id:'draft',ownerId:'owner',name:'Invitación de prueba',eventType:'birthday',imageUrl:null,eventDate:null,paidAt:null,expiresAt:null,status:'DRAFT',slug:null,customSlug:null,updatedAt:new Date('2026-11-10')};
+ const base={id:'draft',ownerId:'owner',name:'Invitación de prueba',eventType:'birthday',imageUrl:null,eventDate:null,paidAt:null,expiresAt:null,status:'DRAFT',slug:null,customSlug:null,updatedAt:new Date('2026-11-10'),draftLastSavedAt:new Date('2026-11-10T12:00:00Z')};
  const events=[base,{...base,id:'published',status:'PUBLISHED',slug:'publicada',paidAt:new Date(),expiresAt:new Date('2099-01-01')},{...base,id:'locked',status:'REFUNDED',paidAt:new Date()}];
  const view=mod.exports.DashboardContent({ownerId:'owner',now:new Date('2026-11-10').getTime(),userName:'Prueba',userEmail:'test@example.invalid',events});
  const nodes=node=>Array.isArray(node)?node.flatMap(nodes):node?.props?[node,...nodes(node.props.children)]:[];
  const all=nodes(view);
+ const retention=all.filter(n=>n.props.className==='dashboard-draft-retention');
+ assert.equal(retention.length,0);
  for(const id of ['draft','published']){
   assert.ok(all.some(n=>n.props.href===`/dashboard/eventos/${id}`&&n.props['aria-label']==='Editar información: Invitación de prueba'));
   assert.ok(all.some(n=>n.props.href===`/dashboard/eventos/${id}/show?from=dashboard`&&n.props.target==='_blank'&&n.props['aria-label']==='Editar diseño: Invitación de prueba'));

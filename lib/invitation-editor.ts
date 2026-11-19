@@ -60,6 +60,11 @@ export class EditorSaveFailure extends Error {
 }
 export const EDITOR_AUTOSAVE_DELAY = 1500;
 export const EDITOR_DRAFT_LIFETIME = 7 * 24 * 60 * 60 * 1000;
+export const EDITOR_IMAGE_CLEANUP_LIMIT = 256;
+export function isDiscardedImageUrls(value: unknown): value is string[] {
+  return Array.isArray(value) && value.length <= EDITOR_IMAGE_CLEANUP_LIMIT
+    && value.every(url => typeof url === "string" && url.length <= 1000);
+}
 export const editorDraftPrefix = (ownerId: string, scope: string) => `cheetahinvite:editor:v1:${ownerId}:${scope || "new"}:`;
 export const validCreationKey = (key: string) => /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(key);
 
@@ -84,6 +89,7 @@ export function editorFormData(snapshot: string, version: number, creationKey = 
 export type EditorDraftRecord = {
   schema: 1; ownerId: string; eventId: string; creationKey: string; snapshot: string; version: number;
   updatedAt: number; wizard: EditorWizard; key?: string; privacyVersion?: number;
+  discardedImageUrls?: string[];
 };
 
 // Local storage is untrusted and may contain obsolete or partially written records.
@@ -93,6 +99,7 @@ export function parseEditorDraft(raw: string | null, ownerId: string, scope: str
   try {
     const record = JSON.parse(raw) as EditorDraftRecord;
     if (record.schema !== 1 || record.ownerId !== ownerId || (scope && record.eventId !== scope)
+      || (record.discardedImageUrls !== undefined && !isDiscardedImageUrls(record.discardedImageUrls))
       || typeof record.eventId !== "string" || (record.eventId && !/^[a-zA-Z0-9_-]{1,80}$/.test(record.eventId))
       || !validCreationKey(record.creationKey) || !Number.isSafeInteger(record.version) || record.version < 0
       || (record.privacyVersion !== undefined && (!Number.isSafeInteger(record.privacyVersion) || record.privacyVersion < 0))

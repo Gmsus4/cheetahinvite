@@ -8,7 +8,7 @@ const React = require('react');
 
 function fixture() {
   const cache = new Map();
-  const f = { calls: [], navigations: [], mocks: new Map(), headers: { host: 'site.test', 'x-forwarded-proto': 'https' },
+  const f = { calls: [], navigations: [], messages: [], mocks: new Map(), headers: { host: 'site.test', 'x-forwarded-proto': 'https' },
     result: { ok: true, url: 'https://site.test/dashboard' }, registrationOk: true };
   class FormDataMock {
     constructor(values) { this.values = values; }
@@ -24,7 +24,7 @@ function fixture() {
     function requireMock(name) {
       if (f.mocks.has(name)) return f.mocks.get(name);
       if (name === 'server-only' || name.endsWith('.css')) return {};
-      if (name === 'react') return { ...React, useState: initial => [initial, () => {}] };
+      if (name === 'react') return { ...React, useState: initial => [initial, value => f.messages.push(value)] };
       if (name === 'next/headers') return { headers: async () => new Headers(f.headers) };
       if (name === 'next/server') return { connection: async () => {} };
       if (name === 'next/navigation') return {
@@ -121,6 +121,18 @@ test('credential login returns to the requested invitation and keeps errors on t
   f.result = { error: 'CredentialsSignin' };
   await LoginForm({ redirectTo: '/crear' }).props.onSubmit(submission());
   assert.deepEqual(f.navigations, [destination]);
+});
+
+test('login shows rate limiting and temporary unavailability without redirecting', async () => {
+  const f = fixture();
+  const { LoginForm } = f.load('components/login/LoginForm.tsx');
+  f.result = { error: 'CredentialsSignin', code: 'too_many_attempts' };
+  await LoginForm({ redirectTo: '/crear' }).props.onSubmit(submission());
+  assert.ok(f.messages.includes('Demasiados intentos de acceso. Espera 15 minutos e inténtalo de nuevo.'));
+  f.result = { error: 'CredentialsSignin', code: 'temporarily_unavailable' };
+  await LoginForm({ redirectTo: '/crear' }).props.onSubmit(submission());
+  assert.ok(f.messages.includes('El acceso no está disponible por el momento. Inténtalo de nuevo más tarde.'));
+  assert.equal(f.navigations.length, 0);
 });
 
 test('registration keeps its destination on success and if automatic sign-in requires retry', async () => {

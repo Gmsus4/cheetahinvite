@@ -80,6 +80,12 @@ de 24 horas. Las reservas duran diez minutos. Las escrituras R2 son condicionale
 para impedir sobrescrituras; los reintentos no duplican reservas ni prolongan leases.
 Una operación fallida sigue ocupando cupo hasta confirmar el borrado.
 
+Al guardar, el editor también envía las fotos descartadas durante esa edición,
+incluidas las reemplazadas antes del primer guardado. Solo esas cargas temporales
+sin referencias pasan a la cola de limpieza; las de otras pestañas conservan su
+plazo. La lista se conserva en la copia local para recuperarla tras una recarga.
+Las cargas abandonadas sin guardar mantienen el vencimiento de 24 horas.
+
 La escritura se serializa con guardados, eliminación del evento y limpieza.
 Se comprueban referencias de portada, fondo, galerías, secciones desactivadas y
 ejemplos publicados. La limpieza mantiene reclamaciones con lease y reintentos.

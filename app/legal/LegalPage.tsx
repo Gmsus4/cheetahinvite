@@ -3,6 +3,7 @@ import { FiArrowUp, FiArrowUpRight, FiClock, FiFileText } from "react-icons/fi";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { auth } from "@/auth";
+import { LEGAL_OPERATOR } from "@/lib/legal";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import "./legal.css";
 
@@ -47,9 +48,8 @@ export function LegalPage({
         </nav>
       </aside>
       <article className="legal-document" aria-label={title}>
-        {/* <div className="legal-notice"><strong>Antes de publicar:</strong> completa los campos señalados como <code>[POR DEFINIR]</code> con información real de la persona o empresa que opera Cheetah Invite. Este borrador no sustituye una revisión legal.</div> */}
         {sections.map((section, index) => <section className="legal-section" id={`seccion-${index + 1}`} key={section.title}><span className="legal-section-number">SECCIÓN {String(index + 1).padStart(2, "0")}</span><h2>{section.title}</h2><div>{section.body}</div></section>)}
-        <div className="legal-contact"><strong>¿Necesitas ayuda?</strong><p>Si tienes alguna duda, estamos para orientarte.</p><a href="mailto:cheetahinvite@gmail.com">cheetahinvite@gmail.com <FiArrowUpRight aria-hidden="true" /></a></div>
+        <div className="legal-contact"><strong>¿Necesitas ayuda?</strong><p>Si tienes alguna duda, estamos para orientarte.</p><a href={LEGAL_OPERATOR.emailHref}>{LEGAL_OPERATOR.email} <FiArrowUpRight aria-hidden="true" /></a></div>
       </article>
       </div>
       </div>

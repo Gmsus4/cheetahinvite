@@ -107,7 +107,7 @@ export async function finishImage(ownerId: string, eventId: string, publicId: st
   if (!accepted) throw new ImageStorageError("La invitación cambió durante la carga. Recarga el editor antes de continuar.");
 }
 
-export async function syncImages(tx: Transaction, ownerId: string, eventId: string, previous: Images, next: Images) {
+export async function syncImages(tx: Transaction, ownerId: string, eventId: string, previous: Images, next: Images, discardedImageUrls: string[] = []) {
   await adoptSavedImages(tx, ownerId, eventId, previous);
   const previousUrls = new Set(invitationImageUrls(previous));
   const managed: { publicId: string; url: string }[] = [];
@@ -118,7 +118,12 @@ export async function syncImages(tx: Transaction, ownerId: string, eventId: stri
     if (!isOwnImageUrl(url)) continue;
     const publicId = ownedImageKey(url, ownerId, eventId);
     // Preserve existing external/shared legacy references without claiming ownership.
-    if (!publicId && previousUrls.has(url)) continue;
+    if (!publicId && previousUrls.has(url)) {
+      // A refunded invitation can transfer its saved assets to its replacement.
+      const transferred = await tx.cloudinaryAsset.findFirst({ where: { ownerId, eventId, url, state: "READY" } });
+      if (transferred) managed.push({ publicId: transferred.publicId, url });
+      continue;
+    }
     if (!publicId) throw new ImageStorageError("Usa fotos subidas desde esta invitación.", 400);
     managed.push({ publicId, url });
   }
@@ -141,6 +146,13 @@ export async function syncImages(tx: Transaction, ownerId: string, eventId: stri
   }
   if (ids.length) await tx.cloudinaryAsset.updateMany({ where: { publicId: { in: ids }, ownerId, eventId, state: "READY" }, data: { expiresAt: null } });
   await queueReadyImages(tx, { ownerId, eventId, expiresAt: null, publicId: { notIn: ids } });
+  // Only retire temporary uploads explicitly discarded by this editor. Other tabs'
+  // uploads keep their lease, and images still used anywhere in this save stay live.
+  const discardedIds = discardedImageUrls.flatMap(url => {
+    const id = ownedImageKey(url, ownerId, eventId);
+    return id ? [id] : [];
+  });
+  if (discardedIds.length) await queueReadyImages(tx, { ownerId, eventId, expiresAt: { not: null }, publicId: { in: discardedIds, notIn: ids } });
 }
 
 async function queueReadyImages(tx: Transaction, where: Prisma.CloudinaryAssetWhereInput) {
@@ -158,6 +170,18 @@ export async function queueEventImages(tx: Transaction, ownerId: string, eventId
     state: "DELETE_PENDING",
     // An upload may still be in flight. Do not destroy before it can arrive.
     nextAttemptAt: asset.expiresAt,
+  } });
+}
+
+export async function transferSavedImages(tx: Transaction, ownerId: string, eventId: string, replacementId: string, event: Images) {
+  await adoptSavedImages(tx, ownerId, eventId, event);
+  const urls = new Set(invitationImageUrls(event));
+  const assets = await tx.cloudinaryAsset.findMany({ where: { ownerId, eventId } });
+  const saved = assets.filter(asset => asset.url && urls.has(asset.url));
+  if (saved.some(asset => asset.state !== "READY")) throw new ImageStorageError("Una foto está en proceso de limpieza. Inténtalo de nuevo o contacta con soporte.");
+  await queueEventImages(tx, ownerId, eventId, event);
+  await tx.cloudinaryAsset.updateMany({ where: { ownerId, eventId, publicId: { in: saved.map(asset => asset.publicId) } }, data: {
+    eventId: replacementId, state: "READY", expiresAt: null, nextAttemptAt: null,
   } });
 }
 

@@ -11,7 +11,7 @@ function fixture({ storageBlocked = false, mobile = false, missingPhoto = false 
   const slots = [], effects = [], cleanups = [], records = new Map(), calls = [];
   let cursor = 0, effectCursor = 0, driverConfig, focused = 0, loadingFailure = false;
   const listeners = new Map();
-  const root = { dataset: {}, querySelector: selector => missingPhoto && (selector.includes('cover-photo') || selector.includes('block-photo')) ? null : ({ selector }) };
+  const root = { dataset: {}, querySelector: selector => missingPhoto && (selector.includes('cover-photo') || selector.includes('block-photo') || selector.includes('photo-focus') || selector.includes('photo-format') || selector.includes('block-photo-border')) ? null : ({ selector }) };
   const trigger = { closest: () => root, focus: () => focused++ };
   const window = {
     scrollY: 130, innerHeight: 640, scrollTo: position => calls.push(['restore', position]), scrollBy: position => calls.push(['scroll', position]),
@@ -57,14 +57,24 @@ const flush = async () => { for (let i = 0; i < 20; i++) await Promise.resolve()
 
 test('tour targets each block icon, location and help and distinguishes saving from publication', () => {
   const steps = invitationEditorTourSteps(defaults);
-  assert.equal(steps.length, 13);
-  assert.equal(new Set(steps.map(step => step.element)).size, 13);
+  assert.equal(steps.length, 19);
+  assert.equal(new Set(steps.map(step => step.element)).size, 19);
   assert.equal(steps[0].element, '.wa-cover-heading');
   assert.match(steps[0].popover.description, /formada por bloques/);
   const message = (steps, anchor) => steps.find(step => step.element === `[data-tour="${anchor}"]`).popover.description;
-  assert.deepEqual(steps.slice(1,5).map(step => step.element), ['block-edit','block-style','block-alignment','block-visibility'].map(anchor => `[data-tour="${anchor}"]`));
+  assert.deepEqual(steps.slice(1,4).map(step => step.element), ['block-edit','block-style','block-alignment'].map(anchor => `[data-tour="${anchor}"]`));
   assert.match(message(steps, 'block-visibility'), /Conservaremos su contenido/);
   assert.match(message(steps, 'block-style'), /Automático/);
+  assert.match(message(steps, 'block-background-color'), /Los cinco tonos de tu imagen/);
+  assert.match(message(steps, 'block-text-color'), /Color del texto.*Apariencia/);
+  assert.deepEqual(steps.slice(4, 8).map(step => step.element), ['block-background-color', 'block-text-color', 'block-content-border', 'block-photo-border'].map(anchor => `[data-tour="${anchor}"]`));
+  assert.match(steps[8].popover.title, /galería/);
+  assert.deepEqual(steps.slice(9, 12).map(step => step.element), ['photo-focus', 'photo-format', 'block-visibility'].map(anchor => `[data-tour="${anchor}"]`));
+  assert.match(message(steps, 'block-content-border'), /Por defecto, Más espacio o Sin espacio/);
+  assert.match(message(steps, 'block-photo-border'), /independiente/);
+  assert.match(message(steps, 'photo-focus'), /se guardan por separado/);
+  assert.match(message(steps, 'photo-format'), /cuadrado, rectangular o la proporción/);
+  assert.match(message(steps, 'photo-format'), /Mostrar completa conserva toda la foto/);
   assert.match(message(steps, 'location'), /Google Maps/);
   assert.match(message(steps, 'help'), /repetir este recorrido/);
   assert.match(message(steps, 'save'), /todavía no publica/);
@@ -79,11 +89,27 @@ test('tour targets each block icon, location and help and distinguishes saving f
   assert.doesNotMatch(message(dashboard,'back'),/continuar al pago/);
 });
 
+test('mobile explains both colors through More and includes the photo tools', () => {
+  const steps = invitationEditorTourSteps({ ...defaults, mobile: true });
+  const colors = steps.filter(step => /La gota:|La T:/.test(step.popover.title));
+  assert.equal(colors.length, 2);
+  for (const step of colors) {
+    assert.equal(step.element, '[data-tour="block-more"]');
+    assert.match(step.popover.description, /En Más, busca/);
+  }
+  for (const anchor of ['photo-focus', 'photo-format']) {
+    assert.ok(steps.some(step => step.element === `[data-tour="${anchor}"]`));
+  }
+  const border = steps.find(step => step.popover.title.startsWith('Bordes del contenido:'));
+  assert.equal(border.element, '[data-tour="block-more"]');
+  assert.match(border.popover.description, /En Más/);
+});
+
 test('welcome appears once per account, manual help replays the tour, and closing restores focus and scroll', async t => {
   const f = fixture(); t.after(() => f.cleanup());
   assert.ok(f.render().welcome);
   f.render().help.props.onClick(); await flush();
-  assert.equal(f.config.steps.length, 13);
+  assert.equal(f.config.steps.length, 19);
   assert.equal(f.config.disableActiveInteraction, true);
   assert.equal(f.config.animate, false);
   assert.equal(f.config.closeBtnLabel, 'Salir del recorrido');
@@ -102,7 +128,7 @@ test('welcome appears once per account, manual help replays the tour, and closin
 test('mobile keeps the target above the bottom card and skips missing targets', async t => {
   const f = fixture({ mobile: true, missingPhoto: true }); t.after(() => f.cleanup());
   f.render().help.props.onClick(); await flush();
-  assert.equal(f.config.steps.length, 10);
+  assert.equal(f.config.steps.length, 13);
   assert.ok(f.config.steps.some(step=>step.element?.selector==='[data-tour="block-more"]'));
   assert.ok(!f.config.steps.some(step=>/block-style|block-alignment|block-visibility/.test(step.element?.selector)));
   f.config.onHighlighted({ closest: () => null, getBoundingClientRect: () => ({ top: 300, bottom: 380 }) });

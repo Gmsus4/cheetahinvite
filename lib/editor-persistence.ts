@@ -1,11 +1,12 @@
-import { EDITOR_AUTOSAVE_DELAY, EditorSaveFailure, editorDraftPrefix, parseEditorDraft, type EditorDraftRecord, type EditorSaveResult, type EditorWizard } from "@/lib/invitation-editor";
+import { EDITOR_AUTOSAVE_DELAY, EDITOR_IMAGE_CLEANUP_LIMIT, EditorSaveFailure, editorDraftPrefix, parseEditorDraft, type EditorDraftRecord, type EditorSaveResult, type EditorValues, type EditorWizard } from "@/lib/invitation-editor";
 import { redactEditorPin } from "@/lib/invitation-privacy";
+import { invitationImageUrls } from "@/lib/invitation-images";
 
 type Options = {
   ownerId: string; eventId: string; snapshot: string; version: number; creation: boolean; manualOnly: boolean;
   privacyVersion?: number;
   initialChanges?: { snapshot: string; version: number; privacyVersion?: number; sessionId?: string };
-  save(snapshot: string, version: number, automatic: boolean, privacyVersion: number): Promise<EditorSaveResult>;
+  save(snapshot: string, version: number, automatic: boolean, privacyVersion: number, discardedImageUrls: string[]): Promise<EditorSaveResult>;
 };
 type Browser = { storage: Storage | null; uuid(): string; now(): number; online(): boolean };
 export type EditorPersistenceState = {
@@ -37,6 +38,7 @@ export class EditorPersistence {
   private failedSnapshot = "";
   private retryDelay = 10_000;
   private creationComplete = false;
+  private discardedImageUrls = new Set<string>();
 
   constructor(private options: Options) {
     this.snapshot = options.initialChanges?.snapshot ?? options.snapshot;
@@ -57,6 +59,14 @@ export class EditorPersistence {
   getCreationKey = () => this.creationKey;
   private patch(changes: Partial<EditorPersistenceState>) { this.state = { ...this.state, ...changes }; for (const listener of this.listeners) listener(); }
   private clearTimer() { if (this.timer) clearTimeout(this.timer); this.timer = undefined; }
+  private rememberRemovedImages(previous: string, next: string) {
+    const retained = new Set(invitationImageUrls(JSON.parse(next) as EditorValues));
+    for (const url of invitationImageUrls(JSON.parse(previous) as EditorValues)) {
+      if (!retained.has(url) && url.length <= 1000) this.discardedImageUrls.add(url);
+    }
+    // Older abandoned uploads still have the server's 24-hour expiry as a fallback.
+    this.discardedImageUrls = new Set([...this.discardedImageUrls].slice(-EDITOR_IMAGE_CLEANUP_LIMIT));
+  }
   isDirty = () => this.snapshot !== this.state.acknowledged || this.state.code === "conflict";
   shouldWarn = () => this.isDirty() || this.uploading || this.state.saving;
 
@@ -102,6 +112,7 @@ export class EditorPersistence {
   update(snapshot: string, uploading: boolean, wizard: EditorWizard, manualOnly: boolean) {
     const changed = snapshot !== this.snapshot;
     const uploadChanged = uploading !== this.uploading;
+    if (changed) this.rememberRemovedImages(this.snapshot, snapshot);
     this.snapshot = snapshot; this.uploading = uploading; this.wizard = wizard;
     if (manualOnly && !this.state.manualOnly) this.patch({ manualOnly: true });
     if (changed && this.state.code === "validation") this.patch({ error: "", code: "" });
@@ -115,7 +126,7 @@ export class EditorPersistence {
     try {
       if (!this.browser.storage) throw new Error("Storage unavailable");
       if (needed) {
-        const record: EditorDraftRecord = { schema: 1, ownerId: this.options.ownerId, eventId: this.eventId, creationKey: this.creationKey, snapshot: redactEditorPin(this.snapshot, this.state.acknowledged), version: this.version, privacyVersion: this.privacyVersion, wizard: this.wizard, updatedAt: this.browser.now() };
+        const record: EditorDraftRecord = { schema: 1, ownerId: this.options.ownerId, eventId: this.eventId, creationKey: this.creationKey, snapshot: redactEditorPin(this.snapshot, this.state.acknowledged), version: this.version, privacyVersion: this.privacyVersion, wizard: this.wizard, updatedAt: this.browser.now(), discardedImageUrls: [...this.discardedImageUrls] };
         this.browser.storage.setItem(this.recordKey, JSON.stringify(record));
         if (!this.state.local) this.patch({ local: true });
       } else {
@@ -128,6 +139,7 @@ export class EditorPersistence {
     const record = this.state.recovery;
     if (!record) return null;
     this.restoredKey = record.key;
+    this.discardedImageUrls = new Set(record.discardedImageUrls ?? []);
     this.snapshot = record.snapshot; this.eventId = record.eventId; this.creationKey = record.creationKey; this.wizard = record.wizard;
     const privacyConflict = record.privacyVersion !== undefined && record.privacyVersion !== this.privacyVersion;
     const conflictVersion = record.version !== this.version || privacyConflict ? this.version : undefined;
@@ -146,6 +158,7 @@ export class EditorPersistence {
   discardChanges(snapshot = this.state.acknowledged) {
     if (this.flight || this.uploading || this.state.recovery) return false;
     this.clearTimer();
+    this.rememberRemovedImages(this.snapshot, snapshot);
     this.snapshot = snapshot;
     this.failedSnapshot = "";
     // Keep conflict information while earlier unsaved edits still need saving.
@@ -198,14 +211,17 @@ export class EditorPersistence {
       this.backup(); return unavailable();
     }
     const submitted = this.snapshot;
+    const discardedImageUrls = [...this.discardedImageUrls];
     const version = this.version;
     const privacyVersion = this.privacyVersion;
     this.backup(); this.patch({ saving: true, error: "" });
     const flight = Promise.resolve().then(async () => {
       let result: EditorSaveResult;
-      try { result = await this.options.save(submitted, version, automatic, privacyVersion); }
+      try { result = await this.options.save(submitted, version, automatic, privacyVersion, discardedImageUrls); }
       catch (error) { result = error instanceof EditorSaveFailure ? error.result : unavailable(); }
       if (result.ok) {
+        for (const url of discardedImageUrls) this.discardedImageUrls.delete(url);
+        this.rememberRemovedImages(submitted, this.snapshot);
         this.version = result.version; this.eventId = result.eventId; this.retryDelay = 10_000;
         this.privacyVersion = result.privacyVersion ?? this.privacyVersion;
         this.patch({ acknowledged: submitted, lastSaved: true, code: "", error: "", conflictVersion: undefined, conflictPrivacyVersion: undefined });

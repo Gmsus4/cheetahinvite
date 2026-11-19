@@ -923,7 +923,12 @@ test('mobile framing reaches the cover, attached photos and carousel without cha
  for (const coverLayout of ['split', 'split-reverse', 'stacked', 'overlay']) {
   const html = renderToStaticMarkup(React.createElement(CelebrationInvitation, {...props,coverLayout}));
   assert.match(html, /class="wa-portrait" data-mobile-image-focus="top" data-desktop-image-focus="bottom"/);
-  assert.equal((html.match(/class="wa-section-media" data-mobile-image-focus="bottom"/g) || []).length, 2);
+  const media = html.match(/<div\b[^>]*\bclass="wa-section-media"[^>]*>/g) || [];
+  assert.equal(media.length, 2);
+  for (const photo of media) {
+    assert.match(photo, /\bdata-mobile-image-focus="bottom"/);
+    assert.match(photo, /\bdata-desktop-image-focus="top"/);
+  }
   assert.match(html, /data-photo-position="before"/);
   assert.equal((html.match(/data-mobile-image-focus="bottom" data-desktop-image-focus="top"/g) || []).length, 2);
   assert.match(html, /wa-carousel-slide/);
@@ -997,7 +1002,9 @@ test('photo and content margins are independently editable and rendered on their
     const sections=[{...section,textMargin,photoMargin},{...section,id:'cover',type:'cover',textMargin,photoMargin}];
     const html=renderToStaticMarkup(React.createElement(CelebrationInvitation,{...base,sections}));
     assert.match(html,new RegExp('class="wa-panel wa-section wa-story" data-margin="'+textMargin+'"'));
-    assert.match(html,new RegExp('class="wa-section-media" data-photo-margin="'+photoMargin+'"'));
+    const [media] = html.match(/<div\b[^>]*\bclass="wa-section-media"[^>]*>/g) || [];
+    assert.ok(media);
+    assert.match(media,new RegExp('\\bdata-photo-margin="'+photoMargin+'"'));
     assert.match(html,new RegExp('class="wa-cover-heading" data-margin="'+textMargin+'"'));
     assert.match(html,new RegExp('class="wa-portrait" data-photo-margin="'+photoMargin+'"'));
     assert.doesNotMatch(html,/class="wa-section-row" data-margin=/);

@@ -92,29 +92,45 @@ function editor(t, { creation = true, exampleId, privacy = 'PUBLIC', privacyVers
   return f;
 }
 
-test('continuing a new invitation saves its information and opens /show without leaving creation', async t => {
+test('saving through the guided editor removes a cover replaced before the first save', async t => {
+  const f = editor(t, { creation: false });
+  const upload = () => f.db.client.uploadInvitationImage(new File(['photo'], 'photo.png', { type: 'image/png' }), 'event');
+  const original = await upload();
+  f.states[0] = { ...f.states[0], imageUrl: original }; f.render();
+  const background = await upload();
+  f.states[0] = { ...f.states[0], backgroundImageUrl: background }; f.render();
+  const replacement = await upload();
+  f.states[0] = { ...f.states[0], imageUrl: replacement }; f.render();
+  await f.click();
+  assert.equal(f.controller.isDirty(), false);
+  await Promise.all(f.db.jobs.map(job => job()));
+  assert.deepEqual([...f.db.state.assets.values()].map(asset => asset.url).sort(), [background, replacement].sort());
+  assert.equal(f.db.providerAssets.size, 2);
+});
+
+test('a new invitation edits its design inline and continues to review without saving or opening a tab', async t => {
   for (const mobile of [false, true]) {
     const f = editor(t, { mobile }); f.states[1] = 5;
     f.states[0] = { ...f.states[0], hostNames: 'Alex y Sam', eventDate: '2027-01-15', eventTime: '18:00', venue: 'Salón', address: 'Calle' };
     f.changeName('Mi invitación para personalizar');
-    const [previewButton] = nodes(f.view, node => node.props?.['aria-label'] === 'Editar diseño en una nueva pestaña');
-    assert.equal(previewButton.props.disabled, false);
-    previewButton.props.onClick(); await f.flush();
-    const id = f.controller.getEventId();
-    const url = new URL(f.windows[0].href, 'https://example.invalid');
-    assert.equal(url.pathname, `/dashboard/eventos/${id}/show`);
-    const { invitationPreviewKey, parseInvitationPreview } = f.db.load('lib/invitation-preview.ts');
-    const preview = parseInvitationPreview(f.storage.getItem(invitationPreviewKey('owner', id, url.searchParams.get('preview'))), 'owner', id);
-    assert.equal(JSON.parse(preview.snapshot).name, 'Mi invitación para personalizar');
-    assert.equal(preview.creationFlow, true);
-    assert.equal(f.saveCalls, 1); assert.equal(f.publications, 0);
-    assert.equal(f.db.state.events.get(id).status, 'DRAFT');
-    assert.equal(f.db.state.events.get(id).contentVersion, 1);
-    assert.equal(f.db.state.events.size, 2);
-    assert.equal(JSON.parse(f.controller.getSnapshot().acknowledged).name, 'Mi invitación para personalizar');
-    assert.equal(nodes(f.view, node => node.props?.expanded && node.props.fitViewport).length, 0);
-    assert.equal(f.states[0].name, 'Mi invitación para personalizar'); assert.equal(f.states[1], 5);
-    assert.equal(f.routes.some(([, href]) => href.includes('/show')), false);
+    assert.equal(nodes(f.view, node => node.props?.['aria-label'] === 'Editar diseño en una nueva pestaña').length, 0);
+    const [design] = nodes(f.view, node => node.type?.name === 'InvitationStyleJourney' && node.props.compact);
+    assert.ok(design);
+    design.props.onChange({ accent: '#123456' }); f.render();
+    const [preview] = nodes(f.view, node => node.type?.name === 'CreationInvitationPreview');
+    assert.equal(preview.props.values.accent, '#123456');
+    for (let step = 0; step < 5; step++) {
+      nodes(f.view, node => node.type === 'form')[0].props.onSubmit({ preventDefault() {} });
+      f.render();
+    }
+    await f.flush();
+    assert.equal(f.states[1], 6);
+    assert.equal(f.states[0].name, 'Mi invitación para personalizar');
+    assert.equal(f.states[0].accent, '#123456');
+    assert.equal(f.saveCalls, 0); assert.equal(f.publications, 0);
+    assert.equal(f.db.state.events.size, 1);
+    assert.equal(f.controller.shouldWarn(), true);
+    assert.deepEqual(f.windows, []); assert.deepEqual(f.routes, []);
   }
 });
 
@@ -130,13 +146,19 @@ test('editing information omits design tools while preserving pending content an
   assert.equal(f.saveCalls,0);assert.equal(f.windows.length,0);
 });
 
-test('an expired creation session closes the preview tab and keeps the sign-in recovery action', async t => {
+test('an expired creation session keeps inline design edits and offers sign-in recovery when saving', async t => {
   const f = editor(t); f.states[1] = 5;
   f.states[0] = { ...f.states[0], hostNames: 'Alex y Sam', eventDate: '2027-01-15', eventTime: '18:00', venue: 'Salón', address: 'Calle' };
   f.changeName('Sin perder'); f.db.owner = null;
-  nodes(f.view, node => node.props?.['aria-label'] === 'Editar diseño en una nueva pestaña')[0].props.onClick(); await f.flush();
-  assert.equal(f.windows[0].closed, true); assert.deepEqual(f.routes, []); assert.equal(f.saveCalls, 0);
+  nodes(f.view, node => node.type?.name === 'InvitationStyleJourney')[0].props.onChange({ accent: '#123456' }); f.render();
+  await f.click();
+  assert.deepEqual(f.windows, []); assert.deepEqual(f.routes, []); assert.equal(f.saveCalls, 0);
   assert.equal(f.controller.getSnapshot().code, 'auth'); assert.equal(f.states[0].name, 'Sin perder');
+  assert.equal(f.states[0].accent, '#123456');
+  const [signIn] = nodes(f.view, node => node.props?.href?.startsWith('/login'));
+  assert.ok(signIn);
+  assert.equal(new URL(signIn.props.href, 'https://example.invalid').searchParams.get('callbackUrl'), '/crear');
+  assert.ok(f.storage.length > 0);
 });
 
 test('draft and live edit actions clearly distinguish saving from publishing', async t => {
@@ -224,10 +246,14 @@ test('session expiry and conflicts retain edits instead of navigating away', asy
 });
 
 test('uploading disables save-and-exit and neither saves nor leaves', async t => {
-  const f = editor(t); f.states[7] = 1; f.render();
+  const f = editor(t); f.states[1] = 2; f.render();
+  const [upload] = nodes(f.view, node => node.type?.name === 'InvitationImageUpload');
+  upload.props.onBusyChange(true); f.render();
   assert.equal(f.button().props.disabled, true);
   await f.click();
   assert.equal(f.saveCalls, 0); assert.equal(f.routes.length, 0);
+  upload.props.onBusyChange(false); f.render();
+  assert.equal(f.button().props.disabled, false);
 });
 
 test('saving waits for confirmation, blocks repeated clicks and exits to the requested destination', async t => {
@@ -258,7 +284,7 @@ test('the status distinguishes device copies, saved account content and an untou
 test('example editors save and return to their own administration instead of the customer dashboard', async t => {
   const f = editor(t, { creation: false, exampleId: 'example' });
   f.changeName('Ejemplo actualizado'); await f.click();
-  assert.deepEqual(f.routes.at(-1), ['push', '/admin/disenos/example']);
+  assert.deepEqual(f.routes.at(-1), ['push', '/admin/disenos']);
 });
 
 test('the leave dialog offers save, stay and unsaved exit and protects an active save from Escape', () => {

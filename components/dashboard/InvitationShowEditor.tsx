@@ -1,5 +1,6 @@
 "use client";
 import { InvitationDateInput } from "./InvitationDateInput";
+import { InvitationTimeInput } from "./InvitationTimeInput";
 
 import { invitationSectionLabels } from "@/lib/invitation-sections";
 
@@ -52,8 +53,9 @@ export function InvitationShowEditor({ event, returnLink, initialChanges, onSave
   const { controller, state, confirmNavigation, navigation } = useEditorProtection({
     ownerId: event.ownerId, eventId: event.id, snapshot: JSON.stringify(savedValues), version: event.contentVersion, privacyVersion: event.privacyVersion ?? 0, creation: false, manualOnly: true,
     initialChanges: initialChanges ? { ...initialChanges, snapshot: JSON.stringify(incomingValues) } : undefined,
-    save: async (submitted, version) => {
+    save: async (submitted, version, automatic, privacyVersion, discardedImageUrls) => {
       const data = editorFormData(submitted, version);
+      data.set("discardedImageUrls", JSON.stringify(discardedImageUrls));
       data.delete("customSlug");
       data.delete("privacy"); data.delete("pin"); data.delete("pinPending");
       return updateEvent(event.id, data);
@@ -286,7 +288,7 @@ function DateFields({ values, patch, expiresAt, isExample }: { values: EditorVal
   return <div className={styles.dateFields}>
     {!isExample && <InvitationDateNotice date={values.eventDate} time={values.eventTime} expiresAt={expiresAt} />}
     <Field label="Fecha" id="show-date"><InvitationDateInput id="show-date" value={values.eventDate} onValueChange={date => patch({ eventDate: date, ...(!date ? { eventTime: "" } : {}) })} /></Field>
-    <Field label="Hora" id="show-time"><input id="show-time" type="time" disabled={!values.eventDate} value={values.eventTime} onChange={e => patch({ eventTime: e.target.value })} /></Field>
+    <Field label="Hora" id="show-time"><InvitationTimeInput id="show-time" disabled={!values.eventDate} value={values.eventTime} onValueChange={time => patch({ eventTime: time })} /></Field>
   </div>;
 }
 

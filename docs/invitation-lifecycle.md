@@ -47,10 +47,25 @@ presupuestos, sesiones PIN y enlaces); las fotos se encolan en la misma
 transacción. La cola sobrevive al evento y reintenta los fallos del proveedor.
 Los registros de compras se conservan independientemente.
 
-Los borradores sin compra y los ejemplos están excluidos. Las invitaciones
-suspendidas o reembolsadas también se eliminan al cumplir su fecha de conservación.
+Los ejemplos están excluidos. Los borradores sin compra y sin cortesía, en estado
+`DRAFT` o `PENDING_PAYMENT`, se eliminan después de seis meses naturales desde
+`draftLastSavedAt`. Inicialmente es la fecha de creación; únicamente guardar cambios
+reales de contenido, diseño o privacidad reinicia el plazo. Abrir el editor, iniciar
+sesión, guardar valores idénticos, subir fotos sin guardarlas o consultar pagos no
+lo reinicia. La migración `20261118000002_draft_retention` usa `updatedAt` como
+última actividad conocida de registros anteriores. Los ajustes de la invitación muestran la fecha
+de eliminación en Ciudad de México. Los avisos por correo de 30 y 7 días quedan
+pendientes y no se envían en esta versión.
+
+Los borradores usan la misma conciliación previa de pagos, relectura bajo bloqueo,
+eliminación en cascada, liberación de espacio y cola de imágenes que las publicaciones.
+Si hay un intento pendiente sin resolver o falla su verificación se conservan para
+reintentar. Cada ejecución examina hasta diez publicaciones y diez borradores,
+con un presupuesto compartido de treinta segundos para estas eliminaciones.
+
+Las invitaciones suspendidas o reembolsadas también se eliminan al cumplir su fecha de conservación.
 Las cortesías conservan su vencimiento otorgado y el mismo mes de archivo.
-Ante un pago pendiente se consulta Stripe primero. Si la verificación falla, la
+Ante un pago pendiente se consulta al proveedor correspondiente primero. Si la verificación falla, la
 invitación se conserva y la ruta devuelve 500 para reintentar. La eliminación
 ocurre en la siguiente ejecución exitosa después del límite, sin requerir visitas.
 El repositorio contiene el Worker; desplegar la app no activa por sí solo su cron.
@@ -64,6 +79,13 @@ la política independiente de cierre de cuentas o retención del historial comer
 comprueba fechas límite, años bisiestos, permisos, renovaciones idempotentes,
 avisos atrasados, eliminación y conservación ante fallos de verificación. Usa
 servicios aislados, sin cobros ni eliminación de invitaciones reales.
+
+`node --test tests/draft-retention.test.cjs tests/dashboard-edit-actions.test.cjs`
+verifica seis meses naturales, guardados reales e idénticos, privacidad, pagos
+pendientes, tarjetas del dashboard, liberación de espacio y fotos compartidas.
+`npm run test:postgres` también incluye `tests/draft-retention.postgres.cjs`:
+ejecuta la nueva migración y comprueba eliminación concurrente, cascadas,
+retención de compras y cola duradera en una base local desechable.
 
 `node tests/invitation-lifecycle.postgres.cjs` comprueba bloqueos, renovaciones
 simultáneas, eliminación en cascada y cola de fotos con PostgreSQL real. Crea y

@@ -21,7 +21,7 @@ export function InvitationTerm({ event, now, compact = false }: Props) {
     return () => clearInterval(interval);
   }, [now]);
   const term = invitationLifecycle(event, new Date(clock));
-  if (!term) return null;
+  if (!term || event.status === "REFUNDED") return null;
   return <section className={styles.term} data-compact={compact || undefined} aria-label="Vigencia de la invitación">
     {term.phase === "active" ? <>
       <div className={styles.heading}>

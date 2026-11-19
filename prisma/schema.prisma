@@ -20,9 +20,12 @@ model User {
   passwordResetHash String? @unique
   passwordResetExpiresAt DateTime?
   invitationCount Int       @default(0)
+  createdAt       DateTime? @default(now())
   accounts        Account[]
   sessions        Session[]
   events          Event[]
+
+  @@index([createdAt, id])
 }
 
 enum EventStatus {
@@ -88,6 +91,7 @@ model Event {
   stripeCheckoutSessionId String? @unique
   stripePaymentIntentId String? @unique
   createdAt    DateTime    @default(now())
+  draftLastSavedAt DateTime @default(now())
   updatedAt    DateTime    @updatedAt
   owner        User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   rsvpResponses RsvpResponse[]
@@ -99,6 +103,7 @@ model Event {
 
   @@index([ownerId, status])
   @@index([expiresAt])
+  @@index([draftLastSavedAt])
   @@unique([ownerId, customSlug])
 }
 
@@ -246,6 +251,15 @@ model VerificationToken {
 }
 
 model PasswordRecoveryLimit {
+  key       String   @id
+  count     Int      @default(1)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+// Shared admission counters across Workers; keys contain only scoped HMACs.
+model AuthAttemptBudget {
   key       String   @id
   count     Int      @default(1)
   expiresAt DateTime

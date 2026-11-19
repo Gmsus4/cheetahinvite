@@ -1,7 +1,7 @@
 import "server-only";
 import { prisma } from "@/prisma";
 import { Prisma } from "@/generated/prisma/client";
-import { invitationLifecycle } from "@/lib/invitation-lifecycle";
+import { draftDeletionDate, invitationLifecycle } from "@/lib/invitation-lifecycle";
 import { reconcilePurchase } from "@/lib/payment-reconciliation";
 import { queueEventImages, withImageLock } from "@/lib/image-storage";
 
@@ -16,12 +16,21 @@ export async function runInvitationLifecycle(now = new Date(), limit = 10, owner
   const candidates = await prisma.event.findMany({ where: {
     ...scope, isExample: false, expiresAt: { lte: new Date(now.getTime() - 28 * 86_400_000) }, ...grant,
   }, orderBy: [{ expiresAt: "asc" }, { id: "asc" }], take: limit });
+  const drafts = await prisma.event.findMany({ where: {
+    ...scope, isExample: false, paidAt: null, complimentaryAt: null, status: { in: ["DRAFT", "PENDING_PAYMENT"] },
+    // Broad indexed scan; exact calendar deadline is checked below, including month ends.
+    draftLastSavedAt: { lte: new Date(now.getTime() - 180 * 86_400_000) },
+  }, orderBy: [{ draftLastSavedAt: "asc" }, { id: "asc" }], take: limit });
+  const isDue = (event: Parameters<typeof draftDeletionDate>[0] & Parameters<typeof invitationLifecycle>[0]) => {
+    const deadline = draftDeletionDate(event);
+    return deadline ? deadline <= now : invitationLifecycle(event, now)?.phase === "deletion_due";
+  };
   const result = { archived: archived.count, deleted: 0, retained: 0, failed: 0 };
   const started = Date.now();
-  for (const candidate of candidates) {
+  for (const candidate of [...candidates, ...drafts]) {
     // Leave time for image cleanup in the scheduler's bounded request.
     if (Date.now() - started >= 30_000) break;
-    if (invitationLifecycle(candidate, now)?.phase !== "deletion_due") continue;
+    if (!isDue(candidate)) continue;
     try {
       // Verify ambiguous payments before deleting. Provider errors keep all data
       // for a retry; a delayed successful webhook must not lose a valid renewal.
@@ -38,7 +47,7 @@ export async function runInvitationLifecycle(now = new Date(), limit = 10, owner
       const deleted = await withImageLock(candidate.ownerId, async tx => {
         await tx.$queryRaw(Prisma.sql`SELECT "id" FROM "Event" WHERE "id" = ${candidate.id} FOR UPDATE`);
         const event = await tx.event.findFirst({ where: { id: candidate.id, ownerId: candidate.ownerId, isExample: false } });
-        if (!event || invitationLifecycle(event, now)?.phase !== "deletion_due") return false;
+        if (!event || !isDue(event)) return false;
         const unresolved = await tx.invitationPayment.findFirst({ where: {
           eventId: event.id, ownerId: event.ownerId, status: { in: ["PENDING", "FAILED"] },
         } });

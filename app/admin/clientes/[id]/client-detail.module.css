@@ -1,0 +1,36 @@
+.detail { min-width: 0; }
+.profile { min-width: 0; container-type: inline-size; }
+.profile :global(.admin-heading) { margin-top: 20px; }
+.profile :global(.admin-heading h1),.profile :global(.admin-heading p) { overflow-wrap: anywhere; }
+.detail :global(.admin-section-title) { margin: 22px 0 10px; font-size: 18px; line-height: 1.35; }
+.detail :global(.admin-table-wrap) { margin-bottom: 16px; border-radius: 8px; }
+.detail :global(.admin-table :is(th,td)) { padding: 8px 12px; }
+.detail :global(.admin-table td) { line-height: 1.5; }
+.detail :global(.admin-table td small) { line-height: 1.5; }
+.detail :global(.admin-table .admin-badge) { padding: 3px 7px; border-radius: 6px; }
+.accountSection { padding: 16px 0 20px; border-block: 1px solid var(--line); }
+.accountHeading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 16px; margin-bottom: 16px; }
+.accountHeading h2 { margin: 0; font: 600 15px/1.4 var(--font-poppins),Arial,sans-serif; letter-spacing: -.025em; }
+.accountDetails { display: grid; grid-template-columns: minmax(0,.75fr) minmax(0,.9fr) minmax(0,1.5fr); gap: 16px 24px; margin: 0; }
+.accountDetails > div { min-width: 0; }
+.accountDetails dt { margin-bottom: 7px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+.accountDetails dd { margin: 0; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.accountReference code { color: var(--muted); font-size: 12px; }
+.detail .courtesyLink { min-height: 36px; padding: 7px 10px; border-radius: 8px; font-size: 12px; }
+.courtesyLink svg { color: var(--orange); }
+.eventStatus { display: grid; justify-items: start; gap: 4px; }
+.eventPrivacy { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: 11px; line-height: 1.4; white-space: nowrap; }
+.eventPrivacy svg { width: 12px; height: 12px; flex-shrink: 0; }
+.eventAccess { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 30px; white-space: nowrap; }
+.backLink { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 34px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 12px; line-height: 1.4; text-decoration: none; }
+.detail :global(.admin-table) .publicLink { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 30px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); font-size: 11px; line-height: 1.4; text-decoration: none; }
+.backLink svg { width: 13px; height: 13px; flex-shrink: 0; }
+.publicLink svg { width: 12px; height: 12px; flex-shrink: 0; }
+.backLink:hover,.detail :global(.admin-table) .publicLink:hover { border-color: var(--orange); background: var(--accent-soft); color: var(--orange); }
+@container (max-width: 600px) {
+  .accountDetails { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+  .accountReference { grid-column: 1 / -1; }
+}
+@media (pointer: coarse) {
+  .backLink,.detail .courtesyLink { min-height: 44px; }
+}

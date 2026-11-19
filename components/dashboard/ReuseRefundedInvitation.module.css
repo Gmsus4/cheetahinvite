@@ -1,0 +1,3 @@
+.container { padding-bottom: 24px; }
+.confirmation { display: flex; align-items: flex-start; gap: 10px; line-height: 1.6; }
+.confirmation input[type="checkbox"] { flex: 0 0 18px; width: 18px; height: 18px; min-height: 0; margin: 4px 0 0; padding: 0; accent-color: var(--orange); }

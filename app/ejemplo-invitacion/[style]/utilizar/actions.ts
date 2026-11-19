@@ -7,7 +7,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { authPageHref } from "@/lib/auth-destination";
 import { withImageLock } from "@/lib/image-storage";
 import { validCreationKey } from "@/lib/invitation-editor";
-import { canEditInvitation } from "@/lib/invitation-lifecycle";
+import { canEditInvitation, savedContentChanged } from "@/lib/invitation-lifecycle";
 import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { getShowcaseInvitation } from "@/lib/showcase";
 import { showcaseStyleData } from "@/lib/showcase-style";
@@ -56,6 +56,7 @@ export async function useExampleStyle(style: string, formData: FormData) {
       // All existing photos remain referenced. New shared references come only from the public snapshot.
       const changed = await tx.event.updateMany({ where: { id: event.id, ownerId: session.user.id, contentVersion: version, isExample: false }, data: {
         ...design, imagePalette: design.imagePalette ?? Prisma.DbNull, sections: JSON.parse(JSON.stringify(design.sections)), contentVersion: { increment: 1 },
+        ...(savedContentChanged(event, design) ? { draftLastSavedAt: new Date() } : {}),
       } });
       if (!changed.count) throw new StyleApplicationError("conflict");
       return event.id;
