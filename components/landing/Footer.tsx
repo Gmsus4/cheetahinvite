@@ -1,6 +1,6 @@
 import { BrandEmblem } from "@/components/BrandEmblem";
 import Link from "next/link";
-import { FiArrowUp, FiArrowUpRight, FiMessageCircle } from "react-icons/fi";
+import { FiArrowUp, FiArrowUpRight, FiHelpCircle } from "react-icons/fi";
 
 export function Footer() {
   return (
@@ -26,7 +26,7 @@ export function Footer() {
             <span className="footer-group-label">TE ACOMPAÑAMOS</span>
             <p>¿Una duda antes de empezar?</p>
             <Link className="footer-help-link" href="/ayuda">
-              <span className="footer-help-icon"><FiMessageCircle aria-hidden="true" /></span>
+              <span className="footer-help-icon"><FiHelpCircle aria-hidden="true" /></span>
               Ayuda y soporte <FiArrowUpRight aria-hidden="true" />
             </Link>
           </div>

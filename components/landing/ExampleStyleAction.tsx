@@ -16,7 +16,6 @@ export function ExampleStyleAction({ styleSlug, priceLabel }: { styleSlug: strin
     <div className={styles.spacer} aria-hidden="true" />
     <aside className={styles.bar} aria-label="Opciones de la demostración">
       <div className={styles.demoOptions}>
-        <span className={styles.demoLabel}>Demo</span>
         <Link className={styles.explore} href="/demo">Ver diseños <FiArrowUpRight aria-hidden="true" /></Link>
       </div>
       <Link className={styles.link} href={`/ejemplo-invitacion/${encodeURIComponent(styleSlug)}/utilizar`}>

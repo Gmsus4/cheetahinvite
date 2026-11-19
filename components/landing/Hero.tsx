@@ -1,5 +1,6 @@
 import {
-  FiArrowUpRight,
+  FiArrowRight,
+  FiGrid,
   FiStar,
 } from "react-icons/fi";
 import { HeroInvitationExamples } from "./HeroInvitationExamples";
@@ -27,10 +28,10 @@ export async function Hero() {
         </p>
         <div className="hero-actions">
           <a className="button" href="/crear">
-            Crear mi invitación gratis <span><FiArrowUpRight aria-hidden="true" /></span>
+            Crear mi invitación gratis <span><FiArrowRight aria-hidden="true" /></span>
           </a>
           <a className="text-link" href="/demo">
-            Ver ejemplos <span><FiArrowUpRight aria-hidden="true" /></span>
+            Ver diseños <span><FiGrid aria-hidden="true" /></span>
           </a>
         </div>
       </div>
