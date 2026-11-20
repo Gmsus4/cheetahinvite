@@ -11,9 +11,10 @@ import "./guided-editor.css";
 import "./invitation-atmosphere.css";
 import "./site-typography.css";
 import "./theme.css";
+import "./interface-design.css";
 
 export const metadata: Metadata = {
-  title: "Cheetah Invite — Invitaciones digitales para celebrar",
+  title: "Soccasion — Invitaciones digitales para celebrar",
   description:
     "Crea tu invitación digital para bodas, cumpleaños, graduaciones y más. Personaliza tus fotos, colores y los detalles de tu celebración.",
 };

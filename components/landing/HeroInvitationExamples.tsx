@@ -49,7 +49,7 @@ export function HeroInvitationExamples({ examples, priceLabel }: { examples: Eve
         <span className="hero-example-hint" role="status"><FiCheck aria-hidden="true" /> {selected.label} · datos de ejemplo</span>
       </div>
     </div>
-    <HeroInvitationPhone action={<>
+    <div className="hero-phone-slot"><HeroInvitationPhone action={<>
       <button className="hero-example-arrow hero-example-arrow-prev" type="button" aria-label="Diseño anterior" title="Diseño anterior" aria-controls="hero-invitation-example" disabled={availableExamples.length < 2} onClick={() => changeDesign(-1)}><FiChevronLeft aria-hidden="true" /></button>
       <button className="hero-example-arrow hero-example-arrow-next" type="button" aria-label="Diseño siguiente" title="Diseño siguiente" aria-controls="hero-invitation-example" disabled={availableExamples.length < 2} onClick={() => changeDesign(1)}><FiChevronRight aria-hidden="true" /></button>
       <a
@@ -61,6 +61,6 @@ export function HeroInvitationExamples({ examples, priceLabel }: { examples: Eve
         aria-label={`Ver diseño completo: ${selected.label} (se abre en otra pestaña)`}
       ><FiExternalLink aria-hidden="true" /></a></>}>
       <InvitationExampleFrame key={selected.slug} styleSlug={selected.slug} label={selected.label} viewportHeight={830} hideScrollbar loading="eager" preview />
-    </HeroInvitationPhone>
+    </HeroInvitationPhone></div>
   </>;
 }

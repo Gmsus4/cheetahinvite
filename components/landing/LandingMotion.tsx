@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import styles from "./HomeMobile.module.css";
 
 const revealTargets = ".how-intro, .steps > article, .benefits-heading, .benefit-card, .pricing-copy, .price-card, .home-faq-heading, .home-faq-group, .home-faq-support";
 
@@ -75,5 +76,5 @@ export function LandingMotion({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <main ref={root} className="landing-home">{children}</main>;
+  return <main ref={root} className={`landing-home ${styles.home}`}>{children}</main>;
 }

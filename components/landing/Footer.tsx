@@ -1,45 +1,54 @@
-import { BrandEmblem } from "@/components/BrandEmblem";
+import { BrandWordmark } from "@/components/BrandWordmark";
 import Link from "next/link";
-import { FiArrowUp, FiArrowUpRight, FiHelpCircle } from "react-icons/fi";
+import styles from "./Footer.module.css";
 
-export function Footer() {
+export function Footer({ homePage = true, hideSupportLink = false, currentPath }: {
+  homePage?: boolean;
+  hideSupportLink?: boolean;
+  currentPath?: "/terminos" | "/aviso-de-privacidad";
+}) {
   return (
-    <footer className="home-footer">
-      <div className="home-footer-shell">
-        <div className="home-footer-main">
-          <div className="footer-brand-block">
-            <a className="brand" href="#inicio" aria-label="Cheetah Invite, inicio">
-              <BrandEmblem size={42} />
-              <span className="brand-name">Cheetah<span>Invite</span></span>
-            </a>
-            <p>Invitaciones digitales para momentos<br />que se quedan contigo.</p>
-          </div>
-          <div className="footer-link-group">
-            <span className="footer-group-label">DESCUBRE CHEETAH INVITE</span>
-            <nav className="footer-navigation" aria-label="Navegación al pie de página">
-              <a href="#como-funciona">Cómo funciona</a>
-              <a href="#precios">Precios</a>
-              <a href="#preguntas-frecuentes">Preguntas frecuentes</a>
-            </nav>
-          </div>
-          <div className="footer-help">
-            <span className="footer-group-label">TE ACOMPAÑAMOS</span>
-            <p>¿Una duda antes de empezar?</p>
-            <Link className="footer-help-link" href="/ayuda">
-              <span className="footer-help-icon"><FiHelpCircle aria-hidden="true" /></span>
-              Ayuda y soporte <FiArrowUpRight aria-hidden="true" />
-            </Link>
-          </div>
+    <footer className={styles.footer}>
+      <div className={styles.invitation}>
+        <div>
+          <span className={styles.kicker}>TU PRÓXIMA HISTORIA EMPIEZA AQUÍ</span>
+          <h2>Hay mucho<br />por celebrar.</h2>
         </div>
+        <div className={styles.action}>
+          <p>Empieza con una invitación que se sienta muy tuya.</p>
+          <Link className={styles.create} href="/crear">Crear mi invitación gratis</Link>
+          <span>Diseña a tu ritmo. Paga solo al publicar.</span>
+        </div>
+      </div>
 
-        <div className="home-footer-bottom">
-          <small>© 2026 Cheetah Invite. Celebra a tu manera.</small>
-          <nav className="footer-legal-links" aria-label="Información legal">
-            <Link href="/terminos">Términos y condiciones</Link>
-            <Link href="/aviso-de-privacidad">Privacidad</Link>
-          </nav>
-          <a className="footer-back-top" href="#inicio">Volver arriba <span><FiArrowUp aria-hidden="true" /></span></a>
+      <div className={styles.navigation}>
+        <div className={styles.brandBlock}>
+          <Link className={styles.brand} href="/" aria-label="Soccasion, inicio">
+            <BrandWordmark />
+          </Link>
+          <p>Para los días que quieres<br />compartir con todos.</p>
         </div>
+        <nav className={styles.linkGroup} aria-label="Descubre Soccasion">
+          <span className={styles.label}>EXPLORA</span>
+          <a href={`${homePage ? "" : "/"}#como-funciona`}>Cómo funciona</a>
+          <Link href="/demo">Ver diseños</Link>
+          <a href={`${homePage ? "" : "/"}#precios`}>Precios</a>
+        </nav>
+        <nav className={styles.linkGroup} aria-label="Ayuda para tu invitación">
+          <span className={styles.label}>TE ACOMPAÑAMOS</span>
+          <a href={`${homePage ? "" : "/"}#preguntas-frecuentes`}>Preguntas frecuentes</a>
+          {!hideSupportLink && <Link href="/ayuda">Ayuda y soporte</Link>}
+          <Link href="/login">Iniciar sesión</Link>
+        </nav>
+      </div>
+
+      <div className={styles.bottom}>
+        <small>© 2026 Soccasion</small>
+        <nav className={styles.legal} aria-label="Información legal">
+          {currentPath !== "/terminos" && <Link href="/terminos">Términos y condiciones</Link>}
+          {currentPath !== "/aviso-de-privacidad" && <Link href="/aviso-de-privacidad">Privacidad</Link>}
+        </nav>
+        <a className={styles.backTop} href="#">Volver al inicio</a>
       </div>
     </footer>
   );

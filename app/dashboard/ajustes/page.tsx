@@ -11,7 +11,7 @@ import { BrandLoader } from "@/components/BrandLoader";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import styles from "./settings.module.css";
 
-export const metadata: Metadata = { title: "Ajustes de cuenta | Cheetah Invite" };
+export const metadata: Metadata = { title: "Ajustes de cuenta | Soccasion" };
 export default function AccountSettingsPage() {
   return <Suspense fallback={<BrandLoader message="Cargando tu cuenta…" />}><AccountSettings /></Suspense>;
 }
@@ -31,7 +31,7 @@ async function AccountSettings() {
       <div className={styles.grid}>
         <section className={styles.profileCard} aria-labelledby="account-details-heading">
           <span className={styles.eyebrow}>TU PERFIL</span>
-          <div className={styles.profileIdentity}><span className={styles.avatar} aria-hidden="true">{initials}</span><div><h2 id="account-details-heading">{name}</h2><span className={styles.profileCaption}>Tu cuenta de Cheetah Invite</span></div></div>
+          <div className={styles.profileIdentity}><span className={styles.avatar} aria-hidden="true">{initials}</span><div><h2 id="account-details-heading">{name}</h2><span className={styles.profileCaption}>Tu cuenta de Soccasion</span></div></div>
           <dl className={styles.details}><div><dt><FiMail aria-hidden="true" />Correo de tu cuenta</dt><dd>{account.email || "Sin correo registrado"}</dd></div></dl>
         </section>
         <section className={styles.security} aria-labelledby="account-security-heading">

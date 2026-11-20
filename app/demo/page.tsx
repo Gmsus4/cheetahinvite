@@ -10,7 +10,7 @@ import styles from "./demo.module.css";
 import "../landing-home.css";
 
 export const metadata: Metadata = {
-  title: "Demos de invitaciones | Cheetah Invite",
+  title: "Demos de invitaciones | Soccasion",
   description: "Explora nuestros diseños de invitaciones digitales y prueba las demos para encontrar el estilo de tu celebración.",
 };
 

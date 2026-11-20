@@ -3,8 +3,8 @@
 .main { display: flex; align-items: center; justify-content: space-between; gap: 20px 32px; }
 .identity { min-width: 0; }
 .brand { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--ink); }
-.brand > span:last-child { font-family: var(--font-poppins),Arial,sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -.05em; }
-.brand > span:last-child > span { color: var(--orange); }
+.brand > span:last-child { font-family: var(--font-poppins),Arial,sans-serif; font-size: 18px; font-weight:400; letter-spacing: -.05em; }
+.brand > span:last-child > span { color: inherit; }
 .identity p { margin: 2px 0 0; font-size: 12px; line-height: 1.7; }
 .support { display: flex; align-items: center; gap: 20px; min-height: 60px; color: var(--ink); }
 .support > span:first-child { display: grid; gap: 5px; min-width: 0; }
@@ -26,3 +26,10 @@
   .bottom { align-items: flex-start; flex-direction: column; gap: 2px; margin-top: 16px; }
   .bottom nav { gap: 4px 20px; }
 }
+
+
+.footer::before { display: none; }
+.identity p,.support small { font-size: 14px; }
+.bottom { font-size: 12px; }
+.support strong { font-size: 14px; }
+.arrow { display: none; }

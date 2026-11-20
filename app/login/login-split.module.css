@@ -1,0 +1,83 @@
+.page {
+  display: grid;
+  grid-template-columns: 1.04fr 1fr;
+  min-height: 100svh;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-inter), Arial, sans-serif;
+}
+
+.formPanel {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-width: 0;
+  padding: 32px clamp(28px, 4vw, 72px) 28px;
+}
+
+.identity { display: flex; align-items: center; justify-content: flex-end; gap: 20px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 24px; font-size: 21px; font-weight:400; letter-spacing: -.06em; }
+.brand b { font-weight: 400; color: inherit; }
+.brand :global(.brand-emblem) { filter: none; background:transparent; }
+.content { align-self: center; width: min(100%, 420px); margin: 24px auto; }
+.content h1 { font-family: var(--font-poppins), Arial, sans-serif; margin: 0; font-size: clamp(38px, 3.5vw, 52px); font-weight: 600; letter-spacing: -.065em; line-height: 1.08; }
+.description { margin: 18px 0 32px; color: var(--muted); font-size: 16px; line-height: 1.7; }
+
+.page :global(.login-form) { gap: 0; }
+.page :global(.login-form > label),
+.page :global(.login-password-heading label) { margin-bottom: 10px; font-size: 14px; font-weight: 500; }
+.page :global(.login-password-heading) { gap: 12px; margin-top: 24px; }
+.page :global(.login-forgot-password) { margin-bottom: 10px; color: var(--ink); font-size: 13px; line-height: 1.5; text-align: right; }
+.page :global(.login-input-wrap) { height: 56px; padding: 0 16px; border-radius: 8px; background: var(--surface-muted); border-color: transparent; }
+.page :global(.login-input-wrap input) { font: 400 16px var(--font-inter), Arial, sans-serif; }
+.page :global(.login-input-wrap:focus-within) { border-color: var(--ink); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ink) 12%, transparent); }
+.page :global(.password-toggle) { width: 40px; height: 44px; }
+.page :global(.login-submit) { justify-content: center; height: 46px; margin-top: 28px; padding: 12px 18px; border: 0; border-radius: 5px; background: var(--orange); color: var(--on-accent); font: 600 14px var(--font-inter), Arial, sans-serif; }
+.page :global(.login-submit:hover:not(:disabled)) { background: var(--orange-hover); transform: none; }
+.page :global(.login-submit:disabled) { opacity: .65; cursor: wait; }
+.page :global(.login-submit > svg) { display: none; }
+.page :global(.login-notice) { min-height: 0; margin: 16px 0 0; color: var(--danger); font-size: 14px; line-height: 1.6; }
+.page :global(.login-notice:empty) { display: none; }
+.divider { display: flex; align-items: center; gap: 18px; margin: 24px 0; color: var(--muted); font-size: 13px; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.page :global(.google-signin-button) { height: 56px; border-radius: 5px; font: 500 15px var(--font-inter), Arial, sans-serif; }
+.page :global(.google-signin-button svg) { width: 21px; height: 21px; }
+.page :global(.google-signin-button:hover:not(:disabled)) { background: var(--surface-muted); }
+.signup { margin: 26px 0 0; color: var(--muted); font-size: 14px; line-height: 1.8; text-align: center; }
+.signup a { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+.legal { width: min(100%, 420px); margin: 0 auto; color: var(--muted); font-size: 12px; line-height: 1.8; text-align: center; }
+.legal a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.page :is(a, button):focus-visible { outline: 2px solid var(--ink); outline-offset: 5px; }
+:global(:root[data-theme="dark"]) .page :global(.login-input-wrap) { border-color: var(--line); background: var(--app-background); }
+:global(:root[data-theme="dark"]) .page :global(.login-input-wrap:focus-within) { border-color: var(--orange); box-shadow: 0 0 0 3px color-mix(in srgb, var(--orange) 15%, transparent); }
+:global(:root[data-theme="dark"]) .page :is(a, button):focus-visible { outline-color: var(--orange); }
+
+.registerPage .content { margin-block: 24px; }
+.registerPage .content h1 { font-size: clamp(36px, 3.2vw, 46px); }
+.registerPage .description { margin-bottom: 24px; }
+.registerPage :global(.register-field-label) { margin-top: 18px; }
+.registerPage :global(.register-password-note) { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.registerPage .divider { margin-block: 20px; }
+.registerPage .signup { margin-top: 20px; }
+
+.visual { position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 100%; overflow: hidden; padding: 44px clamp(28px, 4vw, 64px) 56px; background: var(--inverse-surface); color: #fff; isolation: isolate; }
+.photo { z-index: -2; object-fit: cover; object-position: 56% center; }
+.visual::after { content: ""; position: absolute; z-index: -1; inset: 0; background: linear-gradient(180deg, rgb(11 19 32 / .45), transparent 27%, transparent 42%, rgb(11 19 32 / .86)); }
+.visualKicker { max-width: 280px; color: #fff; font-size: 12px; font-weight: 500; letter-spacing: .12em; line-height: 1.8; }
+.visualCopy { padding-top: 200px; }
+.visualCopy h2 { font-family: var(--font-poppins), Arial, sans-serif; max-width: 540px; margin: 0; color: #fff; font-size: clamp(34px, 3.6vw, 56px); font-weight: 500; letter-spacing: -.055em; line-height: 1.12; text-wrap: balance; }
+.visualCopy p { max-width: 350px; margin: 24px 0 0; color: var(--inverse-muted); font-size: 16px; line-height: 1.7; }
+
+@media (max-width: 1000px) and (min-width: 761px) {
+  .formPanel { padding-inline: 32px; }
+  .visual { padding-inline: 32px; }
+  .page :global(.login-password-heading) { align-items: flex-start; }
+}
+@media (max-width: 760px) {
+  .page { grid-template-columns: 1fr; }
+  .formPanel { min-height: 100svh; padding: 24px max(24px, calc((100% - 440px) / 2)) 24px; }
+  .content { margin-block: 24px; }
+  .content h1 { font-size: clamp(38px, 8vw, 48px); }
+  .visual { min-height: 440px; padding: 32px 28px; }
+  .visualCopy { padding-top: 140px; }
+  .visualCopy h2 { font-family: var(--font-poppins), Arial, sans-serif; max-width: 440px; font-size: 36px; }
+}

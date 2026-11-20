@@ -1,3 +1,4 @@
+import { InvitationNavigation } from "@/components/dashboard/InvitationNavigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FiArrowRight, FiArrowUpRight, FiCheck, FiChevronDown, FiCreditCard, FiEye, FiLock } from "react-icons/fi";
@@ -27,7 +28,7 @@ import { InvitationActionLink } from "@/components/dashboard/InvitationActionLin
 import { ReuseRefundedInvitation } from "@/components/dashboard/ReuseRefundedInvitation";
 import styles from "./payment.module.css";
 
-export const metadata: Metadata = { title: "Tu compra | Cheetah Invite" };
+export const metadata: Metadata = { title: "Tu compra | Soccasion" };
 
 export default function PaymentPage(props: PageProps<"/dashboard/eventos/[id]/pago">) {
   return <Suspense fallback={<BrandLoader message="Preparando el pago…" />}><PaymentData {...props} /></Suspense>;
@@ -67,6 +68,7 @@ async function PaymentData({ params, searchParams }: PageProps<"/dashboard/event
   if (event.complimentaryAt && !event.paidAt) return <main className={styles.page}>
     <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} />
     <div className={styles.content}>
+      <InvitationNavigation eventId={id} />
       <div className={styles.heading}><span className={styles.eyebrow}>TU CELEBRACIÓN</span><h1>Tu invitación</h1><p className={styles.eventName}>{event.name}</p></div>
       <section className={`${styles.card} ${styles.paymentCard}`} aria-labelledby="courtesy-heading" data-published={published || undefined}>
         <div className={styles.cardHeading}><h2 id="courtesy-heading">{published ? "Comparte tu invitación" : event.expiresAt && event.expiresAt > new Date() ? "Publica cuando esté lista" : "La cortesía ha vencido"}</h2><span className={styles.status}>Cortesía</span></div>

@@ -26,8 +26,8 @@ export async function sendRecoveryEmail(email: string, token: string, tokenHash:
     body: JSON.stringify({
       from,
       to: [email],
-      subject: "Recupera tu acceso a Cheetah Invite",
-      text: `Solicitaste restablecer tu contraseña de Cheetah Invite.\n\nAbre este enlace: ${link}\n\nEl enlace vence en 30 minutos y solo puede utilizarse una vez. Si no solicitaste el cambio, ignora este correo.`,
+      subject: "Recupera tu acceso a Soccasion",
+      text: `Solicitaste restablecer tu contraseña de Soccasion.\n\nAbre este enlace: ${link}\n\nEl enlace vence en 30 minutos y solo puede utilizarse una vez. Si no solicitaste el cambio, ignora este correo.`,
     }),
     signal: AbortSignal.timeout(10000),
   });

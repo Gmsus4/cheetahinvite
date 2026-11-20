@@ -9,7 +9,7 @@ import { getShowcaseInvitation, getShowcaseExamples } from "@/lib/showcase";
 import { getInvitationEventContent, invitationEventTypes } from "@/lib/invitation-event-content";
 import { getCurrentPrice } from "@/lib/site-pricing";
 
-export const metadata: Metadata = { title: "Invitación de ejemplo | Cheetah Invite", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Invitación de ejemplo | Soccasion", robots: { index: false, follow: false } };
 
 export function generateStaticParams() {
   return landingEventExamples.map(({ slug }) => ({ style: slug }));

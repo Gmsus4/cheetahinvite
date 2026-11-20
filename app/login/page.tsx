@@ -2,18 +2,19 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { BrandLoader } from "@/components/BrandLoader";
 import { authDestinationFromRequest } from "@/lib/auth-destination-server";
-// import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
-import { AuthAccountSwitch } from "@/components/login/AuthAccountSwitch";
-import { BrandEmblem } from "@/components/BrandEmblem";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { BrandWordmark } from "@/components/BrandWordmark";
 import { LoginForm } from "@/components/login/LoginForm";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
-// import loginIllustration from "@/public/login.webp";
+import { AuthAccountSwitch } from "@/components/login/AuthAccountSwitch";
+import styles from "./login-split.module.css";
 import "./login.css";
 
 export const metadata: Metadata = {
-  title: "Iniciar sesión | Cheetah Invite",
-  description: "Accede a tu espacio de Cheetah Invite.",
+  title: "Iniciar sesión | Soccasion",
+  description: "Accede a tu espacio de Soccasion.",
 };
 
 export default function LoginPage(props: PageProps<"/login">) {
@@ -23,57 +24,45 @@ export default function LoginPage(props: PageProps<"/login">) {
 async function LoginContent({ searchParams }: PageProps<"/login">) {
   const redirectTo = await authDestinationFromRequest((await searchParams).callbackUrl);
   return (
-    <main className="login-page login-home-style">
-      <header className="login-topbar">
-        <Link className="brand" href="/" aria-label="Cheetah Invite, inicio">
-          <BrandEmblem size={40} priority />
-          <span className="brand-name">
-            Cheetah<span>Invite</span>
-          </span>
-        </Link>
-        <AuthAccountSwitch mode="login" redirectTo={redirectTo} />
-      </header>
+    <main className={styles.page}>
+      <section className={styles.formPanel} aria-labelledby="login-title">
+        <div className={styles.identity}>
+          <ThemeToggle variant="subtle" />
+        </div>
 
-      <div className="login-layout">
-        <section className="login-visual" aria-label="Bienvenida">
-          <span className="login-kicker">QUÉ BUENO VERTE DE NUEVO</span>
-          <h1>
-            Tus momentos
-            <br />
-            especiales,
-            <br />
-            <em>siempre a la mano.</em>
-          </h1>
-          <p>
-            Entra a tu espacio para continuar creando, editar tus invitaciones
-            y mantener cada detalle bajo control.
-          </p>
-          {/* <div className="login-illustration" aria-hidden="true">
-            <Image src={loginIllustration} alt="" sizes="(max-width: 620px) 260px, 380px" loading="eager" />
-          </div> */}
-          <div className="login-decoration" aria-hidden="true">
-            <div className="login-orbit orbit-one" />
-            <div className="login-orbit orbit-two" />
-          </div>
-          <div className="login-visual-footer">CELEBRA CADA HISTORIA</div>
-        </section>
+        <div className={styles.content}>
+          <Link className={styles.brand} href="/" aria-label="Soccasion, inicio">
+            <BrandWordmark priority compact />
+          </Link>
+          <h1 id="login-title">Qué bueno<br />verte de nuevo.</h1>
+          <p className={styles.description}>Inicia sesión y sigue preparando ese gran día.</p>
+          <GoogleSignInButton redirectTo={redirectTo} />
+          <div className={styles.divider}><span>o inicia sesión con tu correo</span></div>
+          <LoginForm redirectTo={redirectTo} />
+          <AuthAccountSwitch mode="login" redirectTo={redirectTo} inline className={styles.signup} />
+        </div>
 
-        <section className="login-form-panel" aria-labelledby="login-title">
-          <div className="login-form-wrap">
-            <span className="login-kicker">TU ESPACIO CHEETAH INVITE</span>
-            <h2 id="login-title">Inicia sesión</h2>
-            <p className="login-description">
-              Ingresa tus datos para volver a tus invitaciones.
-            </p>
-            <GoogleSignInButton redirectTo={redirectTo} />
-            <div className="auth-divider"><span>o inicia con tu correo</span></div>
-            <LoginForm redirectTo={redirectTo} />
-          </div>
-          <small className="login-legal">
-            Al continuar, aceptas nuestros <Link href="/terminos">Términos y condiciones</Link> y <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>.
-          </small>
-        </section>
-      </div>
+        <p className={styles.legal}>
+          Al continuar, aceptas nuestros <Link href="/terminos">Términos y condiciones</Link> y <Link href="/aviso-de-privacidad">Aviso de privacidad</Link>.
+        </p>
+      </section>
+
+      <aside className={styles.visual} aria-labelledby="login-visual-title">
+        <Image
+          className={styles.photo}
+          src="/demo/boda/celebracion.webp"
+          alt="Mesas de celebración en un jardín iluminado al atardecer"
+          fill
+          sizes="(max-width: 760px) 100vw, 48vw"
+          loading="eager"
+          unoptimized
+        />
+        <span className={styles.visualKicker}>PARA TODO LO QUE MERECE CELEBRARSE</span>
+        <div className={styles.visualCopy}>
+          <h2 id="login-visual-title">Los mejores días<br />empiezan con un «ven».</h2>
+          <p>Tu historia, tu gente y una invitación que los reúne.</p>
+        </div>
+      </aside>
     </main>
   );
 }

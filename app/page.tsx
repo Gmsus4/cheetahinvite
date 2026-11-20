@@ -15,7 +15,7 @@ import { LandingMotion } from "@/components/landing/LandingMotion";
 import "./landing-home.css";
 
 export const metadata: Metadata = {
-  title: "Cheetah Invite — Invitaciones digitales para tu evento",
+  title: "Soccasion — Invitaciones digitales para tu evento",
   description:
     "Crea gratis tu invitación digital con fotos, ubicación y confirmación de asistencia. Personalízala, revisa el resultado y paga solo al publicar.",
 };

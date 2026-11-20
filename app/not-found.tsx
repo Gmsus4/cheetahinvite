@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FiHome } from "react-icons/fi";
-import { BrandEmblem } from "@/components/BrandEmblem";
+import { BrandWordmark } from "@/components/BrandWordmark";
 import styles from "./not-found.module.css";
 
 export const metadata: Metadata = {
-  title: "Página no encontrada | Cheetah Invite",
-  description: "No encontramos la página que buscas. Vuelve al inicio de Cheetah Invite.",
+  title: "Página no encontrada | Soccasion",
+  description: "No encontramos la página que buscas. Vuelve al inicio de Soccasion.",
   robots: { index: false, follow: false },
 };
 
 export default function NotFound() {
   return <div className={styles.page}>
     <header className={styles.header}>
-      <div className={styles.brand}><BrandEmblem size={36} /><span>Cheetah <span>Invite</span></span></div>
+      <div className={styles.brand}><BrandWordmark /></div>
     </header>
     <main className={styles.main}>
       <div className={styles.content}>

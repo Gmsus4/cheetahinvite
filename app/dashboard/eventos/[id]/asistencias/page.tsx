@@ -1,3 +1,4 @@
+import { InvitationNavigation } from "@/components/dashboard/InvitationNavigation";
 import { eventCompanionLimit } from "@/lib/rsvp";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -14,7 +15,7 @@ import { RsvpRefresh } from "@/components/dashboard/RsvpRefresh";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import styles from "./attendance.module.css";
 
-export const metadata: Metadata = { title: "Respuestas de asistencia | Cheetah Invite" };
+export const metadata: Metadata = { title: "Respuestas de asistencia | Soccasion" };
 export default function AttendancePage(props: PageProps<"/dashboard/eventos/[id]/asistencias">) {
   return <Suspense fallback={<BrandLoader message="Cargando las respuestas…" />}><AttendanceData {...props} /></Suspense>;
 }
@@ -45,6 +46,7 @@ async function AttendanceData({ params, searchParams }: PageProps<"/dashboard/ev
   return <main className={styles.page}>
     <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} />
     <div className={styles.content}>
+      <InvitationNavigation eventId={id} />
       <div className={styles.heading}><span className={styles.eyebrow}>TU CELEBRACIÓN · ASISTENCIAS</span><h1>¿Quién viene a celebrar?</h1><p className={styles.eventName}>{event.name}</p><p>Revisa las confirmaciones y prepara cada detalle para tus invitados.</p></div>
       {!hasIntegratedRsvp(event.sections) && <div className={styles.notice}><FiInfo aria-hidden="true" /><p>La confirmación integrada está desactivada. Puedes activarla en la sección Confirmación del editor. Las respuestas anteriores se conservan.</p></div>}
       <dl className={styles.stats}>{stats.map(({ label, value, caption, Icon, featured }) => <div key={label} className={`${styles.stat}${featured ? ` ${styles.featured}` : ""}`}><dt><span className={styles.statIcon}><Icon aria-hidden="true" /></span>{label}</dt><dd>{value}</dd><small>{caption}</small></div>)}</dl>

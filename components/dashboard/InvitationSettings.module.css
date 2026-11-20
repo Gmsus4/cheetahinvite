@@ -81,3 +81,21 @@
   .eventIdentity { max-width: 100%; margin-top: 10px; }
   .eventThumbnail { flex-basis: 36px; width: 36px; height: 36px; border-radius: 9px; }
 }
+
+
+.page .content { box-sizing: border-box; width: 100%; max-width: 1328px; padding: 56px 24px 40px; }
+.page .heading { display: block; }
+.page .heading h1 { margin: 12px 0 20px; font-family: var(--font-poppins),Arial,sans-serif; font-size: clamp(36px,4vw,52px); font-weight: 600; line-height: 1.12; letter-spacing: -.065em; }
+.page .eyebrow { color: var(--muted); font-size: 12px; }
+.page .grid { gap: 28px; margin-top: 36px; }
+.page .privacy { padding: 28px; border-radius: 8px; }
+.page .sectionHeading h2 { font-size: 22px; }
+.page .sectionHeading p,.page .choices span,.page .hint,.page .pinArea p,.page .pinArea small { font-size: 14px; line-height: 1.7; }
+.page .choices button { border-radius: 5px; padding: 20px; }
+.page .choices button[aria-pressed=true] { background: var(--accent-soft); border-color: var(--orange); box-shadow: none; }
+.page .primary { border-radius: 5px; color: var(--on-accent); font-size: 14px; }
+.page .pinArea input { border-radius: 5px; background: var(--surface-muted); }
+.page .termSection { border-radius: 8px; padding: 24px; }
+.page .eventIdentity p { font-size: 16px; }
+@media(max-width:760px) { .page .content { padding-top: 32px; } .page .grid { grid-template-columns: minmax(0,1fr); gap: 20px; } .page .privacy { padding: 24px; } }
+@media(max-width:380px) { .page .content { padding-inline: 16px; } }

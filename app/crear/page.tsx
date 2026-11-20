@@ -14,7 +14,7 @@ import { getCurrentPrice } from "@/lib/site-pricing";
 import { authPageHref } from "@/lib/auth-destination";
 
 export const metadata: Metadata = {
-  title: "Nueva invitación | Cheetah Invite",
+  title: "Nueva invitación | Soccasion",
   description: "Empieza un borrador para tu próxima celebración.",
 };
 

@@ -10,7 +10,7 @@ producción. Quedan datos y decisiones del operador por completar.
 ## Datos del responsable y mantenimiento
 
 - Responsable del servicio y de privacidad: **Fernando Gómez Montes**.
-- Correo vigente: **cheetahinvite@gmail.com**.
+- Correo vigente: **soccasion@gmail.com**.
 - Teléfono: **33 5141 5751**, con enlace internacional `+523351415751`.
 - El propietario confirmó nombre, correo y teléfono el 18 de noviembre de 2026;
   indicó que contratará otro correo posteriormente, sin proporcionar aún uno nuevo.
@@ -58,7 +58,7 @@ publicaciones, acceso con PIN y difusión de las invitaciones.
 
 Las reclamaciones por falta de consentimiento, datos incorrectos, infracción de
 derechos o uso indebido se atribuyen al Organizador cuando deriven de su conducta.
-Se incluye la obligación de mantener a salvo a Cheetah Invite únicamente cuando
+Se incluye la obligación de mantener a salvo a Soccasion únicamente cuando
 proceda legalmente, por responsabilidades y gastos razonables y acreditados
 derivados del incumplimiento del Organizador. No se excluyen actos u omisiones
 de la plataforma ni se trasladan sus obligaciones propias.
@@ -66,7 +66,7 @@ de la plataforma ni se trasladan sus obligaciones propias.
 La redacción se adapta a las funciones existentes: no afirma que el Organizador
 importe teléfonos de invitados ni que el sistema envíe invitaciones o recordatorios
 automáticamente. El formulario integrado recibe respuestas de los invitados.
-Tampoco se clasifica a Cheetah Invite como encargado para todo tratamiento: los
+Tampoco se clasifica a Soccasion como encargado para todo tratamiento: los
 roles y acuerdos correspondientes deben verificarse por finalidad y operación.
 
 Se ofrece reporte por el correo vigente, sin exigir cuenta, con enlace,

@@ -4,21 +4,22 @@ import { LEGAL_OPERATOR, LEGAL_UPDATED_AT } from "@/lib/legal";
 import { RSVP_LIMITS } from "@/lib/rsvp";
 
 export const metadata: Metadata = {
-  title: "Aviso de privacidad | Cheetah Invite",
-  description: "Datos personales, invitaciones con PIN, asistencia, pagos, proveedores y derechos ARCO en Cheetah Invite.",
+  title: "Aviso de privacidad | Soccasion",
+  description: "Datos personales, invitaciones con PIN, asistencia, pagos, proveedores y derechos ARCO en Soccasion.",
 };
 
 export default function PrivacyPage() {
   return <LegalPage
+    currentPath="/aviso-de-privacidad"
     eyebrow="PRIVACIDAD Y DATOS PERSONALES"
     title="Aviso de privacidad integral"
-    intro="Este aviso explica el tratamiento de datos al visitar Cheetah Invite, crear una cuenta, editar o consultar invitaciones, confirmar asistencia, contratar servicios o contactar a soporte. También aplica a invitados y personas cuyos datos aparezcan en un evento."
+    intro="Este aviso explica el tratamiento de datos al visitar Soccasion, crear una cuenta, editar o consultar invitaciones, confirmar asistencia, contratar servicios o contactar a soporte. También aplica a invitados y personas cuyos datos aparezcan en un evento."
     updated={LEGAL_UPDATED_AT}
     sections={[
       {
         title: "Responsable, domicilio y contacto",
         body: <>
-          <p>El responsable del tratamiento es <strong>{LEGAL_OPERATOR.name}</strong>, operador de Cheetah Invite. Domicilio: <strong>{LEGAL_OPERATOR.address}</strong>.</p>
+          <p>El responsable del tratamiento es <strong>{LEGAL_OPERATOR.name}</strong>, operador de Soccasion. Domicilio: <strong>{LEGAL_OPERATOR.address}</strong>.</p>
           <p>Para privacidad y derechos ARCO, escribe a <a href={LEGAL_OPERATOR.emailHref}>{LEGAL_OPERATOR.email}</a> con el asunto “Privacidad / Derechos ARCO”. Responsable de privacidad: <strong>{LEGAL_OPERATOR.name}</strong>. Teléfono de contacto: <a href={LEGAL_OPERATOR.phoneHref}>{LEGAL_OPERATOR.phone}</a>.</p>
         </>,
       },
@@ -50,7 +51,7 @@ export default function PrivacyPage() {
         title: "Invitaciones públicas y protegidas con PIN",
         body: <>
           <p>El organizador elige entre acceso público y protección con PIN de seis dígitos. En modo público, cualquier persona con el enlace puede abrirlo y reenviarlo; aplicaciones de mensajería o redes sociales pueden consultar y guardar portada, título y descripción para sus vistas previas.</p>
-          <p>En modo protegido, la página requiere el PIN y muestra metadatos genéricos de Cheetah Invite antes de desbloquearla. Tras introducirlo correctamente, una cookie permite el acceso durante hasta doce horas. Cambiar el PIN o la privacidad invalida los accesos previos. El PIN no verifica la identidad: cualquiera que lo reciba junto con el enlace puede entrar.</p>
+          <p>En modo protegido, la página requiere el PIN y muestra metadatos genéricos de Soccasion antes de desbloquearla. Tras introducirlo correctamente, una cookie permite el acceso durante hasta doce horas. Cambiar el PIN o la privacidad invalida los accesos previos. El PIN no verifica la identidad: cualquiera que lo reciba junto con el enlace puede entrar.</p>
           <p>La protección de la página no convierte las imágenes en archivos de acceso individual: quien conozca una dirección directa puede consultarla, incluidas referencias antiguas de Cloudinary. Cambiar a PIN o eliminar el evento no retira copias, descargas ni vistas previas guardadas por otros servicios.</p>
           <p>Quien publique debe tener autorización para utilizar fotografías y datos de terceros, incluidos menores. Si apareces en una invitación y quieres ejercer tus derechos, puedes contactar al responsable sin necesidad de registrarte.</p>
         </>,
@@ -58,7 +59,7 @@ export default function PrivacyPage() {
       {
         title: "Datos de terceros y gestión de asistencia",
         body: <>
-          <p>La persona titular de la cuenta que crea y administra la invitación (el Organizador) es responsable de los datos de otras personas que incorpora y de contar con los derechos, consentimientos y autorizaciones necesarios para compartirlos y utilizarlos en las funciones del evento. Debe informar a las personas involucradas sobre ese uso y facilitarles este aviso. Cheetah Invite trata la información conforme a las finalidades aquí descritas; esta obligación del Organizador no elimina las que correspondan a la plataforma.</p>
+          <p>La persona titular de la cuenta que crea y administra la invitación (el Organizador) es responsable de los datos de otras personas que incorpora y de contar con los derechos, consentimientos y autorizaciones necesarios para compartirlos y utilizarlos en las funciones del evento. Debe informar a las personas involucradas sobre ese uso y facilitarles este aviso. Soccasion trata la información conforme a las finalidades aquí descritas; esta obligación del Organizador no elimina las que correspondan a la plataforma.</p>
           <p>Las respuestas integradas se facilitan al organizador para gestionar su evento. La lista no es pública: la cuenta propietaria puede verla, exportarla en CSV y eliminar respuestas. El personal autorizado puede tratarla cuando sea necesario para operación, seguridad, atención de derechos o soporte.</p>
           <p>Cada invitado recupera o actualiza su propia respuesta mediante una clave aleatoria guardada en su navegador; el servidor conserva su huella. No se utiliza el nombre como identificador verificado. Si borras el almacenamiento o cambias de dispositivo, puedes perder el acceso a tu respuesta y generar registros duplicados.</p>
           <p>Desactivar el formulario conserva las respuestas ya recibidas. Eliminar una respuesta la retira de la aplicación y de futuras exportaciones; eliminar la invitación elimina sus respuestas. Los CSV descargados permanecen bajo control de quien los descargó. El organizador debe protegerlos y utilizar los datos para las finalidades informadas a sus invitados.</p>
@@ -85,7 +86,7 @@ export default function PrivacyPage() {
         title: "Enlaces y reproductores de terceros",
         body: <>
           <p>Las invitaciones pueden incluir WhatsApp, mapas, mesas de regalos, enlaces externos o reproductores de Spotify, YouTube, Apple Music y SoundCloud elegidos por el organizador. Los reproductores incrustados pueden conectarse a esos proveedores al cargarse en la página, incluso antes de iniciar la reproducción, y transmitir datos técnicos o utilizar sus propias cookies.</p>
-          <p>Al seguir un enlace externo, los datos que proporciones se tratan fuera de Cheetah Invite conforme al aviso del destinatario. Las respuestas de WhatsApp no se guardan como confirmaciones integradas de la plataforma. Consulta las condiciones del servicio externo y la información que facilite el organizador.</p>
+          <p>Al seguir un enlace externo, los datos que proporciones se tratan fuera de Soccasion conforme al aviso del destinatario. Las respuestas de WhatsApp no se guardan como confirmaciones integradas de la plataforma. Consulta las condiciones del servicio externo y la información que facilite el organizador.</p>
         </>,
       },
       {

@@ -17,7 +17,7 @@ import "@/app/ayuda/soporte.css";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import styles from "./purchases.module.css";
 
-export const metadata: Metadata = { title: "Mis compras | Cheetah Invite" };
+export const metadata: Metadata = { title: "Mis compras | Soccasion" };
 export default function PurchasesPage(props: PageProps<"/dashboard/compras">) {
   return <Suspense fallback={<BrandLoader message="Cargando tus compras…" />}><PurchasesData {...props} /></Suspense>;
 }

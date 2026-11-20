@@ -1,0 +1,19 @@
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.name {
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: 21px;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: -.07em;
+  line-height: 1;
+}
+
+.compact { gap: 1px; }
+.compact .name { font-size: 27px; }

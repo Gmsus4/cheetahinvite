@@ -1,19 +1,11 @@
-import Link from "next/link";
-import { FiArrowUp, FiArrowUpRight, FiClock, FiFileText } from "react-icons/fi";
-import { Suspense } from "react";
-import { connection } from "next/server";
-import { auth } from "@/auth";
+import { FiClock, FiFileText } from "react-icons/fi";
 import { LEGAL_OPERATOR } from "@/lib/legal";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { Navbar } from "@/components/landing/Navbar";
+import { Footer } from "@/components/landing/Footer";
+import "../landing-home.css";
 import "./legal.css";
 
 type Section = { title: string; body: React.ReactNode };
-
-async function LegalNavigation() {
-  await connection();
-  const session = await auth();
-  return <DashboardHeader name={session?.user?.name || "Usuario"} email={session?.user?.email || ""} image={session?.user?.image} guest={!session?.user} />;
-}
 
 export function LegalPage({
   eyebrow,
@@ -21,17 +13,19 @@ export function LegalPage({
   intro,
   updated,
   sections,
+  currentPath,
 }: {
   eyebrow: string;
   title: string;
   intro: string;
   updated: string;
   sections: Section[];
+  currentPath: "/terminos" | "/aviso-de-privacidad";
 }) {
   return (
-    <main className="legal-page legal-modern" id="documento">
-      <Suspense fallback={<DashboardHeader name="" email="" guest />}><LegalNavigation /></Suspense>
-      <div className="legal-shell">
+    <main className="landing-home legal-page legal-modern">
+      <Navbar homePage={false} />
+      <div className="legal-shell" id="inicio">
       <div className="legal-hero">
         <span className="legal-hero-icon" aria-hidden="true"><FiFileText /></span>
         <p className="legal-eyebrow">{eyebrow}</p>
@@ -44,16 +38,16 @@ export function LegalPage({
         <nav className="legal-toc" aria-label="Contenido">
           <span className="legal-toc-label">EN ESTE DOCUMENTO</span>
           <ol>{sections.map((section, index) => <li key={section.title}><a href={`#seccion-${index + 1}`}><span>{String(index + 1).padStart(2, "0")}</span>{section.title}</a></li>)}</ol>
-          <a className="legal-top-link" href="#documento">Volver arriba <FiArrowUp aria-hidden="true" /></a>
+          <a className="legal-top-link" href="#">Volver arriba</a>
         </nav>
       </aside>
       <article className="legal-document" aria-label={title}>
         {sections.map((section, index) => <section className="legal-section" id={`seccion-${index + 1}`} key={section.title}><span className="legal-section-number">SECCIÓN {String(index + 1).padStart(2, "0")}</span><h2>{section.title}</h2><div>{section.body}</div></section>)}
-        <div className="legal-contact"><strong>¿Necesitas ayuda?</strong><p>Si tienes alguna duda, estamos para orientarte.</p><a href={LEGAL_OPERATOR.emailHref}>{LEGAL_OPERATOR.email} <FiArrowUpRight aria-hidden="true" /></a></div>
+        <div className="legal-contact"><strong>¿Necesitas ayuda?</strong><p>Si tienes alguna duda, estamos para orientarte.</p><a className="button" href={LEGAL_OPERATOR.emailHref}>{LEGAL_OPERATOR.email}</a></div>
       </article>
       </div>
       </div>
-      <footer className="legal-footer"><Link href="/terminos">Términos y condiciones</Link><Link href="/aviso-de-privacidad">Aviso de privacidad</Link><span>© 2026 Cheetah Invite</span></footer>
+      <Footer homePage={false} currentPath={currentPath} />
     </main>
   );
 }

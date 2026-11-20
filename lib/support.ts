@@ -1,4 +1,4 @@
-export const SUPPORT_EMAIL = "cheetahinvite@gmail.com";
+export const SUPPORT_EMAIL = "soccasion@gmail.com";
 export const supportReasons = [
   "Me cobraron, pero no se publicó mi invitación",
   "Creo que pagué dos veces",
@@ -11,7 +11,7 @@ export function supportMailto({ email = "", eventId = "", eventName = "", paymen
   email?: string; eventId?: string; eventName?: string; paymentId?: string; reason?: string; message?: string;
 } = {}) {
   const body = [
-    "Hola, equipo de Cheetah Invite:", "",
+    "Hola, equipo de Soccasion:", "",
     `Motivo: ${reason}`,
     `Correo de mi cuenta: ${email.trim() || "[escribe el correo de tu cuenta]"}`,
     `Referencia de la invitación: ${eventId || "[si la tienes]"}`,

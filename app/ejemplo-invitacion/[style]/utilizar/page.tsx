@@ -15,7 +15,7 @@ import { prisma } from "@/prisma";
 import { useExampleStyle } from "./actions";
 import styles from "./style-selection.module.css";
 
-export const metadata: Metadata = { title: "Utilizar este estilo | Cheetah Invite", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Utilizar este estilo | Soccasion", robots: { index: false, follow: false } };
 
 type Props = { params: Promise<{ style: string }>; searchParams: Promise<{ error?: string }> };
 

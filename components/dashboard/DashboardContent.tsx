@@ -5,7 +5,6 @@ import { invitationPath } from "@/lib/invitation-url";
 import { isInvitationPublished } from "@/lib/invitation-payment";
 import { canEditInvitation, invitationLifecycle } from "@/lib/invitation-lifecycle";
 import {
-  FiArrowUpRight,
   FiCalendar,
   FiEdit2,
   FiGift,
@@ -100,7 +99,7 @@ export function DashboardContent({ ownerId, userName, userEmail, userImage, even
               <p className="dashboard-subtitle">Cada celebración empieza con una invitación. Aquí puedes crear, editar y compartir las tuyas.</p>
             </div>
             {availableSlots > 0 && <Link className="button dashboard-create-button" href="/crear">
-              Nueva invitación <FiArrowUpRight aria-hidden="true" />
+              <FiPlus aria-hidden="true" /> Nueva invitación
             </Link>}
           </div>
           {availableSlots > 0 && <div className="dashboard-draft-recovery"><CreationDraftResume ownerId={ownerId} existingEventIds={events.map(event => event.id)} /></div>}
@@ -122,6 +121,8 @@ export function DashboardContent({ ownerId, userName, userEmail, userImage, even
                     <div className={`dashboard-invitation-cover${event.imageUrl ? " has-image" : ""}`}>
                       {event.imageUrl ? <Image src={event.imageUrl} alt={`Portada de ${event.name}`} fill unoptimized sizes="(max-width: 640px) 100vw, (max-width: 1050px) 50vw, 33vw" /> : <FiGift className="dashboard-cover-gift" aria-hidden="true" />}
                       <span className={`dashboard-status status-${event.status.toLowerCase()}`}><i aria-hidden="true" />{["PUBLISHED", "EXPIRED"].includes(event.status) && invitationLifecycle(event, new Date(now))?.phase !== "active" ? "Archivado" : statusLabels[event.status]}</span>
+                    </div>
+                    <div className="dashboard-cover-details">
                       <div className="dashboard-invitation-type-row"><span className="dashboard-invitation-type">{eventLabels[event.eventType] ?? event.eventType}</span>{courtesyIds.has(event.id) && <span className="dashboard-courtesy-badge"><FiGift aria-hidden="true" /> Cortesía</span>}</div>
                       <h3>{event.name}</h3>
                       <div className="dashboard-invitation-meta">
@@ -151,6 +152,7 @@ export function DashboardContent({ ownerId, userName, userEmail, userImage, even
                   <span className="dashboard-slot-plus"><FiPlus aria-hidden="true" /></span>
                   <h3>{events.length === 0 && index === 0 ? "Tu primera invitación" : "Tu próxima celebración"}</h3>
                   <p>Un nuevo momento merece su propia invitación. Dale tu estilo y compártelo.</p>
+                  <span className="dashboard-slot-cta">Crear invitación</span>
                 </Link>)}
               </div>
           </section>

@@ -1,7 +1,7 @@
 # Recuperación de contraseña
 
 En `/login`, «¿Olvidaste tu contraseña?» lleva a `/recuperar-contrasena`.
-La opción principal es la recuperación manual por `cheetahinvite@gmail.com`.
+La opción principal es la recuperación manual por `soccasion@gmail.com`.
 El formulario abre la aplicación de correo con el asunto y el correo de la
 cuenta en el cuerpo. El usuario revisa y envía el mensaje: la web no envía
 automáticamente esta solicitud ni verifica códigos de soporte.
@@ -39,7 +39,7 @@ Google deben continuar con Google; este flujo no les crea una contraseña.
 
 ```dotenv
 RESEND_API_KEY="re_..."
-RESEND_FROM_EMAIL="Cheetah Invite <acceso@tu-dominio-verificado.com>"
+RESEND_FROM_EMAIL="Soccasion <acceso@tu-dominio-verificado.com>"
 APP_URL="http://localhost:3000"
 ```
 

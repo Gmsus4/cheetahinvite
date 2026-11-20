@@ -5,21 +5,22 @@ import { ACCOUNT_LIMITS } from "@/lib/limits";
 import { RSVP_LIMITS } from "@/lib/rsvp";
 
 export const metadata: Metadata = {
-  title: "Términos y condiciones | Cheetah Invite",
-  description: "Condiciones de creación, publicación, pagos, privacidad y vigencia de las invitaciones digitales de Cheetah Invite.",
+  title: "Términos y condiciones | Soccasion",
+  description: "Condiciones de creación, publicación, pagos, privacidad y vigencia de las invitaciones digitales de Soccasion.",
 };
 
 export default function TermsPage() {
   return <LegalPage
+    currentPath="/terminos"
     eyebrow="CONDICIONES DEL SERVICIO"
     title="Términos y condiciones"
-    intro="Estas condiciones regulan el acceso y uso de Cheetah Invite, plataforma para crear, personalizar, publicar y compartir invitaciones digitales. Al crear una cuenta o contratar un servicio, aceptas estos términos."
+    intro="Estas condiciones regulan el acceso y uso de Soccasion, plataforma para crear, personalizar, publicar y compartir invitaciones digitales. Al crear una cuenta o contratar un servicio, aceptas estos términos."
     updated={LEGAL_UPDATED_AT}
     sections={[
       {
         title: "Quién presta el servicio y contacto",
         body: <>
-          <p>Cheetah Invite es operado por <strong>{LEGAL_OPERATOR.name}</strong> (en adelante, “Cheetah Invite” o el “Proveedor”). Domicilio: <strong>{LEGAL_OPERATOR.address}</strong>.</p>
+          <p>Soccasion es operado por <strong>{LEGAL_OPERATOR.name}</strong> (en adelante, “Soccasion” o el “Proveedor”). Domicilio: <strong>{LEGAL_OPERATOR.address}</strong>.</p>
           <p>Atención, aclaraciones y solicitudes de privacidad: <a href={LEGAL_OPERATOR.emailHref}>{LEGAL_OPERATOR.email}</a>. Teléfono: <a href={LEGAL_OPERATOR.phoneHref}>{LEGAL_OPERATOR.phone}</a>.</p>
         </>,
       },
@@ -53,10 +54,10 @@ export default function TermsPage() {
         body: <>
           <p>Para estos términos, el <strong>Organizador</strong> es la persona titular de la cuenta que crea y administra la invitación. Es responsable de la información que incorpora, de cómo comparte la invitación y del uso que hace de las funciones del servicio.</p>
           <ul>
-            <li><strong>Datos y autorizaciones.</strong> El Organizador declara que los nombres, fotografías, ubicaciones, textos y demás datos que incorpora corresponden a su evento, son correctos y se utilizan de forma lícita. Debe contar con los derechos, consentimientos y autorizaciones necesarios para compartirlos con Cheetah Invite y publicarlos o utilizarlos en las funciones que active. No debe incluir datos de personas ajenas al evento ni utilizar información de terceros para finalidades distintas de las autorizadas.</li>
-            <li><strong>Alcance del servicio.</strong> Cheetah Invite proporciona herramientas para crear, alojar, publicar y compartir invitaciones y gestionar respuestas de asistencia. El tratamiento de datos se realiza conforme al <a href="/aviso-de-privacidad">Aviso de privacidad</a>, para prestar el servicio y atender las finalidades de seguridad, soporte y cumplimiento legal allí descritas. La plataforma no organiza los eventos ni la publicación implica aprobación del contenido del Organizador.</li>
-            <li><strong>Reclamaciones de terceros.</strong> En la medida permitida por la legislación aplicable, Cheetah Invite no asume responsabilidad por reclamaciones derivadas de datos incorrectos, falta de consentimiento, infracción de derechos de terceros o uso indebido de las invitaciones que sean atribuibles al Organizador. El Organizador deberá responder por su incumplimiento y, cuando legalmente proceda, mantener a Cheetah Invite a salvo de las responsabilidades y los gastos razonables y acreditados que deriven de dicho incumplimiento. Esta obligación no comprende actos u omisiones imputables a Cheetah Invite ni limita sus obligaciones legales o los derechos de las personas afectadas.</li>
-            <li><strong>Uso autorizado e incumplimientos.</strong> Las invitaciones y sus funciones deben utilizarse exclusivamente para fines lícitos relacionados con el evento, respetando los derechos de otras personas. Cheetah Invite podrá retirar o suspender invitaciones y limitar el acceso cuando detecte o reciba indicios de un uso contrario a estos términos, incluso de forma preventiva mientras se revisa el caso. Estas reglas se aplican a borradores, invitaciones publicadas y protegidas con PIN, así como a su difusión.</li>
+            <li><strong>Datos y autorizaciones.</strong> El Organizador declara que los nombres, fotografías, ubicaciones, textos y demás datos que incorpora corresponden a su evento, son correctos y se utilizan de forma lícita. Debe contar con los derechos, consentimientos y autorizaciones necesarios para compartirlos con Soccasion y publicarlos o utilizarlos en las funciones que active. No debe incluir datos de personas ajenas al evento ni utilizar información de terceros para finalidades distintas de las autorizadas.</li>
+            <li><strong>Alcance del servicio.</strong> Soccasion proporciona herramientas para crear, alojar, publicar y compartir invitaciones y gestionar respuestas de asistencia. El tratamiento de datos se realiza conforme al <a href="/aviso-de-privacidad">Aviso de privacidad</a>, para prestar el servicio y atender las finalidades de seguridad, soporte y cumplimiento legal allí descritas. La plataforma no organiza los eventos ni la publicación implica aprobación del contenido del Organizador.</li>
+            <li><strong>Reclamaciones de terceros.</strong> En la medida permitida por la legislación aplicable, Soccasion no asume responsabilidad por reclamaciones derivadas de datos incorrectos, falta de consentimiento, infracción de derechos de terceros o uso indebido de las invitaciones que sean atribuibles al Organizador. El Organizador deberá responder por su incumplimiento y, cuando legalmente proceda, mantener a Soccasion a salvo de las responsabilidades y los gastos razonables y acreditados que deriven de dicho incumplimiento. Esta obligación no comprende actos u omisiones imputables a Soccasion ni limita sus obligaciones legales o los derechos de las personas afectadas.</li>
+            <li><strong>Uso autorizado e incumplimientos.</strong> Las invitaciones y sus funciones deben utilizarse exclusivamente para fines lícitos relacionados con el evento, respetando los derechos de otras personas. Soccasion podrá retirar o suspender invitaciones y limitar el acceso cuando detecte o reciba indicios de un uso contrario a estos términos, incluso de forma preventiva mientras se revisa el caso. Estas reglas se aplican a borradores, invitaciones publicadas y protegidas con PIN, así como a su difusión.</li>
           </ul>
           <p>Cualquier persona puede reportar un uso no autorizado a <a href={`${LEGAL_OPERATOR.emailHref}?subject=${encodeURIComponent("Reporte de uso indebido de una invitación")}`}>{LEGAL_OPERATOR.email}</a>, aunque no tenga cuenta. Incluye el enlace, una descripción y únicamente la información necesaria para revisar el caso; no envíes contraseñas ni PIN.</p>
         </>,
@@ -66,7 +67,7 @@ export default function TermsPage() {
         body: <>
           <p>Crear o previsualizar una invitación no la publica. Para habilitar el enlace debes completar los datos necesarios, elegir su privacidad y contar con un pago confirmado o una cortesía vigente otorgada por el equipo. Revisa nombres, fechas, ubicaciones, textos e imágenes antes de publicar.</p>
           <p>En modo público, cualquier persona con el enlace puede abrirlo y reenviarlo. En modo protegido, se requiere un PIN de seis dígitos que compartes con tus invitados. Quien conozca el enlace y el PIN puede acceder: no se verifica su identidad. El acceso del navegador dura hasta doce horas; cambiar el PIN o la privacidad invalida los accesos anteriores.</p>
-          <p>Las invitaciones públicas pueden mostrar su portada y textos en vistas previas de otras aplicaciones. Las protegidas presentan una vista previa genérica de Cheetah Invite. El PIN protege la página; las imágenes siguen siendo accesibles para quien conozca su dirección directa. Evita contenido que necesite confidencialidad estricta.</p>
+          <p>Las invitaciones públicas pueden mostrar su portada y textos en vistas previas de otras aplicaciones. Las protegidas presentan una vista previa genérica de Soccasion. El PIN protege la página; las imágenes siguen siendo accesibles para quien conozca su dirección directa. Evita contenido que necesite confidencialidad estricta.</p>
           <p>Puedes editar durante la vigencia y eliminar desde el panel. Cambiar el enlace puede mantener direcciones anteriores que conducen a la misma invitación y respetan su privacidad actual. El cambio a PIN o la eliminación no retiran capturas, descargas o vistas previas conservadas por terceros.</p>
         </>,
       },
@@ -75,14 +76,14 @@ export default function TermsPage() {
         body: <>
           <p>Si activas la confirmación integrada, los invitados responden con nombre y apellido, Sí o No asistiré y el número de acompañantes adicionales permitido por el organizador, de cero a {RSVP_LIMITS.companions}. No se solicitan nombres de acompañantes, teléfono ni correo. Las respuestas no son identidades verificadas, pases de acceso ni una garantía de asistencia.</p>
           <p>La lista no se publica: la cuenta organizadora puede consultarla, descargarla en CSV y eliminar respuestas. Cada invitado conserva una clave en su navegador para recuperar o modificar su respuesta. Cambiar de dispositivo o borrar el almacenamiento puede impedir recuperarla y generar duplicados. Desactivar el formulario conserva las respuestas hasta su eliminación o la del evento.</p>
-          <p>Puedes añadir enlaces externos de confirmación, mapas, regalos y reproductores de Spotify, YouTube, Apple Music o SoundCloud. Su disponibilidad, contenido y tratamiento de datos dependen del servicio externo. El organizador debe contar con permisos y explicar cómo usará los datos que reciba fuera de Cheetah Invite.</p>
+          <p>Puedes añadir enlaces externos de confirmación, mapas, regalos y reproductores de Spotify, YouTube, Apple Music o SoundCloud. Su disponibilidad, contenido y tratamiento de datos dependen del servicio externo. El organizador debe contar con permisos y explicar cómo usará los datos que reciba fuera de Soccasion.</p>
         </>,
       },
       {
         title: "Precio, medios de pago y confirmación",
         body: <>
           <p>El precio total por evento, en pesos mexicanos e IVA incluido, se muestra antes de contratar. El importe de la pantalla de pago es el aplicable a esa compra; los cambios posteriores no alteran pagos confirmados. Para consultas sobre comprobantes fiscales, contacta a soporte.</p>
-          <p>Según las opciones habilitadas, puedes continuar a Stripe para tarjeta u OXXO, PayPal o Mercado Pago. El proveedor elegido procesa los datos del medio de pago. Cheetah Invite conserva referencias, importe, moneda, fechas y estados de la operación, sin almacenar el número completo de tu tarjeta ni su código de seguridad.</p>
+          <p>Según las opciones habilitadas, puedes continuar a Stripe para tarjeta u OXXO, PayPal o Mercado Pago. El proveedor elegido procesa los datos del medio de pago. Soccasion conserva referencias, importe, moneda, fechas y estados de la operación, sin almacenar el número completo de tu tarjeta ni su código de seguridad.</p>
           <p>Iniciar el pago, volver del proveedor o generar una ficha no publica la invitación: se requiere verificar la confirmación. Con OXXO, la ficha vence en un día y la confirmación puede llegar hasta el siguiente día hábil después del depósito. Respeta el vencimiento mostrado y, si ya pagaste, espera la confirmación o contacta a soporte antes de intentar otro cobro.</p>
         </>,
       },
@@ -99,7 +100,7 @@ export default function TermsPage() {
         title: "Cancelaciones, reembolsos y aclaraciones",
         body: <>
           <p>Para cancelar el servicio, aclarar un pago o pedir un reembolso, escribe desde el correo de tu cuenta a <a href={LEGAL_OPERATOR.emailHref}>{LEGAL_OPERATOR.email}</a>. Indica la referencia de la invitación o compra, fecha aproximada y motivo. No envíes contraseñas ni datos completos de tarjeta. Soporte revisará y responderá por correo; la solicitud no implica aprobación automática del reembolso.</p>
-          <p>La política comercial contempla reembolsos por fallas atribuibles a Cheetah Invite que impidan prestar el servicio, incluidos cobros duplicados por error del sistema. Se comprobará la incidencia y se informará la solución y, cuando proceda, el importe. No se ofrece una devolución comercial por cambio de opinión, errores del contenido introducido por el usuario o eliminación voluntaria de la invitación.</p>
+          <p>La política comercial contempla reembolsos por fallas atribuibles a Soccasion que impidan prestar el servicio, incluidos cobros duplicados por error del sistema. Se comprobará la incidencia y se informará la solución y, cuando proceda, el importe. No se ofrece una devolución comercial por cambio de opinión, errores del contenido introducido por el usuario o eliminación voluntaria de la invitación.</p>
           <p>Esto no excluye devoluciones, compensaciones ni otros derechos irrenunciables de la legislación aplicable. Los tiempos de reflejo dependen del proveedor y de la institución financiera. OXXO no admite reembolso directo por Stripe; si procede una devolución, soporte acordará el mecanismo correspondiente.</p>
           <p>Los botones de ayuda y recuperación manual preparan un correo en tu aplicación: debes revisarlo y enviarlo. Abrirlo no crea un ticket ni envía una solicitud automáticamente.</p>
         </>,
@@ -124,7 +125,7 @@ export default function TermsPage() {
       },
       {
         title: "Propiedad intelectual de la plataforma",
-        body: <p>La marca, software, diseño, textos y recursos de Cheetah Invite pertenecen al Proveedor o a sus licenciantes. Te concedemos un permiso personal, limitado y no transferible para utilizar la plataforma conforme a estos términos. No puedes copiar, revender ni explotar sus recursos fuera de las funciones autorizadas, sin perjuicio de los usos permitidos por la ley y de tus derechos sobre el contenido propio.</p>,
+        body: <p>La marca, software, diseño, textos y recursos de Soccasion pertenecen al Proveedor o a sus licenciantes. Te concedemos un permiso personal, limitado y no transferible para utilizar la plataforma conforme a estos términos. No puedes copiar, revender ni explotar sus recursos fuera de las funciones autorizadas, sin perjuicio de los usos permitidos por la ley y de tus derechos sobre el contenido propio.</p>,
       },
       {
         title: "Privacidad y datos de invitados",

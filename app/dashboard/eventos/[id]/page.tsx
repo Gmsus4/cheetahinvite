@@ -9,7 +9,7 @@ import { EventEditor } from "@/components/dashboard/InvitationEditor";
 import { getCurrentPrice } from "@/lib/site-pricing";
 import { canEditInvitation } from "@/lib/invitation-lifecycle";
 
-export const metadata: Metadata = { title: "Editar invitación | Cheetah Invite" };
+export const metadata: Metadata = { title: "Editar invitación | Soccasion" };
 
 export default function EditEventPage({ params, searchParams }: PageProps<"/dashboard/eventos/[id]">) {
   return <Suspense fallback={<BrandLoader message="Abriendo tu invitación…" />}>

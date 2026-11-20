@@ -158,7 +158,7 @@ export function CelebrationInvitation(inputProps: InvitationProps & { preview?: 
           <MarginControl section={closingSection} onEdit={props.onEdit} renderMarginControl={props.renderMarginControl} />
           <VisibilityControl section={closingSection} onEdit={props.onEdit} />
         </div>}
-        <span className="wa-kicker" data-invitation-field={closingSection ? closingSection.id + '-title' : undefined}>{closingSection ? closingSection.title : copy.closingKicker}</span><strong>{title}</strong><p data-invitation-field={closingSection ? closingSection.id + '-content' : undefined}>{closingSection ? closingSection.content : copy.closingMessage}</p><small>Cheetah Invite</small>
+        <span className="wa-kicker" data-invitation-field={closingSection ? closingSection.id + '-title' : undefined}>{closingSection ? closingSection.title : copy.closingKicker}</span><strong>{title}</strong><p data-invitation-field={closingSection ? closingSection.id + '-content' : undefined}>{closingSection ? closingSection.content : copy.closingMessage}</p><small>Soccasion</small>
       </footer>}
     </div>
     </div>

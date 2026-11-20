@@ -1,13 +1,13 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { FiArrowLeft } from "react-icons/fi";
-import { BrandEmblem } from "@/components/BrandEmblem";
+import { BrandWordmark } from "@/components/BrandWordmark";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function RecoveryPage({ title, description, children }: { title: string; description: string; children: ReactNode }) {
   return <main className="login-page">
     <header className="login-topbar">
-      <Link className="brand" href="/" aria-label="Cheetah Invite, inicio"><BrandEmblem size={40} priority /><span className="brand-name">Cheetah<span>Invite</span></span></Link>
+      <Link className="brand" href="/" aria-label="Soccasion, inicio"><BrandWordmark priority /></Link>
       <div className="recovery-header-actions"><ThemeToggle /><Link className="login-back" href="/login"><FiArrowLeft aria-hidden="true" /> Volver a iniciar sesión</Link></div>
     </header>
     <div className="login-layout">
@@ -20,7 +20,7 @@ export function RecoveryPage({ title, description, children }: { title: string; 
       </section>
       <section className="login-form-panel" aria-labelledby="recovery-title">
         <div className="login-form-wrap">
-          <span className="login-kicker">TU CUENTA CHEETAH INVITE</span>
+          <span className="login-kicker">TU CUENTA SOCCASION</span>
           <h2 id="recovery-title">{title}</h2>
           <p className="login-description">{description}</p>
           {children}

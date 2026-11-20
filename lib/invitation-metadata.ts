@@ -16,15 +16,15 @@ type ShareableEvent = {
 export function invitationMetadata(event: ShareableEvent, origin: string): Metadata {
   const metadataBase = new URL(origin);
   if (event.privacy && event.privacy !== "PUBLIC") {
-    const title = "Invitación protegida | Cheetah Invite";
+    const title = "Invitación protegida | Soccasion";
     const description = "Introduce el PIN que te compartió el organizador para abrir esta invitación.";
     return { metadataBase, title, description, robots: { index: false, follow: false },
       alternates: { canonical: new URL(invitationPath(event)!, metadataBase).toString() },
-      openGraph: { title, description, images: [{ url: new URL("/Logo.webp", metadataBase).toString(), alt: "Cheetah Invite" }] },
+      openGraph: { title, description, images: [{ url: new URL("/Logo.webp", metadataBase).toString(), alt: "Soccasion" }] },
       twitter: { card: "summary", title, description, images: [new URL("/Logo.webp", metadataBase).toString()] },
     };
   }
-  const title = `${event.name} | Cheetah Invite`;
+  const title = `${event.name} | Soccasion`;
   const details = [
     event.eventDate && new Intl.DateTimeFormat("es-MX", { dateStyle: "long", timeZone: "UTC" }).format(event.eventDate),
     event.venue,
@@ -42,7 +42,7 @@ export function invitationMetadata(event: ShareableEvent, origin: string): Metad
     openGraph: {
       type: "website",
       locale: "es_MX",
-      siteName: "Cheetah Invite",
+      siteName: "Soccasion",
       url,
       title,
       description,

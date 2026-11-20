@@ -40,20 +40,25 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --app-background: #10161e;
-  --surface: #19232f;
-  --surface-muted: #222e3c;
-  --surface-hover: #2b394a;
-  --ink: #f5f4f0;
-  --muted: #b4becb;
-  --faint: #95a2b3;
-  --line: #354254;
+  --app-background: #111315;
+  --surface: #1a1d20;
+  --surface-muted: #23272b;
+  --surface-hover: #2c3136;
+  --ink: #f2f3f4;
+  --muted: #b8bfc7;
+  --faint: #99a3ae;
+  --line: #343b42;
+  --orange-hover: #f16a25;
+  --on-accent: #fff;
   --accent: var(--orange);
   --inverse-accent: var(--orange);
   --orange-light: var(--orange);
-  --accent-soft: #35271f;
-  --accent-line: #77472f;
-  --inverse-surface: #0b1119;
+  --accent-soft: #2c221c;
+  --accent-line: #63412e;
+  --inverse-surface: #0c0e10;
+  --on-inverse: #f2f3f4;
+  --inverse-muted: #b0b8c1;
+  --inverse-line: #ffffff18;
   --success: #8ed6a4;
   --success-soft: #1b3428;
   --success-line: #365d46;
@@ -71,7 +76,7 @@
 
 html, body { background: var(--app-background); color: var(--ink); }
 body { accent-color: var(--orange); }
-.brand-name > span { color: var(--orange); }
+.brand-name > span { color: inherit; }
 ::selection { background: var(--accent-line); color: var(--ink); }
 
 /* These designs are authored by the host and keep their own color scheme. */

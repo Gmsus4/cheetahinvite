@@ -8,7 +8,7 @@ import { BrandLoader } from "@/components/BrandLoader";
 import "./hero-preview.css";
 import { demoPreviewKey } from "@/lib/demo-preview";
 
-export const metadata: Metadata = { title: "Demostración | Cheetah Invite", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Demostración | Soccasion", robots: { index: false, follow: false } };
 
 export function generateStaticParams() {
   return landingEventExamples.map(({ slug }) => ({ style: slug }));

@@ -9,7 +9,7 @@ import { prisma } from "@/prisma";
 import "./dashboard-home.css";
 
 export const metadata: Metadata = {
-  title: "Mi panel | Cheetah Invite",
+  title: "Mi panel | Soccasion",
   description: "Administra tus invitaciones digitales y eventos.",
 };
 

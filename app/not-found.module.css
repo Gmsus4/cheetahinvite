@@ -1,8 +1,8 @@
 .page { display: flex; flex: 1; flex-direction: column; min-height: 100svh; background: var(--app-background); color: var(--ink); font-family: var(--font-body), Arial, sans-serif; }
 .page * { box-sizing: border-box; }
 .header { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: min(1120px, calc(100% - 40px)); margin: 20px auto 0; padding: 14px 20px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
-.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-family: var(--font-poppins), Arial, sans-serif; font-size: 20px; font-weight: 600; letter-spacing: -.04em; text-decoration: none; }
-.brand > span > span { color: var(--orange); }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-family: var(--font-poppins), Arial, sans-serif; font-size: 20px; font-weight:400; letter-spacing: -.04em; text-decoration: none; }
+.brand > span > span { color: inherit; }
 .main { display: grid; flex: 1; place-items: center; padding: 64px 24px; }
 .content { width: min(100%, 640px); text-align: center; }
 .code { margin: 0 0 24px; color: var(--orange); font-family: var(--font-poppins), Arial, sans-serif; font-size: clamp(100px, 18vw, 160px); font-weight: 600; line-height: 1; letter-spacing: -.07em; }

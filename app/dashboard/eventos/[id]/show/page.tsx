@@ -9,7 +9,7 @@ import { validCreationKey } from "@/lib/invitation-editor";
 import { prisma } from "@/prisma";
 import { canEditInvitation } from "@/lib/invitation-lifecycle";
 
-export const metadata: Metadata = { title: "Vista previa privada | Cheetah Invite" };
+export const metadata: Metadata = { title: "Vista previa privada | Soccasion" };
 
 type ShowPageProps = PageProps<"/dashboard/eventos/[id]/show">;
 

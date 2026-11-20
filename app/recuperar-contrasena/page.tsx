@@ -4,7 +4,7 @@ import { PasswordRecoveryForm } from "@/components/login/PasswordRecoveryForm";
 import { ManualPasswordRecovery } from "@/components/login/ManualPasswordRecovery";
 import "../login/login.css";
 
-export const metadata: Metadata = { title: "Recuperar contraseña | Cheetah Invite", robots: { index: false, follow: false }, referrer: "no-referrer" };
+export const metadata: Metadata = { title: "Recuperar contraseña | Soccasion", robots: { index: false, follow: false }, referrer: "no-referrer" };
 
 export default function ForgotPasswordPage() {
   return <RecoveryPage title="Recupera tu acceso" description="Solicita ayuda al equipo para volver a entrar a tu cuenta.">

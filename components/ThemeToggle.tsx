@@ -30,6 +30,42 @@ export function ThemeToggle({ variant = "default" }: { variant?: "default" | "su
   const panel = useRef<HTMLDivElement>(null);
   const id = useId();
 
+  useLayoutEffect(() => {
+    if (!open) return;
+    const positionPanel = () => {
+      const button = trigger.current;
+      const menu = panel.current;
+      if (!button || !menu) return;
+      const viewport = window.visualViewport;
+      let top = viewport?.offsetTop ?? 0;
+      let bottom = top + (viewport?.height ?? window.innerHeight);
+      // A scrolling navigation panel can clip the popup before the viewport does.
+      for (let parent = root.current?.parentElement; parent; parent = parent.parentElement) {
+        if (/(auto|scroll|hidden|clip)/.test(getComputedStyle(parent).overflowY)) {
+          const bounds = parent.getBoundingClientRect();
+          top = Math.max(top, bounds.top);
+          bottom = Math.min(bottom, bounds.bottom);
+        }
+      }
+      const bounds = button.getBoundingClientRect();
+      const below = bottom - bounds.bottom - 20;
+      const above = bounds.top - top - 20;
+      const opensAbove = below < menu.scrollHeight && above > below;
+      menu.style.top = opensAbove ? "auto" : "calc(100% + 12px)";
+      menu.style.bottom = opensAbove ? "calc(100% + 12px)" : "auto";
+      menu.style.maxHeight = `${Math.max(0, opensAbove ? above : below)}px`;
+    };
+    positionPanel();
+    window.addEventListener("resize", positionPanel);
+    window.addEventListener("scroll", positionPanel, true);
+    window.visualViewport?.addEventListener("resize", positionPanel);
+    return () => {
+      window.removeEventListener("resize", positionPanel);
+      window.removeEventListener("scroll", positionPanel, true);
+      window.visualViewport?.removeEventListener("resize", positionPanel);
+    };
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     panel.current?.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.focus();

@@ -1,7 +1,7 @@
 /* Shared brand styling for the private invitation workspace. */
 .workspace { min-height: 100svh; background: var(--app-background); color: var(--ink); font-family: var(--font-body), Arial, sans-serif; }
-.toolbar { position: fixed; z-index: 30; top: 14px; left: 50%; display: flex; align-items: center; justify-content: space-between; gap: 20px; width: min(1232px, calc(100% - 40px)); min-height: 64px; padding: 9px 14px; transform: translateX(-50%); border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 12px; box-shadow: 0 10px 36px rgb(var(--shadow-rgb) / .08); }
-.toolbar a, .toolbar button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; transition: border-color .18s, background .18s, color .18s; }
+.toolbar { position: fixed; z-index: 30; top: 14px; left: 50%; display: flex; align-items: center; justify-content: space-between; gap: 20px; width: min(1232px, calc(100% - 40px)); min-height: 64px; padding: 9px 14px; transform: translateX(-50%); border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 12px; box-shadow: 0 10px 36px rgb(var(--shadow-rgb) / .08); }
+.toolbar a, .toolbar button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--ink); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; transition: border-color .18s, background .18s, color .18s; }
 .toolbar a:hover, .toolbar button:hover, .toolbar button[aria-expanded="true"] { border-color: var(--orange); background: var(--accent-soft); color: var(--accent); }
 .toolbar .back { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
 .toolbar p { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
@@ -25,27 +25,27 @@
 .workspace :global(.wa-panel[data-editable]):has(> :global(.wa-edit-actions)) { padding-top: 64px; }
 .workspace :global(.wa-edit-button):focus-visible { outline: 2px solid #fff; outline-offset: 3px; box-shadow: none; }
 .workspace :global(.wa-edit-button) svg { flex: 0 0 20px; width: 20px; height: 20px; }
-.workspace :global(.wa-cover-heading[data-editable]), .workspace :global(.wa-intro) :global(.wa-cover-heading[data-editable]) { --wa-cover-editor-top: 64px; --wa-cover-editor-bottom: 20px; padding: 64px 24px 20px; border-radius: 12px; }
+.workspace :global(.wa-cover-heading[data-editable]), .workspace :global(.wa-intro) :global(.wa-cover-heading[data-editable]) { --wa-cover-editor-top: 64px; --wa-cover-editor-bottom: 20px; padding: 64px 24px 20px; border-radius: 5px; }
 .workspace :global(.wa-cover-heading) > :global(.wa-edit-actions) { top: 12px; right: 12px; max-width: calc(100% - 24px); }
-.notice { position: fixed; z-index: 40; bottom: 24px; left: 50%; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); transform: translateX(-50%); border-radius: 14px; background: var(--accent-soft); color: var(--ink); font-size: 14px; font-weight: 600; box-shadow: 0 8px 28px rgb(var(--shadow-rgb) / .12); }
+.notice { position: fixed; z-index: 40; bottom: 24px; left: 50%; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); transform: translateX(-50%); border-radius: 5px; background: var(--accent-soft); color: var(--ink); font-size: 14px; font-weight: 600; box-shadow: 0 8px 28px rgb(var(--shadow-rgb) / .12); }
 .notice:not(:empty) { padding: 14px 20px; border: 1px solid var(--accent-line); }
 .notice svg { flex: none; width: 18px; height: 18px; color: var(--accent); }
-.dialog { --editor-dialog-height: min(90dvh, 900px); position: fixed; inset: 0; width: min(660px, calc(100% - 40px)); max-width: none; max-height: var(--editor-dialog-height); padding: 0; margin: auto; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); color: var(--ink); font-family: var(--font-body), Arial, sans-serif; box-shadow: 0 24px 80px rgb(var(--shadow-rgb) / .2); }
+.dialog { --editor-dialog-height: min(90dvh, 900px); position: fixed; inset: 0; width: min(660px, calc(100% - 40px)); max-width: none; max-height: var(--editor-dialog-height); padding: 0; margin: auto; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font-family: var(--font-body), Arial, sans-serif; box-shadow: 0 24px 80px rgb(var(--shadow-rgb) / .2); }
 .dialogWide { width: min(760px, calc(100% - 40px)); }
 .dialog::backdrop, .workspace :global(.editor-leave-dialog)::backdrop { background: rgb(var(--shadow-rgb) / .6); backdrop-filter: blur(4px); }
 .dialog > form { display: flex; flex-direction: column; max-height: calc(var(--editor-dialog-height) - 2px); margin: 0; }
 .dialogHeader { display: flex; flex-shrink: 0; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); background: var(--surface); }
 .dialogHeading { min-width: 0; }
-.eyebrow { display: block; color: var(--accent); font-size: 9px; font-weight: 700; line-height: 1.4; letter-spacing: .1em; }
+.eyebrow { display: block; color: var(--accent); font-size: 12px; font-weight: 700; line-height: 1.4; letter-spacing: .1em; }
 .dialogHeader h2 { margin: 4px 0 6px; color: var(--ink); font-family: var(--font-poppins), Arial, sans-serif; font-size: 20px; font-weight: 600; line-height: 1.25; letter-spacing: -.035em; overflow-wrap: anywhere; }
 .dialogHeader p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
-.dialogHeader button { display: grid; flex: none; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--muted); cursor: pointer; }
+.dialogHeader button { display: grid; flex: none; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--muted); cursor: pointer; }
 .dialogHeader button:hover:not(:disabled) { border-color: var(--orange); background: var(--accent-soft); color: var(--accent); }
 .dialogBody { min-height: 0; padding: 18px 20px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-gutter: stable; }
 .fields { display: grid; min-width: 0; gap: 16px; margin: 0; padding: 0; border: 0; }
 .fields > * { min-width: 0; }
 .fieldGroup { min-width: 0; margin: 0; padding: 0; border: 0; }
-.fieldGroup > legend { margin-bottom: 12px; padding: 0; color: var(--muted); font-size: 11px; font-weight: 600; line-height: 1.5; letter-spacing: .04em; text-transform: uppercase; }
+.fieldGroup > legend { margin-bottom: 12px; padding: 0; color: var(--muted); font-size: 12px; font-weight: 600; line-height: 1.5; letter-spacing: .04em; text-transform: uppercase; }
 .fieldGroup > div { display: grid; min-width: 0; gap: 14px; }
 .fieldGroup + .fieldGroup { padding-top: 16px; border-top: 1px solid var(--line); }
 .fieldRow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 14px; min-width: 0; }
@@ -53,46 +53,46 @@
 .fieldRow > * { min-width: 0; }
 .sectionIntro { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .sectionOptions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.sectionOptions button { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.sectionOptions button { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
 .sectionOptions button:hover { border-color: var(--orange); background: var(--accent-soft); }
 .sectionOptions button > span { display: grid; gap: 4px; }
 .sectionOptions strong { font-size: 13px; }
 .sectionOptions svg { flex: 0 0 20px; width: 20px; height: 20px; color: var(--accent); }
 .fields :global(.guided-field), .fields :global(.editor-field) { display: flex; min-width: 0; flex-direction: column; gap: 6px; margin: 0; }
 .fields :global(.guided-field) > label, .fields :global(.editor-field) > label { color: var(--ink); font-size: 12px; font-weight: 600; line-height: 1.5; }
-.fields :is(input:not([type="file"]):not([type="radio"]):not([type="range"]):not([type="checkbox"]), textarea, select):not(:where(:global(.guided-phone-input) input)) { width: 100%; min-width: 0; min-height: 44px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; line-height: 1.6; accent-color: var(--orange); transition: border-color .18s, box-shadow .18s; }
+.fields :is(input:not([type="file"]):not([type="radio"]):not([type="range"]):not([type="checkbox"]), textarea, select):not(:where(:global(.guided-phone-input) input)) { width: 100%; min-width: 0; min-height: 44px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; line-height: 1.6; accent-color: var(--orange); transition: border-color .18s, box-shadow .18s; }
 .fields input[type="checkbox"] { width: 22px; height: 22px; margin: 0; accent-color: var(--orange); cursor: pointer; }
 .fields textarea { resize: vertical; line-height: 1.7; }
 .fields :is(input, textarea, select):not(:where(:global(.guided-phone-input) input)):focus-visible { border-color: var(--orange); outline: 2px solid var(--orange); outline-offset: 2px; }
 .fields :is(input, select):disabled { background: var(--surface-muted); color: var(--muted); }
-.fields small { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.fields small { color: var(--muted); font-size: 12px; line-height: 1.5; }
 .fields :global(.guided-section-photo) { margin-top: 0; padding-top: 0; border-top: 0; }
 .fields :global(.guided-section-media) :global(.guided-section-photo) { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--line); }
 .fields :global(.guided-section-photo) h3 { color: var(--ink); font-family: var(--font-poppins), Arial, sans-serif; font-size: 15px; font-weight: 600; }
 .fields :global(.guided-section-photo) h3 span { font-family: var(--font-body), Arial, sans-serif; font-size: 12px; }
 .fields :global(.guided-section-photo) > p { font-size: 13px; line-height: 1.75; }
-.fields :global(.guided-section-surface) button { min-height: 40px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+.fields :global(.guided-section-surface) button { min-height: 40px; border-radius: 5px; font-size: 13px; font-weight: 600; }
 .fields :global(.guided-section-surface) button[aria-pressed="true"] { border-color: var(--orange); background: var(--accent-soft); color: var(--accent); }
-.fields :global(.guided-palettes) label { border-radius: 14px; }
+.fields :global(.guided-palettes) label { border-radius: 5px; }
 .fields :global(.guided-palettes) label:has(input:checked) { border-color: var(--orange); background: var(--accent-soft); }
 .fields :global(.image-upload-field) { align-items: stretch; gap: 12px; }
-.fields :global(.image-upload-button) { position: relative; justify-content: center; min-height: 44px; padding: 10px 14px; border: 1px solid var(--accent-line); border-radius: 10px; background: var(--accent-soft); color: var(--accent); font: 600 13px/1.5 var(--font-body), Arial, sans-serif; }
+.fields :global(.image-upload-button) { position: relative; justify-content: center; min-height: 44px; padding: 10px 14px; border: 1px solid var(--accent-line); border-radius: 5px; background: var(--accent-soft); color: var(--accent); font: 600 13px/1.5 var(--font-body), Arial, sans-serif; }
 .fields :global(.image-upload-button):hover { border-color: var(--orange); background: var(--accent-soft); }
 .fields :global(.image-upload-button):has(input:focus-visible) { outline: 3px solid var(--orange); outline-offset: 3px; }
 .fields :global(.image-upload-button) svg { width: 18px; height: 18px; color: var(--accent); }
 .fields :global(.image-upload-previews) { gap: 12px; margin-top: 4px; }
-.fields :global(.image-upload-preview) { width: 88px; height: 96px; border: 1px solid var(--line); border-radius: 10px; }
-.fields :global(.image-upload-preview) button { width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--danger); box-shadow: 0 2px 8px rgb(var(--shadow-rgb) / .12); }
+.fields :global(.image-upload-preview) { width: 88px; height: 96px; border: 1px solid var(--line); border-radius: 5px; }
+.fields :global(.image-upload-preview) button { width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--danger); box-shadow: 0 2px 8px rgb(var(--shadow-rgb) / .12); }
 .fields :global(.image-upload-preview) button:hover:not(:disabled) { background: var(--danger-soft); }
 .fields :global(.image-upload-error) { color: var(--danger); font-size: 13px; }
-.fields :global(.guided-include-toggle) { min-height: 44px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.fields :global(.guided-include-toggle) { min-height: 44px; padding: 12px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); }
 .fields :global(.guided-include-toggle) strong { font-size: 12px; line-height: 1.5; }
 .fields :global(.guided-toggle) input[type="checkbox"] { width: 42px; height: 25px; min-height: 25px; padding: 0; }
 .fields :global(.guided-toggle) input:checked + :global(.guided-switch) { background: var(--orange); }
 .dateFields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .dateFields p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .dialogFooter { display: flex; flex-shrink: 0; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--line); background: var(--surface); }
-.dialogFooter button, .error button, .error a { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: 600 13px/1.5 var(--font-body), Arial, sans-serif; text-decoration: none; cursor: pointer; transition: border-color .18s, background .18s, color .18s; }
+.dialogFooter button, .error button, .error a { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--ink); font: 600 13px/1.5 var(--font-body), Arial, sans-serif; text-decoration: none; cursor: pointer; transition: border-color .18s, background .18s, color .18s; }
 .dialogFooter button:hover:not(:disabled), .error :is(button, a):hover { border-color: var(--orange); background: var(--accent-soft); color: var(--accent); }
 .dialogFooter .save { border-color: var(--orange); background: var(--orange); color: var(--on-inverse); }
 .dialogFooter .save:hover:not(:disabled) { border-color: var(--orange-hover); background: var(--orange-hover); color: var(--on-inverse); }
@@ -100,12 +100,12 @@
 .dialogFooter svg { display: block; flex: none; width: 17px; height: 17px; }
 .dialog button:disabled { cursor: wait; opacity: .55; }
 .dialog :is(button, a):focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
-.error { margin-top: 22px; padding: 16px; border: 1px solid var(--danger-line); border-radius: 14px; background: var(--danger-soft); color: var(--danger); font-size: 13px; line-height: 1.7; }
+.error { margin-top: 22px; padding: 16px; border: 1px solid var(--danger-line); border-radius: 5px; background: var(--danger-soft); color: var(--danger); font-size: 13px; line-height: 1.7; }
 .error p { margin: 0 0 12px; }
 .saveError { position: fixed; z-index: 40; bottom: 24px; left: 50%; width: min(440px, calc(100% - 32px)); margin: 0; transform: translateX(-50%); box-shadow: 0 8px 28px #0003; }
-.workspace :global(.editor-leave-dialog) { padding: 28px; border-radius: 24px; font-family: var(--font-body), Arial, sans-serif; }
+.workspace :global(.editor-leave-dialog) { padding: 28px; border-radius: 8px; font-family: var(--font-body), Arial, sans-serif; }
 .workspace :global(.editor-leave-dialog) h2 { font-family: var(--font-poppins), Arial, sans-serif; font-weight: 600; letter-spacing: -.04em; }
-.workspace :global(.editor-leave-dialog) button { min-height: 46px; border-radius: 12px; font-size: 14px; font-weight: 600; }
+.workspace :global(.editor-leave-dialog) button { min-height: 46px; border-radius: 5px; font-size: 14px; font-weight: 600; }
 .workspace :global(.editor-leave-dialog) button:first-child:hover { border-color: var(--orange-hover); background: var(--orange-hover); }
 .workspace :global(.editor-leave-dialog) button:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
 .toolbar a, .toolbar button, .toolbar .back { position: relative; display: grid; flex-shrink: 0; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: #191919; color: #fff; box-shadow: none; }
@@ -120,7 +120,7 @@
   .toolbar { top: 50%; right: 16px; left: auto; flex-direction: column; align-items: center; justify-content: flex-start; gap: 16px; width: 44px; min-height: 0; max-height: calc(100svh - 40px); padding: 0; overflow: visible; transform: translateY(-50%); border: 0; border-radius: 0; background: transparent; box-shadow: none; }
   .toolbar :is(a, button):focus-visible { outline-color: #fff; outline-offset: -3px; }
   .toolbar p { display: none; }
-  .back span, .tools span { position: absolute; top: 50%; right: calc(100% + 12px); width: max-content; height: auto; padding: 8px 12px; overflow: visible; clip-path: none; transform: translateY(-50%); border-radius: 10px; background: #191919; color: #fff; font-size: 12px; line-height: 1.4; white-space: nowrap; box-shadow: 0 4px 16px #0002; opacity: 0; visibility: hidden; pointer-events: none; }
+  .back span, .tools span { position: absolute; top: 50%; right: calc(100% + 12px); width: max-content; height: auto; padding: 8px 12px; overflow: visible; clip-path: none; transform: translateY(-50%); border-radius: 5px; background: #191919; color: #fff; font-size: 12px; line-height: 1.4; white-space: nowrap; box-shadow: 0 4px 16px #0002; opacity: 0; visibility: hidden; pointer-events: none; }
   .toolbar :is(a, button):is(:hover, :focus-visible) > span { opacity: 1; visibility: visible; }
   .tools { flex-direction: column; gap: 8px; }
 }
@@ -134,7 +134,7 @@
   .toolbar :is(a,button):focus-visible { outline-color: #fff; outline-offset: -3px; }
   .toolbar p { display: none; }
   .tools { flex-direction: column; gap: 6px; }
-  .back span, .tools span { position: absolute; z-index: 1; top: 50%; left: calc(100% + 8px); right: auto; transform: translateY(-50%); width: max-content; max-width: calc(100vw - 80px); padding: 8px 12px; border-radius: 10px; background: #191919; color: #fff; font-size: 12px; line-height: 1.4; white-space: nowrap; opacity: 0; visibility: hidden; pointer-events: none; }
+  .back span, .tools span { position: absolute; z-index: 1; top: 50%; left: calc(100% + 8px); right: auto; transform: translateY(-50%); width: max-content; max-width: calc(100vw - 80px); padding: 8px 12px; border-radius: 5px; background: #191919; color: #fff; font-size: 12px; line-height: 1.4; white-space: nowrap; opacity: 0; visibility: hidden; pointer-events: none; }
   .toolbar :is(a,button):is(:hover,:focus-visible) > span { opacity: 1; visibility: visible; }
 }
 @media (hover: none), (pointer: coarse) {
@@ -180,7 +180,7 @@
 .fields :global(.guided-program-row-fields) { grid-template-columns: minmax(130px, .4fr) minmax(0, 1fr); gap: 12px; }
 @media (max-width: 460px) {
   .appearanceSummary { gap: 10px; }
-  .appearanceLabel > span { font-size: 11px; }
+  .appearanceLabel > span { font-size: 12px; }
 }
 
 /* Reserve the space used by block actions even when six buttons wrap on narrow blocks. */
@@ -195,7 +195,7 @@
   .workspace :global([data-editable]) > :global(.wa-edit-photo-actions) { display: none; }
   .workspace :global(.wa-cover-heading[data-editable]), .workspace :global(.wa-intro) :global(.wa-cover-heading[data-editable]) { --wa-cover-editor-top: 16px; --wa-cover-editor-bottom: 16px; padding: 16px; }
   .workspace :global(.wa-panel[data-editable]):has(> :global(.wa-edit-actions)), .workspace :global(.wa-footer[data-editable]) { padding-top: 16px; }
-  .dialog { --editor-dialog-height: calc(100dvh - max(12px,env(safe-area-inset-top))); inset: auto 0 0; width: 100%; max-width: 100%; margin: 0; border-radius: 18px 18px 0 0; border-bottom: 0; }
+  .dialog { --editor-dialog-height: calc(100dvh - max(12px,env(safe-area-inset-top))); inset: auto 0 0; width: 100%; max-width: 100%; margin: 0; border-radius: 8px 18px 0 0; border-bottom: 0; }
   .dialogHeader { padding: 14px 16px; }
   .dialogHeader h2 { font-size: 18px; }
   .dialogBody { padding: 16px; scrollbar-gutter: auto; }

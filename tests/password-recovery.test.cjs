@@ -73,7 +73,7 @@ const tokenFromEmail = (index = sent.length - 1) => {
 
 beforeEach(async () => {
   process.env.RESEND_API_KEY = 're_test_fixture';
-  process.env.RESEND_FROM_EMAIL = 'Cheetah Invite <access@example.com>';
+  process.env.RESEND_FROM_EMAIL = 'Soccasion <access@example.com>';
   process.env.APP_URL = 'https://app.example';
   users = [{ id: 'user', email: 'user@example.com', passwordHash: await hashPassword('old-password-123'), sessionVersion: 0, passwordResetHash: null, passwordResetExpiresAt: null }, { id: 'google', email: 'google@example.com', passwordHash: null, sessionVersion: 0 }];
   limits = new Map(); sent = []; jobs = []; deliveryFailure = false;

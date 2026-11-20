@@ -112,7 +112,7 @@ MERCADOPAGO_WEBHOOK_SECRET="..."
 ### Configuración inicial y cuentas
 
 1. Entrar a Developers con la cuenta real que administra el negocio. En Tus
-   integraciones crear una aplicación llamada **Cheetah Invite** y seleccionar
+   integraciones crear una aplicación llamada **Soccasion** y seleccionar
    **Checkout Pro → API de Orders**. Preferences muestra un aviso de retiro;
    las nuevas compras de este proyecto usan Orders.
 2. En **Credenciales**, seleccionar **Prueba** y comprobar que el país de
@@ -129,8 +129,8 @@ MERCADOPAGO_WEBHOOK_SECRET="..."
    usando `sandbox` mientras se prueba. En Vercel guardar en el entorno que se
    despliega y volver a desplegar. `APP_URL` debe ser la URL HTTPS pública para
    recibir notificaciones sin un túnel.
-6. Abrir una ventana de incógnito, acceder a Cheetah Invite e iniciar la compra
-   desde la invitación. Iniciar sesión en Cheetah Invite si hace falta para abrir
+6. Abrir una ventana de incógnito, acceder a Soccasion e iniciar la compra
+   desde la invitación. Iniciar sesión en Soccasion si hace falta para abrir
    el evento, pero **no iniciar sesión en Mercado Pago**. La guía actual de
    [pruebas de Checkout Pro con Orders](https://www.mercadopago.com.mx/developers/es/docs/checkout-pro-orders/integration-test-introduction)
    indica que este flujo no necesita una cuenta de prueba compradora. Usar la

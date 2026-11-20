@@ -3,13 +3,13 @@
 import { type FormEvent, useState } from "react";
 import { FiArrowUpRight, FiMail } from "react-icons/fi";
 
-const supportEmail = "cheetahinvite@gmail.com";
+const supportEmail = "soccasion@gmail.com";
 
 export function ManualPasswordRecovery() {
   const [email, setEmail] = useState("");
   const [prepared, setPrepared] = useState(false);
   const body = [
-    "Hola, equipo de Cheetah Invite:",
+    "Hola, equipo de Soccasion:",
     "",
     "Motivo: recuperar mi contraseña.",
     `Correo electrónico de mi cuenta: ${email.trim().toLowerCase()}`,
@@ -18,7 +18,7 @@ export function ManualPasswordRecovery() {
     "",
     "Gracias.",
   ].join("\n");
-  const mailto = `mailto:${supportEmail}?${new URLSearchParams({ subject: "Recuperación de contraseña — Cheetah Invite", body }).toString().replace(/\+/g, "%20")}`;
+  const mailto = `mailto:${supportEmail}?${new URLSearchParams({ subject: "Recuperación de contraseña — Soccasion", body }).toString().replace(/\+/g, "%20")}`;
 
   function prepareEmail(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

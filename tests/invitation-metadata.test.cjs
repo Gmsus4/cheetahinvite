@@ -15,7 +15,7 @@ const event = {
 
 test('shares the cover and event message across Open Graph and Twitter', () => {
   const metadata = invitationMetadata(event, 'https://invite.example');
-  assert.equal(metadata.openGraph.title, 'Nuestra boda | Cheetah Invite');
+  assert.equal(metadata.openGraph.title, 'Nuestra boda | Soccasion');
   assert.equal(metadata.description, 'Ven a celebrar con nosotros.');
   assert.equal(metadata.openGraph.images[0].url, event.imageUrl);
   assert.equal(metadata.twitter.images[0].url, event.imageUrl);

@@ -2,7 +2,7 @@
 
 ## Canal y recepción
 
-El canal es `cheetahinvite@gmail.com`. `/ayuda` prepara un correo con motivo,
+El canal es `soccasion@gmail.com`. `/ayuda` prepara un correo con motivo,
 correo de la cuenta, referencia opcional y descripción. Desde la pantalla de
 pago la referencia y el correo se completan con la invitación del usuario
 autenticado. El dashboard ofrece un correo preparado por invitación.
@@ -54,7 +54,7 @@ de recuperación, sin pedir credenciales al cliente.
 ## Solicitudes de reembolso
 
 El formulario recibe solicitudes, no las aprueba ni ejecuta. La política
-comercial acordada contempla fallas atribuibles a Cheetah Invite que impidan
+comercial acordada contempla fallas atribuibles a Soccasion que impidan
 prestar el servicio, incluidos cobros duplicados por error del sistema. No se
 ofrece devolución comercial por cambio de opinión, errores de contenido del
 usuario o eliminación voluntaria, sin excluir derechos legales irrenunciables.
