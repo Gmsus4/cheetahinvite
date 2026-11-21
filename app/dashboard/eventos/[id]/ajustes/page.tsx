@@ -1,4 +1,3 @@
-import { InvitationNavigation } from "@/components/dashboard/InvitationNavigation";
 import { Suspense } from "react";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
@@ -33,7 +32,6 @@ async function SettingsData({ params }: Pick<PageProps<"/dashboard/eventos/[id]/
   return <main className={styles.page}>
     <DashboardHeader name={session.user.name || "Usuario"} email={session.user.email || ""} image={session.user.image} />
     <div className={styles.content}>
-      <InvitationNavigation eventId={id} />
       <header className={styles.heading}><span className={styles.eyebrow}>TU INVITACIÓN</span><h1>Ajustes de la invitación</h1><div className={styles.eventIdentity}><span className={styles.eventThumbnail}>{event.imageUrl ? <Image src={event.imageUrl} alt="" width={40} height={40} unoptimized /> : <FiImage aria-hidden="true" />}</span><p>{event.name}</p></div></header>
       <div className={styles.grid}>
         {editable && <InvitationPrivacySettings eventId={id} initialPrivacy={event.privacy} initialVersion={event.privacyVersion} hasPin={Boolean(event.pinHash)} />}

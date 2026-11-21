@@ -1,6 +1,0 @@
-.navigation { display: flex; gap: 28px; margin-bottom: 36px; overflow-x: auto; border-bottom: 1px solid var(--line); scrollbar-width: thin; }
-.navigation a { display: inline-flex; align-items: center; flex-shrink: 0; min-height: 48px; padding: 12px 0; border-bottom: 2px solid transparent; color: var(--muted); font: 500 14px/1.5 var(--font-inter),Arial,sans-serif; text-decoration: none; }
-.navigation a:hover { color: var(--ink); }
-.navigation a[aria-current] { color: var(--ink); border-bottom-color: var(--orange); }
-.navigation a:focus-visible { outline: 2px solid var(--orange); outline-offset: -4px; }
-@media(max-width:760px) { .navigation { gap: 24px; margin-bottom: 28px; } }

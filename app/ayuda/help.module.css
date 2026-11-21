@@ -17,7 +17,7 @@
 .page :is(a,button,summary,input,select,textarea):focus-visible { outline: 2px solid var(--help-ink); outline-offset: 4px; }
 :global(:root[data-theme="dark"]) .page :is(a,button,summary,input,select,textarea):focus-visible { outline-color: var(--orange); }
 .page :global(.support-shell) { width: auto; max-width: none; margin: 0; padding: 48px var(--help-inset) 72px; }
-.hero { display: grid; grid-template-columns: 1.4fr 1fr; align-items: center; gap: 64px; padding: 56px; border: 1px solid var(--help-border); border-radius: 12px; background: var(--help-background); color: var(--help-ink); }
+.hero { display: grid; grid-template-columns: 1.4fr 1fr; align-items: center; gap: 64px; padding: 56px; border: 1px solid var(--help-border); border-radius: 26px; background: var(--help-background); color: var(--help-ink); }
 .eyebrow { display: block; color: var(--help-secondary); font-size: 12px; font-weight: 600; letter-spacing: .12em; line-height: 1.8; }
 .hero h1 { margin: 24px 0; color: var(--help-ink); font-size: clamp(40px, 4.6vw, 64px); letter-spacing: -.065em; line-height: 1.06; }
 .heroCopy > p { max-width: 420px; margin: 0; color: var(--help-secondary); font-size: 16px; line-height: 1.8; }
@@ -34,7 +34,7 @@
 .topics small { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; font-weight: 400; }
 .page :global(.support-layout) { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: start; gap: 64px; }
 .page :global(.support-card) { min-width: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; scroll-margin-top: 112px; }
-.page .contactCard { padding: 32px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.page .contactCard { padding: 32px; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); }
 .sectionHeading { margin-bottom: 16px; }
 .sectionHeading .eyebrow { margin-bottom: 12px; }
 .page :global(.support-card h2) { margin: 0; font-size: clamp(26px, 2.4vw, 32px); letter-spacing: -.05em; line-height: 1.2; }
@@ -42,13 +42,13 @@
 .page :global(.support-request) { gap: 8px; }
 .page :global(.support-request label) { font-size: 14px; font-weight: 500; line-height: 1.6; }
 .page :global(.support-request label:not(:first-child)) { margin-top: 12px; }
-.page :global(.support-request :is(input,select,textarea)) { min-height: 52px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 7px; background: var(--help-surface); color: var(--ink); font-family: inherit; font-size: 16px; line-height: 1.6; }
+.page :global(.support-request :is(input,select,textarea)) { min-height: 52px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--help-surface); color: var(--ink); font-family: inherit; font-size: 16px; line-height: 1.6; }
 .page :global(.support-request textarea) { min-height: 140px; }
 .page :global(.support-request select) { appearance: none; padding-right: 40px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%23596575' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
 .page :global(.support-request :is(input,select,textarea):focus) { border-color: var(--help-ink); }
 .page :global(.support-request .button) { margin-top: 20px; font-family: inherit; }
 .page :global(.support-request :is(.support-note,.support-reference,.support-feedback)) { font-size: 12px; line-height: 1.8; }
-.page :global(.support-feedback) { border-radius: 6px; background: var(--help-surface); }
+.page :global(.support-feedback) { border-radius: 12px; background: var(--help-surface); }
 .page :global(.support-card a) { color: var(--help-ink); }
 .page :global(.support-faq details) { padding: 0; border-top: 1px solid var(--line); scroll-margin-top: 112px; }
 .page :global(.support-faq details:target) { border-top-color: var(--help-ink); }

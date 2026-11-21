@@ -24,7 +24,7 @@ export function Footer({ homePage = true, hideSupportLink = false, currentPath }
       <div className={styles.navigation}>
         <div className={styles.brandBlock}>
           <Link className={styles.brand} href="/" aria-label="Soccasion, inicio">
-            <BrandWordmark />
+            <BrandWordmark tone="white" />
           </Link>
           <p>Para los días que quieres<br />compartir con todos.</p>
         </div>

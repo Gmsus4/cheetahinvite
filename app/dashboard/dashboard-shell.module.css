@@ -1,8 +1,1 @@
-.shell { width: 100%; min-width: 0; min-height: 100svh; font-family: var(--font-inter),Arial,sans-serif; }
-/* These are interface controls, outside the invitation's authored canvas. */
-.shell :global(.invitation-delete-modal),
-.shell :global(.editor-leave-dialog) { border-radius: 8px; font-family: var(--font-inter),Arial,sans-serif; }
-.shell :global(.invitation-delete-modal) :is(input,button) { border-radius: 5px; }
-.shell :global(.invitation-delete-modal) h2 { font-family: var(--font-poppins),Arial,sans-serif; letter-spacing: -.045em; }
-.shell :global(.dashboard-account-identity) strong { font-size: 16px; }
-.shell :global(.dashboard-account-identity) small { font-size: 13px; }
+.shell { --font-body: var(--font-nunito); width: 100%; min-width: 0; min-height: 100svh; font-family: var(--font-body),Arial,sans-serif; }

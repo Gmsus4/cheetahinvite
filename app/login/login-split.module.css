@@ -27,11 +27,11 @@
 .page :global(.login-password-heading label) { margin-bottom: 10px; font-size: 14px; font-weight: 500; }
 .page :global(.login-password-heading) { gap: 12px; margin-top: 24px; }
 .page :global(.login-forgot-password) { margin-bottom: 10px; color: var(--ink); font-size: 13px; line-height: 1.5; text-align: right; }
-.page :global(.login-input-wrap) { height: 56px; padding: 0 16px; border-radius: 8px; background: var(--surface-muted); border-color: transparent; }
+.page :global(.login-input-wrap) { height: 56px; padding: 0 16px; border-radius: 12px; background: var(--surface-muted); border-color: transparent; }
 .page :global(.login-input-wrap input) { font: 400 16px var(--font-inter), Arial, sans-serif; }
 .page :global(.login-input-wrap:focus-within) { border-color: var(--ink); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ink) 12%, transparent); }
 .page :global(.password-toggle) { width: 40px; height: 44px; }
-.page :global(.login-submit) { justify-content: center; height: 46px; margin-top: 28px; padding: 12px 18px; border: 0; border-radius: 5px; background: var(--orange); color: var(--on-accent); font: 600 14px var(--font-inter), Arial, sans-serif; }
+.page :global(.login-submit) { justify-content: center; height: 46px; margin-top: 28px; padding: 12px 18px; border: 0; border-radius: 999px; background: var(--orange); color: var(--on-accent); font: 600 14px var(--font-inter), Arial, sans-serif; }
 .page :global(.login-submit:hover:not(:disabled)) { background: var(--orange-hover); transform: none; }
 .page :global(.login-submit:disabled) { opacity: .65; cursor: wait; }
 .page :global(.login-submit > svg) { display: none; }
@@ -39,7 +39,7 @@
 .page :global(.login-notice:empty) { display: none; }
 .divider { display: flex; align-items: center; gap: 18px; margin: 24px 0; color: var(--muted); font-size: 13px; }
 .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-.page :global(.google-signin-button) { height: 56px; border-radius: 5px; font: 500 15px var(--font-inter), Arial, sans-serif; }
+.page :global(.google-signin-button) { height: 56px; border-radius: 999px; font: 500 15px var(--font-inter), Arial, sans-serif; }
 .page :global(.google-signin-button svg) { width: 21px; height: 21px; }
 .page :global(.google-signin-button:hover:not(:disabled)) { background: var(--surface-muted); }
 .signup { margin: 26px 0 0; color: var(--muted); font-size: 14px; line-height: 1.8; text-align: center; }

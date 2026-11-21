@@ -3,13 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
-import { FiCreditCard, FiHelpCircle, FiMail, FiSettings, FiGrid } from "react-icons/fi";
+import { FiCompass, FiCreditCard, FiHelpCircle, FiMail, FiSettings, FiGrid } from "react-icons/fi";
 import { getSession } from "next-auth/react";
 import { DashboardSignOut } from "./DashboardSignOut";
 import type { Driver } from "driver.js";
 import { accountMenuTourSteps } from "@/lib/account-menu-tour";
 import "driver.js/dist/driver.css";
 import "./InvitationEditorTour.css";
+import styles from "./DashboardAccountMenu.module.css";
 
 export function DashboardAccountMenu({ name, email, image, onDashboard = false, active, guard }: { name: string; email: string; image?: string | null; onDashboard?: boolean; active?: "purchases" | "help"; guard?: (event: { preventDefault(): void }, href: string) => void }) {
   const [open, setOpen] = useState(false);
@@ -96,22 +97,31 @@ export function DashboardAccountMenu({ name, email, image, onDashboard = false, 
     }
   }
 
-  return <div className="dashboard-account-menu" ref={root} onBlur={event => {
+  return <div className={`dashboard-account-menu ${styles.menu}`} ref={root} onBlur={event => {
     if (!tourActive.current && !event.currentTarget.contains(event.relatedTarget)) setOpen(false);
   }}>
     <button ref={trigger} className="dashboard-account-trigger" type="button" aria-label="Menú de mi cuenta" aria-expanded={open} aria-controls={id} onClick={() => { if (!tourActive.current) setOpen(value => !value); }}>
       {avatar ? <Image src={avatar} alt="" width={44} height={44} unoptimized onError={() => setFailedImage(avatar)} /> : <span aria-hidden="true">{initials}</span>}
     </button>
-    {open && <nav id={id} ref={panel} className="dashboard-account-panel" aria-label="Opciones de mi cuenta">
-      <div className="dashboard-account-identity"><strong>{name}</strong><small>{email}</small></div>
+    {open && <nav id={id} ref={panel} className={`dashboard-account-panel ${styles.panel}`} aria-label="Opciones de mi cuenta">
+      <div className={styles.profile}>
+        <div className={styles.avatar} aria-hidden="true">{avatar ? <Image src={avatar} alt="" width={40} height={40} unoptimized onError={() => setFailedImage(avatar)} /> : initials}</div>
+        <div className={styles.identity}><span className={styles.caption}>Mi cuenta</span><strong>{name}</strong><small>{email}</small></div>
+      </div>
+      <div className={styles.links}>
       <Link data-account-tour="invitations" href={onDashboard ? "#mis-invitaciones" : "/dashboard#mis-invitaciones"} onNavigate={event => guard?.(event, onDashboard ? "#mis-invitaciones" : "/dashboard#mis-invitaciones")} onClick={() => setOpen(false)} aria-current={onDashboard ? "location" : undefined}><FiMail aria-hidden="true" /><span className="dashboard-account-label">Mis invitaciones</span></Link>
       <Link data-account-tour="purchases" aria-current={active === "purchases" ? "page" : undefined} href="/dashboard/compras" onNavigate={event => guard?.(event, "/dashboard/compras")} onClick={() => setOpen(false)}><FiCreditCard aria-hidden="true" /><span className="dashboard-account-label">Mis compras</span></Link>
       <Link data-account-tour="settings" href="/dashboard/ajustes" onNavigate={event => guard?.(event, "/dashboard/ajustes")} onClick={() => setOpen(false)}><FiSettings aria-hidden="true" /><span className="dashboard-account-label">Ajustes de cuenta</span></Link>
       {admin && <Link data-account-tour="admin" href="/admin" onNavigate={event => guard?.(event, "/admin")} onClick={() => setOpen(false)}><FiGrid aria-hidden="true" /><span className="dashboard-account-label">Administración</span></Link>}
+      </div>
+      <div className={styles.support}>
       <Link data-account-tour="help" aria-current={active === "help" ? "page" : undefined} href="/ayuda" onNavigate={event => guard?.(event, "/ayuda")} onClick={() => setOpen(false)}><FiHelpCircle aria-hidden="true" /><span className="dashboard-account-label">Ayuda y soporte</span></Link>
-      <button ref={guideButton} className="dashboard-account-guide" type="button" onClick={() => void startGuide()} aria-disabled={guiding}><FiHelpCircle aria-hidden="true" /><span>{guiding ? "Guía en curso…" : "Conocer este menú"}</span></button>
+      <button ref={guideButton} className="dashboard-account-guide" type="button" onClick={() => void startGuide()} aria-disabled={guiding}><FiCompass aria-hidden="true" /><span>{guiding ? "Guía en curso…" : "Conocer este menú"}</span></button>
       {tourError && <p className="dashboard-account-tour-error" role="alert">{tourError}</p>}
+      </div>
+      <div className={styles.footer}>
       <DashboardSignOut className="dashboard-account-signout" />
+      </div>
     </nav>}
   </div>;
 }

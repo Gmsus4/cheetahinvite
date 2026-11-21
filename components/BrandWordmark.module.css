@@ -1,19 +1,25 @@
 .wordmark {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  width: 154px;
   flex-shrink: 0;
-  color: inherit;
+  vertical-align: middle;
 }
 
-.name {
-  font-family: var(--font-poppins), Arial, sans-serif;
-  font-size: 21px;
-  font-weight: 400;
-  font-style: normal;
-  letter-spacing: -.07em;
-  line-height: 1;
+.wordmark .image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5540 / 1202;
+  object-fit: contain;
 }
 
-.compact { gap: 1px; }
-.compact .name { font-size: 27px; }
+.wordmark .blackImage { display: block; }
+.wordmark .whiteImage { display: none; }
+
+:global(:root[data-theme="dark"]) .auto .blackImage,
+.white .blackImage { display: none; }
+
+:global(:root[data-theme="dark"]) .auto .whiteImage,
+.white .whiteImage { display: block; }
+
+.compact { width: 180px; }
